@@ -22,11 +22,12 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <img 
-              src="/src/assets/logo.png" 
-              alt="Reflectlife" 
-              className="h-10 w-auto transition-smooth group-hover:scale-105"
-            />
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-smooth">
+              <span className="text-primary font-serif font-bold text-xl">R</span>
+            </div>
+            <span className="font-serif text-xl font-semibold text-foreground">
+              Reflectlife
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
