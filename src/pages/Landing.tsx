@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { Heart, Image, Share2, Clock, Users, Shield } from "lucide-react";
+import { Heart, Share2, Clock, Users, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import heroImage from "@/assets/hero-memorial.jpg";
+import heroBanner from "@/assets/hero-banner.png";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 
 const Landing = () => {
@@ -50,44 +50,14 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 gradient-hero opacity-90" />
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `url(${heroImage})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-        
-        <div className="relative container mx-auto px-4 py-24 md:py-32">
-          <div className="max-w-3xl mx-auto text-center text-primary-foreground animate-fade-up">
-            <h1 className="font-serif text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              A timeless space to celebrate and remember
-            </h1>
-            <p className="text-lg md:text-xl mb-8 opacity-95">
-              Reflectlife helps you create beautiful digital memorials to honor those who live on in our hearts. 
-              Share stories, preserve memories, and keep legacies alive for generations to come.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/auth">
-                <Button size="lg" variant="secondary" className="w-full sm:w-auto text-base px-8 shadow-elegant-lg">
-                  Create a Memorial
-                </Button>
-              </Link>
-              <Link to="/memorials">
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="w-full sm:w-auto text-base px-8 border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
-                >
-                  Explore Memorial Wall
-                </Button>
-              </Link>
-            </div>
-          </div>
+      {/* Hero Banner */}
+      <section className="w-full">
+        <div className="w-full h-[400px] md:h-[500px] overflow-hidden">
+          <img
+            src={heroBanner}
+            alt="Reflectlife floral memorial banner"
+            className="w-full h-full object-cover"
+          />
         </div>
       </section>
 

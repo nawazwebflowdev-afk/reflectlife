@@ -8,85 +8,85 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Reflectlife color palette - muted, respectful earth tones */
-    --background: 30 20% 98%;
-    --foreground: 320 15% 20%;
+    /* Reflectlife color palette - warm, uplifting florals inspired by banner */
+    --background: 42 35% 96%;
+    --foreground: 280 20% 25%;
 
-    --card: 30 30% 96%;
-    --card-foreground: 320 15% 20%;
+    --card: 42 40% 98%;
+    --card-foreground: 280 20% 25%;
 
-    --popover: 30 30% 96%;
-    --popover-foreground: 320 15% 20%;
+    --popover: 42 40% 98%;
+    --popover-foreground: 280 20% 25%;
 
-    /* Primary: dusty mauve #6a5973 */
-    --primary: 287 14% 40%;
-    --primary-foreground: 30 20% 98%;
+    /* Primary: deep plum from flowers #5d4257 */
+    --primary: 315 18% 32%;
+    --primary-foreground: 42 35% 96%;
 
-    /* Secondary: rose taupe #8c717e */
-    --secondary: 340 12% 49%;
-    --secondary-foreground: 30 20% 98%;
+    /* Secondary: warm golden from center flower #c4a868 */
+    --secondary: 43 45% 58%;
+    --secondary-foreground: 280 20% 25%;
 
-    /* Muted: soft neutrals */
-    --muted: 30 15% 90%;
-    --muted-foreground: 287 8% 45%;
+    /* Muted: soft cream from banner background */
+    --muted: 42 25% 92%;
+    --muted-foreground: 280 12% 50%;
 
-    /* Accent: sage green #62715f */
-    --accent: 105 9% 41%;
-    --accent-foreground: 30 20% 98%;
+    /* Accent: sage green from foliage #6b7c65 */
+    --accent: 105 10% 45%;
+    --accent-foreground: 42 35% 96%;
 
     --destructive: 0 72% 51%;
-    --destructive-foreground: 30 20% 98%;
+    --destructive-foreground: 42 35% 96%;
 
-    --border: 30 15% 85%;
-    --input: 30 15% 85%;
-    --ring: 287 14% 40%;
+    --border: 42 20% 88%;
+    --input: 42 20% 88%;
+    --ring: 315 18% 32%;
 
     --radius: 1rem;
 
-    /* Gradients for hero sections */
-    --gradient-hero: linear-gradient(135deg, hsl(287 14% 40%) 0%, hsl(340 12% 49%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(30 30% 96%) 0%, hsl(30 20% 98%) 100%);
+    /* Gradients for sections */
+    --gradient-hero: linear-gradient(135deg, hsl(315 18% 32%) 0%, hsl(43 45% 58%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(42 40% 98%) 0%, hsl(42 35% 96%) 100%);
 
-    /* Shadows - soft and elegant */
-    --shadow-sm: 0 2px 8px hsl(287 14% 40% / 0.08);
-    --shadow-md: 0 4px 16px hsl(287 14% 40% / 0.12);
-    --shadow-lg: 0 8px 32px hsl(287 14% 40% / 0.16);
+    /* Shadows - soft and warm */
+    --shadow-sm: 0 2px 8px hsl(315 18% 32% / 0.08);
+    --shadow-md: 0 4px 16px hsl(315 18% 32% / 0.12);
+    --shadow-lg: 0 8px 32px hsl(315 18% 32% / 0.16);
 
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 320 15% 12%;
-    --foreground: 30 20% 95%;
+    --background: 280 20% 15%;
+    --foreground: 42 35% 95%;
 
-    --card: 320 15% 15%;
-    --card-foreground: 30 20% 95%;
+    --card: 280 20% 18%;
+    --card-foreground: 42 35% 95%;
 
-    --popover: 320 15% 15%;
-    --popover-foreground: 30 20% 95%;
+    --popover: 280 20% 18%;
+    --popover-foreground: 42 35% 95%;
 
-    --primary: 287 14% 60%;
-    --primary-foreground: 320 15% 12%;
+    --primary: 315 18% 55%;
+    --primary-foreground: 280 20% 15%;
 
-    --secondary: 340 12% 55%;
-    --secondary-foreground: 320 15% 12%;
+    --secondary: 43 45% 65%;
+    --secondary-foreground: 280 20% 15%;
 
-    --muted: 320 10% 20%;
-    --muted-foreground: 30 15% 65%;
+    --muted: 280 15% 25%;
+    --muted-foreground: 42 20% 70%;
 
-    --accent: 105 9% 50%;
-    --accent-foreground: 320 15% 12%;
+    --accent: 105 10% 55%;
+    --accent-foreground: 280 20% 15%;
 
     --destructive: 0 72% 51%;
-    --destructive-foreground: 30 20% 98%;
+    --destructive-foreground: 42 35% 96%;
 
-    --border: 320 10% 25%;
-    --input: 320 10% 25%;
-    --ring: 287 14% 60%;
+    --border: 280 15% 30%;
+    --input: 280 15% 30%;
+    --ring: 315 18% 55%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(287 14% 25%) 0%, hsl(340 12% 30%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(320 15% 15%) 0%, hsl(320 15% 12%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(315 18% 25%) 0%, hsl(43 45% 35%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(280 20% 18%) 0%, hsl(280 20% 15%) 100%);
   }
 }
 
