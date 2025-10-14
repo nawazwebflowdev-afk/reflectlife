@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Heart, Share2, Clock, Users, Shield } from "lucide-react";
+import { Heart, Share2, Clock, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import heroBanner from "@/assets/hero-banner.png";
@@ -10,17 +10,40 @@ const Landing = () => {
     {
       icon: Heart,
       title: "Create a Memorial",
-      description: "Design a beautiful, personalized space to honor your loved one's life and legacy.",
+      description: "Build a personal page with photos, stories, and videos.",
     },
     {
       icon: Share2,
-      title: "Share Memories",
-      description: "Invite family and friends to contribute photos, stories, and tributes together.",
+      title: "Celebrate a Journey",
+      description: "Share life's special moments with family and friends.",
     },
     {
       icon: Clock,
-      title: "Keep a Legacy",
-      description: "Preserve memories forever in a timeline that celebrates every cherished moment.",
+      title: "Keep Their Legacy Alive",
+      description: "Honor and remember, anywhere and anytime.",
+    },
+  ];
+
+  const testimonials = [
+    {
+      quote: "Reflectlife gave us a beautiful way to celebrate my mother's life. It's comforting to have all our memories in one place.",
+      name: "Sarah M.",
+      image: portraitPlaceholder,
+    },
+    {
+      quote: "A truly special space where our family can come together and share stories about Dad. It means everything to us.",
+      name: "Michael T.",
+      image: portraitPlaceholder,
+    },
+    {
+      quote: "Creating a memorial was so easy, and it's become a place of peace for us all. Thank you for this gift.",
+      name: "Linda K.",
+      image: portraitPlaceholder,
+    },
+    {
+      quote: "Reflectlife helped us keep grandma's memory alive in such a meaningful way. We visit it often.",
+      name: "James R.",
+      image: portraitPlaceholder,
     },
   ];
 
@@ -67,7 +90,7 @@ const Landing = () => {
               Remember your loved ones
             </h1>
             <p className="text-lg md:text-xl lg:text-2xl text-white/95 mb-8 md:mb-10 max-w-2xl drop-shadow-md animate-fade-in" style={{ animationDelay: '200ms' }}>
-              Turn your memories into something beautiful that lasts
+              Begin a journey of remembrance — for the ones who will always be part of you
             </p>
             <Link to="/auth">
               <Button size="lg" className="px-8 md:px-12 py-6 text-base md:text-lg shadow-elegant-lg animate-fade-in" style={{ animationDelay: '400ms' }}>
@@ -78,15 +101,15 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* About / How It Works Section */}
       <section className="py-20 bg-gradient-subtle">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 animate-fade-in">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-              Honor Their Memory
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-6">
+              Keeping memories alive, together
             </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Everything you need to create a meaningful tribute that celebrates a life well-lived
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
+              Reflectlife is a warm space to preserve and share stories of your loved ones — a place where memories, moments, and legacies live on forever.
             </p>
           </div>
 
@@ -94,17 +117,17 @@ const Landing = () => {
             {features.map((feature, index) => (
               <Card 
                 key={index} 
-                className="border-2 hover:shadow-elegant transition-smooth hover:-translate-y-1 bg-card"
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="border-2 hover:shadow-elegant transition-smooth hover:-translate-y-1 bg-card animate-fade-in"
+                style={{ animationDelay: `${index * 150}ms` }}
               >
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
                     <feature.icon className="h-8 w-8 text-primary" />
                   </div>
                   <h3 className="font-serif text-xl font-semibold mb-3">
                     {feature.title}
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground leading-relaxed">
                     {feature.description}
                   </p>
                 </CardContent>
@@ -114,52 +137,41 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Sample Memorials Section */}
-      <section className="py-20">
+      {/* Testimonials Section */}
+      <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+          <div className="text-center mb-16">
             <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-              Recent Memorials
+              What families say about Reflectlife
             </h2>
-            <p className="text-muted-foreground text-lg">
-              Celebrating lives and preserving legacies
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-12">
-            {sampleMemorials.map((memorial) => (
-              <Link key={memorial.id} to={`/memorial/${memorial.id}`}>
-                <Card className="overflow-hidden hover:shadow-elegant-lg transition-smooth group">
-                  <div className="aspect-square overflow-hidden bg-muted">
-                    <img
-                      src={memorial.image}
-                      alt={memorial.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
-                    />
-                  </div>
-                  <CardContent className="p-6">
-                    <h3 className="font-serif text-xl font-semibold mb-1">
-                      {memorial.name}
-                    </h3>
-                    <p className="text-muted-foreground text-sm mb-3">
-                      {memorial.years}
-                    </p>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Users className="h-4 w-4" />
-                      <span>{memorial.tributeCount} tributes</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+            {testimonials.map((testimonial, index) => (
+              <Card 
+                key={index} 
+                className="bg-card/50 border-2 hover:shadow-elegant transition-smooth animate-fade-in"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <CardContent className="p-8">
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-16 h-16 rounded-full overflow-hidden mb-4 bg-muted">
+                      <img
+                        src={testimonial.image}
+                        alt={testimonial.name}
+                        className="w-full h-full object-cover opacity-60"
+                      />
                     </div>
-                  </CardContent>
-                </Card>
-              </Link>
+                    <p className="text-muted-foreground italic mb-4 leading-relaxed">
+                      "{testimonial.quote}"
+                    </p>
+                    <p className="font-serif font-semibold text-foreground">
+                      — {testimonial.name}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
-          </div>
-
-          <div className="text-center">
-            <Link to="/memorials">
-              <Button variant="outline" size="lg">
-                View All Memorials
-              </Button>
-            </Link>
           </div>
         </div>
       </section>
