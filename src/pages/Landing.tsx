@@ -51,13 +51,30 @@ const Landing = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Banner */}
-      <section className="w-full">
-        <div className="w-full h-[400px] md:h-[500px] overflow-hidden">
+      <section className="relative w-full">
+        <div className="relative w-full h-[500px] md:h-[600px] overflow-hidden">
           <img
             src={heroBanner}
             alt="Reflectlife floral memorial banner"
             className="w-full h-full object-cover"
           />
+          {/* Overlay gradient for text legibility */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40" />
+          
+          {/* Centered text overlay */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
+            <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 md:mb-6 drop-shadow-lg animate-fade-in">
+              Remember your loved ones
+            </h1>
+            <p className="text-lg md:text-xl lg:text-2xl text-white/95 mb-8 md:mb-10 max-w-2xl drop-shadow-md animate-fade-in" style={{ animationDelay: '200ms' }}>
+              Turn your memories into something beautiful that lasts
+            </p>
+            <Link to="/auth">
+              <Button size="lg" className="px-8 md:px-12 py-6 text-base md:text-lg shadow-elegant-lg animate-fade-in" style={{ animationDelay: '400ms' }}>
+                Start remembering today
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
