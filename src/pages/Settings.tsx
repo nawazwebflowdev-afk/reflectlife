@@ -1,4 +1,5 @@
-import { User, Bell, Lock, Download, Trash2 } from "lucide-react";
+import { User, Bell, Lock, Download, Trash2, Flag } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,7 +7,43 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 
+const logosByCountry = {
+  Ukraine: [
+    "https://i.imgur.com/yBHhufp.png",
+    "https://i.imgur.com/qIjXxON.png",
+    "https://i.imgur.com/nBRK0br.png",
+    "https://i.imgur.com/7vGUqsH.png",
+    "https://i.imgur.com/oWqB5QC.png",
+    "https://i.imgur.com/FQDN4x7.png",
+    "https://i.imgur.com/VaUkyjA.png",
+    "https://i.imgur.com/ABU8nFn.png",
+    "https://i.imgur.com/Jqvt7mQ.png",
+    "https://i.imgur.com/ql066uD.png",
+    "https://i.imgur.com/2a1ocjV.png",
+    "https://i.imgur.com/t3gT8mX.png",
+  ],
+  Mexico: [
+    "https://i.imgur.com/2v0Oplj.png",
+    "https://i.imgur.com/4SUQEdm.png",
+    "https://i.imgur.com/vONvKYd.png",
+    "https://i.imgur.com/WWrrvCT.png",
+    "https://i.imgur.com/122gCKq.png",
+    "https://i.imgur.com/nNaGkMv.png",
+    "https://i.imgur.com/1jN475k.png",
+    "https://i.imgur.com/T4pWsd1.png",
+    "https://i.imgur.com/6IzsJk2.png",
+    "https://i.imgur.com/85N84C5.png",
+    "https://i.imgur.com/73vBTJ1.png",
+    "https://i.imgur.com/u0P3Tc6.png",
+    "https://i.imgur.com/hAQwX2U.png",
+    "https://i.imgur.com/1pfCzQA.png",
+    "https://i.imgur.com/YahKDy2.png",
+  ],
+};
+
 const Settings = () => {
+  const [selectedLogo, setSelectedLogo] = useState<string | null>(null);
+
   return (
     <div className="min-h-screen py-12">
       <div className="container mx-auto px-4 max-w-4xl">
@@ -85,6 +122,49 @@ const Settings = () => {
                 <Input id="new-password" type="password" placeholder="••••••••" />
               </div>
               <Button>Update Password</Button>
+            </CardContent>
+          </Card>
+
+          {/* Country Logo Selection */}
+          <Card className="shadow-elegant">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Flag className="h-5 w-5 text-primary" />
+                <CardTitle>Country Logo Selection</CardTitle>
+              </div>
+              <CardDescription>Choose a country logo for your memorial</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {Object.entries(logosByCountry).map(([country, logos]) => (
+                <div key={country} className="space-y-3">
+                  <h3 className="font-medium text-sm text-muted-foreground">{country}</h3>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                    {logos.map((logoUrl, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedLogo(logoUrl)}
+                        className={`relative aspect-square rounded-lg border-2 overflow-hidden transition-all hover:scale-105 hover:shadow-lg ${
+                          selectedLogo === logoUrl
+                            ? "border-primary shadow-elegant ring-2 ring-primary/20"
+                            : "border-border hover:border-primary/50"
+                        }`}
+                      >
+                        <img
+                          src={logoUrl}
+                          alt={`${country} logo ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {selectedLogo && (
+                <div className="pt-4 flex items-center justify-between border-t">
+                  <p className="text-sm text-muted-foreground">Selected logo will appear on your memorial</p>
+                  <Button>Save Logo</Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
