@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
+import reflectlifeLogo from "@/assets/reflectlife-logo.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -10,11 +11,12 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-primary font-serif font-bold text-xl">R</span>
-              </div>
-              <span className="font-serif text-xl font-semibold">Reflectlife</span>
+            <Link to="/" className="flex items-center gap-3 group">
+              <img 
+                src={reflectlifeLogo} 
+                alt="Reflectlife" 
+                className="h-10 w-auto object-contain transition-smooth group-hover:scale-105"
+              />
             </Link>
             <p className="text-muted-foreground text-sm max-w-md mb-4">
               A timeless space to celebrate, remember, and share the stories of those who live on in our hearts.
