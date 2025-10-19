@@ -1,4 +1,4 @@
-import { User, Bell, Lock, Download, Trash2, Flag, Users, Heart, Plus, DollarSign } from "lucide-react";
+import { User, Bell, Lock, Download, Trash2, Flag } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import ConnectionTree from "@/components/ConnectionTree";
 
 const logosByCountry = {
   Ukraine: [
@@ -41,38 +42,8 @@ const logosByCountry = {
   ],
 };
 
-type TreeType = "family" | "friendship";
-type RelationshipType = {
-  id: string;
-  name: string;
-  photo?: string;
-  note: string;
-  relationshipLabel: string;
-  parentId?: string;
-};
-
-type TreeTemplate = {
-  id: string;
-  name: string;
-  style: string;
-  isPaid: boolean;
-  price?: number;
-  preview: string;
-};
-
-const defaultTemplates: TreeTemplate[] = [
-  { id: "classic", name: "Classic Family Tree", style: "bg-gradient-to-b from-amber-50 to-amber-100", isPaid: false, preview: "Traditional vertical layout" },
-  { id: "modern", name: "Modern Minimalist", style: "bg-gradient-to-b from-slate-50 to-slate-100", isPaid: false, preview: "Clean horizontal design" },
-  { id: "vintage", name: "Vintage Elegance", style: "bg-gradient-to-b from-sepia-50 to-sepia-100", isPaid: true, price: 4.99, preview: "Ornate decorative style" },
-  { id: "nature", name: "Nature Inspired", style: "bg-gradient-to-b from-green-50 to-green-100", isPaid: true, price: 5.99, preview: "Organic flowing branches" },
-];
-
 const Settings = () => {
   const [selectedLogo, setSelectedLogo] = useState<string | null>(null);
-  const [activeTreeType, setActiveTreeType] = useState<TreeType>("family");
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("classic");
-  const [relationships, setRelationships] = useState<RelationshipType[]>([]);
-  const [showAddRelationship, setShowAddRelationship] = useState(false);
 
   return (
     <div className="min-h-screen py-12">
@@ -225,143 +196,7 @@ const Settings = () => {
           </Card>
 
           {/* Connection Tree */}
-          <Card className="shadow-elegant">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />
-                <CardTitle>Connection Tree</CardTitle>
-              </div>
-              <CardDescription>Create your family tree or friendship network</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Tree Type Selector */}
-              <div className="flex gap-2">
-                <Button
-                  variant={activeTreeType === "family" ? "default" : "outline"}
-                  onClick={() => setActiveTreeType("family")}
-                  className="flex-1"
-                >
-                  <Users className="h-4 w-4 mr-2" />
-                  Family Tree
-                </Button>
-                <Button
-                  variant={activeTreeType === "friendship" ? "default" : "outline"}
-                  onClick={() => setActiveTreeType("friendship")}
-                  className="flex-1"
-                >
-                  <Heart className="h-4 w-4 mr-2" />
-                  Friendship Tree
-                </Button>
-              </div>
-
-              {/* Template Selection */}
-              <div className="space-y-3">
-                <h4 className="font-medium text-sm">Choose a Template</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {defaultTemplates.map((template) => (
-                    <button
-                      key={template.id}
-                      onClick={() => !template.isPaid && setSelectedTemplate(template.id)}
-                      className={`relative rounded-lg border-2 p-4 text-left transition-all hover:shadow-lg ${
-                        selectedTemplate === template.id
-                          ? "border-primary shadow-elegant ring-2 ring-primary/20"
-                          : "border-border hover:border-primary/50"
-                      } ${template.isPaid ? "opacity-90" : ""}`}
-                    >
-                      <div className={`h-24 rounded-md mb-3 ${template.style} flex items-center justify-center`}>
-                        <span className="text-xs text-muted-foreground">{template.preview}</span>
-                      </div>
-                      <h5 className="font-medium text-sm mb-1">{template.name}</h5>
-                      {template.isPaid ? (
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-primary font-semibold flex items-center gap-1">
-                            <DollarSign className="h-3 w-3" />
-                            {template.price}
-                          </span>
-                          <Button size="sm" variant="outline" className="h-7 text-xs">
-                            Purchase
-                          </Button>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-green-600 font-medium">Free</span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tree Visualization */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium text-sm">
-                    {activeTreeType === "family" ? "Family Members" : "Friendship Network"}
-                  </h4>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setShowAddRelationship(!showAddRelationship)}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add Person
-                  </Button>
-                </div>
-
-                {showAddRelationship && (
-                  <div className="bg-muted/30 rounded-lg p-4 space-y-3 animate-fade-in border border-border">
-                    <Input placeholder="Name" />
-                    <Input placeholder={activeTreeType === "family" ? "Relationship (e.g., Mother, Son)" : "Connection (e.g., Best Friend, Mentor)"} />
-                    <textarea
-                      className="w-full min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      placeholder="Short note or memory..."
-                    />
-                    <div className="flex gap-2">
-                      <Button size="sm" className="flex-1">Save</Button>
-                      <Button size="sm" variant="outline" onClick={() => setShowAddRelationship(false)}>Cancel</Button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Tree Display */}
-                <div className={`${defaultTemplates.find(t => t.id === selectedTemplate)?.style} rounded-lg p-6 border border-border min-h-[300px]`}>
-                  {relationships.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center space-y-3 py-12">
-                      <Users className="h-12 w-12 text-muted-foreground/50" />
-                      <p className="text-sm text-muted-foreground">
-                        Start building your {activeTreeType} tree by adding people
-                      </p>
-                      <Button size="sm" variant="outline" onClick={() => setShowAddRelationship(true)}>
-                        <Plus className="h-4 w-4 mr-1" />
-                        Add First Person
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {/* Animated tree visualization would go here */}
-                      <p className="text-sm text-muted-foreground text-center">
-                        Tree visualization will appear here
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Share Template Option */}
-              <div className="pt-4 border-t space-y-3">
-                <h4 className="font-medium text-sm">Share Your Design</h4>
-                <p className="text-xs text-muted-foreground">
-                  Create a custom template and share it with the Reflectlife community
-                </p>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    Create Custom Template
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
-                    Browse Community Templates
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ConnectionTree />
 
           {/* Data Export */}
           <Card className="shadow-elegant">
