@@ -1,10 +1,78 @@
-import { Link } from "react-router-dom";
-import { Plus, Calendar, Eye, Settings, Image } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Plus, Calendar, Eye, Settings, Image, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
+import type { User } from "@supabase/supabase-js";
+
+interface Profile {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+}
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Check authentication and fetch profile
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+      setUser(session.user);
+      fetchProfile(session.user.id);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!session) {
+          navigate("/auth");
+        } else {
+          setUser(session.user);
+          fetchProfile(session.user.id);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (error) throw error;
+      setProfile(data);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: "Signed out",
+      description: "You've been successfully signed out.",
+    });
+    navigate("/auth");
+  };
+
   const memorials = [
     {
       id: "m-001",
@@ -17,6 +85,14 @@ const Dashboard = () => {
     },
   ];
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen py-8 flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen py-8">
       <div className="container mx-auto px-4">
@@ -24,15 +100,25 @@ const Dashboard = () => {
         <div className="mb-8 animate-fade-in">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="font-serif text-4xl font-bold mb-2">My Memorials</h1>
-              <p className="text-muted-foreground">Manage and update your memorial pages</p>
+              <h1 className="font-serif text-4xl font-bold mb-2">
+                Welcome, {profile?.full_name || user?.email?.split('@')[0] || 'User'}
+              </h1>
+              <p className="text-muted-foreground">
+                {profile?.bio || "Manage and update your memorial pages"}
+              </p>
             </div>
-            <Link to="/memorial/new">
-              <Button size="lg" className="gap-2 shadow-elegant">
-                <Plus className="h-5 w-5" />
-                Create New Memorial
+            <div className="flex gap-2">
+              <Link to="/memorial/new">
+                <Button size="lg" className="gap-2 shadow-elegant">
+                  <Plus className="h-5 w-5" />
+                  Create New Memorial
+                </Button>
+              </Link>
+              <Button size="lg" variant="outline" onClick={handleSignOut} className="gap-2">
+                <LogOut className="h-4 w-4" />
+                Sign Out
               </Button>
-            </Link>
+            </div>
           </div>
         </div>
 
