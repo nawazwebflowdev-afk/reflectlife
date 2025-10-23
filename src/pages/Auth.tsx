@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, User, ArrowRight } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -176,7 +176,10 @@ const Auth = () => {
 
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? (
-                      "Signing in..."
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Signing in...
+                      </>
                     ) : (
                       <>
                         Sign In
@@ -242,7 +245,10 @@ const Auth = () => {
 
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? (
-                      "Creating account..."
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating account...
+                      </>
                     ) : (
                       <>
                         Create Account
