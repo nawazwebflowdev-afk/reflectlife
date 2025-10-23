@@ -1,12 +1,22 @@
-import { User, Bell, Lock, Download, Trash2, Flag } from "lucide-react";
-import { useState } from "react";
+import { User, Bell, Lock, Download, Trash2, Flag, Palette } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import ConnectionTree from "@/components/ConnectionTree";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const logosByCountry = {
   Ukraine: [
@@ -44,6 +54,95 @@ const logosByCountry = {
 
 const Settings = () => {
   const [selectedLogo, setSelectedLogo] = useState<string | null>(null);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [colorTheme, setColorTheme] = useState("light");
+  const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/auth");
+      return;
+    }
+    setUserId(session.user.id);
+    setEmail(session.user.email || "");
+    await fetchProfile(session.user.id);
+  };
+
+  const fetchProfile = async (id: string) => {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (data) {
+      setFullName(data.full_name || "");
+      setColorTheme(data.color_theme || "light");
+      setSelectedLogo(data.logo_url || null);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!userId) return;
+    setIsLoading(true);
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        full_name: fullName,
+        color_theme: colorTheme,
+      })
+      .eq("id", userId);
+
+    setIsLoading(false);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+    }
+  };
+
+  const handleSaveLogo = async () => {
+    if (!userId || !selectedLogo) return;
+    setIsLoading(true);
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ logo_url: selectedLogo })
+      .eq("id", userId);
+
+    setIsLoading(false);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save logo",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Logo saved successfully",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen py-12">
@@ -66,13 +165,27 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
-                <Input id="name" placeholder="John Doe" defaultValue="John Doe" />
+                <Input 
+                  id="name" 
+                  placeholder="John Doe" 
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="john@example.com" defaultValue="john@example.com" />
+                <Input 
+                  id="email" 
+                  type="email" 
+                  value={email}
+                  disabled
+                  className="bg-muted"
+                />
+                <p className="text-xs text-muted-foreground">Email cannot be changed</p>
               </div>
-              <Button>Save Changes</Button>
+              <Button onClick={handleSaveProfile} disabled={isLoading}>
+                {isLoading ? "Saving..." : "Save Changes"}
+              </Button>
             </CardContent>
           </Card>
 
@@ -101,6 +214,37 @@ const Settings = () => {
                 </div>
                 <Switch defaultChecked />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Color Theme */}
+          <Card className="shadow-elegant">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Palette className="h-5 w-5 text-primary" />
+                <CardTitle>Color Theme</CardTitle>
+              </div>
+              <CardDescription>Choose your preferred color theme</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="theme">Theme</Label>
+                <Select value={colorTheme} onValueChange={setColorTheme}>
+                  <SelectTrigger id="theme">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">Light</SelectItem>
+                    <SelectItem value="dark">Dark</SelectItem>
+                    <SelectItem value="blue">Blue</SelectItem>
+                    <SelectItem value="green">Green</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={handleSaveProfile} disabled={isLoading}>
+                {isLoading ? "Saving..." : "Save Theme"}
+              </Button>
             </CardContent>
           </Card>
 
@@ -187,7 +331,9 @@ const Settings = () => {
                     </div>
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">This logo will represent your memorial</p>
-                      <Button>Save Selection</Button>
+                      <Button onClick={handleSaveLogo} disabled={isLoading}>
+                        {isLoading ? "Saving..." : "Save Selection"}
+                      </Button>
                     </div>
                   </div>
                 </>

@@ -1,13 +1,84 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, User, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 import reflectlifeLogo from "@/assets/reflectlife-logo.png";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [profile, setProfile] = useState<{ full_name?: string; avatar_url?: string } | null>(null);
   const location = useLocation();
-  const isAuthenticated = false; // TODO: Replace with actual auth state
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const isAuthenticated = !!user;
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        } else {
+          setProfile(null);
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("full_name, avatar_url")
+      .eq("id", userId)
+      .single();
+    
+    if (data) {
+      setProfile(data);
+    }
+  };
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      });
+    } else {
+      setUser(null);
+      setProfile(null);
+      navigate("/");
+      toast({
+        title: "Signed out",
+        description: "You've been successfully signed out",
+      });
+    }
+  };
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -16,6 +87,13 @@ const Navigation = () => {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+  
+  const getUserInitials = () => {
+    if (profile?.full_name) {
+      return profile.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+    return user?.email?.[0].toUpperCase() || 'U';
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border shadow-sm">
@@ -50,10 +128,34 @@ const Navigation = () => {
             })}
 
             {isAuthenticated ? (
-              <Button variant="ghost" size="sm" className="gap-2">
-                <User className="h-4 w-4" />
-                Profile
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={profile?.avatar_url} />
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                    </Avatar>
+                    <span className="hidden sm:inline">{profile?.full_name || user?.email}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                    <User className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/settings")}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <Link to="/auth">
                 <Button size="sm" className="shadow-elegant">
@@ -96,10 +198,30 @@ const Navigation = () => {
               })}
 
               {isAuthenticated ? (
-                <Button variant="ghost" size="sm" className="gap-2 justify-start">
-                  <LogOut className="h-4 w-4" />
-                  Sign Out
-                </Button>
+                <>
+                  <div className="px-4 py-2 border-t border-border">
+                    <p className="text-sm font-medium">{profile?.full_name || user?.email}</p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  </div>
+                  <Link to="/settings" onClick={() => setIsOpen(false)}>
+                    <Button variant="ghost" size="sm" className="gap-2 justify-start w-full">
+                      <Settings className="h-4 w-4" />
+                      Settings
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="gap-2 justify-start w-full"
+                    onClick={() => {
+                      setIsOpen(false);
+                      handleSignOut();
+                    }}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </Button>
+                </>
               ) : (
                 <Link to="/auth" onClick={() => setIsOpen(false)}>
                   <Button size="sm" className="w-full">

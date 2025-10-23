@@ -8,19 +8,34 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import type { Session } from "@supabase/supabase-js";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user is already logged in
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+        if (session) {
+          navigate("/dashboard");
+        }
+      }
+    );
+
+    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
       if (session) {
         navigate("/dashboard");
       }
     });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -62,11 +77,11 @@ const Auth = () => {
     const password = formData.get("password") as string;
     const fullName = formData.get("fullName") as string;
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/`,
+        emailRedirectTo: `${window.location.origin}/dashboard`,
         data: {
           full_name: fullName,
         },
@@ -81,11 +96,15 @@ const Auth = () => {
         description: error.message,
         variant: "destructive",
       });
-    } else {
+    } else if (data.user) {
       toast({
         title: "Account created!",
-        description: "Please check your email to verify your account.",
+        description: "Welcome! Your profile has been set up.",
       });
+      // If email confirmation is disabled, redirect immediately
+      if (data.session) {
+        navigate("/dashboard");
+      }
     }
   };
 

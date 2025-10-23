@@ -135,6 +135,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          color_theme: string | null
           created_at: string | null
           email: string | null
           full_name: string | null
@@ -145,6 +146,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          color_theme?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
@@ -155,6 +157,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          color_theme?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
