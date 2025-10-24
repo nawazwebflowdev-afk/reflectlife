@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Memorial from "./pages/Memorial";
 import Memorials from "./pages/Memorials";
 import Settings from "./pages/Settings";
+import TimelineView from "./pages/TimelineView";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="/memorial/:id" element={<Memorial />} />
               <Route path="/memorials" element={<Memorials />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/timeline/:id" element={<TimelineView />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

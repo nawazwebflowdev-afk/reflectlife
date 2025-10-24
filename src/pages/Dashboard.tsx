@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, Calendar, Eye, Settings, Image, LogOut } from "lucide-react";
+import { Plus, Calendar, Eye, Settings, Image, LogOut, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
+import { CreateTimelineModal } from "@/components/CreateTimelineModal";
 
 interface Profile {
   id: string;
@@ -21,6 +22,7 @@ const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showCreateTimeline, setShowCreateTimeline] = useState(false);
 
   useEffect(() => {
     // Check authentication and fetch profile
@@ -114,6 +116,15 @@ const Dashboard = () => {
                   Create New Memorial
                 </Button>
               </Link>
+              <Button
+                size="lg"
+                variant="secondary"
+                onClick={() => setShowCreateTimeline(true)}
+                className="gap-2"
+              >
+                <Clock className="h-5 w-5" />
+                Create Timeline
+              </Button>
               <Button size="lg" variant="outline" onClick={handleSignOut} className="gap-2">
                 <LogOut className="h-4 w-4" />
                 Sign Out
@@ -227,6 +238,14 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+
+      {user && (
+        <CreateTimelineModal
+          open={showCreateTimeline}
+          onOpenChange={setShowCreateTimeline}
+          userId={user.id}
+        />
+      )}
     </div>
   );
 };

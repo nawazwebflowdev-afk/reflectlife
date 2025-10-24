@@ -49,6 +49,44 @@ export type Database = {
           },
         ]
       }
+      memorial_entries: {
+        Row: {
+          caption: string | null
+          content_type: Database["public"]["Enums"]["content_type"]
+          content_url: string | null
+          created_at: string | null
+          event_date: string | null
+          id: string
+          timeline_id: string
+        }
+        Insert: {
+          caption?: string | null
+          content_type: Database["public"]["Enums"]["content_type"]
+          content_url?: string | null
+          created_at?: string | null
+          event_date?: string | null
+          id?: string
+          timeline_id: string
+        }
+        Update: {
+          caption?: string | null
+          content_type?: Database["public"]["Enums"]["content_type"]
+          content_url?: string | null
+          created_at?: string | null
+          event_date?: string | null
+          id?: string
+          timeline_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_entries_timeline_id_fkey"
+            columns: ["timeline_id"]
+            isOneToOne: false
+            referencedRelation: "memorial_timelines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memorial_media: {
         Row: {
           caption: string | null
@@ -83,6 +121,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      memorial_timelines: {
+        Row: {
+          background_url: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_public: boolean | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          background_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          background_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       memorials: {
         Row: {
@@ -261,7 +332,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      content_type: "photo" | "video" | "note"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -388,6 +459,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      content_type: ["photo", "video", "note"],
+    },
   },
 } as const
