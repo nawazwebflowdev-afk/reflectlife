@@ -216,6 +216,7 @@ export type Database = {
           last_name: string | null
           logo_url: string | null
           phone_number: string | null
+          template_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -231,6 +232,7 @@ export type Database = {
           last_name?: string | null
           logo_url?: string | null
           phone_number?: string | null
+          template_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -246,7 +248,82 @@ export type Database = {
           last_name?: string | null
           logo_url?: string | null
           phone_number?: string | null
+          template_id?: string | null
           updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "site_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_templates: {
+        Row: {
+          country: string
+          created_at: string | null
+          creator_id: string | null
+          description: string | null
+          id: string
+          is_free: boolean
+          name: string
+          preview_url: string | null
+          price: number
+        }
+        Insert: {
+          country: string
+          created_at?: string | null
+          creator_id?: string | null
+          description?: string | null
+          id?: string
+          is_free?: boolean
+          name: string
+          preview_url?: string | null
+          price?: number
+        }
+        Update: {
+          country?: string
+          created_at?: string | null
+          creator_id?: string | null
+          description?: string | null
+          id?: string
+          is_free?: boolean
+          name?: string
+          preview_url?: string | null
+          price?: number
+        }
+        Relationships: []
+      }
+      template_creators: {
+        Row: {
+          approved: boolean
+          country: string
+          created_at: string | null
+          display_name: string
+          id: string
+          portfolio: string | null
+          user_id: string
+        }
+        Insert: {
+          approved?: boolean
+          country: string
+          created_at?: string | null
+          display_name: string
+          id?: string
+          portfolio?: string | null
+          user_id: string
+        }
+        Update: {
+          approved?: boolean
+          country?: string
+          created_at?: string | null
+          display_name?: string
+          id?: string
+          portfolio?: string | null
+          user_id?: string
         }
         Relationships: []
       }

@@ -2,18 +2,24 @@ import { Link, useNavigate } from "react-router-dom";
 import { Plus, Calendar, Eye, Settings, Image, LogOut, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { CreateTimelineModal } from "@/components/CreateTimelineModal";
+import CreatorDashboard from "@/components/CreatorDashboard";
 
 interface Profile {
   id: string;
   full_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+}
+
+interface CreatorProfile {
+  approved: boolean;
 }
 
 const Dashboard = () => {
@@ -23,6 +29,7 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateTimeline, setShowCreateTimeline] = useState(false);
+  const [isCreator, setIsCreator] = useState(false);
 
   useEffect(() => {
     // Check authentication and fetch profile
@@ -59,6 +66,17 @@ const Dashboard = () => {
 
       if (error) throw error;
       setProfile(data);
+
+      // Check if user is an approved creator
+      const { data: creatorData } = await supabase
+        .from("template_creators")
+        .select("approved")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (creatorData?.approved) {
+        setIsCreator(true);
+      }
     } catch (error) {
       console.error("Error fetching profile:", error);
     } finally {
@@ -157,86 +175,179 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Memorials List */}
-        <div className="space-y-4">
-          {memorials.length > 0 ? (
-            memorials.map((memorial) => (
-              <Card key={memorial.id} className="hover:shadow-elegant transition-smooth">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    {/* Image */}
-                    <div className="w-24 h-24 flex-shrink-0">
-                      <img
-                        src={memorial.image}
-                        alt={memorial.name}
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    </div>
+        {/* Main Content Tabs */}
+        {isCreator ? (
+          <Tabs defaultValue="memorials" className="space-y-6">
+            <TabsList>
+              <TabsTrigger value="memorials">My Memorials</TabsTrigger>
+              <TabsTrigger value="templates">Creator Dashboard</TabsTrigger>
+            </TabsList>
 
-                    {/* Info */}
-                    <div className="flex-grow">
-                      <h3 className="font-serif text-2xl font-semibold mb-1">
-                        {memorial.name}
+            <TabsContent value="memorials" className="space-y-4">
+              {memorials.length > 0 ? (
+                memorials.map((memorial) => (
+                  <Card key={memorial.id} className="hover:shadow-elegant transition-smooth">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col md:flex-row gap-6">
+                        {/* Image */}
+                        <div className="w-24 h-24 flex-shrink-0">
+                          <img
+                            src={memorial.image}
+                            alt={memorial.name}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-grow">
+                          <h3 className="font-serif text-2xl font-semibold mb-1">
+                            {memorial.name}
+                          </h3>
+                          <p className="text-muted-foreground mb-3">{memorial.years}</p>
+                          
+                          <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
+                            <div className="flex items-center gap-1">
+                              <Eye className="h-4 w-4" />
+                              <span>{memorial.views} views</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Image className="h-4 w-4" />
+                              <span>{memorial.tributeCount} tributes</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              <span>Updated {memorial.lastUpdated}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap gap-3">
+                            <Link to={`/memorial/${memorial.id}`}>
+                              <Button variant="default" size="sm">
+                                View Memorial
+                              </Button>
+                            </Link>
+                            <Link to={`/memorial/${memorial.id}/edit`}>
+                              <Button variant="outline" size="sm" className="gap-2">
+                                <Settings className="h-4 w-4" />
+                                Edit
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <Card className="text-center py-16">
+                  <CardContent>
+                    <div className="max-w-md mx-auto">
+                      <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Plus className="h-10 w-10 text-primary" />
+                      </div>
+                      <h3 className="font-serif text-2xl font-semibold mb-3">
+                        No Memorials Yet
                       </h3>
-                      <p className="text-muted-foreground mb-3">{memorial.years}</p>
-                      
-                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center gap-1">
-                          <Eye className="h-4 w-4" />
-                          <span>{memorial.views} views</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Image className="h-4 w-4" />
-                          <span>{memorial.tributeCount} tributes</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          <span>Updated {memorial.lastUpdated}</span>
-                        </div>
+                      <p className="text-muted-foreground mb-6">
+                        Create your first memorial to start preserving precious memories and celebrating the lives of your loved ones.
+                      </p>
+                      <Link to="/memorial/new">
+                        <Button size="lg" className="gap-2">
+                          <Plus className="h-5 w-5" />
+                          Create Your First Memorial
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="templates">
+              <CreatorDashboard />
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <div className="space-y-4">
+            {memorials.length > 0 ? (
+              memorials.map((memorial) => (
+                <Card key={memorial.id} className="hover:shadow-elegant transition-smooth">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row gap-6">
+                      {/* Image */}
+                      <div className="w-24 h-24 flex-shrink-0">
+                        <img
+                          src={memorial.image}
+                          alt={memorial.name}
+                          className="w-full h-full object-cover rounded-lg"
+                        />
                       </div>
 
-                      <div className="flex flex-wrap gap-3">
-                        <Link to={`/memorial/${memorial.id}`}>
-                          <Button variant="default" size="sm">
-                            View Memorial
-                          </Button>
-                        </Link>
-                        <Link to={`/memorial/${memorial.id}/edit`}>
-                          <Button variant="outline" size="sm" className="gap-2">
-                            <Settings className="h-4 w-4" />
-                            Edit
-                          </Button>
-                        </Link>
+                      {/* Info */}
+                      <div className="flex-grow">
+                        <h3 className="font-serif text-2xl font-semibold mb-1">
+                          {memorial.name}
+                        </h3>
+                        <p className="text-muted-foreground mb-3">{memorial.years}</p>
+                        
+                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
+                          <div className="flex items-center gap-1">
+                            <Eye className="h-4 w-4" />
+                            <span>{memorial.views} views</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Image className="h-4 w-4" />
+                            <span>{memorial.tributeCount} tributes</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            <span>Updated {memorial.lastUpdated}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-3">
+                          <Link to={`/memorial/${memorial.id}`}>
+                            <Button variant="default" size="sm">
+                              View Memorial
+                            </Button>
+                          </Link>
+                          <Link to={`/memorial/${memorial.id}/edit`}>
+                            <Button variant="outline" size="sm" className="gap-2">
+                              <Settings className="h-4 w-4" />
+                              Edit
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
                     </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <Card className="text-center py-16">
+                <CardContent>
+                  <div className="max-w-md mx-auto">
+                    <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Plus className="h-10 w-10 text-primary" />
+                    </div>
+                    <h3 className="font-serif text-2xl font-semibold mb-3">
+                      No Memorials Yet
+                    </h3>
+                    <p className="text-muted-foreground mb-6">
+                      Create your first memorial to start preserving precious memories and celebrating the lives of your loved ones.
+                    </p>
+                    <Link to="/memorial/new">
+                      <Button size="lg" className="gap-2">
+                        <Plus className="h-5 w-5" />
+                        Create Your First Memorial
+                      </Button>
+                    </Link>
                   </div>
                 </CardContent>
               </Card>
-            ))
-          ) : (
-            <Card className="text-center py-16">
-              <CardContent>
-                <div className="max-w-md mx-auto">
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Plus className="h-10 w-10 text-primary" />
-                  </div>
-                  <h3 className="font-serif text-2xl font-semibold mb-3">
-                    No Memorials Yet
-                  </h3>
-                  <p className="text-muted-foreground mb-6">
-                    Create your first memorial to start preserving precious memories and celebrating the lives of your loved ones.
-                  </p>
-                  <Link to="/memorial/new">
-                    <Button size="lg" className="gap-2">
-                      <Plus className="h-5 w-5" />
-                      Create Your First Memorial
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
 
       {user && (

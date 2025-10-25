@@ -82,7 +82,9 @@ const Navigation = () => {
 
   const navLinks = [
     { name: "Home", path: "/" },
+    { name: "Templates", path: "/templates" },
     { name: "Memorial Wall", path: "/memorials" },
+    { name: "Become a Creator", path: "/become-creator", authRequired: true },
     { name: "Dashboard", path: "/dashboard", authRequired: true },
   ];
 

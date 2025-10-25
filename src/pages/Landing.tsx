@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import heroBanner from "@/assets/hero-banner.png";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
+import FeaturedTemplates from "@/components/FeaturedTemplates";
 
 const Landing = () => {
   const features = [
@@ -173,6 +174,22 @@ const Landing = () => {
               </Card>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Featured Templates Section */}
+      <section className="py-20 bg-gradient-subtle">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
+              Featured Templates
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
+              Choose from our collection of beautifully designed memorial templates
+            </p>
+          </div>
+
+          <FeaturedTemplates />
         </div>
       </section>
 
