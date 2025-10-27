@@ -1,8 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, Calendar, Eye, Settings, Image, LogOut, Clock } from "lucide-react";
+import { Plus, Calendar, Eye, Settings, Image, LogOut, Clock, Edit, Heart, FileText, ShoppingBag, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -10,12 +11,23 @@ import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { CreateTimelineModal } from "@/components/CreateTimelineModal";
 import CreatorDashboard from "@/components/CreatorDashboard";
+import { ProfileEditModal } from "@/components/ProfileEditModal";
 
 interface Profile {
   id: string;
+  first_name: string | null;
+  last_name: string | null;
   full_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  country: string | null;
+  color_theme: string | null;
+}
+
+interface Stats {
+  totalMemories: number;
+  templatesPurchased: number;
+  likesReceived: number;
 }
 
 interface CreatorProfile {
@@ -30,6 +42,12 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateTimeline, setShowCreateTimeline] = useState(false);
   const [isCreator, setIsCreator] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [stats, setStats] = useState<Stats>({
+    totalMemories: 0,
+    templatesPurchased: 0,
+    likesReceived: 0,
+  });
 
   useEffect(() => {
     // Check authentication and fetch profile
@@ -77,10 +95,47 @@ const Dashboard = () => {
       if (creatorData?.approved) {
         setIsCreator(true);
       }
+
+      // Fetch stats
+      await fetchStats(userId);
     } catch (error) {
       console.error("Error fetching profile:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchStats = async (userId: string) => {
+    try {
+      // Total memories posted
+      const { count: memoriesCount } = await supabase
+        .from("memorial_posts")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId);
+
+      // Likes received on user's posts
+      const { data: userPosts } = await supabase
+        .from("memorial_posts")
+        .select("id")
+        .eq("user_id", userId);
+
+      let likesReceived = 0;
+      if (userPosts && userPosts.length > 0) {
+        const postIds = userPosts.map(p => p.id);
+        const { count: likesCount } = await supabase
+          .from("memorial_likes")
+          .select("*", { count: "exact", head: true })
+          .in("post_id", postIds);
+        likesReceived = likesCount || 0;
+      }
+
+      setStats({
+        totalMemories: memoriesCount || 0,
+        templatesPurchased: 0, // Placeholder for future implementation
+        likesReceived: likesReceived,
+      });
+    } catch (error) {
+      console.error("Error fetching stats:", error);
     }
   };
 
@@ -113,67 +168,123 @@ const Dashboard = () => {
     );
   }
 
+  const getInitials = () => {
+    if (profile?.first_name && profile?.last_name) {
+      return `${profile.first_name[0]}${profile.last_name[0]}`.toUpperCase();
+    }
+    return profile?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U";
+  };
+
   return (
     <div className="min-h-screen py-8">
       <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="mb-8 animate-fade-in">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="font-serif text-4xl font-bold mb-2">
-                Welcome, {profile?.full_name || user?.email?.split('@')[0] || 'User'}
-              </h1>
-              <p className="text-muted-foreground">
-                {profile?.bio || "Manage and update your memorial pages"}
-              </p>
+        {/* Profile Section */}
+        <Card className="mb-8 animate-fade-in">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+              <Avatar className="h-24 w-24 ring-4 ring-primary/10">
+                <AvatarImage src={profile?.avatar_url || ""} />
+                <AvatarFallback className="text-2xl bg-gradient-to-br from-primary to-primary/60 text-primary-foreground">
+                  {getInitials()}
+                </AvatarFallback>
+              </Avatar>
+              
+              <div className="flex-grow text-center md:text-left">
+                <h1 className="font-serif text-3xl font-bold mb-2">
+                  {profile?.full_name || `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || user?.email?.split('@')[0] || "User"}
+                </h1>
+                {profile?.country && (
+                  <p className="text-muted-foreground mb-2">📍 {profile.country}</p>
+                )}
+                {!profile?.first_name && !profile?.last_name && (
+                  <p className="text-sm text-muted-foreground bg-muted/50 inline-block px-3 py-1 rounded-full">
+                    Complete your profile to personalize your experience
+                  </p>
+                )}
+              </div>
+
+              <Button onClick={() => setShowEditProfile(true)} className="gap-2">
+                <Edit className="h-4 w-4" />
+                Edit Profile
+              </Button>
             </div>
-            <div className="flex gap-2">
-              <Link to="/memorial/new">
-                <Button size="lg" className="gap-2 shadow-elegant">
-                  <Plus className="h-5 w-5" />
-                  Create New Memorial
+          </CardContent>
+        </Card>
+
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-up">
+          <Card className="hover:shadow-elegant transition-smooth">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardDescription>Total Memories Posted</CardDescription>
+                <Heart className="h-5 w-5 text-primary" />
+              </div>
+              <CardTitle className="text-4xl font-serif bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                {stats.totalMemories}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+
+          <Card className="hover:shadow-elegant transition-smooth">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardDescription>Templates Purchased</CardDescription>
+                <ShoppingBag className="h-5 w-5 text-primary" />
+              </div>
+              <CardTitle className="text-4xl font-serif bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                {stats.templatesPurchased}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+
+          <Card className="hover:shadow-elegant transition-smooth">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardDescription>Likes Received</CardDescription>
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <CardTitle className="text-4xl font-serif bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                {stats.likesReceived}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        </div>
+
+        {/* Quick Links Section */}
+        <Card className="mb-8 animate-fade-up">
+          <CardHeader>
+            <CardTitle className="font-serif">Quick Links</CardTitle>
+            <CardDescription>Navigate to your favorite sections</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Link to="/memorials">
+                <Button variant="outline" className="w-full gap-2 h-auto py-4 hover:shadow-elegant transition-smooth">
+                  <FileText className="h-5 w-5" />
+                  <span>My Memorial Wall</span>
                 </Button>
               </Link>
-              <Button
-                size="lg"
-                variant="secondary"
-                onClick={() => setShowCreateTimeline(true)}
-                className="gap-2"
-              >
-                <Clock className="h-5 w-5" />
-                Create Timeline
-              </Button>
-              <Button size="lg" variant="outline" onClick={handleSignOut} className="gap-2">
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </Button>
+              <Link to="/timeline">
+                <Button variant="outline" className="w-full gap-2 h-auto py-4 hover:shadow-elegant transition-smooth">
+                  <Clock className="h-5 w-5" />
+                  <span>My Timeline</span>
+                </Button>
+              </Link>
+              <Link to="/templates">
+                <Button variant="outline" className="w-full gap-2 h-auto py-4 hover:shadow-elegant transition-smooth">
+                  <Image className="h-5 w-5" />
+                  <span>My Templates</span>
+                </Button>
+              </Link>
+              <Link to="/become-creator">
+                <Button variant="outline" className="w-full gap-2 h-auto py-4 hover:shadow-elegant transition-smooth">
+                  <Sparkles className="h-5 w-5" />
+                  <span>Become a Creator</span>
+                </Button>
+              </Link>
             </div>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-up">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription>Total Memorials</CardDescription>
-              <CardTitle className="text-3xl font-serif">{memorials.length}</CardTitle>
-            </CardHeader>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription>Total Views</CardDescription>
-              <CardTitle className="text-3xl font-serif">142</CardTitle>
-            </CardHeader>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardDescription>Total Tributes</CardDescription>
-              <CardTitle className="text-3xl font-serif">24</CardTitle>
-            </CardHeader>
-          </Card>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Main Content Tabs */}
         {isCreator ? (
@@ -351,11 +462,19 @@ const Dashboard = () => {
       </div>
 
       {user && (
-        <CreateTimelineModal
-          open={showCreateTimeline}
-          onOpenChange={setShowCreateTimeline}
-          userId={user.id}
-        />
+        <>
+          <CreateTimelineModal
+            open={showCreateTimeline}
+            onOpenChange={setShowCreateTimeline}
+            userId={user.id}
+          />
+          <ProfileEditModal
+            open={showEditProfile}
+            onOpenChange={setShowEditProfile}
+            userId={user.id}
+            onProfileUpdate={() => fetchProfile(user.id)}
+          />
+        </>
       )}
     </div>
   );
