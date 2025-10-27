@@ -9,6 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Image as ImageIcon, MapPin, Calendar, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { User } from "@supabase/supabase-js";
+import { CommentsModal } from "@/components/CommentsModal";
+import { cn } from "@/lib/utils";
 
 interface Post {
   id: string;
@@ -23,6 +25,7 @@ interface Post {
     full_name: string | null;
     avatar_url: string | null;
   };
+  isLikedByUser?: boolean;
 }
 
 const Timeline = () => {
@@ -34,6 +37,7 @@ const Timeline = () => {
   const [location, setLocation] = useState("");
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const [selectedPostForComments, setSelectedPostForComments] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -50,7 +54,26 @@ const Timeline = () => {
 
     fetchPosts();
 
-    return () => subscription.unsubscribe();
+    // Set up real-time subscription for posts
+    const channel = supabase
+      .channel('memorial-posts-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'memorial_posts'
+        },
+        () => {
+          fetchPosts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchPosts = async () => {
@@ -67,7 +90,7 @@ const Timeline = () => {
         variant: "destructive",
       });
     } else {
-      // Fetch profile data for each post
+      // Fetch profile data and like status for each post
       const postsWithProfiles = await Promise.all(
         (data || []).map(async (post) => {
           const { data: profile } = await supabase
@@ -76,9 +99,23 @@ const Timeline = () => {
             .eq("id", post.user_id)
             .single();
           
+          // Check if current user has liked this post
+          let isLikedByUser = false;
+          if (user) {
+            const { data: likeData } = await supabase
+              .from("memorial_likes")
+              .select("id")
+              .eq("post_id", post.id)
+              .eq("user_id", user.id)
+              .single();
+            
+            isLikedByUser = !!likeData;
+          }
+          
           return {
             ...post,
-            profiles: profile || { full_name: null, avatar_url: null }
+            profiles: profile || { full_name: null, avatar_url: null },
+            isLikedByUser
           };
         })
       );
@@ -182,6 +219,53 @@ const Timeline = () => {
     }
 
     setUploading(false);
+  };
+
+  const handleToggleLike = async (postId: string, isLiked: boolean) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to like posts",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isLiked) {
+      // Unlike
+      const { error } = await supabase
+        .from("memorial_likes")
+        .delete()
+        .eq("post_id", postId)
+        .eq("user_id", user.id);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to unlike",
+          variant: "destructive",
+        });
+      }
+    } else {
+      // Like
+      const { error } = await supabase
+        .from("memorial_likes")
+        .insert({
+          post_id: postId,
+          user_id: user.id,
+        });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to like",
+          variant: "destructive",
+        });
+      }
+    }
+
+    // Refresh posts to update like counts
+    fetchPosts();
   };
 
   const getUserInitials = (name: string | null, email?: string) => {
@@ -351,11 +435,29 @@ const Timeline = () => {
 
                   {/* Post Actions */}
                   <div className="flex items-center gap-4 pt-2 border-t border-border">
-                    <Button variant="ghost" size="sm" className="gap-2">
-                      <Heart className="h-4 w-4" />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={cn(
+                        "gap-2 transition-all duration-200 hover:scale-110",
+                        post.isLikedByUser && "text-red-500"
+                      )}
+                      onClick={() => handleToggleLike(post.id, post.isLikedByUser || false)}
+                    >
+                      <Heart
+                        className={cn(
+                          "h-4 w-4 transition-all",
+                          post.isLikedByUser && "fill-current"
+                        )}
+                      />
                       <span className="text-sm">{post.likes_count}</span>
                     </Button>
-                    <Button variant="ghost" size="sm" className="gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-2 transition-all duration-200 hover:scale-110"
+                      onClick={() => setSelectedPostForComments(post.id)}
+                    >
                       <MessageCircle className="h-4 w-4" />
                       <span className="text-sm">{post.comments_count}</span>
                     </Button>
@@ -373,6 +475,14 @@ const Timeline = () => {
           </Button>
         </div>
       </div>
+
+      {/* Comments Modal */}
+      <CommentsModal
+        open={!!selectedPostForComments}
+        onOpenChange={(open) => !open && setSelectedPostForComments(null)}
+        postId={selectedPostForComments || ""}
+        user={user}
+      />
     </div>
   );
 };

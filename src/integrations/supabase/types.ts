@@ -49,6 +49,38 @@ export type Database = {
           },
         ]
       }
+      memorial_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "memorial_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memorial_entries: {
         Row: {
           caption: string | null
@@ -83,6 +115,35 @@ export type Database = {
             columns: ["timeline_id"]
             isOneToOne: false
             referencedRelation: "memorial_timelines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memorial_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "memorial_posts"
             referencedColumns: ["id"]
           },
         ]
