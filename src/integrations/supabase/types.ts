@@ -122,6 +122,39 @@ export type Database = {
           },
         ]
       }
+      memorial_posts: {
+        Row: {
+          caption: string | null
+          comments_count: number | null
+          created_at: string | null
+          id: string
+          likes_count: number | null
+          location: string | null
+          media_url: string | null
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          comments_count?: number | null
+          created_at?: string | null
+          id?: string
+          likes_count?: number | null
+          location?: string | null
+          media_url?: string | null
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          comments_count?: number | null
+          created_at?: string | null
+          id?: string
+          likes_count?: number | null
+          location?: string | null
+          media_url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       memorial_timelines: {
         Row: {
           background_url: string | null
