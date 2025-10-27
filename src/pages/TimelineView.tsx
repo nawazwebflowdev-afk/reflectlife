@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AddMemoryModal } from "@/components/AddMemoryModal";
 import { useToast } from "@/hooks/use-toast";
+import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import { format } from "date-fns";
-import { ArrowLeft, Calendar, FileText, Image as ImageIcon, Plus, Video } from "lucide-react";
+import { ArrowLeft, Calendar, FileText, Image as ImageIcon, Plus, Video, Palette } from "lucide-react";
 
 interface Timeline {
   id: string;
@@ -29,6 +30,7 @@ const TimelineView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const templateTheme = useTemplateTheme();
   const [timeline, setTimeline] = useState<Timeline | null>(null);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -101,26 +103,46 @@ const TimelineView = () => {
     );
   }
 
+  const backgroundImage = templateTheme.backgroundUrl || timeline.background_url;
+
   return (
-    <div className="min-h-screen">
+    <div 
+      className="min-h-screen transition-smooth"
+      style={{
+        '--template-accent': templateTheme.accentColor,
+      } as React.CSSProperties}
+    >
       {/* Hero Section */}
       <div
-        className="relative h-[400px] bg-gradient-subtle flex items-center justify-center"
+        className="relative h-[400px] bg-gradient-subtle flex items-center justify-center transition-smooth"
         style={
-          timeline.background_url
+          backgroundImage
             ? {
-                backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${timeline.background_url})`,
+                backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${backgroundImage})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }
             : undefined
         }
       >
-        <div className="absolute top-6 left-6">
+        <div className="absolute top-6 left-6 flex items-center gap-3">
           <Button variant="outline" onClick={() => navigate("/dashboard")} className="gap-2 bg-background/80 backdrop-blur-sm">
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
           </Button>
+          {templateTheme.templateName && (
+            <div className="text-white/90 text-sm font-medium bg-black/30 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/20">
+              Theme: {templateTheme.templateName}
+            </div>
+          )}
+        </div>
+        <div className="absolute top-6 right-6">
+          <Link to="/templates">
+            <Button variant="outline" className="gap-2 bg-background/80 backdrop-blur-sm">
+              <Palette className="h-4 w-4" />
+              Change Template
+            </Button>
+          </Link>
         </div>
         <div className="text-center text-white z-10">
           <h1 className="font-serif text-5xl font-bold mb-4">{timeline.title}</h1>
@@ -144,11 +166,22 @@ const TimelineView = () => {
           </div>
 
           {entries.length === 0 ? (
-            <Card className="text-center py-16">
+            <Card 
+              className="text-center py-16 border-2 transition-smooth" 
+              style={{ 
+                borderColor: templateTheme.accentColor,
+                boxShadow: `0 0 20px ${templateTheme.accentColor}20`
+              }}
+            >
               <CardContent>
                 <div className="max-w-md mx-auto">
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Plus className="h-10 w-10 text-primary" />
+                  <div 
+                    className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center"
+                    style={{ 
+                      backgroundColor: `${templateTheme.accentColor}20`,
+                    }}
+                  >
+                    <Plus className="h-10 w-10" style={{ color: templateTheme.accentColor }} />
                   </div>
                   <h3 className="font-serif text-2xl font-semibold mb-3">No Memories Yet</h3>
                   <p className="text-muted-foreground mb-6">
@@ -166,14 +199,23 @@ const TimelineView = () => {
           ) : (
             <div className="space-y-8">
               {entries.map((entry) => (
-                <Card key={entry.id} className="hover:shadow-elegant transition-smooth">
+                <Card 
+                  key={entry.id} 
+                  className="hover:shadow-elegant transition-smooth border-l-4"
+                  style={{ 
+                    borderLeftColor: templateTheme.accentColor,
+                  }}
+                >
                   <CardContent className="p-6">
                     <div className="flex gap-6">
                       {/* Date Column */}
                       <div className="flex-shrink-0 w-24 text-center">
                         {entry.event_date && (
                           <>
-                            <div className="text-3xl font-bold text-primary">
+                            <div 
+                              className="text-3xl font-bold"
+                              style={{ color: templateTheme.accentColor }}
+                            >
                               {format(new Date(entry.event_date), "dd")}
                             </div>
                             <div className="text-sm text-muted-foreground">
@@ -188,13 +230,13 @@ const TimelineView = () => {
                         {/* Type Icon */}
                         <div className="flex items-center gap-2 mb-3">
                           {entry.content_type === "photo" && (
-                            <ImageIcon className="h-5 w-5 text-primary" />
+                            <ImageIcon className="h-5 w-5" style={{ color: templateTheme.accentColor }} />
                           )}
                           {entry.content_type === "video" && (
-                            <Video className="h-5 w-5 text-primary" />
+                            <Video className="h-5 w-5" style={{ color: templateTheme.accentColor }} />
                           )}
                           {entry.content_type === "note" && (
-                            <FileText className="h-5 w-5 text-primary" />
+                            <FileText className="h-5 w-5" style={{ color: templateTheme.accentColor }} />
                           )}
                           <span className="text-sm text-muted-foreground capitalize">
                             {entry.content_type}

@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Calendar, MapPin, Heart, MessageCircle, Image as ImageIcon, Edit } from "lucide-react";
+import { Calendar, MapPin, Heart, MessageCircle, Image as ImageIcon, Edit, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import timelineBg from "@/assets/timeline-bg.jpg";
 
 const Memorial = () => {
   const { id } = useParams();
+  const templateTheme = useTemplateTheme();
   const [likeCount, setLikeCount] = useState(24);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -55,23 +57,50 @@ const Memorial = () => {
     setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
   };
 
+  const backgroundImage = templateTheme.backgroundUrl || timelineBg;
+
   return (
-    <div className="min-h-screen">
+    <div 
+      className="min-h-screen transition-smooth"
+      style={{
+        '--template-accent': templateTheme.accentColor,
+      } as React.CSSProperties}
+    >
       {/* Hero Section */}
       <section 
-        className="relative h-[400px] flex items-end"
+        className="relative h-[400px] flex items-end transition-smooth"
         style={{
-          backgroundImage: `url(${timelineBg})`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${backgroundImage})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
         
+        {templateTheme.templateName && (
+          <div className="absolute top-6 left-6 text-white/90 text-sm font-medium bg-black/30 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/20">
+            Theme: {templateTheme.templateName}
+          </div>
+        )}
+        
+        <div className="absolute top-6 right-6">
+          <Link to="/templates">
+            <Button variant="outline" className="gap-2 bg-background/80 backdrop-blur-sm">
+              <Palette className="h-4 w-4" />
+              Change Template
+            </Button>
+          </Link>
+        </div>
+        
         <div className="relative container mx-auto px-4 pb-8">
           <div className="flex flex-col md:flex-row items-end gap-6">
             {/* Portrait */}
-            <div className="w-40 h-40 rounded-2xl overflow-hidden border-4 border-background shadow-elegant-lg flex-shrink-0">
+            <div 
+              className="w-40 h-40 rounded-2xl overflow-hidden border-4 border-background shadow-elegant-lg flex-shrink-0 transition-smooth"
+              style={{
+                boxShadow: `0 0 30px ${templateTheme.accentColor}40`,
+              }}
+            >
               <img
                 src={memorial.portraitUrl}
                 alt={memorial.name}
@@ -142,14 +171,23 @@ const Memorial = () => {
           <TabsContent value="timeline" className="space-y-6">
             {timeline.length > 0 ? (
               timeline.map((entry) => (
-                <Card key={entry.id} className="shadow-elegant hover:shadow-elegant-lg transition-smooth">
+                <Card 
+                  key={entry.id} 
+                  className="shadow-elegant hover:shadow-elegant-lg transition-smooth border-l-4"
+                  style={{ 
+                    borderLeftColor: templateTheme.accentColor,
+                  }}
+                >
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <div 
+                        className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: `${templateTheme.accentColor}20` }}
+                      >
                         {entry.type === "photo" ? (
-                          <ImageIcon className="h-5 w-5 text-primary" />
+                          <ImageIcon className="h-5 w-5" style={{ color: templateTheme.accentColor }} />
                         ) : (
-                          <MessageCircle className="h-5 w-5 text-primary" />
+                          <MessageCircle className="h-5 w-5" style={{ color: templateTheme.accentColor }} />
                         )}
                       </div>
 
