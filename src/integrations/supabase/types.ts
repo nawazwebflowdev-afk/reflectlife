@@ -330,6 +330,7 @@ export type Database = {
       tree_templates: {
         Row: {
           created_at: string | null
+          creator_id: string | null
           id: string
           is_paid: boolean | null
           name: string
@@ -340,6 +341,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          creator_id?: string | null
           id?: string
           is_paid?: boolean | null
           name: string
@@ -350,6 +352,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          creator_id?: string | null
           id?: string
           is_paid?: boolean | null
           name?: string
@@ -401,14 +404,42 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "admin" | "creator" | "user"
       content_type: "photo" | "video" | "note"
     }
     CompositeTypes: {
@@ -537,6 +568,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "creator", "user"],
       content_type: ["photo", "video", "note"],
     },
   },
