@@ -4,7 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Check } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Check, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -24,6 +26,8 @@ const Templates = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [filterType, setFilterType] = useState<"all" | "free" | "paid">("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -79,7 +83,7 @@ const Templates = () => {
     if (!isFree) {
       toast({
         title: "Purchase Required",
-        description: "Payment integration coming soon!",
+        description: "Stripe payment integration will be enabled soon. This is a demo mode.",
       });
       return;
     }
@@ -98,7 +102,7 @@ const Templates = () => {
     } else {
       setSelectedTemplateId(templateId);
       toast({
-        title: "Template Selected",
+        title: "Template Applied!",
         description: "Your template has been applied to your memorials",
       });
     }
@@ -107,7 +111,9 @@ const Templates = () => {
   const getCountryFlag = (country: string): string => {
     const flags: Record<string, string> = {
       "United States": "🇺🇸",
+      "USA": "🇺🇸",
       "United Kingdom": "🇬🇧",
+      "England": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
       "France": "🇫🇷",
       "Japan": "🇯🇵",
       "Italy": "🇮🇹",
@@ -116,9 +122,32 @@ const Templates = () => {
       "India": "🇮🇳",
       "Brazil": "🇧🇷",
       "Australia": "🇦🇺",
+      "Mexico": "🇲🇽",
+      "Israel": "🇮🇱",
+      "Morocco": "🇲🇦",
+      "Tanzania": "🇹🇿",
+      "Thailand": "🇹🇭",
+      "Ukraine": "🇺🇦",
     };
     return flags[country] || "🌍";
   };
+
+  const filteredTemplates = templates.filter((template) => {
+    // Filter by type
+    if (filterType === "free" && !template.is_free) return false;
+    if (filterType === "paid" && template.is_free) return false;
+
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return (
+        template.name.toLowerCase().includes(query) ||
+        template.country.toLowerCase().includes(query)
+      );
+    }
+
+    return true;
+  });
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -140,57 +169,90 @@ const Templates = () => {
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
-              {templates.map((template) => (
-                <Card
-                  key={template.id}
-                  className={`border-2 hover:shadow-elegant transition-smooth hover:-translate-y-1 bg-card overflow-hidden ${
-                    selectedTemplateId === template.id ? "border-primary" : ""
-                  }`}
-                >
-                  <div className="aspect-[3/4] overflow-hidden relative">
-                    <img
-                      src={template.preview_url || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
-                      alt={template.name}
-                      className="w-full h-full object-cover"
-                    />
-                    {selectedTemplateId === template.id && (
-                      <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-2">
-                        <Check className="h-4 w-4" />
+            <>
+              {/* Filter Bar */}
+              <div className="mb-8 max-w-7xl mx-auto flex flex-col md:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by country or name..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Select value={filterType} onValueChange={(value: "all" | "free" | "paid") => setFilterType(value)}>
+                  <SelectTrigger className="w-full md:w-[180px]">
+                    <SelectValue placeholder="Filter by type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Templates</SelectItem>
+                    <SelectItem value="free">Free Only</SelectItem>
+                    <SelectItem value="paid">Paid Only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Templates Grid */}
+              {filteredTemplates.length === 0 ? (
+                <div className="text-center py-20">
+                  <p className="text-muted-foreground">No templates found matching your criteria.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
+                  {filteredTemplates.map((template, index) => (
+                    <Card
+                      key={template.id}
+                      className={`border-2 hover:shadow-elegant transition-smooth hover:-translate-y-1 bg-card overflow-hidden animate-fade-in ${
+                        selectedTemplateId === template.id ? "border-primary" : ""
+                      }`}
+                      style={{ animationDelay: `${index * 0.05}s` }}
+                    >
+                      <div className="aspect-[3/4] overflow-hidden relative">
+                        <img
+                          src={template.preview_url || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
+                          alt={template.name}
+                          className="w-full h-full object-cover"
+                        />
+                        {selectedTemplateId === template.id && (
+                          <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-2">
+                            <Check className="h-4 w-4" />
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-2xl">{getCountryFlag(template.country)}</span>
-                      <h3 className="font-serif text-lg font-semibold">{template.name}</h3>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {template.description}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      {template.is_free ? (
-                        <Badge variant="secondary">Free</Badge>
-                      ) : (
-                        <Badge variant="outline">${template.price}</Badge>
-                      )}
-                      <Button
-                        size="sm"
-                        variant={selectedTemplateId === template.id ? "outline" : "default"}
-                        onClick={() => handleSelectTemplate(template.id, template.is_free)}
-                        disabled={selectedTemplateId === template.id}
-                      >
-                        {selectedTemplateId === template.id
-                          ? "Selected"
-                          : template.is_free
-                          ? "Use Template"
-                          : "Buy Template"}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-2xl">{getCountryFlag(template.country)}</span>
+                          <h3 className="font-serif text-lg font-semibold">{template.name}</h3>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {template.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          {template.is_free ? (
+                            <Badge variant="secondary">Free</Badge>
+                          ) : (
+                            <Badge variant="outline">${template.price}</Badge>
+                          )}
+                          <Button
+                            size="sm"
+                            variant={selectedTemplateId === template.id ? "outline" : "default"}
+                            onClick={() => handleSelectTemplate(template.id, template.is_free)}
+                            disabled={selectedTemplateId === template.id}
+                          >
+                            {selectedTemplateId === template.id
+                              ? "Selected"
+                              : template.is_free
+                              ? "Use Template"
+                              : "Buy Template"}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>
