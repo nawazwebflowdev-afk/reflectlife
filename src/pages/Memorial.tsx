@@ -17,12 +17,12 @@ const Memorial = () => {
   // Sample memorial data
   const memorial = {
     id: "m-001",
-    name: "Ada Johnson",
+    name: "Sarah Adries",
     birthDate: "February 12, 1948",
     deathDate: "September 5, 2024",
-    location: "Lagos, Nigeria",
+    location: "Tel Aviv, Israel",
     portraitUrl: portraitPlaceholder,
-    bio: "Ada was a loving mother, devoted teacher, and pillar of her community. She touched countless lives with her warmth, wisdom, and unwavering kindness.",
+    bio: "Sarah was a loving mother, devoted teacher, and pillar of her community. She touched countless lives with her warmth, wisdom, and unwavering kindness.",
   };
 
   const timeline = [
@@ -46,7 +46,7 @@ const Memorial = () => {
   const tributes = [
     {
       id: "tr-001",
-      author: "Samuel Johnson",
+      author: "David Adries",
       date: "2 days ago",
       text: "Mom, your love and guidance continue to inspire us every day. You taught us the meaning of kindness and compassion. We miss you deeply.",
     },
