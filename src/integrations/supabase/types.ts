@@ -396,6 +396,7 @@ export type Database = {
           approved: boolean
           country: string
           created_at: string | null
+          description: string | null
           display_name: string
           id: string
           portfolio: string | null
@@ -405,6 +406,7 @@ export type Database = {
           approved?: boolean
           country: string
           created_at?: string | null
+          description?: string | null
           display_name: string
           id?: string
           portfolio?: string | null
@@ -414,6 +416,7 @@ export type Database = {
           approved?: boolean
           country?: string
           created_at?: string | null
+          description?: string | null
           display_name?: string
           id?: string
           portfolio?: string | null

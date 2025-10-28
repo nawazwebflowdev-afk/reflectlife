@@ -32,6 +32,7 @@ interface Stats {
 
 interface CreatorProfile {
   approved: boolean;
+  id: string;
 }
 
 const Dashboard = () => {
@@ -42,6 +43,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateTimeline, setShowCreateTimeline] = useState(false);
   const [isCreator, setIsCreator] = useState(false);
+  const [creatorProfile, setCreatorProfile] = useState<CreatorProfile | null>(null);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [stats, setStats] = useState<Stats>({
     totalMemories: 0,
@@ -88,12 +90,15 @@ const Dashboard = () => {
       // Check if user is an approved creator
       const { data: creatorData } = await supabase
         .from("template_creators")
-        .select("approved")
+        .select("*")
         .eq("user_id", userId)
         .maybeSingle();
 
-      if (creatorData?.approved) {
-        setIsCreator(true);
+      if (creatorData) {
+        setCreatorProfile(creatorData);
+        if (creatorData.approved) {
+          setIsCreator(true);
+        }
       }
 
       // Fetch stats
@@ -210,6 +215,23 @@ const Dashboard = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Creator Application Status Banner */}
+        {creatorProfile && !creatorProfile.approved && (
+          <Card className="mb-8 border-primary/50 bg-primary/5 animate-fade-in">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <Clock className="h-5 w-5 text-primary animate-pulse" />
+                <div>
+                  <p className="font-semibold">Creator Application Pending Review</p>
+                  <p className="text-sm text-muted-foreground">
+                    Your application is under review. You'll gain access to template uploads once approved.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-up">

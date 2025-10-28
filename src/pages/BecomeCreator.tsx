@@ -25,6 +25,7 @@ const BecomeCreator = () => {
   const [email, setEmail] = useState("");
   const [country, setCountry] = useState("");
   const [portfolio, setPortfolio] = useState("");
+  const [description, setDescription] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -91,6 +92,8 @@ const BecomeCreator = () => {
         display_name: displayName,
         country,
         portfolio: portfolio || null,
+        description: description || null,
+        approved: false,
       });
 
     setLoading(false);
@@ -104,7 +107,7 @@ const BecomeCreator = () => {
     } else {
       toast({
         title: "Application Submitted",
-        description: "We'll review your application and get back to you soon!",
+        description: "Your application has been submitted. You'll be notified when approved.",
       });
       navigate("/dashboard");
     }
@@ -213,6 +216,18 @@ const BecomeCreator = () => {
                     value={portfolio}
                     onChange={(e) => setPortfolio(e.target.value)}
                     placeholder="https://your-portfolio.com"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="description">Why do you want to become a creator? *</Label>
+                  <Textarea
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Tell us about your creative vision and why you'd like to design memorial templates..."
+                    rows={4}
+                    required
                   />
                 </div>
 

@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { countries } from "@/data/countries";
 
@@ -33,6 +33,7 @@ const CreatorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
   
   // Form state
   const [name, setName] = useState("");
@@ -45,8 +46,26 @@ const CreatorDashboard = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchCreatorTemplates();
+    checkApprovalStatus();
   }, []);
+
+  const checkApprovalStatus = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return;
+
+    const { data: creatorData } = await supabase
+      .from("template_creators")
+      .select("approved")
+      .eq("user_id", session.user.id)
+      .single();
+
+    if (creatorData?.approved) {
+      setIsApproved(true);
+      fetchCreatorTemplates();
+    } else {
+      setLoading(false);
+    }
+  };
 
   const fetchCreatorTemplates = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -174,6 +193,22 @@ const CreatorDashboard = () => {
       <div className="flex justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
+    );
+  }
+
+  if (!isApproved) {
+    return (
+      <Card className="border-primary/50 bg-primary/5">
+        <CardContent className="p-8 text-center">
+          <Clock className="h-12 w-12 mx-auto mb-4 text-primary" />
+          <h3 className="font-serif text-xl font-semibold mb-2">
+            Application Under Review
+          </h3>
+          <p className="text-muted-foreground">
+            Your creator application is being reviewed. You'll gain access to template uploads once approved.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
