@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 
 interface CreatorApplication {
   id: string;
@@ -148,10 +146,7 @@ const AdminCreatorRequests = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navigation />
-      
-      <main className="flex-1 py-12 bg-gradient-subtle">
+    <div className="py-12 bg-gradient-subtle">
         <div className="container mx-auto px-4">
           <div className="mb-8">
             <h1 className="font-serif text-4xl font-bold mb-2">Creator Applications</h1>
@@ -235,9 +230,6 @@ const AdminCreatorRequests = () => {
             </div>
           )}
         </div>
-      </main>
-
-      <Footer />
     </div>
   );
 };

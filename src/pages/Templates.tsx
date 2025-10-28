@@ -8,8 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Check, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 
 interface Template {
   id: string;
@@ -150,10 +148,7 @@ const Templates = () => {
   });
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navigation />
-      
-      <main className="flex-1 py-12 bg-gradient-subtle">
+    <div className="py-12 bg-gradient-subtle">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
@@ -255,9 +250,6 @@ const Templates = () => {
             </>
           )}
         </div>
-      </main>
-
-      <Footer />
     </div>
   );
 };

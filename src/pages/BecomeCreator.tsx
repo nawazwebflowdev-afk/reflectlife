@@ -16,8 +16,6 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Palette, TrendingUp, DollarSign } from "lucide-react";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { countries } from "@/data/countries";
 
 const BecomeCreator = () => {
@@ -132,10 +130,7 @@ const BecomeCreator = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navigation />
-      
-      <main className="flex-1 py-12 bg-gradient-subtle">
+    <div className="py-12 bg-gradient-subtle">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-12">
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
@@ -250,9 +245,6 @@ const BecomeCreator = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
-
-      <Footer />
     </div>
   );
 };
