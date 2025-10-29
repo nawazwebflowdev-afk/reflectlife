@@ -16,6 +16,7 @@ import TimelineView from "./pages/TimelineView";
 import Templates from "./pages/Templates";
 import BecomeCreator from "./pages/BecomeCreator";
 import AdminCreatorRequests from "./pages/AdminCreatorRequests";
+import Tree from "./pages/Tree";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,10 +39,11 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
               <Route path="/timeline" element={<Timeline />} />
               <Route path="/timeline/:id" element={<TimelineView />} />
-              <Route path="/templates" element={<Templates />} />
-              <Route path="/become-creator" element={<BecomeCreator />} />
-              <Route path="/admin/creator-requests" element={<AdminCreatorRequests />} />
-              <Route path="*" element={<NotFound />} />
+          <Route path="/templates" element={<Templates />} />
+          <Route path="/become-creator" element={<BecomeCreator />} />
+          <Route path="/admin/creator-requests" element={<AdminCreatorRequests />} />
+          <Route path="/tree" element={<Tree />} />
+          <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
           <Footer />

@@ -49,6 +49,44 @@ export type Database = {
           },
         ]
       }
+      connections: {
+        Row: {
+          connection_type: string
+          created_at: string | null
+          id: string
+          owner_id: string
+          person_id: string
+          relationship_type: string
+          shared_memory_id: string | null
+        }
+        Insert: {
+          connection_type: string
+          created_at?: string | null
+          id?: string
+          owner_id: string
+          person_id: string
+          relationship_type: string
+          shared_memory_id?: string | null
+        }
+        Update: {
+          connection_type?: string
+          created_at?: string | null
+          id?: string
+          owner_id?: string
+          person_id?: string
+          relationship_type?: string
+          shared_memory_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connections_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memorial_comments: {
         Row: {
           content: string
@@ -307,6 +345,7 @@ export type Database = {
           first_name: string | null
           full_name: string | null
           id: string
+          is_deceased: boolean | null
           last_name: string | null
           logo_url: string | null
           phone_number: string | null
@@ -323,6 +362,7 @@ export type Database = {
           first_name?: string | null
           full_name?: string | null
           id: string
+          is_deceased?: boolean | null
           last_name?: string | null
           logo_url?: string | null
           phone_number?: string | null
@@ -339,6 +379,7 @@ export type Database = {
           first_name?: string | null
           full_name?: string | null
           id?: string
+          is_deceased?: boolean | null
           last_name?: string | null
           logo_url?: string | null
           phone_number?: string | null
