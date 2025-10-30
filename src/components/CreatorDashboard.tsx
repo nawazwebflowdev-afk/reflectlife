@@ -92,8 +92,16 @@ const CreatorDashboard = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to upload templates",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setUploading(true);
 
@@ -111,8 +119,8 @@ const CreatorDashboard = () => {
 
       if (uploadError) {
         toast({
-          title: "Upload Error",
-          description: "Failed to upload preview image",
+          title: "Error",
+          description: uploadError.message,
           variant: "destructive",
         });
         setUploading(false);
@@ -136,7 +144,7 @@ const CreatorDashboard = () => {
         price: isFree ? 0 : parseFloat(price),
         is_free: isFree,
         preview_url: previewUrl,
-        creator_id: session.user.id,
+        creator_id: user.id,
         is_creator_template: true,
       });
 
@@ -145,13 +153,13 @@ const CreatorDashboard = () => {
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to create template",
+        description: error.message,
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Template Created",
-        description: "Your template has been published and is now visible to users under 'Templates by Other Creators.'",
+        title: "Success",
+        description: "Template published successfully!",
       });
       resetForm();
       setShowForm(false);

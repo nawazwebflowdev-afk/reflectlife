@@ -194,8 +194,8 @@ const BecomeCreator = () => {
       setUploadProgress(100);
 
       toast({
-        title: "Success!",
-        description: "Your template has been published and is now visible to users under 'Templates by Other Creators.'",
+        title: "Success",
+        description: "Template published successfully!",
       });
 
       form.reset();
