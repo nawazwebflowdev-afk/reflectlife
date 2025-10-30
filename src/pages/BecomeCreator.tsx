@@ -136,10 +136,10 @@ const BecomeCreator = () => {
   };
 
   const handleTemplateSubmit = async (values: TemplateFormValues) => {
-    if (!userId || !previewFile) {
+    if (!previewFile) {
       toast({
         title: "Missing Information",
-        description: "Please provide all required fields including preview image",
+        description: "Please upload a preview image",
         variant: "destructive",
       });
       return;
@@ -149,9 +149,16 @@ const BecomeCreator = () => {
     setUploadProgress(0);
 
     try {
+      // Get current authenticated user
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        throw new Error("You must be logged in to upload templates");
+      }
+
       // Upload preview image
       const fileExt = previewFile.name.split(".").pop();
-      const fileName = `${userId}-${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
       const filePath = `templates/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -166,12 +173,12 @@ const BecomeCreator = () => {
 
       setUploadProgress(50);
 
-      // Insert template
+      // Insert template with authenticated user's ID
       const { error: insertError } = await supabase
         .from("site_templates")
         .insert([
           {
-            creator_id: userId,
+            creator_id: user.id,
             name: values.name,
             description: values.description,
             price: values.price,
@@ -196,8 +203,8 @@ const BecomeCreator = () => {
       setUploadProgress(0);
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Upload Failed",
+        description: error.message || "Failed to upload template. Please try again.",
         variant: "destructive",
       });
     } finally {
