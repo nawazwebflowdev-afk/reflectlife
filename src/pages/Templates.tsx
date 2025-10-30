@@ -65,7 +65,7 @@ const Templates = () => {
       .select("*")
       .eq("is_creator_template", false)
       .order("is_free", { ascending: false })
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: false });
 
     if (data && !error) {
       setTemplates(data);
