@@ -137,6 +137,7 @@ const CreatorDashboard = () => {
         is_free: isFree,
         preview_url: previewUrl,
         creator_id: session.user.id,
+        is_creator_template: true,
       });
 
     setUploading(false);
@@ -150,7 +151,7 @@ const CreatorDashboard = () => {
     } else {
       toast({
         title: "Template Created",
-        description: "Your template has been added successfully",
+        description: "Your template has been published and is now visible to users under 'Templates by Other Creators.'",
       });
       resetForm();
       setShowForm(false);
@@ -291,10 +292,12 @@ const CreatorDashboard = () => {
                     id="price"
                     type="number"
                     step="0.01"
-                    min="0"
+                    min="4.99"
+                    max="19.99"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
                     required={!isFree}
+                    placeholder="4.99"
                   />
                 </div>
               )}

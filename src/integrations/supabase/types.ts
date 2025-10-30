@@ -403,6 +403,7 @@ export type Database = {
           creator_id: string | null
           description: string | null
           id: string
+          is_creator_template: boolean
           is_free: boolean
           name: string
           preview_url: string | null
@@ -414,6 +415,7 @@ export type Database = {
           creator_id?: string | null
           description?: string | null
           id?: string
+          is_creator_template?: boolean
           is_free?: boolean
           name: string
           preview_url?: string | null
@@ -425,6 +427,7 @@ export type Database = {
           creator_id?: string | null
           description?: string | null
           id?: string
+          is_creator_template?: boolean
           is_free?: boolean
           name?: string
           preview_url?: string | null

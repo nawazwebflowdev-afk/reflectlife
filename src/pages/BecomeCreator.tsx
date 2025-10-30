@@ -25,7 +25,7 @@ import { z } from "zod";
 const templateFormSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters").max(100, "Name must be less than 100 characters"),
   description: z.string().min(10, "Description must be at least 10 characters").max(500, "Description must be less than 500 characters"),
-  price: z.coerce.number().min(4.99, "Minimum price is €4.99").max(14.99, "Maximum price is €14.99"),
+  price: z.coerce.number().min(4.99, "Minimum price is €4.99").max(19.99, "Maximum price is €19.99"),
 });
 
 type TemplateFormValues = z.infer<typeof templateFormSchema>;
@@ -178,6 +178,7 @@ const BecomeCreator = () => {
             preview_url: publicUrl,
             country: country,
             is_free: false,
+            is_creator_template: true,
           },
         ]);
 
@@ -187,7 +188,7 @@ const BecomeCreator = () => {
 
       toast({
         title: "Success!",
-        description: "Your template has been published successfully!",
+        description: "Your template has been published and is now visible to users under 'Templates by Other Creators.'",
       });
 
       form.reset();
@@ -342,7 +343,7 @@ const BecomeCreator = () => {
                             type="number" 
                             step="0.01"
                             min="4.99"
-                            max="14.99"
+                            max="19.99"
                             placeholder="4.99"
                             {...field}
                           />

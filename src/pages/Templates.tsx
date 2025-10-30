@@ -17,10 +17,14 @@ interface Template {
   price: number;
   is_free: boolean;
   description: string | null;
+  is_creator_template: boolean;
+  creator_id: string | null;
+  creator_name?: string;
 }
 
 const Templates = () => {
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [creatorTemplates, setCreatorTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -55,15 +59,38 @@ const Templates = () => {
   };
 
   const fetchTemplates = async () => {
+    // Fetch platform templates (not creator templates)
     const { data, error } = await supabase
       .from("site_templates")
       .select("*")
+      .eq("is_creator_template", false)
       .order("is_free", { ascending: false })
       .order("created_at", { ascending: true });
 
     if (data && !error) {
       setTemplates(data);
     }
+
+    // Fetch creator templates with creator information
+    const { data: creatorData, error: creatorError } = await supabase
+      .from("site_templates")
+      .select(`
+        *,
+        profiles!site_templates_creator_id_fkey(full_name, first_name, last_name)
+      `)
+      .eq("is_creator_template", true)
+      .order("created_at", { ascending: false });
+
+    if (creatorData && !creatorError) {
+      const templatesWithCreators = creatorData.map((template: any) => ({
+        ...template,
+        creator_name: template.profiles?.full_name || 
+                     `${template.profiles?.first_name || ""} ${template.profiles?.last_name || ""}`.trim() ||
+                     "Anonymous Creator"
+      }));
+      setCreatorTemplates(templatesWithCreators);
+    }
+
     setLoading(false);
   };
 
@@ -194,7 +221,7 @@ const Templates = () => {
                   <p className="text-muted-foreground">No templates found matching your criteria.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto mb-16">
                   {filteredTemplates.map((template, index) => (
                     <Card
                       key={template.id}
@@ -246,6 +273,76 @@ const Templates = () => {
                     </Card>
                   ))}
                 </div>
+              )}
+
+              {/* Creator Templates Section */}
+              {creatorTemplates.length > 0 && (
+                <>
+                  <div className="text-center mb-8 mt-16">
+                    <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
+                      Templates by Other Creators
+                    </h2>
+                    <p className="text-lg text-muted-foreground">
+                      Unique designs from our community of talented creators
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
+                    {creatorTemplates.map((template, index) => (
+                      <Card
+                        key={template.id}
+                        className={`border-2 hover:shadow-elegant transition-smooth hover:-translate-y-1 bg-card overflow-hidden animate-fade-in ${
+                          selectedTemplateId === template.id ? "border-primary" : ""
+                        }`}
+                        style={{ animationDelay: `${index * 0.05}s` }}
+                      >
+                        <div className="aspect-[3/4] overflow-hidden relative">
+                          <img
+                            src={template.preview_url || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
+                            alt={template.name}
+                            className="w-full h-full object-cover"
+                          />
+                          {selectedTemplateId === template.id && (
+                            <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-2">
+                              <Check className="h-4 w-4" />
+                            </div>
+                          )}
+                        </div>
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-2xl">{getCountryFlag(template.country)}</span>
+                            <h3 className="font-serif text-lg font-semibold">{template.name}</h3>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-2">
+                            By @{template.creator_name}
+                          </p>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            {template.description}
+                          </p>
+                          <div className="flex items-center justify-between">
+                            {template.is_free ? (
+                              <Badge variant="secondary">Free</Badge>
+                            ) : (
+                              <Badge variant="outline">€{template.price}</Badge>
+                            )}
+                            <Button
+                              size="sm"
+                              variant={selectedTemplateId === template.id ? "outline" : "default"}
+                              onClick={() => handleSelectTemplate(template.id, template.is_free)}
+                              disabled={selectedTemplateId === template.id}
+                            >
+                              {selectedTemplateId === template.id
+                                ? "Selected"
+                                : template.is_free
+                                ? "Use Template"
+                                : "Buy Template"}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </>
               )}
             </>
           )}
