@@ -227,7 +227,7 @@ const Templates = () => {
                           {template.is_free ? (
                             <Badge variant="secondary">Free</Badge>
                           ) : (
-                            <Badge variant="outline">${template.price}</Badge>
+                            <Badge variant="outline">€{template.price}</Badge>
                           )}
                           <Button
                             size="sm"

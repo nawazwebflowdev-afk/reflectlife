@@ -286,7 +286,7 @@ const CreatorDashboard = () => {
 
               {!isFree && (
                 <div>
-                  <Label htmlFor="price">Price ($) *</Label>
+                  <Label htmlFor="price">Price (€) *</Label>
                   <Input
                     id="price"
                     type="number"
@@ -340,7 +340,7 @@ const CreatorDashboard = () => {
                 {template.is_free ? (
                   <Badge variant="secondary">Free</Badge>
                 ) : (
-                  <Badge variant="outline">${template.price}</Badge>
+                  <Badge variant="outline">€{template.price}</Badge>
                 )}
                 <Button
                   size="sm"
