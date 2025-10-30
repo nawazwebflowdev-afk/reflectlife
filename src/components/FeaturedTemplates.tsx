@@ -10,6 +10,8 @@ interface Template {
   name: string;
   country: string;
   preview_url: string | null;
+  is_free: boolean;
+  price: number;
 }
 
 const FeaturedTemplates = () => {
@@ -21,14 +23,24 @@ const FeaturedTemplates = () => {
   }, []);
 
   const fetchFreeTemplates = async () => {
-    const { data, error } = await supabase
+    // Fetch 2 free templates
+    const { data: freeTemplates } = await supabase
       .from("site_templates")
-      .select("id, name, country, preview_url")
+      .select("id, name, country, preview_url, is_free, price")
+      .eq("is_free", true)
       .order("created_at", { ascending: false })
-      .limit(4);
+      .limit(2);
 
-    if (data && !error) {
-      setTemplates(data);
+    // Fetch 2 paid templates
+    const { data: paidTemplates } = await supabase
+      .from("site_templates")
+      .select("id, name, country, preview_url, is_free, price")
+      .eq("is_free", false)
+      .order("created_at", { ascending: false })
+      .limit(2);
+
+    if (freeTemplates && paidTemplates) {
+      setTemplates([...freeTemplates, ...paidTemplates]);
     }
     setLoading(false);
   };
@@ -57,12 +69,22 @@ const FeaturedTemplates = () => {
                 className="w-full h-full object-cover hover:scale-105 transition-smooth"
               />
             </div>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center gap-2">
                 <span className="text-2xl">{getCountryFlag(template.country)}</span>
                 <h3 className="font-serif text-lg font-semibold">{template.name}</h3>
               </div>
               <p className="text-sm text-muted-foreground">{template.country}</p>
+              <div className="flex items-center justify-between pt-2">
+                <span className="font-semibold text-lg">
+                  {template.is_free ? "Free" : `€${template.price.toFixed(2)}`}
+                </span>
+                <Link to={`/templates/${template.id}`}>
+                  <Button variant="secondary" size="sm">
+                    View Template
+                  </Button>
+                </Link>
+              </div>
             </CardContent>
           </Card>
         ))}
