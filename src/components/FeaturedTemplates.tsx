@@ -24,7 +24,7 @@ const FeaturedTemplates = () => {
     const { data, error } = await supabase
       .from("site_templates")
       .select("id, name, country, preview_url")
-      .eq("is_free", true)
+      .order("created_at", { ascending: false })
       .limit(4);
 
     if (data && !error) {
