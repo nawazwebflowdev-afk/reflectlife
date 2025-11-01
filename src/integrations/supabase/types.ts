@@ -87,6 +87,41 @@ export type Database = {
           },
         ]
       }
+      creator_payouts: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          creator_id: string | null
+          id: string
+          payout_method: Json | null
+          status: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          creator_id?: string | null
+          id?: string
+          payout_method?: Json | null
+          status?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          creator_id?: string | null
+          id?: string
+          payout_method?: Json | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_payouts_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memorial_comments: {
         Row: {
           content: string
@@ -341,6 +376,7 @@ export type Database = {
           color_theme: string | null
           country: string | null
           created_at: string | null
+          earnings_balance: number | null
           email: string | null
           first_name: string | null
           full_name: string | null
@@ -358,6 +394,7 @@ export type Database = {
           color_theme?: string | null
           country?: string | null
           created_at?: string | null
+          earnings_balance?: number | null
           email?: string | null
           first_name?: string | null
           full_name?: string | null
@@ -375,6 +412,7 @@ export type Database = {
           color_theme?: string | null
           country?: string | null
           created_at?: string | null
+          earnings_balance?: number | null
           email?: string | null
           first_name?: string | null
           full_name?: string | null
@@ -467,6 +505,57 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      template_purchases: {
+        Row: {
+          amount: number | null
+          buyer_id: string | null
+          created_at: string | null
+          creator_id: string | null
+          currency: string | null
+          id: string
+          payment_status: string | null
+          stripe_payment_intent_id: string | null
+          template_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          buyer_id?: string | null
+          created_at?: string | null
+          creator_id?: string | null
+          currency?: string | null
+          id?: string
+          payment_status?: string | null
+          stripe_payment_intent_id?: string | null
+          template_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          buyer_id?: string | null
+          created_at?: string | null
+          creator_id?: string | null
+          currency?: string | null
+          id?: string
+          payment_status?: string | null
+          stripe_payment_intent_id?: string | null
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_purchases_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_purchases_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "site_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tree_templates: {
         Row: {
@@ -563,6 +652,57 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_wallets: {
+        Row: {
+          balance: number | null
+          currency: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          balance?: number | null
+          currency?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          balance?: number | null
+          currency?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallet_transactions: {
+        Row: {
+          amount: number | null
+          balance_after: number | null
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          balance_after?: number | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          balance_after?: number | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          type?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
