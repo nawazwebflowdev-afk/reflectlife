@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Trash2, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { countries } from "@/data/countries";
+import { getCountryFlag } from "@/lib/countryFlags";
 
 interface CreatorTemplate {
   id: string;
@@ -341,10 +342,11 @@ const CreatorDashboard = () => {
               />
             </div>
             <CardContent className="p-4">
-              <h3 className="font-serif text-lg font-semibold mb-2">
-                {template.name}
-              </h3>
-              <p className="text-sm text-muted-foreground mb-2">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-2xl">{getCountryFlag(template.country)}</span>
+                <h3 className="font-serif text-lg font-semibold">{template.name}</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">
                 {template.country}
               </p>
               <div className="flex items-center justify-between">

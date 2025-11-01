@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Check, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getCountryFlag } from "@/lib/countryFlags";
 
 interface Template {
   id: string;
@@ -133,29 +134,6 @@ const Templates = () => {
     }
   };
 
-  const getCountryFlag = (country: string): string => {
-    const flags: Record<string, string> = {
-      "United States": "🇺🇸",
-      "USA": "🇺🇸",
-      "United Kingdom": "🇬🇧",
-      "England": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-      "France": "🇫🇷",
-      "Japan": "🇯🇵",
-      "Italy": "🇮🇹",
-      "Spain": "🇪🇸",
-      "Germany": "🇩🇪",
-      "India": "🇮🇳",
-      "Brazil": "🇧🇷",
-      "Australia": "🇦🇺",
-      "Mexico": "🇲🇽",
-      "Israel": "🇮🇱",
-      "Morocco": "🇲🇦",
-      "Tanzania": "🇹🇿",
-      "Thailand": "🇹🇭",
-      "Ukraine": "🇺🇦",
-    };
-    return flags[country] || "🌍";
-  };
 
   const filteredTemplates = templates.filter((template) => {
     // Filter by type

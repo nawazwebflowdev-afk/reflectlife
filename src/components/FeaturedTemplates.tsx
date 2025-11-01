@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { getCountryFlag } from "@/lib/countryFlags";
 
 interface Template {
   id: string;
@@ -99,22 +100,6 @@ const FeaturedTemplates = () => {
       </div>
     </>
   );
-};
-
-const getCountryFlag = (country: string): string => {
-  const flags: Record<string, string> = {
-    "United States": "🇺🇸",
-    "United Kingdom": "🇬🇧",
-    "France": "🇫🇷",
-    "Japan": "🇯🇵",
-    "Italy": "🇮🇹",
-    "Spain": "🇪🇸",
-    "Germany": "🇩🇪",
-    "India": "🇮🇳",
-    "Brazil": "🇧🇷",
-    "Australia": "🇦🇺",
-  };
-  return flags[country] || "🌍";
 };
 
 export default FeaturedTemplates;
