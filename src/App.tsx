@@ -17,6 +17,7 @@ import Templates from "./pages/Templates";
 import BecomeCreator from "./pages/BecomeCreator";
 import AdminCreatorRequests from "./pages/AdminCreatorRequests";
 import Tree from "./pages/Tree";
+import HelpCentre from "./pages/HelpCentre";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/become-creator" element={<BecomeCreator />} />
           <Route path="/admin/creator-requests" element={<AdminCreatorRequests />} />
           <Route path="/tree" element={<Tree />} />
+          <Route path="/help" element={<HelpCentre />} />
           <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
