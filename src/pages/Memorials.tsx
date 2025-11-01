@@ -1,43 +1,83 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Search, Users, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Search, Users, Plus, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import CreateMemorialModal from "@/components/CreateMemorialModal";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
+import { format } from "date-fns";
+
+interface Memorial {
+  id: string;
+  name: string;
+  date_of_birth: string | null;
+  date_of_death: string | null;
+  location: string | null;
+  preview_image_url: string | null;
+  bio: string | null;
+}
 
 const Memorials = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
+  const [memorials, setMemorials] = useState<Memorial[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
-  const memorials = [
-    {
-      id: "m-001",
-      name: "Ada Johnson",
-      years: "1948 - 2024",
-      location: "Lagos, Nigeria",
-      image: portraitPlaceholder,
-      tributeCount: 24,
-    },
-    {
-      id: "m-002",
-      name: "Robert Chen",
-      years: "1952 - 2025",
-      location: "Singapore",
-      image: portraitPlaceholder,
-      tributeCount: 18,
-    },
-    {
-      id: "m-003",
-      name: "Maria Rodriguez",
-      years: "1965 - 2024",
-      location: "Barcelona, Spain",
-      image: portraitPlaceholder,
-      tributeCount: 32,
-    },
-  ];
+  useEffect(() => {
+    checkUser();
+    fetchMemorials();
+  }, []);
+
+  const checkUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setUser(user);
+  };
+
+  const fetchMemorials = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('memorials')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setMemorials(data || []);
+    } catch (error: any) {
+      console.error('Error fetching memorials:', error);
+      toast({
+        title: "Error loading memorials",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreateClick = () => {
+    if (!user) {
+      navigate('/auth');
+    } else {
+      setIsCreateModalOpen(true);
+    }
+  };
+
+  const formatYears = (dob: string | null, dod: string | null) => {
+    const birthYear = dob ? format(new Date(dob), 'yyyy') : '?';
+    const deathYear = dod ? format(new Date(dod), 'yyyy') : '?';
+    return `${birthYear} - ${deathYear}`;
+  };
 
   const filteredMemorials = memorials.filter((memorial) =>
-    memorial.name.toLowerCase().includes(searchQuery.toLowerCase())
+    memorial.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    memorial.location?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -66,16 +106,18 @@ const Memorials = () => {
             </div>
           </div>
 
-          <Link to="/auth">
-            <Button size="lg" className="gap-2 shadow-elegant">
-              <Plus className="h-5 w-5" />
-              Create a Memorial
-            </Button>
-          </Link>
+          <Button size="lg" className="gap-2 shadow-elegant" onClick={handleCreateClick}>
+            <Plus className="h-5 w-5" />
+            Create a Memorial
+          </Button>
         </div>
 
         {/* Memorials Grid */}
-        {filteredMemorials.length > 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          </div>
+        ) : filteredMemorials.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredMemorials.map((memorial, index) => (
               <Link key={memorial.id} to={`/memorial/${memorial.id}`}>
@@ -85,7 +127,7 @@ const Memorials = () => {
                 >
                   <div className="aspect-square overflow-hidden bg-muted">
                     <img
-                      src={memorial.image}
+                      src={memorial.preview_image_url || portraitPlaceholder}
                       alt={memorial.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
                     />
@@ -95,15 +137,13 @@ const Memorials = () => {
                       {memorial.name}
                     </h3>
                     <p className="text-muted-foreground text-sm mb-2">
-                      {memorial.years}
+                      {formatYears(memorial.date_of_birth, memorial.date_of_death)}
                     </p>
-                    <p className="text-muted-foreground text-sm mb-3">
-                      {memorial.location}
-                    </p>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Users className="h-4 w-4" />
-                      <span>{memorial.tributeCount} tributes</span>
-                    </div>
+                    {memorial.location && (
+                      <p className="text-muted-foreground text-sm mb-3">
+                        {memorial.location}
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
               </Link>
@@ -127,6 +167,13 @@ const Memorials = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Create Memorial Modal */}
+        <CreateMemorialModal
+          open={isCreateModalOpen}
+          onOpenChange={setIsCreateModalOpen}
+          onMemorialCreated={fetchMemorials}
+        />
       </div>
     </div>
   );
