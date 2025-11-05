@@ -450,7 +450,15 @@ const Auth = () => {
                     Sign in
                   </button>
                 </div>
-              </form>
+              </form>  const handleSignup = async (e) => {
+  e.preventDefault();
+  const token = await grecaptcha.execute('YOUR_SITE_KEY', { action: 'signup' });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { captchaToken: token }
+  });
+};
             </CardContent>
           </Card>
         </div>
