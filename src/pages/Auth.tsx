@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, User, ArrowRight, Loader2, Phone, MapPin } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Loader2, Phone, MapPin, AlertCircle, CheckCircle2, Shield } from "lucide-react";
+import zxcvbn from "zxcvbn";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,12 @@ const Auth = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [country, setCountry] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState<{
+    score: number;
+    feedback: string;
+    color: string;
+  }>({ score: 0, feedback: "", color: "bg-gray-200" });
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -54,6 +61,48 @@ const Auth = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  // Load reCAPTCHA script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://www.google.com/recaptcha/api.js?render=6LfYourSiteKey'; // User needs to add their site key
+    script.async = true;
+    document.body.appendChild(script);
+    
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  // Password strength checker
+  const checkPasswordStrength = useCallback((pwd: string) => {
+    if (!pwd) {
+      setPasswordStrength({ score: 0, feedback: "", color: "bg-gray-200" });
+      return;
+    }
+
+    const result = zxcvbn(pwd);
+    const strengthLabels = ["Very Weak", "Weak", "Fair", "Good", "Strong"];
+    const strengthColors = [
+      "bg-red-500",
+      "bg-orange-500",
+      "bg-yellow-500",
+      "bg-blue-500",
+      "bg-green-500"
+    ];
+
+    setPasswordStrength({
+      score: result.score,
+      feedback: strengthLabels[result.score],
+      color: strengthColors[result.score]
+    });
+  }, []);
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    checkPasswordStrength(newPassword);
+  };
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -112,44 +161,96 @@ const Auth = () => {
       });
       return;
     }
+
+    // Check password strength
+    if (passwordStrength.score < 3) {
+      toast({
+        title: "Weak Password",
+        description: "Please choose a stronger password (at least 'Good' strength)",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsLoading(true);
 
-    const redirectUrl = `${window.location.origin}/dashboard`;
-    const fullName = `${firstName} ${lastName}`;
-
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          full_name: fullName,
-          phone_number: phoneNumber,
-          country: country,
+    try {
+      // Execute reCAPTCHA
+      const token = await new Promise<string>((resolve, reject) => {
+        if (typeof window !== 'undefined' && (window as any).grecaptcha) {
+          (window as any).grecaptcha.ready(() => {
+            (window as any).grecaptcha
+              .execute('6LfYourSiteKey', { action: 'signup' }) // User needs to add their site key
+              .then(resolve)
+              .catch(reject);
+          });
+        } else {
+          reject(new Error('reCAPTCHA not loaded'));
         }
-      }
-    });
-
-    setIsLoading(false);
-
-    if (error) {
-      toast({
-        title: "Sign up failed",
-        description: error.message,
-        variant: "destructive",
       });
-    } else if (data.user) {
+
+      setRecaptchaToken(token);
+
+      // Call secure signup edge function
+      const { data, error } = await supabase.functions.invoke('secure-signup', {
+        body: {
+          email,
+          password,
+          firstName,
+          lastName,
+          phoneNumber,
+          country,
+          recaptchaToken: token,
+          passwordScore: passwordStrength.score,
+        }
+      });
+
+      setIsLoading(false);
+
+      if (error) {
+        toast({
+          title: "Sign up failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.error) {
+        toast({
+          title: "Sign up failed",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({
         title: "Account created!",
-        description: "Welcome! Your profile has been set up.",
+        description: data.message || "Please check your email to confirm your account.",
       });
+
+      // Clear form
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setPassword("");
+      setPhoneNumber("");
+      setCountry("");
+      setTermsAccepted(false);
+      setPasswordStrength({ score: 0, feedback: "", color: "bg-gray-200" });
       
-      if (data.session) {
-        navigate("/dashboard");
-      }
+      // Switch to sign in view
+      setShowSignUp(false);
+
+    } catch (error: any) {
+      setIsLoading(false);
+      console.error('Signup error:', error);
+      toast({
+        title: "Sign up failed",
+        description: error.message || "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -236,12 +337,38 @@ const Auth = () => {
                       placeholder="••••••••"
                       className="pl-10"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={handlePasswordChange}
                       required
-                      minLength={6}
+                      minLength={8}
                       disabled={isLoading}
                     />
                   </div>
+                  {password && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full transition-all duration-300 ${passwordStrength.color}`}
+                            style={{ width: `${(passwordStrength.score + 1) * 20}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-medium">{passwordStrength.feedback}</span>
+                      </div>
+                      <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                        <Shield className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                        <div>
+                          {passwordStrength.score < 3 ? (
+                            <span className="text-orange-600">Use a mix of uppercase, lowercase, numbers, and special characters</span>
+                          ) : (
+                            <span className="text-green-600 flex items-center gap-1">
+                              <CheckCircle2 className="h-3 w-3" />
+                              Strong password
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-2">
