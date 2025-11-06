@@ -23,10 +23,14 @@ type ConnectionType = "family" | "friendship";
 interface Connection {
   id: string;
   owner_id: string;
-  person_id: string;
+  person_id: string | null;
+  related_person_name: string | null;
   relationship_type: string;
   connection_type: ConnectionType;
   shared_memory_id?: string;
+  image_url?: string;
+  x_pos?: number;
+  y_pos?: number;
   profile?: {
     id: string;
     first_name: string;
@@ -135,14 +139,14 @@ const Tree = () => {
       data: {
         label: (
           <div className="flex flex-col items-center gap-2">
-            <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-primary">
+            <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-primary shadow-lg">
               <img
                 src={currentUser.avatar_url || "/placeholder.svg"}
                 alt={currentUser.full_name}
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="text-sm font-semibold text-center">You</div>
+            <div className="text-sm font-semibold text-center bg-background/80 backdrop-blur-sm px-2 py-1 rounded">You</div>
           </div>
         ),
       },
@@ -151,38 +155,102 @@ const Tree = () => {
         border: "none",
         padding: 0,
       },
+      draggable: false,
     };
 
     // Create nodes for connected people
     const connectionNodes: Node[] = filteredConnections.map((conn, index) => {
-      const angle = (2 * Math.PI * index) / filteredConnections.length;
-      const radius = 250;
-      const x = 400 + radius * Math.cos(angle);
-      const y = 300 + radius * Math.sin(angle);
+      // Use saved positions or calculate default layout
+      let x, y;
+      if (conn.x_pos !== undefined && conn.y_pos !== undefined && conn.x_pos !== 0 && conn.y_pos !== 0) {
+        x = conn.x_pos;
+        y = conn.y_pos;
+      } else {
+        if (mode === "family") {
+          // Hierarchical layout for family tree
+          const parentsCount = filteredConnections.filter(c => 
+            c.relationship_type.toLowerCase().includes("parent") || 
+            c.relationship_type.toLowerCase().includes("grandparent")
+          ).length;
+          const siblingsCount = filteredConnections.filter(c => 
+            c.relationship_type.toLowerCase().includes("sibling") || 
+            c.relationship_type.toLowerCase().includes("cousin")
+          ).length;
+          const childrenCount = filteredConnections.filter(c => 
+            c.relationship_type.toLowerCase().includes("child") || 
+            c.relationship_type.toLowerCase().includes("grandchild")
+          ).length;
+
+          if (conn.relationship_type.toLowerCase().includes("parent") || 
+              conn.relationship_type.toLowerCase().includes("grandparent")) {
+            const parentIndex = filteredConnections.filter(c => 
+              c.relationship_type.toLowerCase().includes("parent") || 
+              c.relationship_type.toLowerCase().includes("grandparent")
+            ).indexOf(conn);
+            x = 200 + (parentIndex * 200);
+            y = 50;
+          } else if (conn.relationship_type.toLowerCase().includes("sibling") || 
+                     conn.relationship_type.toLowerCase().includes("cousin")) {
+            const siblingIndex = filteredConnections.filter(c => 
+              c.relationship_type.toLowerCase().includes("sibling") || 
+              c.relationship_type.toLowerCase().includes("cousin")
+            ).indexOf(conn);
+            x = 200 + (siblingIndex * 150);
+            y = 300;
+          } else if (conn.relationship_type.toLowerCase().includes("child") || 
+                     conn.relationship_type.toLowerCase().includes("grandchild")) {
+            const childIndex = filteredConnections.filter(c => 
+              c.relationship_type.toLowerCase().includes("child") || 
+              c.relationship_type.toLowerCase().includes("grandchild")
+            ).indexOf(conn);
+            x = 200 + (childIndex * 150);
+            y = 550;
+          } else {
+            // Spouse or other - place beside center
+            x = 600;
+            y = 300;
+          }
+        } else {
+          // Circular layout for friendship web
+          const angle = (2 * Math.PI * index) / filteredConnections.length;
+          const radius = 250;
+          x = 400 + radius * Math.cos(angle);
+          y = 300 + radius * Math.sin(angle);
+        }
+      }
+
+      const nodeId = conn.id;
+      const displayName = conn.person_id 
+        ? (conn.profile?.full_name || "Unknown")
+        : (conn.related_person_name || "Unknown");
+      const avatarUrl = conn.person_id 
+        ? (conn.profile?.avatar_url || "/placeholder.svg")
+        : (conn.image_url || "/placeholder.svg");
+      const isDeceased = conn.person_id && conn.profile?.is_deceased;
 
       return {
-        id: conn.person_id,
+        id: nodeId,
         type: "default",
         position: { x, y },
         data: {
           label: (
             <div className="flex flex-col items-center gap-2">
               <div className="relative">
-                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-border">
+                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-border shadow-md bg-background">
                   <img
-                    src={conn.profile?.avatar_url || "/placeholder.svg"}
-                    alt={conn.profile?.full_name || "User"}
+                    src={avatarUrl}
+                    alt={displayName}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                {conn.profile?.is_deceased && (
+                {isDeceased && (
                   <div className="absolute -top-1 -right-1 text-xl">🕯️</div>
                 )}
               </div>
-              <div className="text-xs font-medium text-center max-w-[100px] truncate">
-                {conn.profile?.full_name || "Unknown"}
+              <div className="text-xs font-medium text-center max-w-[100px] truncate bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded">
+                {displayName}
               </div>
-              <div className="text-xs text-muted-foreground text-center">
+              <div className="text-xs text-muted-foreground text-center bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded">
                 {conn.relationship_type}
               </div>
             </div>
@@ -194,30 +262,53 @@ const Tree = () => {
           padding: 0,
           cursor: "pointer",
         },
+        draggable: true,
       };
     });
 
     // Create edges
     const connectionEdges: Edge[] = filteredConnections.map((conn) => ({
-      id: `${currentUser.id}-${conn.person_id}`,
+      id: `edge-${conn.id}`,
       source: currentUser.id,
-      target: conn.person_id,
-      type: "default",
+      target: conn.id,
+      type: "smoothstep",
       style: {
         stroke: mode === "family" ? "hsl(var(--primary))" : "hsl(var(--accent))",
         strokeWidth: 2,
       },
-      animated: false,
+      animated: mode === "friendship",
     }));
 
     setNodes([centerNode, ...connectionNodes]);
     setEdges(connectionEdges);
   };
 
+  // Save node position when dragging ends
+  const onNodeDragStop = useCallback(async (_: any, node: Node) => {
+    if (node.id === currentUser?.id) return;
+
+    const connection = connections.find((conn) => conn.id === node.id);
+    if (!connection) return;
+
+    try {
+      const { error } = await supabase
+        .from("connections")
+        .update({
+          x_pos: node.position.x,
+          y_pos: node.position.y,
+        })
+        .eq("id", connection.id);
+
+      if (error) throw error;
+    } catch (error: any) {
+      console.error("Error saving position:", error);
+    }
+  }, [connections, currentUser]);
+
   const onNodeClick = useCallback((_: any, node: Node) => {
     if (node.id === currentUser?.id) return;
     
-    const connection = connections.find((conn) => conn.person_id === node.id);
+    const connection = connections.find((conn) => conn.id === node.id);
     if (connection) {
       setSelectedConnection(connection);
     }
@@ -249,28 +340,29 @@ const Tree = () => {
               </p>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
               <ToggleGroup
                 type="single"
                 value={mode}
                 onValueChange={(value) => {
                   if (value) setMode(value as ConnectionType);
                 }}
-                className="border rounded-lg p-1"
+                className="border rounded-lg p-1 bg-background"
               >
                 <ToggleGroupItem value="family" className="gap-2">
                   <span>🌳</span>
-                  <span>Family Tree</span>
+                  <span className="hidden sm:inline">Family Tree</span>
                 </ToggleGroupItem>
                 <ToggleGroupItem value="friendship" className="gap-2">
                   <span>🌐</span>
-                  <span>Friendship Web</span>
+                  <span className="hidden sm:inline">Friendship Web</span>
                 </ToggleGroupItem>
               </ToggleGroup>
 
               <Button onClick={() => setShowAddModal(true)} className="gap-2">
                 <Plus className="h-4 w-4" />
-                Add Connection
+                <span className="hidden sm:inline">Add Connection</span>
+                <span className="sm:hidden">Add</span>
               </Button>
             </div>
           </div>
@@ -294,12 +386,13 @@ const Tree = () => {
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onNodeClick={onNodeClick}
+              onNodeDragStop={onNodeDragStop}
               connectionMode={ConnectionMode.Loose}
               fitView
               attributionPosition="bottom-left"
             >
-              <Controls />
-              <Background />
+              <Controls showInteractive={false} />
+              <Background gap={16} size={1} />
             </ReactFlow>
           </div>
         )}

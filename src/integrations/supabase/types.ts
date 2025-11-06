@@ -54,28 +54,40 @@ export type Database = {
           connection_type: string
           created_at: string | null
           id: string
+          image_url: string | null
           owner_id: string
-          person_id: string
+          person_id: string | null
+          related_person_name: string | null
           relationship_type: string
           shared_memory_id: string | null
+          x_pos: number | null
+          y_pos: number | null
         }
         Insert: {
           connection_type: string
           created_at?: string | null
           id?: string
+          image_url?: string | null
           owner_id: string
-          person_id: string
+          person_id?: string | null
+          related_person_name?: string | null
           relationship_type: string
           shared_memory_id?: string | null
+          x_pos?: number | null
+          y_pos?: number | null
         }
         Update: {
           connection_type?: string
           created_at?: string | null
           id?: string
+          image_url?: string | null
           owner_id?: string
-          person_id?: string
+          person_id?: string | null
+          related_person_name?: string | null
           relationship_type?: string
           shared_memory_id?: string | null
+          x_pos?: number | null
+          y_pos?: number | null
         }
         Relationships: [
           {

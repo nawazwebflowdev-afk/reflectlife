@@ -60,16 +60,29 @@ const ConnectionDetailPanel = ({
   };
 
   const handleViewProfile = () => {
-    navigate(`/profile/${connection.person_id}`);
+    if (connection.person_id) {
+      navigate(`/profile/${connection.person_id}`);
+    }
   };
 
   const handleViewTimeline = () => {
-    if (connection.profile?.is_deceased) {
-      navigate(`/memorial/${connection.person_id}`);
-    } else {
-      navigate(`/timeline/${connection.person_id}`);
+    if (connection.person_id) {
+      if (connection.profile?.is_deceased) {
+        navigate(`/memorial/${connection.person_id}`);
+      } else {
+        navigate(`/timeline/${connection.person_id}`);
+      }
     }
   };
+
+  const displayName = connection.person_id 
+    ? (connection.profile?.full_name || "Unknown")
+    : (connection.related_person_name || "Unknown");
+  const avatarUrl = connection.person_id 
+    ? (connection.profile?.avatar_url || "/placeholder.svg")
+    : (connection.image_url || "/placeholder.svg");
+  const isRegisteredUser = !!connection.person_id;
+  const isDeceased = connection.person_id && connection.profile?.is_deceased;
 
   return (
     <Sheet open={!!connection} onOpenChange={(open) => !open && onClose()}>
@@ -82,19 +95,19 @@ const ConnectionDetailPanel = ({
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={connection.profile?.avatar_url} />
+                <AvatarImage src={avatarUrl} />
                 <AvatarFallback className="text-2xl">
-                  {connection.profile?.full_name?.[0] || "?"}
+                  {displayName[0] || "?"}
                 </AvatarFallback>
               </Avatar>
-              {connection.profile?.is_deceased && (
+              {isDeceased && (
                 <div className="absolute -top-2 -right-2 text-3xl">🕯️</div>
               )}
             </div>
 
             <div className="text-center">
               <h3 className="font-serif text-2xl font-bold">
-                {connection.profile?.full_name || "Unknown"}
+                {displayName}
               </h3>
               {connection.profile?.country && (
                 <p className="text-sm text-muted-foreground mt-1">
@@ -113,31 +126,41 @@ const ConnectionDetailPanel = ({
               {connection.connection_type === "family" ? "🌳 Family" : "🌐 Friendship"}
             </Badge>
 
-            {connection.profile?.is_deceased && (
+            {isDeceased && (
               <Badge variant="secondary" className="bg-muted">
                 In Memoriam
+              </Badge>
+            )}
+
+            {!isRegisteredUser && (
+              <Badge variant="outline" className="text-xs">
+                Not registered on ReflectLife
               </Badge>
             )}
           </div>
 
           <div className="space-y-2">
-            <Button
-              className="w-full justify-between"
-              variant="outline"
-              onClick={handleViewProfile}
-            >
-              View Profile
-              <ExternalLink className="h-4 w-4" />
-            </Button>
+            {isRegisteredUser && (
+              <>
+                <Button
+                  className="w-full justify-between"
+                  variant="outline"
+                  onClick={handleViewProfile}
+                >
+                  View Profile
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
 
-            <Button
-              className="w-full justify-between"
-              variant="outline"
-              onClick={handleViewTimeline}
-            >
-              {connection.profile?.is_deceased ? "View Memorial" : "View Timeline"}
-              <ExternalLink className="h-4 w-4" />
-            </Button>
+                <Button
+                  className="w-full justify-between"
+                  variant="outline"
+                  onClick={handleViewTimeline}
+                >
+                  {isDeceased ? "View Memorial" : "View Timeline"}
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              </>
+            )}
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -150,7 +173,7 @@ const ConnectionDetailPanel = ({
                 <AlertDialogHeader>
                   <AlertDialogTitle>Remove Connection</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to remove {connection.profile?.full_name} from your{" "}
+                    Are you sure you want to remove {displayName} from your{" "}
                     {connection.connection_type} tree? This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
