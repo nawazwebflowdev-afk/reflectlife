@@ -107,8 +107,8 @@ const Signup = () => {
       if (error) throw error;
 
       toast({
-        title: "Check your email! 📧",
-        description: "We've sent a confirmation link to your email. Please verify your account before signing in.",
+        title: "Account created!",
+        description: "Please check your email to verify your account.",
       });
 
       // Clear form

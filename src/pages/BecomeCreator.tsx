@@ -67,7 +67,7 @@ const BecomeCreator = () => {
         description: "Please sign in to become a creator",
         variant: "destructive",
       });
-      navigate("/auth");
+      navigate("/login");
       return;
     }
     

@@ -63,7 +63,7 @@ const Memorials = () => {
 
   const handleCreateClick = () => {
     if (!user) {
-      navigate('/auth');
+      navigate('/login');
     } else {
       setIsCreateModalOpen(true);
     }

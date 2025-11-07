@@ -74,7 +74,7 @@ const ForgotPassword = () => {
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => navigate("/auth")}
+                onClick={() => navigate("/login")}
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Sign In
@@ -137,7 +137,7 @@ const ForgotPassword = () => {
                 type="button"
                 variant="ghost"
                 className="w-full"
-                onClick={() => navigate("/auth")}
+                onClick={() => navigate("/login")}
                 disabled={isLoading}
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />

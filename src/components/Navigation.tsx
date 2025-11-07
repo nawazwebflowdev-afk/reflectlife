@@ -31,7 +31,10 @@ const Navigation = () => {
       (_event, session) => {
         setUser(session?.user ?? null);
         if (session?.user) {
-          fetchProfile(session.user.id);
+          const uid = session.user.id;
+          setTimeout(() => {
+            fetchProfile(uid);
+          }, 0);
         } else {
           setProfile(null);
         }
@@ -42,7 +45,10 @@ const Navigation = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id);
+        const uid = session.user.id;
+        setTimeout(() => {
+          fetchProfile(uid);
+        }, 0);
       }
     });
 
@@ -162,7 +168,7 @@ const Navigation = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link to="/auth">
+              <Link to="/login">
                 <Button size="sm" className="shadow-elegant">
                   Sign In
                 </Button>
@@ -228,7 +234,7 @@ const Navigation = () => {
                   </Button>
                 </>
               ) : (
-                <Link to="/auth" onClick={() => setIsOpen(false)}>
+                <Link to="/login" onClick={() => setIsOpen(false)}>
                   <Button size="sm" className="w-full">
                     Sign In
                   </Button>

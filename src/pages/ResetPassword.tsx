@@ -120,7 +120,7 @@ const ResetPassword = () => {
 
     // Redirect to auth page after 2 seconds
     setTimeout(() => {
-      navigate("/auth");
+      navigate("/login");
     }, 2000);
   };
 

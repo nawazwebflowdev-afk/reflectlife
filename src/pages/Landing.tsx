@@ -93,7 +93,7 @@ const Landing = () => {
             <p className="text-lg md:text-xl lg:text-2xl text-white/95 mb-8 md:mb-10 max-w-2xl drop-shadow-md animate-fade-in" style={{ animationDelay: '200ms' }}>
               Begin a journey of remembrance — for the ones who will always be part of you
             </p>
-            <Link to="/auth">
+            <Link to="/signup">
               <Button size="lg" className="px-8 md:px-12 py-6 text-base md:text-lg shadow-elegant-lg animate-fade-in" style={{ animationDelay: '400ms' }}>
                 Start remembering today
               </Button>
@@ -204,7 +204,7 @@ const Landing = () => {
             <p className="text-lg mb-8 opacity-90">
               Create a lasting tribute that honors their story, celebrates their life, and keeps their memory alive forever.
             </p>
-            <Link to="/auth">
+            <Link to="/signup">
               <Button size="lg" variant="secondary" className="px-12 shadow-elegant-lg">
                 Create a Memorial
               </Button>
