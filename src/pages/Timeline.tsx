@@ -10,7 +10,7 @@ import { Heart, MessageCircle, Image as ImageIcon, MapPin, Calendar, Loader2 } f
 import { formatDistanceToNow } from "date-fns";
 import type { User } from "@supabase/supabase-js";
 import { CommentsModal } from "@/components/CommentsModal";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 
 interface Post {
   id: string;
