@@ -134,6 +134,56 @@ export type Database = {
           },
         ]
       }
+      diary_entries: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          entry_date: string | null
+          favorite_song_url: string | null
+          id: string
+          is_private: boolean | null
+          media_url: string | null
+          reactions: Json | null
+          tags: string[] | null
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          entry_date?: string | null
+          favorite_song_url?: string | null
+          id?: string
+          is_private?: boolean | null
+          media_url?: string | null
+          reactions?: Json | null
+          tags?: string[] | null
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          entry_date?: string | null
+          favorite_song_url?: string | null
+          id?: string
+          is_private?: boolean | null
+          media_url?: string | null
+          reactions?: Json | null
+          tags?: string[] | null
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diary_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memorial_comments: {
         Row: {
           content: string
