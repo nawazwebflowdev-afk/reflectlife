@@ -11,6 +11,7 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2 } from "lucide-react";
@@ -50,6 +51,7 @@ const Tree = () => {
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const { toast } = useToast();
+  const { backgroundUrl, isLoading: templateLoading } = useTemplateTheme();
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -373,13 +375,25 @@ const Tree = () => {
         {filteredConnections.length === 0 ? (
           <EmptyTreeState mode={mode} onAddConnection={() => setShowAddModal(true)} />
         ) : (
-          <div
-            className={`w-full h-full ${
-              mode === "family"
-                ? "bg-gradient-to-br from-green-50/50 to-background dark:from-green-950/20"
-                : "bg-gradient-to-br from-blue-50/50 to-background dark:from-blue-950/20"
-            }`}
-          >
+          <div className="w-full h-full relative overflow-hidden">
+            {/* Background layer with template image or gradient */}
+            <div 
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage: backgroundUrl 
+                  ? `url(${backgroundUrl})`
+                  : mode === "family"
+                  ? "linear-gradient(to bottom right, hsl(var(--muted) / 0.3), hsl(var(--background)))"
+                  : "linear-gradient(to bottom right, hsl(var(--accent) / 0.2), hsl(var(--background)))",
+                filter: backgroundUrl ? "blur(8px)" : "none",
+                transform: backgroundUrl ? "scale(1.1)" : "none",
+              }}
+            />
+            {/* Overlay for better contrast */}
+            <div className="absolute inset-0 bg-background/40 backdrop-blur-[2px]" />
+            
+            {/* Tree content */}
+            <div className="relative w-full h-full">
             <ReactFlow
               nodes={nodes}
               edges={edges}
@@ -394,6 +408,7 @@ const Tree = () => {
               <Controls showInteractive={false} />
               <Background gap={16} size={1} />
             </ReactFlow>
+            </div>
           </div>
         )}
       </div>
