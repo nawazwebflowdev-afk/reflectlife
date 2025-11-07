@@ -77,13 +77,13 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
       const filePath = `${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("memorial_uploads")
+        .from("profile-pictures")
         .upload(filePath, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
-        .from("memorial_uploads")
+        .from("profile-pictures")
         .getPublicUrl(filePath);
 
       setProfile({ ...profile, avatar_url: publicUrl });

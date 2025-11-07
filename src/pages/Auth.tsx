@@ -233,21 +233,26 @@ const Auth = () => {
 
       toast({
         title: "Account created! 🎉",
-        description: "We've sent a confirmation link to your email. Please verify to activate your account.",
+        description: "Welcome to Reflectlife! You're now signed in.",
       });
 
-      // Clear form
-      setFirstName("");
-      setLastName("");
-      setEmail("");
-      setPassword("");
-      setPhoneNumber("");
-      setCountry("");
-      setTermsAccepted(false);
-      setPasswordStrength({ score: 0, feedback: "", color: "bg-gray-200" });
-      
-      // Switch to sign in view
-      setShowSignUp(false);
+      // Sign in the user automatically
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        toast({
+          title: "Sign in required",
+          description: "Please check your email to verify your account, then sign in.",
+        });
+        setShowSignUp(false);
+        return;
+      }
+
+      // Redirect to dashboard
+      navigate("/dashboard");
 
     } catch (error: any) {
       console.error('Signup error:', error);
