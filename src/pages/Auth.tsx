@@ -118,25 +118,33 @@ const Auth = () => {
     
     setIsLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: signInEmail,
-      password: signInPassword,
-    });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: signInEmail,
+        password: signInPassword,
+      });
 
-    setIsLoading(false);
-
-    if (error) {
+      if (error) {
+        toast({
+          title: "Sign in failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Welcome back!",
+          description: "You've successfully signed in.",
+        });
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
       toast({
         title: "Sign in failed",
-        description: error.message,
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Welcome back!",
-        description: "You've successfully signed in.",
-      });
-      navigate("/dashboard");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -180,7 +188,7 @@ const Auth = () => {
         if (typeof window !== 'undefined' && (window as any).grecaptcha) {
           (window as any).grecaptcha.ready(() => {
             (window as any).grecaptcha
-              .execute('6LfYourSiteKey', { action: 'signup' }) // User needs to add their site key
+              .execute('6LfYourSiteKey', { action: 'signup' })
               .then(resolve)
               .catch(reject);
           });
@@ -204,8 +212,6 @@ const Auth = () => {
           passwordScore: passwordStrength.score,
         }
       });
-
-      setIsLoading(false);
 
       if (error) {
         toast({
@@ -244,13 +250,14 @@ const Auth = () => {
       setShowSignUp(false);
 
     } catch (error: any) {
-      setIsLoading(false);
       console.error('Signup error:', error);
       toast({
         title: "Sign up failed",
         description: error.message || "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
