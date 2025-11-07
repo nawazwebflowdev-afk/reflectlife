@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { getCountryFlag } from "@/lib/countryFlags";
+import { useToast } from "@/hooks/use-toast";
 
 interface Template {
   id: string;
@@ -18,10 +19,21 @@ interface Template {
 const FeaturedTemplates = () => {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
+    checkAuth();
     fetchFreeTemplates();
   }, []);
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      setUserId(session.user.id);
+    }
+  };
 
   const fetchFreeTemplates = async () => {
     // Fetch 2 free templates
@@ -44,6 +56,49 @@ const FeaturedTemplates = () => {
       setTemplates([...freeTemplates, ...paidTemplates]);
     }
     setLoading(false);
+  };
+
+  const handleBuyTemplate = async (templateId: string, isFree: boolean) => {
+    if (!userId) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to purchase a template",
+        variant: "destructive",
+      });
+      navigate("/login");
+      return;
+    }
+
+    if (isFree) {
+      navigate("/templates");
+      return;
+    }
+
+    try {
+      toast({
+        title: "Redirecting to checkout...",
+        description: "Please wait while we prepare your purchase",
+      });
+
+      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+        body: { buyer_id: userId, template_id: templateId }
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL received");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast({
+        title: "Checkout Failed",
+        description: "Unable to start checkout. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
@@ -80,11 +135,13 @@ const FeaturedTemplates = () => {
                 <span className="font-semibold text-lg">
                   {template.is_free ? "Free" : `€${template.price.toFixed(2)}`}
                 </span>
-                <Link to={`/templates/${template.id}`}>
-                  <Button variant="secondary" size="sm">
-                    View Template
-                  </Button>
-                </Link>
+                <Button 
+                  variant="secondary" 
+                  size="sm"
+                  onClick={() => handleBuyTemplate(template.id, template.is_free)}
+                >
+                  {template.is_free ? "View Template" : "Buy Template"}
+                </Button>
               </div>
             </CardContent>
           </Card>

@@ -25,6 +25,8 @@ import Tree from "./pages/Tree";
 import Diary from "./pages/Diary";
 import HelpCentre from "./pages/HelpCentre";
 import NotFound from "./pages/NotFound";
+import Success from "./pages/Success";
+import Cancel from "./pages/Cancel";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +59,8 @@ const App = () => (
           <Route path="/tree" element={<Tree />} />
           <Route path="/diary" element={<Diary />} />
           <Route path="/help" element={<HelpCentre />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="/cancel" element={<Cancel />} />
           <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

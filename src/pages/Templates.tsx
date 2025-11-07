@@ -102,18 +102,41 @@ const Templates = () => {
         description: "Please sign in to select a template",
         variant: "destructive",
       });
-      navigate("/auth");
+      navigate("/login");
       return;
     }
 
     if (!isFree) {
-      toast({
-        title: "Purchase Required",
-        description: "Stripe payment integration will be enabled soon. This is a demo mode.",
-      });
+      // Redirect to Stripe checkout
+      try {
+        toast({
+          title: "Redirecting to checkout...",
+          description: "Please wait while we prepare your purchase",
+        });
+
+        const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+          body: { buyer_id: userId, template_id: templateId }
+        });
+
+        if (error) throw error;
+
+        if (data?.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error("No checkout URL received");
+        }
+      } catch (error) {
+        console.error("Checkout error:", error);
+        toast({
+          title: "Checkout Failed",
+          description: "Unable to start checkout. Please try again.",
+          variant: "destructive",
+        });
+      }
       return;
     }
 
+    // For free templates, apply directly
     const { error } = await supabase
       .from("profiles")
       .update({ template_id: templateId })
