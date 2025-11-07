@@ -7,6 +7,8 @@ import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Memorial from "./pages/Memorial";
 import Memorials from "./pages/Memorials";
@@ -35,6 +37,8 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/memorial/:id" element={<Memorial />} />
               <Route path="/memorials" element={<Memorials />} />

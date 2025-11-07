@@ -226,8 +226,8 @@ const Auth = () => {
       }
 
       toast({
-        title: "Account created!",
-        description: data.message || "Please check your email to confirm your account.",
+        title: "Account created! 🎉",
+        description: "We've sent a confirmation link to your email. Please verify to activate your account.",
       });
 
       // Clear form
@@ -524,6 +524,16 @@ const Auth = () => {
                   </>
                 )}
               </Button>
+
+              <div className="flex items-center justify-between text-sm">
+                <button
+                  type="button"
+                  onClick={() => navigate("/forgot-password")}
+                  className="text-primary underline underline-offset-4 hover:text-primary/80 transition-colors"
+                >
+                  Forgot Password?
+                </button>
+              </div>
 
               <div className="text-center text-sm text-muted-foreground">
                 Don't have an account?{" "}
