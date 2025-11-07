@@ -30,3 +30,4 @@ export function decryptText(encryptedText: string, passphrase: string): string {
 export function generatePassphrase(userId: string, secret: string): string {
   return CryptoJS.SHA256(userId + secret).toString();
 }
+const SECRET_KEY = "ReflectLife2025!secure@key";
