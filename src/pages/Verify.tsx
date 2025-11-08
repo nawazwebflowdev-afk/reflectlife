@@ -11,20 +11,12 @@ const Verify = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const verifyEmail = async () => {
-      try {
-        // Get the current user after email verification
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // Listen for auth state changes to handle the email confirmation callback
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth event:', event, 'Session:', session);
 
-        if (userError || !user) {
-          toast({
-            title: "Verification failed",
-            description: "Unable to verify your email. Please try again.",
-            variant: "destructive",
-          });
-          navigate("/login");
-          return;
-        }
+      if (event === 'SIGNED_IN' && session?.user) {
+        const user = session.user;
 
         // Check if email is confirmed
         if (!user.email_confirmed_at) {
@@ -33,50 +25,64 @@ const Verify = () => {
             description: "Please check your email and click the verification link.",
             variant: "destructive",
           });
+          setIsVerifying(false);
           navigate("/login");
           return;
         }
 
         // Upsert profile with user metadata
-        const { error: profileError } = await supabase.from('profiles').upsert({
-          id: user.id,
-          email: user.email,
-          full_name: user.user_metadata?.full_name || '',
-          phone_number: user.user_metadata?.phone_number || '',
-          country: user.user_metadata?.country || '',
-          created_at: new Date().toISOString(),
-        }, {
-          onConflict: 'id'
-        });
+        try {
+          const { error: profileError } = await supabase.from('profiles').upsert({
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || '',
+            phone_number: user.user_metadata?.phone_number || '',
+            country: user.user_metadata?.country || '',
+            created_at: new Date().toISOString(),
+          }, {
+            onConflict: 'id'
+          });
 
-        if (profileError) {
-          console.error('Profile creation error:', profileError);
+          if (profileError) {
+            console.error('Profile creation error:', profileError);
+          }
+
+          setIsVerifying(false);
+
+          toast({
+            title: "Email verified! 🎉",
+            description: "Your email has been successfully verified. Redirecting to your dashboard...",
+          });
+
+          // Redirect to dashboard after a short delay
+          setTimeout(() => {
+            navigate("/dashboard");
+          }, 2000);
+        } catch (error: any) {
+          console.error('Profile creation error:', error);
+          toast({
+            title: "Verification error",
+            description: error.message || "Something went wrong. Please try again.",
+            variant: "destructive",
+          });
+          setIsVerifying(false);
+          navigate("/login");
         }
-
-        setIsVerifying(false);
-
+      } else if (event === 'SIGNED_OUT' || (event === 'INITIAL_SESSION' && !session)) {
+        // No session found, redirect to login
         toast({
-          title: "Email verified! 🎉",
-          description: "Your email has been successfully verified. Redirecting to your dashboard...",
-        });
-
-        // Redirect to dashboard after a short delay
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 2000);
-
-      } catch (error: any) {
-        console.error('Verification error:', error);
-        toast({
-          title: "Verification error",
-          description: error.message || "Something went wrong. Please try again.",
+          title: "Verification failed",
+          description: "Unable to verify your email. Please try signing up again.",
           variant: "destructive",
         });
+        setIsVerifying(false);
         navigate("/login");
       }
-    };
+    });
 
-    verifyEmail();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate, toast]);
 
   return (
