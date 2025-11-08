@@ -27,6 +27,7 @@ import HelpCentre from "./pages/HelpCentre";
 import NotFound from "./pages/NotFound";
 import Success from "./pages/Success";
 import Cancel from "./pages/Cancel";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,7 @@ const App = () => (
           <Route path="/help" element={<HelpCentre />} />
           <Route path="/success" element={<Success />} />
           <Route path="/cancel" element={<Cancel />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
