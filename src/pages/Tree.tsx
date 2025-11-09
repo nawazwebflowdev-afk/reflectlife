@@ -51,7 +51,8 @@ const Tree = () => {
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const { toast } = useToast();
-  const { backgroundUrl, isLoading: templateLoading } = useTemplateTheme();
+  const templateTheme = useTemplateTheme();
+  const backgroundUrl = templateTheme.backgroundUrl;
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -329,7 +330,15 @@ const Tree = () => {
   );
 
   return (
-    <div className="h-screen flex flex-col">
+    <div 
+      className="h-screen flex flex-col"
+      style={{
+        backgroundImage: backgroundUrl ? `linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), url(${backgroundUrl})` : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
       <div className="py-6 px-4 bg-card border-b">
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

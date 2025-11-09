@@ -18,6 +18,12 @@ interface Memorial {
   location: string | null;
   preview_image_url: string | null;
   bio: string | null;
+  user_id: string;
+  profiles?: {
+    full_name: string | null;
+    first_name: string | null;
+    last_name: string | null;
+  };
 }
 
 const Memorials = () => {
@@ -44,7 +50,14 @@ const Memorials = () => {
     try {
       const { data, error } = await supabase
         .from('memorials')
-        .select('*')
+        .select(`
+          *,
+          profiles:user_id (
+            full_name,
+            first_name,
+            last_name
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -132,16 +145,23 @@ const Memorials = () => {
                       className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
                     />
                   </div>
-                  <CardContent className="p-6">
-                    <h3 className="font-serif text-xl font-semibold mb-1">
+                  <CardContent className="p-4 sm:p-6">
+                    <h3 className="font-serif text-lg sm:text-xl font-semibold mb-1">
                       {memorial.name}
                     </h3>
                     <p className="text-muted-foreground text-sm mb-2">
                       {formatYears(memorial.date_of_birth, memorial.date_of_death)}
                     </p>
                     {memorial.location && (
-                      <p className="text-muted-foreground text-sm mb-3">
-                        {memorial.location}
+                      <p className="text-muted-foreground text-sm mb-2">
+                        📍 {memorial.location}
+                      </p>
+                    )}
+                    {memorial.profiles && (
+                      <p className="text-xs text-muted-foreground/80 mt-2">
+                        Added by {memorial.profiles.full_name || 
+                          `${memorial.profiles.first_name || ''} ${memorial.profiles.last_name || ''}`.trim() || 
+                          'Anonymous'}
                       </p>
                     )}
                   </CardContent>

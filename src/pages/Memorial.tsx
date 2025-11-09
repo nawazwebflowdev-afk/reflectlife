@@ -1,29 +1,67 @@
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Calendar, MapPin, Heart, MessageCircle, Image as ImageIcon, Edit, Palette } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Calendar, MapPin, Heart, MessageCircle, Image as ImageIcon, Edit, Palette, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import timelineBg from "@/assets/timeline-bg.jpg";
 
 const Memorial = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const templateTheme = useTemplateTheme();
-  const [likeCount, setLikeCount] = useState(24);
+  const [memorial, setMemorial] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [likeCount, setLikeCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
 
-  // Sample memorial data
-  const memorial = {
-    id: "m-001",
-    name: "Sarah Adries",
-    birthDate: "February 12, 1948",
-    deathDate: "September 5, 2024",
-    location: "Tel Aviv, Israel",
-    portraitUrl: portraitPlaceholder,
-    bio: "Sarah was a loving mother, devoted teacher, and pillar of her community. She touched countless lives with her warmth, wisdom, and unwavering kindness.",
+  useEffect(() => {
+    fetchMemorial();
+    checkAuth();
+  }, [id]);
+
+  const checkAuth = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setCurrentUserId(user?.id || null);
   };
+
+  const fetchMemorial = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("memorials")
+        .select(`
+          *,
+          profiles:user_id (
+            full_name,
+            first_name,
+            last_name
+          )
+        `)
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+      setMemorial(data);
+    } catch (error: any) {
+      console.error("Error fetching memorial:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load memorial",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isCreator = currentUserId && memorial?.user_id === currentUserId;
 
   const timeline = [
     {
@@ -59,11 +97,42 @@ const Memorial = () => {
 
   const backgroundImage = templateTheme.backgroundUrl || timelineBg;
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!memorial) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardContent className="p-6 text-center">
+            <h2 className="font-serif text-2xl mb-2">Memorial Not Found</h2>
+            <p className="text-muted-foreground mb-4">This memorial doesn't exist or has been removed.</p>
+            <Button onClick={() => navigate("/memorials")}>View All Memorials</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const formatDate = (date: string | null) => {
+    if (!date) return "Unknown";
+    return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
   return (
     <div 
       className="min-h-screen transition-smooth"
       style={{
         '--template-accent': templateTheme.accentColor,
+        backgroundImage: `linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), url(${backgroundImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
       } as React.CSSProperties}
     >
       {/* Hero Section */}
@@ -93,33 +162,42 @@ const Memorial = () => {
         </div>
         
         <div className="relative container mx-auto px-4 pb-8">
-          <div className="flex flex-col md:flex-row items-end gap-6">
+          <div className="flex flex-col lg:flex-row items-center lg:items-end gap-4 lg:gap-6">
             {/* Portrait */}
             <div 
-              className="w-40 h-40 rounded-2xl overflow-hidden border-4 border-background shadow-elegant-lg flex-shrink-0 transition-smooth"
+              className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl overflow-hidden border-4 border-background shadow-elegant-lg flex-shrink-0 transition-smooth"
               style={{
                 boxShadow: `0 0 30px ${templateTheme.accentColor}40`,
               }}
             >
               <img
-                src={memorial.portraitUrl}
+                src={memorial.preview_image_url || portraitPlaceholder}
                 alt={memorial.name}
                 className="w-full h-full object-cover"
               />
             </div>
 
             {/* Info */}
-            <div className="flex-grow pb-2">
-              <h1 className="font-serif text-4xl md:text-5xl font-bold mb-2 text-foreground">
+            <div className="flex-grow pb-2 text-center lg:text-left">
+              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 text-foreground">
                 {memorial.name}
               </h1>
-              <p className="text-lg text-muted-foreground mb-3">
-                {memorial.birthDate} – {memorial.deathDate}
+              <p className="text-base sm:text-lg text-muted-foreground mb-3">
+                {formatDate(memorial.date_of_birth)} – {formatDate(memorial.date_of_death)}
               </p>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span>{memorial.location}</span>
-              </div>
+              {memorial.location && (
+                <div className="flex items-center gap-2 text-muted-foreground justify-center lg:justify-start">
+                  <MapPin className="h-4 w-4" />
+                  <span>{memorial.location}</span>
+                </div>
+              )}
+              {memorial.profiles && (
+                <p className="text-sm text-muted-foreground/70 mt-2">
+                  Created by {memorial.profiles.full_name || 
+                    `${memorial.profiles.first_name || ''} ${memorial.profiles.last_name || ''}`.trim() || 
+                    'Anonymous'}
+                </p>
+              )}
             </div>
 
             {/* Actions */}
@@ -133,12 +211,14 @@ const Memorial = () => {
                 <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
                 {likeCount}
               </Button>
-              <Link to={`/memorial/${id}/edit`}>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Edit className="h-4 w-4" />
-                  Edit
-                </Button>
-              </Link>
+              {isCreator && (
+                <Link to={`/memorial/${id}/edit`}>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Edit className="h-4 w-4" />
+                    Edit
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>

@@ -118,6 +118,12 @@ const Dashboard = () => {
         .select("*", { count: "exact", head: true })
         .eq("user_id", userId);
 
+      // Templates purchased
+      const { count: templatesCount } = await supabase
+        .from("template_purchases")
+        .select("*", { count: "exact", head: true })
+        .eq("buyer_id", userId);
+
       // Likes received on user's posts
       const { data: userPosts } = await supabase
         .from("memorial_posts")
@@ -136,7 +142,7 @@ const Dashboard = () => {
 
       setStats({
         totalMemories: memoriesCount || 0,
-        templatesPurchased: 0, // Placeholder for future implementation
+        templatesPurchased: templatesCount || 0,
         likesReceived: likesReceived,
       });
     } catch (error) {
@@ -153,17 +159,35 @@ const Dashboard = () => {
     navigate("/");
   };
 
-  const memorials = [
-    {
-      id: "m-001",
-      name: "Ada Johnson",
-      years: "1948 - 2024",
-      image: portraitPlaceholder,
-      views: 142,
-      tributeCount: 24,
-      lastUpdated: "2 days ago",
-    },
-  ];
+  const [memorials, setMemorials] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserMemorials(user.id);
+    }
+  }, [user]);
+
+  const fetchUserMemorials = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("memorials")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setMemorials(data || []);
+    } catch (error) {
+      console.error("Error fetching memorials:", error);
+    }
+  };
+
+  const formatYears = (dob: string | null, dod: string | null) => {
+    if (!dob || !dod) return "Unknown";
+    const birthYear = new Date(dob).getFullYear();
+    const deathYear = new Date(dod).getFullYear();
+    return `${birthYear} - ${deathYear}`;
+  };
 
   if (isLoading) {
     return (
@@ -325,7 +349,7 @@ const Dashboard = () => {
                         {/* Image */}
                         <div className="w-24 h-24 flex-shrink-0">
                           <img
-                            src={memorial.image}
+                            src={memorial.preview_image_url || portraitPlaceholder}
                             alt={memorial.name}
                             className="w-full h-full object-cover rounded-lg"
                           />
@@ -336,22 +360,14 @@ const Dashboard = () => {
                           <h3 className="font-serif text-2xl font-semibold mb-1">
                             {memorial.name}
                           </h3>
-                          <p className="text-muted-foreground mb-3">{memorial.years}</p>
-                          
-                          <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
-                            <div className="flex items-center gap-1">
-                              <Eye className="h-4 w-4" />
-                              <span>{memorial.views} views</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Image className="h-4 w-4" />
-                              <span>{memorial.tributeCount} tributes</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              <span>Updated {memorial.lastUpdated}</span>
-                            </div>
-                          </div>
+                          <p className="text-muted-foreground mb-3">
+                            {formatYears(memorial.date_of_birth, memorial.date_of_death)}
+                          </p>
+                          {memorial.location && (
+                            <p className="text-sm text-muted-foreground mb-3">
+                              📍 {memorial.location}
+                            </p>
+                          )}
 
                           <div className="flex flex-wrap gap-3">
                             <Link to={`/memorial/${memorial.id}`}>
@@ -407,36 +423,28 @@ const Dashboard = () => {
                 <Card key={memorial.id} className="hover:shadow-elegant transition-smooth">
                   <CardContent className="p-6">
                     <div className="flex flex-col md:flex-row gap-6">
-                      {/* Image */}
-                      <div className="w-24 h-24 flex-shrink-0">
-                        <img
-                          src={memorial.image}
-                          alt={memorial.name}
-                          className="w-full h-full object-cover rounded-lg"
-                        />
-                      </div>
-
-                      {/* Info */}
-                      <div className="flex-grow">
-                        <h3 className="font-serif text-2xl font-semibold mb-1">
-                          {memorial.name}
-                        </h3>
-                        <p className="text-muted-foreground mb-3">{memorial.years}</p>
-                        
-                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
-                          <div className="flex items-center gap-1">
-                            <Eye className="h-4 w-4" />
-                            <span>{memorial.views} views</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Image className="h-4 w-4" />
-                            <span>{memorial.tributeCount} tributes</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            <span>Updated {memorial.lastUpdated}</span>
-                          </div>
+                        {/* Image */}
+                        <div className="w-24 h-24 flex-shrink-0">
+                          <img
+                            src={memorial.preview_image_url || portraitPlaceholder}
+                            alt={memorial.name}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
                         </div>
+
+                        {/* Info */}
+                        <div className="flex-grow">
+                          <h3 className="font-serif text-2xl font-semibold mb-1">
+                            {memorial.name}
+                          </h3>
+                          <p className="text-muted-foreground mb-3">
+                            {formatYears(memorial.date_of_birth, memorial.date_of_death)}
+                          </p>
+                          {memorial.location && (
+                            <p className="text-sm text-muted-foreground mb-3">
+                              📍 {memorial.location}
+                            </p>
+                          )}
 
                         <div className="flex flex-wrap gap-3">
                           <Link to={`/memorial/${memorial.id}`}>
