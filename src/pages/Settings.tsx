@@ -1,4 +1,4 @@
-import { User, Bell, Lock, Download, Trash2, Flag, Palette, Upload, X, Loader2 } from "lucide-react";
+import { User, Bell, Lock, Download, Trash2, Flag, Palette, Upload, X, Loader2, Share2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,9 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import ConnectionTree from "@/components/ConnectionTree";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import DeleteAccountModal from "@/components/DeleteAccountModal";
 import {
   Select,
   SelectContent,
@@ -64,6 +64,8 @@ const Settings = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [isApprovedCreator, setIsApprovedCreator] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -95,6 +97,17 @@ const Settings = () => {
       setColorTheme(data.color_theme || "light");
       setSelectedLogo(data.logo_url || null);
       setAvatarUrl(data.avatar_url || null);
+    }
+
+    // Check if user is an approved creator
+    const { data: creatorData } = await supabase
+      .from("template_creators")
+      .select("approved")
+      .eq("user_id", id)
+      .single();
+
+    if (creatorData?.approved) {
+      setIsApprovedCreator(true);
     }
   };
 
@@ -534,8 +547,26 @@ const Settings = () => {
             </CardContent>
           </Card>
 
-          {/* Connection Tree */}
-          <ConnectionTree />
+          {/* Share Your Design - Only for Approved Creators */}
+          {isApprovedCreator && (
+            <Card className="shadow-elegant">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Share2 className="h-5 w-5 text-primary" />
+                  <CardTitle>Share Your Design</CardTitle>
+                </div>
+                <CardDescription>Upload and manage your memorial templates</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  As an approved creator, you can create and sell memorial templates to help others honor their loved ones.
+                </p>
+                <Button onClick={() => navigate("/dashboard")}>
+                  Go to Creator Dashboard
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Data Export */}
           <Card className="shadow-elegant">
@@ -567,11 +598,25 @@ const Settings = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 Are you sure? This action will permanently remove your account and all associated memorials.
               </p>
-              <Button variant="destructive">Delete Account</Button>
+              <Button 
+                variant="destructive"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                Delete Account
+              </Button>
             </CardContent>
           </Card>
         </div>
       </div>
+
+      {/* Delete Account Modal */}
+      {userId && (
+        <DeleteAccountModal
+          open={showDeleteModal}
+          onOpenChange={setShowDeleteModal}
+          userId={userId}
+        />
+      )}
     </div>
   );
 };

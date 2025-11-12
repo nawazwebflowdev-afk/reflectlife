@@ -144,7 +144,7 @@ const Landing = () => {
             <p className="text-lg md:text-xl lg:text-2xl text-white/95 mb-8 md:mb-10 max-w-2xl drop-shadow-md animate-fade-in" style={{ animationDelay: '200ms' }}>
               Begin a journey of remembrance — for the ones who will always be part of you
             </p>
-            <Link to="/signup">
+            <Link to={user ? "/memorials" : "/signup"}>
               <Button size="lg" className="px-8 md:px-12 py-6 text-base md:text-lg shadow-elegant-lg animate-fade-in" style={{ animationDelay: '400ms' }}>
                 Start remembering today
               </Button>
@@ -299,25 +299,33 @@ const Landing = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {features.map((feature, index) => (
-              <Card 
-                key={index} 
-                className="border-2 hover:shadow-elegant transition-smooth hover:-translate-y-1 bg-card animate-fade-in"
-                style={{ animationDelay: `${index * 150}ms` }}
-              >
-                <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
-                    <feature.icon className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="font-serif text-xl font-semibold mb-3">
-                    {feature.title}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {feature.description}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
+            {features.map((feature, index) => {
+              const isCreateMemorial = feature.title === "Create a Memorial";
+              return (
+                <Card 
+                  key={index} 
+                  className="border-2 hover:shadow-elegant transition-smooth hover:-translate-y-1 bg-card animate-fade-in cursor-pointer"
+                  style={{ animationDelay: `${index * 150}ms` }}
+                  onClick={() => {
+                    if (isCreateMemorial) {
+                      window.location.href = user ? "/memorials" : "/signup";
+                    }
+                  }}
+                >
+                  <CardContent className="p-8 text-center">
+                    <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+                      <feature.icon className="h-8 w-8 text-primary" />
+                    </div>
+                    <h3 className="font-serif text-xl font-semibold mb-3">
+                      {feature.title}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -388,7 +396,7 @@ const Landing = () => {
             <p className="text-lg mb-8 opacity-90">
               Create a lasting tribute that honors their story, celebrates their life, and keeps their memory alive forever.
             </p>
-            <Link to="/signup">
+            <Link to={user ? "/memorials" : "/signup"}>
               <Button size="lg" variant="secondary" className="px-12 shadow-elegant-lg">
                 Create a Memorial
               </Button>
