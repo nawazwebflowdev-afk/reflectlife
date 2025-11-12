@@ -28,6 +28,7 @@ import NotFound from "./pages/NotFound";
 import Success from "./pages/Success";
 import Cancel from "./pages/Cancel";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Checkout from "./pages/Checkout";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const App = () => (
           <Route path="/tree" element={<Tree />} />
           <Route path="/diary" element={<Diary />} />
           <Route path="/help" element={<HelpCentre />} />
+          <Route path="/checkout/:templateId" element={<Checkout />} />
           <Route path="/success" element={<Success />} />
           <Route path="/cancel" element={<Cancel />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
