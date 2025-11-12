@@ -1,12 +1,63 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Heart, Share2, Clock, Shield } from "lucide-react";
+import { Heart, Share2, Clock, Shield, MessageCircle, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import heroBanner from "@/assets/hero-banner.png";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import FeaturedTemplates from "@/components/FeaturedTemplates";
+import { supabase } from "@/integrations/supabase/client";
+import { formatDistanceToNow } from "date-fns";
 
 const Landing = () => {
+  const [user, setUser] = useState<any>(null);
+  const [timelinePosts, setTimelinePosts] = useState<any[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+
+  useEffect(() => {
+    checkUser();
+  }, []);
+
+  const checkUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setUser(user);
+    if (user) {
+      fetchTimelinePosts();
+    }
+  };
+
+  const fetchTimelinePosts = async () => {
+    setLoadingPosts(true);
+    try {
+      const { data, error } = await supabase
+        .from('memorial_posts')
+        .select(`
+          *,
+          profiles:user_id (
+            username,
+            full_name,
+            avatar_url
+          )
+        `)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setTimelinePosts(data || []);
+    } catch (error) {
+      console.error("Error fetching timeline posts:", error);
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
+
+  const getUserInitials = (profile: any) => {
+    if (!profile) return "?";
+    const name = profile.full_name || profile.username || "";
+    return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
   const features = [
     {
       icon: Heart,
@@ -101,6 +152,139 @@ const Landing = () => {
           </div>
         </div>
       </section>
+
+      {/* Timeline Section - For Signed-In Users Only */}
+      {user && (
+        <section className="py-20 bg-background border-y">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
+                Shared Memories
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Recent moments and memories shared by our community
+              </p>
+            </div>
+
+            <div className="max-w-3xl mx-auto space-y-6">
+              {loadingPosts ? (
+                <Card>
+                  <CardContent className="p-12 text-center">
+                    <p className="text-muted-foreground">Loading memories...</p>
+                  </CardContent>
+                </Card>
+              ) : timelinePosts.length > 0 ? (
+                timelinePosts.map((post) => (
+                  <Card key={post.id} className="shadow-elegant hover:shadow-elegant-lg transition-smooth">
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-4 mb-4">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={post.profiles?.avatar_url} />
+                          <AvatarFallback>{getUserInitials(post.profiles)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-grow">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold">
+                              {post.profiles?.full_name || post.profiles?.username || "Anonymous"}
+                            </span>
+                            <span className="text-sm text-muted-foreground">•</span>
+                            <span className="text-sm text-muted-foreground">
+                              {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                            </span>
+                          </div>
+                          {post.location && (
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                              <MapPin className="h-3 w-3" />
+                              <span>{post.location}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {post.caption && (
+                        <p className="text-foreground mb-4 leading-relaxed">{post.caption}</p>
+                      )}
+
+                      {post.media_url && (
+                        <div className="rounded-lg overflow-hidden mb-4">
+                          <img
+                            src={post.media_url}
+                            alt="Memory"
+                            className="w-full h-auto max-h-96 object-cover"
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-6 text-muted-foreground">
+                        <button className="flex items-center gap-2 hover:text-primary transition-smooth">
+                          <Heart className="h-5 w-5" />
+                          <span className="text-sm">{post.likes_count || 0}</span>
+                        </button>
+                        <button className="flex items-center gap-2 hover:text-primary transition-smooth">
+                          <MessageCircle className="h-5 w-5" />
+                          <span className="text-sm">{post.comments_count || 0}</span>
+                        </button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <Card>
+                  <CardContent className="p-12 text-center">
+                    <p className="text-muted-foreground mb-4">
+                      No memories shared yet. Be the first to share a memory!
+                    </p>
+                    <Link to="/timeline">
+                      <Button>Share a Memory</Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              )}
+
+              {timelinePosts.length > 0 && (
+                <div className="text-center pt-4">
+                  <Link to="/timeline">
+                    <Button variant="outline" size="lg">
+                      View All Memories
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Sign In Prompt - For Non-Signed-In Users */}
+      {!user && (
+        <section className="py-20 bg-gradient-subtle border-y">
+          <div className="container mx-auto px-4">
+            <Card className="max-w-2xl mx-auto text-center shadow-elegant">
+              <CardContent className="p-12">
+                <Heart className="h-16 w-16 mx-auto mb-6 text-primary opacity-80" />
+                <h2 className="font-serif text-3xl font-bold mb-4">
+                  Join Our Community
+                </h2>
+                <p className="text-muted-foreground text-lg mb-6 leading-relaxed">
+                  Sign in to see shared memories, create memorials, and connect with others remembering their loved ones.
+                </p>
+                <div className="flex gap-4 justify-center">
+                  <Link to="/login">
+                    <Button size="lg" variant="outline">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link to="/signup">
+                    <Button size="lg">
+                      Sign Up
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      )}
 
       {/* About / How It Works Section */}
       <section className="py-20 bg-gradient-subtle">

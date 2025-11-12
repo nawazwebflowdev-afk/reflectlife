@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import timelineBg from "@/assets/timeline-bg.jpg";
+import EditMemorialModal from "@/components/EditMemorialModal";
 
 const Memorial = () => {
   const { id } = useParams();
@@ -20,6 +21,7 @@ const Memorial = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [likeCount, setLikeCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     fetchMemorial();
@@ -212,12 +214,15 @@ const Memorial = () => {
                 {likeCount}
               </Button>
               {isCreator && (
-                <Link to={`/memorial/${id}/edit`}>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Edit className="h-4 w-4" />
-                    Edit
-                  </Button>
-                </Link>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-2"
+                  onClick={() => setIsEditModalOpen(true)}
+                >
+                  <Edit className="h-4 w-4" />
+                  Edit
+                </Button>
               )}
             </div>
           </div>
@@ -354,6 +359,14 @@ const Memorial = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Edit Modal */}
+      <EditMemorialModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        memorial={memorial}
+        onMemorialUpdated={fetchMemorial}
+      />
     </div>
   );
 };
