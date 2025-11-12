@@ -322,31 +322,37 @@ export type Database = {
         Row: {
           caption: string | null
           comments_count: number | null
+          content: string | null
           created_at: string | null
           id: string
           likes_count: number | null
           location: string | null
           media_url: string | null
+          updated_at: string | null
           user_id: string
         }
         Insert: {
           caption?: string | null
           comments_count?: number | null
+          content?: string | null
           created_at?: string | null
           id?: string
           likes_count?: number | null
           location?: string | null
           media_url?: string | null
+          updated_at?: string | null
           user_id: string
         }
         Update: {
           caption?: string | null
           comments_count?: number | null
+          content?: string | null
           created_at?: string | null
           id?: string
           likes_count?: number | null
           location?: string | null
           media_url?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -390,7 +396,9 @@ export type Database = {
           created_at: string | null
           date_of_birth: string | null
           date_of_death: string | null
+          description: string | null
           id: string
+          images: string[] | null
           location: string | null
           name: string
           preview_image_url: string | null
@@ -402,7 +410,9 @@ export type Database = {
           created_at?: string | null
           date_of_birth?: string | null
           date_of_death?: string | null
+          description?: string | null
           id?: string
+          images?: string[] | null
           location?: string | null
           name: string
           preview_image_url?: string | null
@@ -414,7 +424,9 @@ export type Database = {
           created_at?: string | null
           date_of_birth?: string | null
           date_of_death?: string | null
+          description?: string | null
           id?: string
+          images?: string[] | null
           location?: string | null
           name?: string
           preview_image_url?: string | null
@@ -424,6 +436,68 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "memorials_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          actor_id: string
+          comment_id: string | null
+          created_at: string | null
+          id: string
+          post_id: string | null
+          read: boolean | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_id: string
+          comment_id?: string | null
+          created_at?: string | null
+          id?: string
+          post_id?: string | null
+          read?: boolean | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string
+          comment_id?: string | null
+          created_at?: string | null
+          id?: string
+          post_id?: string | null
+          read?: boolean | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "memorial_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "memorial_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -449,6 +523,7 @@ export type Database = {
           phone_number: string | null
           template_id: string | null
           updated_at: string | null
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -467,6 +542,7 @@ export type Database = {
           phone_number?: string | null
           template_id?: string | null
           updated_at?: string | null
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -485,6 +561,7 @@ export type Database = {
           phone_number?: string | null
           template_id?: string | null
           updated_at?: string | null
+          username?: string | null
         }
         Relationships: [
           {
@@ -806,6 +883,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      update_creator_balance: {
+        Args: { amount: number; creator_id: string }
+        Returns: undefined
       }
     }
     Enums: {
