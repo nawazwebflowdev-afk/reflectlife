@@ -72,18 +72,28 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
       const file = event.target.files?.[0];
       if (!file) return;
 
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload an image file (jpg, png, etc.)",
+          variant: "destructive",
+        });
+        setUploading(false);
+        return;
+      }
+
       const fileExt = file.name.split(".").pop();
-      const fileName = `${userId}-${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const filePath = `user-avatars/${userId}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("profile-pictures")
+        .from("avatars")
         .upload(filePath, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
-        .from("profile-pictures")
+        .from("avatars")
         .getPublicUrl(filePath);
 
       setProfile({ ...profile, avatar_url: publicUrl });

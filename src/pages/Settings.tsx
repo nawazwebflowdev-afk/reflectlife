@@ -116,10 +116,9 @@ const Settings = () => {
     setUploadProgress(0);
 
     try {
-      // Create a unique file path
+      // Create file path in avatars bucket
       const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}-${Date.now()}.${fileExt}`;
-      const filePath = `${userId}/${fileName}`;
+      const filePath = `user-avatars/${userId}.${fileExt}`;
 
       // Simulate progress for better UX
       const progressInterval = setInterval(() => {
@@ -128,7 +127,7 @@ const Settings = () => {
 
       // Upload to Supabase Storage
       const { error: uploadError } = await supabase.storage
-        .from('profile-pictures')
+        .from('avatars')
         .upload(filePath, file, { upsert: true });
 
       clearInterval(progressInterval);
@@ -137,7 +136,7 @@ const Settings = () => {
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('profile-pictures')
+        .from('avatars')
         .getPublicUrl(filePath);
 
       setUploadProgress(95);
@@ -157,6 +156,9 @@ const Settings = () => {
         title: "Success",
         description: "Profile picture updated successfully",
       });
+
+      // Force refresh the page to update avatar in navigation
+      window.location.reload();
     } catch (error: any) {
       console.error('Upload error:', error);
       toast({
