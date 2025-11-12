@@ -14,7 +14,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, Clock } from "lucide-react";
+import { Loader2, Plus, Trash2, Clock, Wallet } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CreatorPayouts from "./CreatorPayouts";
 import { Badge } from "@/components/ui/badge";
 import { countries } from "@/data/countries";
 import { getCountryFlag } from "@/lib/countryFlags";
@@ -223,14 +225,23 @@ const CreatorDashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="font-serif text-2xl font-bold">My Templates</h2>
-        <Button onClick={() => setShowForm(!showForm)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Template
-        </Button>
-      </div>
+    <Tabs defaultValue="templates" className="space-y-6">
+      <TabsList>
+        <TabsTrigger value="templates">My Templates</TabsTrigger>
+        <TabsTrigger value="payouts">
+          <Wallet className="h-4 w-4 mr-2" />
+          Earnings & Payouts
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="templates" className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="font-serif text-2xl font-bold">My Templates</h2>
+          <Button onClick={() => setShowForm(!showForm)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Template
+          </Button>
+        </div>
 
       {showForm && (
         <Card>
@@ -368,16 +379,21 @@ const CreatorDashboard = () => {
         ))}
       </div>
 
-      {templates.length === 0 && !showForm && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <p className="text-muted-foreground">
-              No templates yet. Create your first template to get started!
-            </p>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+        {templates.length === 0 && !showForm && (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <p className="text-muted-foreground">
+                No templates yet. Create your first template to get started!
+              </p>
+            </CardContent>
+          </Card>
+        )}
+      </TabsContent>
+
+      <TabsContent value="payouts">
+        <CreatorPayouts />
+      </TabsContent>
+    </Tabs>
   );
 };
 
