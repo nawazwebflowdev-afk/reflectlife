@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { ExternalLink, Trash2 } from "lucide-react";
+import { ExternalLink, Trash2, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { AddChildConnectionModal } from "./AddChildConnectionModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +33,7 @@ const ConnectionDetailPanel = ({
 }: ConnectionDetailPanelProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [showAddChildModal, setShowAddChildModal] = useState(false);
 
   if (!connection) return null;
 
@@ -140,6 +143,15 @@ const ConnectionDetailPanel = ({
           </div>
 
           <div className="space-y-2">
+            <Button
+              className="w-full justify-between"
+              variant="outline"
+              onClick={() => setShowAddChildModal(true)}
+            >
+              Add Connection to This Person
+              <UserPlus className="h-4 w-4" />
+            </Button>
+
             {isRegisteredUser && (
               <>
                 <Button
@@ -199,6 +211,13 @@ const ConnectionDetailPanel = ({
           )}
         </div>
       </SheetContent>
+
+      <AddChildConnectionModal
+        open={showAddChildModal}
+        onOpenChange={setShowAddChildModal}
+        parentConnectionId={connection.id}
+        onUpdate={onUpdate}
+      />
     </Sheet>
   );
 };
