@@ -24,7 +24,6 @@ interface ProfileData {
   country: string;
   avatar_url: string;
   color_theme: string;
-  emoji_avatar?: string;
 }
 
 export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }: ProfileEditModalProps) => {
@@ -37,7 +36,6 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
     country: "",
     avatar_url: "",
     color_theme: "#3b82f6",
-    emoji_avatar: "",
   });
 
   useEffect(() => {
@@ -62,7 +60,6 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
           country: data.country || "",
           avatar_url: data.avatar_url || "",
           color_theme: data.color_theme || "#3b82f6",
-          emoji_avatar: "",
         });
       }
     } catch (error) {
@@ -131,7 +128,6 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
           country: profile.country,
           avatar_url: profile.avatar_url,
           color_theme: profile.color_theme,
-          emoji_avatar: profile.emoji_avatar,
         })
         .eq("id", userId);
 
@@ -197,16 +193,6 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
                 disabled={uploading}
               />
             </div>
-          </div>
-
-          {/* Emoji Avatar Selector */}
-          <div className="space-y-2">
-            <Label>Or choose an emoji avatar</Label>
-            <EmojiAvatarSelector
-              selectedEmoji={profile.emoji_avatar || ""}
-              onSelectEmoji={(emoji) => setProfile({ ...profile, emoji_avatar: emoji })}
-              size="sm"
-            />
           </div>
 
           {/* Form Fields */}
