@@ -61,15 +61,15 @@ export const SharePostModal = ({
       if (error) throw error;
 
       toast({
-        title: "Memory Shared",
-        description: "Your memory has been shared successfully 💌",
+        title: "Post shared successfully! 💌",
+        description: `Email sent to ${recipientEmail}`,
       });
       onOpenChange(false);
       setRecipientEmail("");
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to share via email",
+        title: "Unable to send message",
+        description: error.message || "Failed to share via email. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -84,8 +84,8 @@ export const SharePostModal = ({
     );
     window.open(`https://wa.me/?text=${message}`, "_blank");
     toast({
-      title: "Opening WhatsApp",
-      description: "Your memory has been shared successfully 💌",
+      title: "Post shared successfully! 💌",
+      description: "Opening WhatsApp to complete sharing",
     });
     onOpenChange(false);
   };

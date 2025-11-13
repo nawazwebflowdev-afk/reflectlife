@@ -12,6 +12,12 @@ import type { User } from "@supabase/supabase-js";
 import { CommentsModal } from "@/components/CommentsModal";
 import { SharePostModal } from "@/components/SharePostModal";
 import { cn } from "@/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Post {
   id: string;
@@ -463,15 +469,27 @@ const Timeline = () => {
                       <MessageCircle className="h-4 w-4" />
                       <span className="text-sm">{post.comments_count}</span>
                     </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedPostForShare(post)}
-                          className="hover:bg-primary/5"
-                        >
-                          <Share2 className={cn("h-5 w-5 mr-1", "text-muted-foreground")} />
-                          Share
-                        </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => user ? setSelectedPostForShare(post) : null}
+                            disabled={!user}
+                            className="gap-2 transition-all duration-200 hover:scale-110"
+                          >
+                            <Share2 className="h-4 w-4" />
+                            <span className="text-sm">Share</span>
+                          </Button>
+                        </TooltipTrigger>
+                        {!user && (
+                          <TooltipContent>
+                            <p>Sign in to share memories</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
                       </div>
                 </div>
               </Card>

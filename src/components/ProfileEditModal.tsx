@@ -50,7 +50,7 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("first_name, last_name, country, avatar_url, color_theme, emoji_avatar")
+        .select("first_name, last_name, country, avatar_url, color_theme")
         .eq("id", userId)
         .single();
 
@@ -62,7 +62,7 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
           country: data.country || "",
           avatar_url: data.avatar_url || "",
           color_theme: data.color_theme || "#3b82f6",
-          emoji_avatar: data.emoji_avatar || "",
+          emoji_avatar: "",
         });
       }
     } catch (error) {
