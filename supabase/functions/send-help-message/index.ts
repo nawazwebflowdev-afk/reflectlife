@@ -28,7 +28,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResponse = await resend.emails.send({
       from: "Reflectlife Support <onboarding@resend.dev>",
-      to: ["sylvia.andrae@fluke.com"],
+      to: ["sypera.sylvia@gmail.com"],
       replyTo: email,
       subject: `Help Request from ${name} (${country})`,
       html: `
