@@ -29,13 +29,13 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { countries } from "@/data/countries";
-import { HelpCircle, Send } from "lucide-react";
+import { HelpCircle, Send, Loader2 } from "lucide-react";
 
 const contactFormSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email"),
+  name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name must be less than 100 characters"),
+  email: z.string().trim().email("Please enter a valid email").max(255, "Email must be less than 255 characters"),
   country: z.string().min(1, "Please select a country"),
-  message: z.string().min(10, "Message must be at least 10 characters"),
+  message: z.string().trim().min(10, "Message must be at least 10 characters").max(1000, "Message must be less than 1000 characters"),
 });
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
@@ -142,28 +142,26 @@ const HelpCentre = () => {
   const onSubmit = async (values: ContactFormValues) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
-        .from("support_messages")
-        .insert([{
+      const { error: functionError } = await supabase.functions.invoke("send-help-message", {
+        body: {
           name: values.name,
           email: values.email,
           country: values.country,
           message: values.message,
-        }]);
-
-      if (error) throw error;
-
-      toast({
-        title: "Message sent successfully",
-        description: "Thank you for reaching out. Our support team will get back to you shortly.",
+        },
       });
 
+      if (functionError) throw functionError;
+
+      toast({
+        title: "Message Received",
+        description: "Your message has been received. We'll reach out to you shortly 💌",
+      });
       form.reset();
-    } catch (error) {
-      console.error("Error submitting support message:", error);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again.",
+        description: error.message || "Failed to send message. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -323,8 +321,17 @@ const HelpCentre = () => {
                   className="w-full shadow-elegant"
                   disabled={isSubmitting}
                 >
-                  <Send className="mr-2 h-4 w-4" />
-                  {isSubmitting ? "Sending..." : "Send Message"}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="mr-2 h-4 w-4" />
+                      Send Message
+                    </>
+                  )}
                 </Button>
               </form>
             </Form>

@@ -6,10 +6,11 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Image as ImageIcon, MapPin, Calendar, Loader2 } from "lucide-react";
+import { Heart, MessageCircle, Image as ImageIcon, MapPin, Calendar, Loader2, Share2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { User } from "@supabase/supabase-js";
 import { CommentsModal } from "@/components/CommentsModal";
+import { SharePostModal } from "@/components/SharePostModal";
 import { cn } from "@/utils";
 
 interface Post {
@@ -38,6 +39,7 @@ const Timeline = () => {
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [selectedPostForComments, setSelectedPostForComments] = useState<string | null>(null);
+  const [selectedPostForShare, setSelectedPostForShare] = useState<Post | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -461,7 +463,16 @@ const Timeline = () => {
                       <MessageCircle className="h-4 w-4" />
                       <span className="text-sm">{post.comments_count}</span>
                     </Button>
-                  </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedPostForShare(post)}
+                          className="hover:bg-primary/5"
+                        >
+                          <Share2 className={cn("h-5 w-5 mr-1", "text-muted-foreground")} />
+                          Share
+                        </Button>
+                      </div>
                 </div>
               </Card>
             ))
