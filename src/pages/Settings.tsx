@@ -1,4 +1,4 @@
-import { User, Bell, Lock, Download, Trash2, Flag, Palette, Upload, X, Loader2, Share2 } from "lucide-react";
+import { User, Bell, Lock, Download, Trash2, Flag, Palette, Upload, X, Loader2, Share2, Star } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import DeleteAccountModal from "@/components/DeleteAccountModal";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -66,6 +67,9 @@ const Settings = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [isApprovedCreator, setIsApprovedCreator] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [reviewMessage, setReviewMessage] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -251,6 +255,46 @@ const Settings = () => {
         title: "Success",
         description: "Profile updated successfully",
       });
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!rating || !reviewMessage.trim()) {
+      toast({
+        title: "Incomplete Review",
+        description: "Please provide a rating and message",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmittingReview(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-review", {
+        body: {
+          userName: fullName,
+          userEmail: email,
+          rating,
+          message: reviewMessage,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Review Sent",
+        description: "Thank you for your feedback — it helps us keep Reflectlife meaningful for everyone 🌿",
+      });
+      setRating(0);
+      setReviewMessage("");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send review",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
