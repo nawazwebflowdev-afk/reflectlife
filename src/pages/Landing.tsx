@@ -4,6 +4,7 @@ import { Heart, Share2, Clock, Shield, MessageCircle, MapPin } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { EmojiAvatar } from "@/components/EmojiAvatarSelector";
 import heroBanner from "@/assets/hero-banner.png";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import FeaturedTemplates from "@/components/FeaturedTemplates";
@@ -80,22 +81,22 @@ const Landing = () => {
     {
       quote: "Reflectlife gave us a beautiful way to celebrate my mother's life. It's comforting to have all our memories in one place.",
       name: "Sarah M.",
-      image: portraitPlaceholder,
+      emoji: "🌸",
     },
     {
       quote: "A truly special space where our family can come together and share stories about Dad. It means everything to us.",
       name: "Michael T.",
-      image: portraitPlaceholder,
+      emoji: "🕊️",
     },
     {
       quote: "Creating a memorial was so easy, and it's become a place of peace for us all. Thank you for this gift.",
       name: "Linda K.",
-      image: portraitPlaceholder,
+      emoji: "🌻",
     },
     {
       quote: "Reflectlife helped us keep grandma's memory alive in such a meaningful way. We visit it often.",
       name: "James R.",
-      image: portraitPlaceholder,
+      emoji: "🌙",
     },
   ];
 
@@ -348,13 +349,7 @@ const Landing = () => {
               >
                 <CardContent className="p-8">
                   <div className="flex flex-col items-center text-center">
-                    <div className="w-16 h-16 rounded-full overflow-hidden mb-4 bg-muted">
-                      <img
-                        src={testimonial.image}
-                        alt={testimonial.name}
-                        className="w-full h-full object-cover opacity-60"
-                      />
-                    </div>
+                    <EmojiAvatar emoji={testimonial.emoji} size="lg" className="mb-4" />
                     <p className="text-muted-foreground italic mb-4 leading-relaxed">
                       "{testimonial.quote}"
                     </p>

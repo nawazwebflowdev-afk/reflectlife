@@ -1,4 +1,4 @@
-import { User, Bell, Lock, Download, Trash2, Flag, Palette, Upload, X, Loader2, Share2, Star } from "lucide-react";
+import { User, Bell, Lock, Download, Trash2, Palette, Upload, X, Loader2, Share2, Star } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -21,42 +21,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const logosByCountry = {
-  Ukraine: [
-    "https://i.imgur.com/yBHhufp.png",
-    "https://i.imgur.com/qIjXxON.png",
-    "https://i.imgur.com/nBRK0br.png",
-    "https://i.imgur.com/7vGUqsH.png",
-    "https://i.imgur.com/oWqB5QC.png",
-    "https://i.imgur.com/FQDN4x7.png",
-    "https://i.imgur.com/VaUkyjA.png",
-    "https://i.imgur.com/ABU8nFn.png",
-    "https://i.imgur.com/Jqvt7mQ.png",
-    "https://i.imgur.com/ql066uD.png",
-    "https://i.imgur.com/2a1ocjV.png",
-    "https://i.imgur.com/t3gT8mX.png",
-  ],
-  Mexico: [
-    "https://i.imgur.com/2v0Oplj.png",
-    "https://i.imgur.com/4SUQEdm.png",
-    "https://i.imgur.com/vONvKYd.png",
-    "https://i.imgur.com/WWrrvCT.png",
-    "https://i.imgur.com/122gCKq.png",
-    "https://i.imgur.com/nNaGkMv.png",
-    "https://i.imgur.com/1jN475k.png",
-    "https://i.imgur.com/T4pWsd1.png",
-    "https://i.imgur.com/6IzsJk2.png",
-    "https://i.imgur.com/85N84C5.png",
-    "https://i.imgur.com/73vBTJ1.png",
-    "https://i.imgur.com/u0P3Tc6.png",
-    "https://i.imgur.com/hAQwX2U.png",
-    "https://i.imgur.com/1pfCzQA.png",
-    "https://i.imgur.com/YahKDy2.png",
-  ],
-};
 
 const Settings = () => {
-  const [selectedLogo, setSelectedLogo] = useState<string | null>(null);
+  
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [colorTheme, setColorTheme] = useState("light");
@@ -99,7 +66,6 @@ const Settings = () => {
     if (data) {
       setFullName(data.full_name || "");
       setColorTheme(data.color_theme || "light");
-      setSelectedLogo(data.logo_url || null);
       setAvatarUrl(data.avatar_url || null);
     }
 
@@ -298,30 +264,6 @@ const Settings = () => {
     }
   };
 
-  const handleSaveLogo = async () => {
-    if (!userId || !selectedLogo) return;
-    setIsLoading(true);
-
-    const { error } = await supabase
-      .from("profiles")
-      .update({ logo_url: selectedLogo })
-      .eq("id", userId);
-
-    setIsLoading(false);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save logo",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Success",
-        description: "Logo saved successfully",
-      });
-    }
-  };
 
   return (
     <div className="min-h-screen py-12">
@@ -520,74 +462,60 @@ const Settings = () => {
             </CardContent>
           </Card>
 
-          {/* Country Logo Selection */}
+          {/* Leave a Review */}
           <Card className="shadow-elegant">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Flag className="h-5 w-5 text-primary" />
-                <CardTitle>Country Logo Selection</CardTitle>
+                <Star className="h-5 w-5 text-primary" />
+                <CardTitle>Leave a Review</CardTitle>
               </div>
-              <CardDescription>Choose a country logo for your memorial</CardDescription>
+              <CardDescription>Share your experience with Reflectlife</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {Object.entries(logosByCountry).map(([country, logos]) => (
-                <div key={country} className="space-y-3">
-                  <h3 className="font-medium text-sm text-muted-foreground">{country}</h3>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                    {logos.map((logoUrl, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setSelectedLogo(logoUrl)}
-                        className={`relative aspect-square rounded-lg border-2 overflow-hidden transition-all hover:scale-105 hover:shadow-lg ${
-                          selectedLogo === logoUrl
-                            ? "border-primary shadow-elegant ring-2 ring-primary/20"
-                            : "border-border hover:border-primary/50"
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Your Rating</Label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      className="transition-transform hover:scale-110"
+                    >
+                      <Star
+                        className={`h-8 w-8 ${
+                          star <= rating
+                            ? "fill-primary text-primary"
+                            : "text-muted-foreground"
                         }`}
-                      >
-                        <img
-                          src={logoUrl}
-                          alt={`${country} logo ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </button>
-                    ))}
-                  </div>
+                      />
+                    </button>
+                  ))}
                 </div>
-              ))}
-              {selectedLogo && (
-                <>
-                  <div className="pt-4 border-t space-y-4">
-                    <h4 className="font-medium text-sm">Preview on Memorial Page</h4>
-                    <div className="bg-muted/30 rounded-lg p-6 border border-border">
-                      <div className="max-w-2xl mx-auto">
-                        {/* Memorial Header Preview */}
-                        <div className="bg-background rounded-lg shadow-elegant p-6 space-y-4">
-                          <div className="flex items-center gap-4">
-                            <img
-                              src={selectedLogo}
-                              alt="Selected logo preview"
-                              className="w-16 h-16 object-cover rounded-lg border-2 border-primary/20"
-                            />
-                            <div className="flex-1">
-                              <h3 className="font-serif text-2xl font-bold">Memorial Name</h3>
-                              <p className="text-muted-foreground text-sm">1950 - 2024</p>
-                            </div>
-                          </div>
-                          <p className="text-sm text-muted-foreground italic">
-                            Your selected logo will appear here on every memorial page
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-muted-foreground">This logo will represent your memorial</p>
-                      <Button onClick={handleSaveLogo} disabled={isLoading}>
-                        {isLoading ? "Saving..." : "Save Selection"}
-                      </Button>
-                    </div>
-                  </div>
-                </>
-              )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="review-message">Your Review</Label>
+                <Textarea
+                  id="review-message"
+                  placeholder="Tell us about your experience..."
+                  value={reviewMessage}
+                  onChange={(e) => setReviewMessage(e.target.value)}
+                  rows={4}
+                />
+              </div>
+              <Button
+                onClick={handleSubmitReview}
+                disabled={isSubmittingReview || !rating || !reviewMessage.trim()}
+              >
+                {isSubmittingReview ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  "Send Review"
+                )}
+              </Button>
             </CardContent>
           </Card>
 
