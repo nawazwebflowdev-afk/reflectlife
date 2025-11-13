@@ -114,13 +114,13 @@ export const AddChildConnectionModal = ({
       if (error) throw error;
 
       toast({
-        title: "Invitation sent 💌",
+        title: "Invitation sent successfully!",
         description: `Invitation email sent to ${inviteEmail}`,
       });
       setInviteEmail("");
     } catch (error: any) {
       toast({
-        title: "Failed to send invitation",
+        title: "Unable to send invitation, please try again.",
         description: error.message,
         variant: "destructive",
       });
@@ -157,11 +157,11 @@ export const AddChildConnectionModal = ({
 
       const { error } = await supabase.from("connections").insert({
         owner_id: user.id,
+        parent_connection_id: parentConnectionId,
         related_person_name: name,
         relationship_type: relationship,
         connection_type: connectionType,
         image_url: finalImageUrl,
-        shared_memory_id: parentConnectionId, // Link to parent
         x_pos: (parentConnection.x_pos || 0) + 150,
         y_pos: (parentConnection.y_pos || 0) + 100,
       });
