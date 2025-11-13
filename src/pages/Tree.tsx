@@ -28,6 +28,7 @@ interface Connection {
   related_person_name: string | null;
   relationship_type: string;
   connection_type: ConnectionType;
+  parent_connection_id?: string | null;
   shared_memory_id?: string;
   image_url?: string;
   x_pos?: number;
@@ -133,6 +134,75 @@ const Tree = () => {
       setEdges([]);
       return;
     }
+
+    // Build hierarchical tree structure
+    const buildHierarchy = (parentId: string | null = null, level: number = 0, parentX: number = 0): { nodes: Node[]; edges: Edge[] } => {
+      const children = filteredConnections.filter(conn => 
+        parentId === null ? !conn.parent_connection_id : conn.parent_connection_id === parentId
+      );
+
+      const hierarchyNodes: Node[] = [];
+      const hierarchyEdges: Edge[] = [];
+      const spacing = 200;
+      const verticalSpacing = 150;
+      
+      children.forEach((conn, index) => {
+        const xPos = conn.x_pos ?? (parentX + (index - children.length / 2) * spacing);
+        const yPos = conn.y_pos ?? (level * verticalSpacing);
+
+        const displayName = conn.person_id 
+          ? (conn.profile?.full_name || "Unknown")
+          : (conn.related_person_name || "Unknown");
+        
+        const avatarUrl = conn.person_id 
+          ? (conn.profile?.avatar_url || "/placeholder.svg")
+          : (conn.image_url || "/placeholder.svg");
+
+        hierarchyNodes.push({
+          id: conn.id,
+          type: 'default',
+          position: { x: xPos, y: yPos },
+          data: { 
+            label: (
+              <div className="flex flex-col items-center gap-2 p-2">
+                <div className="relative">
+                  <img 
+                    src={avatarUrl} 
+                    alt={displayName}
+                    className="w-16 h-16 rounded-full object-cover border-2 border-primary"
+                  />
+                  {conn.profile?.is_deceased && (
+                    <div className="absolute -top-1 -right-1 text-xl">🕯️</div>
+                  )}
+                </div>
+                <div className="text-center">
+                  <div className="font-semibold text-sm">{displayName}</div>
+                  <div className="text-xs text-muted-foreground">{conn.relationship_type}</div>
+                </div>
+              </div>
+            ),
+            connection: conn
+          },
+        });
+
+        if (parentId) {
+          hierarchyEdges.push({
+            id: `${parentId}-${conn.id}`,
+            source: parentId,
+            target: conn.id,
+            type: 'smoothstep',
+            animated: true,
+          });
+        }
+
+        // Recursively add children
+        const childHierarchy = buildHierarchy(conn.id, level + 1, xPos);
+        hierarchyNodes.push(...childHierarchy.nodes);
+        hierarchyEdges.push(...childHierarchy.edges);
+      });
+
+      return { nodes: hierarchyNodes, edges: hierarchyEdges };
+    };
 
     // Create center node (current user)
     const centerNode: Node = {
