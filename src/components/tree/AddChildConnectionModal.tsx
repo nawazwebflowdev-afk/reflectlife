@@ -102,20 +102,25 @@ export const AddChildConnectionModal = ({
         .eq("id", user.id)
         .single();
 
-      const { error } = await supabase.functions.invoke("send-invitation", {
+      const { data, error } = await supabase.functions.invoke("send-invitation", {
         body: {
           recipientEmail: inviteEmail,
           personName: name || "a loved one",
           senderName: profile?.full_name || "Someone",
           connectionId: parentConnectionId,
+          senderId: user.id,
         },
       });
 
       if (error) throw error;
 
+      const isRegistered = data?.isRegistered;
+      
       toast({
-        title: "Invitation sent successfully!",
-        description: `Invitation email sent to ${inviteEmail}`,
+        title: "Invitation sent successfully! 💌",
+        description: isRegistered 
+          ? `${inviteEmail} will receive a notification to contribute`
+          : `${inviteEmail} will receive an invitation to sign up and contribute`,
       });
       setInviteEmail("");
     } catch (error: any) {
