@@ -6,8 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import CreateMemorialModal from "@/components/CreateMemorialModal";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
+import timelineBg from "@/assets/timeline-bg.jpg";
 import { format } from "date-fns";
 
 interface Memorial {
@@ -29,6 +31,7 @@ interface Memorial {
 const Memorials = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const templateTheme = useTemplateTheme();
   const [searchQuery, setSearchQuery] = useState("");
   const [memorials, setMemorials] = useState<Memorial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -93,15 +96,26 @@ const Memorials = () => {
     memorial.location?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const backgroundImage = templateTheme.backgroundUrl || timelineBg;
+
   return (
-    <div className="min-h-screen py-12">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-12 animate-fade-in">
-          <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
+    <div className="min-h-screen">
+      {/* Hero Header with Template Background */}
+      <section 
+        className="relative h-[400px] flex items-center transition-smooth"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${backgroundImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background" />
+        
+        <div className="relative container mx-auto px-4 text-center">
+          <h1 className="font-serif text-4xl md:text-6xl font-bold mb-4 text-white drop-shadow-lg animate-fade-in">
             Memorial Wall
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+          <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-8 drop-shadow-md">
             Celebrating lives and preserving legacies. Browse memorials or create one for your loved one.
           </p>
 
@@ -112,19 +126,26 @@ const Memorials = () => {
               <Input
                 type="text"
                 placeholder="Search by name, location, or date..."
-                className="pl-10 h-12"
+                className="pl-10 h-12 bg-background/90 backdrop-blur-sm"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
           </div>
 
-          <Button size="lg" className="gap-2 shadow-elegant" onClick={handleCreateClick}>
+          {/* Create Memorial Button */}
+          <Button 
+            onClick={handleCreateClick}
+            size="lg"
+            className="gap-2 shadow-lg"
+          >
             <Plus className="h-5 w-5" />
             Create a Memorial
           </Button>
         </div>
+      </section>
 
+      <div className="container mx-auto px-4 py-12">
         {/* Memorials Grid */}
         {isLoading ? (
           <div className="flex justify-center items-center py-20">
