@@ -4,7 +4,7 @@ import { Heart, Share2, Clock, Shield, MessageCircle, MapPin } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { EmojiAvatar } from "@/components/EmojiAvatarSelector";
+import { AvatarDisplay } from "@/components/EmojiAvatarSelector";
 import heroBanner from "@/assets/hero-banner.png";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import FeaturedTemplates from "@/components/FeaturedTemplates";
@@ -81,22 +81,22 @@ const Landing = () => {
     {
       quote: "Reflectlife gave us a beautiful way to celebrate my mother's life. It's comforting to have all our memories in one place.",
       name: "Sarah M.",
-      emoji: "🌸",
+      avatarIndex: 0,
     },
     {
       quote: "A truly special space where our family can come together and share stories about Dad. It means everything to us.",
       name: "Michael T.",
-      emoji: "🕊️",
+      avatarIndex: 5,
     },
     {
       quote: "Creating a memorial was so easy, and it's become a place of peace for us all. Thank you for this gift.",
       name: "Linda K.",
-      emoji: "🌻",
+      avatarIndex: 12,
     },
     {
       quote: "Reflectlife helped us keep grandma's memory alive in such a meaningful way. We visit it often.",
       name: "James R.",
-      emoji: "🌙",
+      avatarIndex: 18,
     },
   ];
 
@@ -349,7 +349,7 @@ const Landing = () => {
               >
                 <CardContent className="p-8">
                   <div className="flex flex-col items-center text-center">
-                    <EmojiAvatar emoji={testimonial.emoji} size="lg" className="mb-4" />
+                    <AvatarDisplay avatarIndex={testimonial.avatarIndex} size="lg" className="mb-4" />
                     <p className="text-muted-foreground italic mb-4 leading-relaxed">
                       "{testimonial.quote}"
                     </p>

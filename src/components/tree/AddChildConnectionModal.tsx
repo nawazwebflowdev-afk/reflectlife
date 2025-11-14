@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, Loader2, Mail } from "lucide-react";
-import { EmojiAvatarSelector } from "@/components/EmojiAvatarSelector";
+import { AvatarSelector, AvatarDisplay } from "@/components/EmojiAvatarSelector";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface AddChildConnectionModalProps {
@@ -33,7 +33,7 @@ export const AddChildConnectionModal = ({
   const [notes, setNotes] = useState("");
   const [details, setDetails] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const [emojiAvatar, setEmojiAvatar] = useState("");
+  const [avatarIndex, setAvatarIndex] = useState(0);
   const [connectionType, setConnectionType] = useState<"family" | "friendship">("family");
   const [inviteEmail, setInviteEmail] = useState("");
 
@@ -153,7 +153,7 @@ export const AddChildConnectionModal = ({
 
       if (!parentConnection) throw new Error("Parent connection not found");
 
-      const finalImageUrl = emojiAvatar || imageUrl;
+      const finalImageUrl = imageUrl;
 
       const { error } = await supabase.from("connections").insert({
         owner_id: user.id,
@@ -193,7 +193,7 @@ export const AddChildConnectionModal = ({
     setNotes("");
     setDetails("");
     setImageUrl("");
-    setEmojiAvatar("");
+    setAvatarIndex(0);
     setInviteEmail("");
     setConnectionType("family");
   };
@@ -216,8 +216,6 @@ export const AddChildConnectionModal = ({
                 <AvatarImage src={imageUrl} />
                 <AvatarFallback>{name[0] || "?"}</AvatarFallback>
               </Avatar>
-            ) : emojiAvatar ? (
-              <div className="text-5xl">{emojiAvatar}</div>
             ) : (
               <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
                 <span className="text-muted-foreground text-sm">No image</span>
@@ -243,12 +241,12 @@ export const AddChildConnectionModal = ({
             </div>
           </div>
 
-          {/* Emoji Avatar Selector */}
+          {/* Avatar Selector */}
           <div className="space-y-2">
-            <Label>Or choose an emoji avatar</Label>
-            <EmojiAvatarSelector
-              selectedEmoji={emojiAvatar}
-              onSelectEmoji={setEmojiAvatar}
+            <Label>Or choose an avatar</Label>
+            <AvatarSelector
+              selectedAvatar={avatarIndex}
+              onSelectAvatar={setAvatarIndex}
               size="sm"
             />
           </div>
