@@ -64,33 +64,70 @@ const Memorial = () => {
   };
 
   const isCreator = currentUserId && memorial?.user_id === currentUserId;
+  const [timelineEntries, setTimelineEntries] = useState<any[]>([]);
+  const [tributePosts, setTributePosts] = useState<any[]>([]);
+  const [galleryMedia, setGalleryMedia] = useState<any[]>([]);
 
-  const timeline = [
-    {
-      id: "t-001",
-      date: "June 10, 1968",
-      type: "photo",
-      title: "Graduation Day",
-      text: "Ada at her university graduation, ready to change the world through education.",
-      mediaUrl: portraitPlaceholder,
-    },
-    {
-      id: "t-002",
-      date: "November 1, 1990",
-      type: "diary",
-      title: "A Note to Family",
-      text: "Remember to always laugh together. Life is precious, and the moments we share with loved ones are what truly matter. Cherish each day and find joy in the simple things.",
-    },
-  ];
+  useEffect(() => {
+    if (memorial?.id) {
+      fetchTimelineData();
+      fetchTributes();
+      fetchGalleryMedia();
+    }
+  }, [memorial?.id]);
 
-  const tributes = [
-    {
-      id: "tr-001",
-      author: "David Adries",
-      date: "2 days ago",
-      text: "Mom, your love and guidance continue to inspire us every day. You taught us the meaning of kindness and compassion. We miss you deeply.",
-    },
-  ];
+  const fetchTimelineData = async () => {
+    try {
+      // Fetch real timeline entries from memorial_entries table
+      const { data, error } = await supabase
+        .from("memorial_entries")
+        .select("*")
+        .eq("timeline_id", memorial?.id)
+        .order("event_date", { ascending: false });
+
+      if (error) throw error;
+      setTimelineEntries(data || []);
+    } catch (error) {
+      console.error("Error fetching timeline:", error);
+    }
+  };
+
+  const fetchTributes = async () => {
+    try {
+      // Fetch real posts/tributes from memorial_posts table
+      const { data, error } = await supabase
+        .from("memorial_posts")
+        .select(`
+          *,
+          profiles:user_id (
+            full_name,
+            avatar_url
+          )
+        `)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setTributePosts(data || []);
+    } catch (error) {
+      console.error("Error fetching tributes:", error);
+    }
+  };
+
+  const fetchGalleryMedia = async () => {
+    try {
+      // Fetch real media from memorial_media table
+      const { data, error } = await supabase
+        .from("memorial_media")
+        .select("*")
+        .eq("memorial_id", memorial?.id)
+        .order("uploaded_at", { ascending: false });
+
+      if (error) throw error;
+      setGalleryMedia(data || []);
+    } catch (error) {
+      console.error("Error fetching gallery:", error);
+    }
+  };
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -247,15 +284,15 @@ const Memorial = () => {
           <TabsList className="mb-6">
             <TabsTrigger value="timeline">Timeline</TabsTrigger>
             <TabsTrigger value="tributes">
-              Tributes ({tributes.length})
+              Tributes ({tributePosts.length})
             </TabsTrigger>
-            <TabsTrigger value="gallery">Gallery</TabsTrigger>
+            <TabsTrigger value="gallery">Gallery ({galleryMedia.length})</TabsTrigger>
           </TabsList>
 
           {/* Timeline */}
           <TabsContent value="timeline" className="space-y-6">
-            {timeline.length > 0 ? (
-              timeline.map((entry) => (
+            {timelineEntries.length > 0 ? (
+              timelineEntries.map((entry) => (
                 <Card 
                   key={entry.id} 
                   className="shadow-elegant hover:shadow-elegant-lg transition-smooth border-l-4"
@@ -269,8 +306,10 @@ const Memorial = () => {
                         className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
                         style={{ backgroundColor: `${templateTheme.accentColor}20` }}
                       >
-                        {entry.type === "photo" ? (
+                        {entry.content_type === "photo" ? (
                           <ImageIcon className="h-5 w-5" style={{ color: templateTheme.accentColor }} />
+                        ) : entry.content_type === "video" ? (
+                          <MessageCircle className="h-5 w-5" style={{ color: templateTheme.accentColor }} />
                         ) : (
                           <MessageCircle className="h-5 w-5" style={{ color: templateTheme.accentColor }} />
                         )}
@@ -279,18 +318,29 @@ const Memorial = () => {
                       <div className="flex-grow">
                         <div className="flex items-center gap-2 mb-2">
                           <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">{entry.date}</span>
+                          <span className="text-sm text-muted-foreground">
+                            {entry.event_date ? formatDate(entry.event_date) : 'No date'}
+                          </span>
                         </div>
-                        <h3 className="font-serif text-xl font-semibold mb-2">
-                          {entry.title}
-                        </h3>
-                        <p className="text-muted-foreground mb-4">{entry.text}</p>
+                        {entry.caption && (
+                          <p className="text-muted-foreground mb-4">{entry.caption}</p>
+                        )}
                         
-                        {entry.mediaUrl && (
+                        {entry.content_url && entry.content_type === "photo" && (
                           <div className="rounded-lg overflow-hidden max-w-md">
                             <img
-                              src={entry.mediaUrl}
-                              alt={entry.title}
+                              src={entry.content_url}
+                              alt={entry.caption || "Memory"}
+                              className="w-full h-auto"
+                            />
+                          </div>
+                        )}
+                        
+                        {entry.content_url && entry.content_type === "video" && (
+                          <div className="rounded-lg overflow-hidden max-w-md">
+                            <video
+                              src={entry.content_url}
+                              controls
                               className="w-full h-auto"
                             />
                           </div>
@@ -303,9 +353,14 @@ const Memorial = () => {
             ) : (
               <Card className="text-center py-12">
                 <CardContent>
-                  <p className="text-muted-foreground">
-                    No memories yet. Start by adding a story, photo, or video — small details keep memories alive.
+                  <p className="text-muted-foreground mb-4">
+                    No timeline memories yet.
                   </p>
+                  {isCreator && (
+                    <p className="text-sm text-muted-foreground">
+                      Start by adding stories, photos, or videos to preserve precious memories.
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -313,27 +368,60 @@ const Memorial = () => {
 
           {/* Tributes */}
           <TabsContent value="tributes" className="space-y-6">
-            {tributes.map((tribute) => (
-              <Card key={tribute.id} className="shadow-elegant">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
-                      <span className="text-accent font-semibold">
-                        {tribute.author.charAt(0)}
-                      </span>
-                    </div>
-                    <div className="flex-grow">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold">{tribute.author}</span>
-                        <span className="text-sm text-muted-foreground">•</span>
-                        <span className="text-sm text-muted-foreground">{tribute.date}</span>
+            {tributePosts.length > 0 ? (
+              tributePosts.map((tribute) => (
+                <Card key={tribute.id} className="shadow-elegant">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+                        {tribute.profiles?.avatar_url ? (
+                          <img 
+                            src={tribute.profiles.avatar_url} 
+                            alt={tribute.profiles.full_name || 'User'}
+                            className="w-full h-full object-cover rounded-full"
+                          />
+                        ) : (
+                          <span className="text-accent font-semibold">
+                            {tribute.profiles?.full_name?.charAt(0) || 'A'}
+                          </span>
+                        )}
                       </div>
-                      <p className="text-muted-foreground">{tribute.text}</p>
+                      <div className="flex-grow">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold">
+                            {tribute.profiles?.full_name || 'Anonymous'}
+                          </span>
+                          <span className="text-sm text-muted-foreground">•</span>
+                          <span className="text-sm text-muted-foreground">
+                            {new Date(tribute.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        {tribute.content && (
+                          <p className="text-muted-foreground mb-3">{tribute.content}</p>
+                        )}
+                        {tribute.media_url && (
+                          <div className="rounded-lg overflow-hidden max-w-md mt-3">
+                            <img
+                              src={tribute.media_url}
+                              alt="Tribute"
+                              className="w-full h-auto"
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <Card className="text-center py-12">
+                <CardContent>
+                  <p className="text-muted-foreground mb-4">
+                    No tributes yet. Be the first to share a memory.
+                  </p>
                 </CardContent>
               </Card>
-            ))}
+            )}
 
             <Card className="border-2 border-dashed">
               <CardContent className="p-6 text-center">
@@ -347,15 +435,48 @@ const Memorial = () => {
 
           {/* Gallery */}
           <TabsContent value="gallery">
-            <Card className="text-center py-12">
-              <CardContent>
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                  <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <p className="text-muted-foreground mb-4">No photos yet</p>
-                <Button variant="outline">Add Photos</Button>
-              </CardContent>
-            </Card>
+            {galleryMedia.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {galleryMedia.map((media) => (
+                  <Card key={media.id} className="overflow-hidden shadow-elegant">
+                    <CardContent className="p-0">
+                      {media.media_type === 'photo' || media.media_type === 'image' ? (
+                        <img
+                          src={media.media_url}
+                          alt={media.caption || "Gallery image"}
+                          className="w-full h-64 object-cover"
+                        />
+                      ) : (
+                        <video
+                          src={media.media_url}
+                          controls
+                          className="w-full h-64 object-cover"
+                        />
+                      )}
+                      {media.caption && (
+                        <div className="p-3">
+                          <p className="text-sm text-muted-foreground">{media.caption}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="text-center py-12">
+                <CardContent>
+                  <ImageIcon className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
+                  <p className="text-muted-foreground mb-4">
+                    No photos or videos yet.
+                  </p>
+                  {isCreator && (
+                    <p className="text-sm text-muted-foreground">
+                      Upload photos and videos to create a beautiful gallery of memories.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>
