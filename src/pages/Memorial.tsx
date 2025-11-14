@@ -67,6 +67,8 @@ const Memorial = () => {
   const [timelineEntries, setTimelineEntries] = useState<any[]>([]);
   const [tributePosts, setTributePosts] = useState<any[]>([]);
   const [galleryMedia, setGalleryMedia] = useState<any[]>([]);
+  const [showTributeModal, setShowTributeModal] = useState(false);
+  const [tribute, setTribute] = useState("");
 
   useEffect(() => {
     if (memorial?.id) {
@@ -94,9 +96,9 @@ const Memorial = () => {
 
   const fetchTributes = async () => {
     try {
-      // Fetch real posts/tributes from memorial_posts table
+      // Fetch real tributes from tributes table
       const { data, error } = await supabase
-        .from("memorial_posts")
+        .from("tributes" as any)
         .select(`
           *,
           profiles:user_id (
@@ -104,6 +106,7 @@ const Memorial = () => {
             avatar_url
           )
         `)
+        .eq("memorial_id", memorial?.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -111,6 +114,55 @@ const Memorial = () => {
     } catch (error) {
       console.error("Error fetching tributes:", error);
     }
+  };
+
+  const handleSubmitTribute = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to post a tribute.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!tribute.trim()) {
+      toast({
+        title: "Empty tribute",
+        description: "Please write something before posting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from("tributes" as any)
+      .insert({
+        user_id: user.id,
+        memorial_id: memorial.id,
+        tribute_text: tribute,
+      });
+
+    if (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "Failed to post tribute.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Your tribute has been shared.",
+    });
+
+    setTribute("");
+    setShowTributeModal(false);
+    fetchTributes();
   };
 
   const fetchGalleryMedia = async () => {
@@ -396,17 +448,8 @@ const Memorial = () => {
                             {new Date(tribute.created_at).toLocaleDateString()}
                           </span>
                         </div>
-                        {tribute.content && (
-                          <p className="text-muted-foreground mb-3">{tribute.content}</p>
-                        )}
-                        {tribute.media_url && (
-                          <div className="rounded-lg overflow-hidden max-w-md mt-3">
-                            <img
-                              src={tribute.media_url}
-                              alt="Tribute"
-                              className="w-full h-auto"
-                            />
-                          </div>
+                        {tribute.tribute_text && (
+                          <p className="text-muted-foreground mb-3">{tribute.tribute_text}</p>
                         )}
                       </div>
                     </div>
@@ -425,12 +468,39 @@ const Memorial = () => {
 
             <Card className="border-2 border-dashed">
               <CardContent className="p-6 text-center">
-                <Button className="gap-2">
+                <Button className="gap-2" onClick={() => setShowTributeModal(true)}>
                   <MessageCircle className="h-4 w-4" />
                   Share a Memory
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Tribute Modal */}
+            {showTributeModal && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-background p-6 rounded-xl max-w-lg w-full mx-4 shadow-lg">
+                  <h2 className="text-xl font-bold mb-4">Share a Tribute</h2>
+
+                  <textarea
+                    className="w-full border border-input rounded-md p-3 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    rows={4}
+                    value={tribute}
+                    onChange={(e) => setTribute(e.target.value)}
+                    placeholder="Write your tribute..."
+                  />
+
+                  <div className="flex justify-end gap-3 mt-4">
+                    <Button variant="ghost" onClick={() => setShowTributeModal(false)}>
+                      Cancel
+                    </Button>
+
+                    <Button onClick={handleSubmitTribute}>
+                      Post Tribute
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           {/* Gallery */}
