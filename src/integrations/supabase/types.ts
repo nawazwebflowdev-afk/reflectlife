@@ -56,6 +56,7 @@ export type Database = {
           id: string
           image_url: string | null
           owner_id: string
+          parent_connection_id: string | null
           person_id: string | null
           related_person_name: string | null
           relationship_type: string
@@ -69,6 +70,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           owner_id: string
+          parent_connection_id?: string | null
           person_id?: string | null
           related_person_name?: string | null
           relationship_type: string
@@ -82,6 +84,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           owner_id?: string
+          parent_connection_id?: string | null
           person_id?: string | null
           related_person_name?: string | null
           relationship_type?: string
@@ -90,6 +93,13 @@ export type Database = {
           y_pos?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "connections_parent_connection_id_fkey"
+            columns: ["parent_connection_id"]
+            isOneToOne: false
+            referencedRelation: "connections"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "connections_person_id_fkey"
             columns: ["person_id"]
@@ -250,6 +260,51 @@ export type Database = {
             columns: ["timeline_id"]
             isOneToOne: false
             referencedRelation: "memorial_timelines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memorial_invitations: {
+        Row: {
+          connection_id: string | null
+          created_at: string | null
+          id: string
+          invitee_email: string
+          inviter_id: string
+          memorial_id: string | null
+          status: string
+        }
+        Insert: {
+          connection_id?: string | null
+          created_at?: string | null
+          id?: string
+          invitee_email: string
+          inviter_id: string
+          memorial_id?: string | null
+          status?: string
+        }
+        Update: {
+          connection_id?: string | null
+          created_at?: string | null
+          id?: string
+          invitee_email?: string
+          inviter_id?: string
+          memorial_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_invitations_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "memorial_invitations_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
             referencedColumns: ["id"]
           },
         ]
@@ -514,6 +569,7 @@ export type Database = {
           created_at: string | null
           earnings_balance: number | null
           email: string | null
+          emoji_avatar: string | null
           first_name: string | null
           full_name: string | null
           id: string
@@ -533,6 +589,7 @@ export type Database = {
           created_at?: string | null
           earnings_balance?: number | null
           email?: string | null
+          emoji_avatar?: string | null
           first_name?: string | null
           full_name?: string | null
           id: string
@@ -552,6 +609,7 @@ export type Database = {
           created_at?: string | null
           earnings_balance?: number | null
           email?: string | null
+          emoji_avatar?: string | null
           first_name?: string | null
           full_name?: string | null
           id?: string
@@ -796,6 +854,38 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tributes: {
+        Row: {
+          created_at: string | null
+          id: string
+          memorial_id: string | null
+          tribute_text: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          memorial_id?: string | null
+          tribute_text: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          memorial_id?: string | null
+          tribute_text?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tributes_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
             referencedColumns: ["id"]
           },
         ]
