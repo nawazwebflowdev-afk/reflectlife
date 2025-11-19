@@ -20,6 +20,30 @@ const Landing = () => {
     checkUser();
   }, []);
 
+  useEffect(() => {
+    if (!user) return;
+
+    // Set up real-time subscription for new timeline posts
+    const channel = supabase
+      .channel('timeline-posts-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'memorial_posts'
+        },
+        () => {
+          fetchTimelinePosts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setUser(user);
