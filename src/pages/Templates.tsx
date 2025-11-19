@@ -37,6 +37,26 @@ const Templates = () => {
   useEffect(() => {
     checkAuth();
     fetchTemplates();
+
+    // Set up real-time subscription for template changes
+    const channel = supabase
+      .channel('templates-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'site_templates'
+        },
+        () => {
+          fetchTemplates();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const checkAuth = async () => {
@@ -255,12 +275,12 @@ const Templates = () => {
               {/* Creator Templates Section */}
               {creatorTemplates.length > 0 && (
                 <>
-                  <div className="text-center mb-8 mt-16">
-                    <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-                      Templates by Other Creators
+                  <div className="text-center mb-8 mt-16 animate-fade-in">
+                    <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                      Creator Templates
                     </h2>
-                    <p className="text-lg text-muted-foreground">
-                      Unique designs from our community of talented creators
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                      Unique designs from our community of talented creators • Updated in real-time
                     </p>
                   </div>
 
