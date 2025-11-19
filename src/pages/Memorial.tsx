@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import timelineBg from "@/assets/timeline-bg.jpg";
 import EditMemorialModal from "@/components/EditMemorialModal";
+import { TributeModal } from "@/components/TributeModal";
+import { Trash2 } from "lucide-react";
 
 const Memorial = () => {
   const { id } = useParams();
@@ -96,14 +98,15 @@ const Memorial = () => {
 
   const fetchTributes = async () => {
     try {
-      // Fetch real tributes from tributes table
+      // Fetch real tributes from memorial_tributes table
       const { data, error } = await supabase
-        .from("tributes" as any)
+        .from("memorial_tributes")
         .select(`
           *,
           profiles:user_id (
             full_name,
-            avatar_url
+            avatar_url,
+            emoji_avatar
           )
         `)
         .eq("memorial_id", memorial?.id)
@@ -113,6 +116,31 @@ const Memorial = () => {
       setTributePosts(data || []);
     } catch (error) {
       console.error("Error fetching tributes:", error);
+    }
+  };
+
+  const handleDeleteTribute = async (tributeId: string) => {
+    try {
+      const { error } = await supabase
+        .from('memorial_tributes')
+        .delete()
+        .eq('id', tributeId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Tribute deleted",
+        description: "Your tribute has been removed",
+      });
+      
+      fetchTributes();
+    } catch (error: any) {
+      console.error("Error deleting tribute:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete tribute",
+        variant: "destructive",
+      });
     }
   };
 
@@ -432,6 +460,8 @@ const Memorial = () => {
                             alt={tribute.profiles.full_name || 'User'}
                             className="w-full h-full object-cover rounded-full"
                           />
+                        ) : tribute.profiles?.emoji_avatar ? (
+                          <span className="text-2xl">{tribute.profiles.emoji_avatar}</span>
                         ) : (
                           <span className="text-accent font-semibold">
                             {tribute.profiles?.full_name?.charAt(0) || 'A'}
@@ -447,9 +477,31 @@ const Memorial = () => {
                           <span className="text-sm text-muted-foreground">
                             {new Date(tribute.created_at).toLocaleDateString()}
                           </span>
+                          {currentUserId === tribute.user_id && (
+                            <>
+                              <span className="text-sm text-muted-foreground">•</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteTribute(tribute.id)}
+                                className="h-auto p-1 text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
                         </div>
                         {tribute.tribute_text && (
                           <p className="text-muted-foreground mb-3">{tribute.tribute_text}</p>
+                        )}
+                        {tribute.media_url && (
+                          <div className="mt-3 rounded-lg overflow-hidden max-w-md">
+                            {tribute.media_url.includes('video') || tribute.media_url.includes('.mp4') ? (
+                              <video src={tribute.media_url} controls className="w-full h-auto" />
+                            ) : (
+                              <img src={tribute.media_url} alt="Tribute media" className="w-full h-auto" />
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>
@@ -475,32 +527,12 @@ const Memorial = () => {
               </CardContent>
             </Card>
 
-            {/* Tribute Modal */}
-            {showTributeModal && (
-              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                <div className="bg-background p-6 rounded-xl max-w-lg w-full mx-4 shadow-lg">
-                  <h2 className="text-xl font-bold mb-4">Share a Tribute</h2>
-
-                  <textarea
-                    className="w-full border border-input rounded-md p-3 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    rows={4}
-                    value={tribute}
-                    onChange={(e) => setTribute(e.target.value)}
-                    placeholder="Write your tribute..."
-                  />
-
-                  <div className="flex justify-end gap-3 mt-4">
-                    <Button variant="ghost" onClick={() => setShowTributeModal(false)}>
-                      Cancel
-                    </Button>
-
-                    <Button onClick={handleSubmitTribute}>
-                      Post Tribute
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
+            <TributeModal
+              open={showTributeModal}
+              onOpenChange={setShowTributeModal}
+              memorialId={memorial?.id}
+              onTributeAdded={fetchTributes}
+            />
           </TabsContent>
 
           {/* Gallery */}

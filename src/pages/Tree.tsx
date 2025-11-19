@@ -12,6 +12,7 @@ import "reactflow/dist/style.css";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
+import { useTemplateBackground } from "@/hooks/useTemplateBackground";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2 } from "lucide-react";
@@ -53,7 +54,8 @@ const Tree = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const { toast } = useToast();
   const templateTheme = useTemplateTheme();
-  const backgroundUrl = templateTheme.backgroundUrl;
+  const { backgroundUrl: purchasedBackground } = useTemplateBackground();
+  const backgroundUrl = purchasedBackground || templateTheme.backgroundUrl;
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -460,16 +462,16 @@ const Tree = () => {
               className="absolute inset-0 bg-cover bg-center"
               style={{
                 backgroundImage: backgroundUrl 
-                  ? `url(${backgroundUrl})`
+                  ? `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${backgroundUrl})`
                   : mode === "family"
                   ? "linear-gradient(to bottom right, hsl(var(--muted) / 0.3), hsl(var(--background)))"
                   : "linear-gradient(to bottom right, hsl(var(--accent) / 0.2), hsl(var(--background)))",
-                filter: backgroundUrl ? "blur(8px)" : "none",
+                filter: backgroundUrl ? "blur(10px)" : "none",
                 transform: backgroundUrl ? "scale(1.1)" : "none",
               }}
             />
             {/* Overlay for better contrast */}
-            <div className="absolute inset-0 bg-background/40 backdrop-blur-[2px]" />
+            <div className="absolute inset-0 bg-background/40 backdrop-blur-[2px]" style={{ filter: "none" }} />
             
             {/* Tree content */}
             <div className="relative w-full h-full">
