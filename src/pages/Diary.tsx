@@ -10,6 +10,7 @@ import { Loader2, Plus, Search, Filter, FileDown, Palette } from "lucide-react";
 import DiaryEntryModal from "@/components/DiaryEntryModal";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import jsPDF from "jspdf";
 
 interface DiaryEntry {
   id: string;
@@ -150,10 +151,88 @@ const Diary = () => {
   };
 
   const exportToPDF = () => {
-    toast({
-      title: "Export feature",
-      description: "PDF export will be available soon!",
-    });
+    try {
+      const pdf = new jsPDF();
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 20;
+      let yPosition = margin;
+
+      // Title
+      pdf.setFontSize(22);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("My Diary", pageWidth / 2, yPosition, { align: "center" });
+      yPosition += 15;
+
+      // Add date
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(`Exported on ${format(new Date(), "MMMM dd, yyyy")}`, pageWidth / 2, yPosition, { align: "center" });
+      yPosition += 15;
+
+      // Add entries
+      filteredEntries.forEach((entry, index) => {
+        // Check if we need a new page
+        if (yPosition > pageHeight - 40) {
+          pdf.addPage();
+          yPosition = margin;
+        }
+
+        // Entry title
+        pdf.setFontSize(14);
+        pdf.setFont("helvetica", "bold");
+        pdf.text(entry.title, margin, yPosition);
+        yPosition += 8;
+
+        // Entry date
+        pdf.setFontSize(10);
+        pdf.setFont("helvetica", "italic");
+        pdf.text(format(new Date(entry.entry_date), "MMMM dd, yyyy"), margin, yPosition);
+        yPosition += 8;
+
+        // Entry content
+        if (entry.content) {
+          pdf.setFontSize(11);
+          pdf.setFont("helvetica", "normal");
+          const contentLines = pdf.splitTextToSize(entry.content, pageWidth - 2 * margin);
+          
+          contentLines.forEach((line: string) => {
+            if (yPosition > pageHeight - 20) {
+              pdf.addPage();
+              yPosition = margin;
+            }
+            pdf.text(line, margin, yPosition);
+            yPosition += 6;
+          });
+        }
+
+        // Tags
+        if (entry.tags && entry.tags.length > 0) {
+          yPosition += 5;
+          pdf.setFontSize(9);
+          pdf.setFont("helvetica", "italic");
+          pdf.text(`Tags: ${entry.tags.join(", ")}`, margin, yPosition);
+          yPosition += 8;
+        }
+
+        // Add spacing between entries
+        yPosition += 10;
+      });
+
+      // Save the PDF
+      pdf.save(`diary-export-${format(new Date(), "yyyy-MM-dd")}.pdf`);
+      
+      toast({
+        title: "Diary exported successfully! 📄",
+        description: `${filteredEntries.length} entries exported to PDF`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Export failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {

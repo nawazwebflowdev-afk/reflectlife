@@ -12,6 +12,7 @@ import type { User } from "@supabase/supabase-js";
 import { CreateTimelineModal } from "@/components/CreateTimelineModal";
 import CreatorDashboard from "@/components/CreatorDashboard";
 import { ProfileEditModal } from "@/components/ProfileEditModal";
+import EditMemorialModal from "@/components/EditMemorialModal";
 
 interface Profile {
   id: string;
@@ -45,6 +46,7 @@ const Dashboard = () => {
   const [isCreator, setIsCreator] = useState(false);
   const [creatorProfile, setCreatorProfile] = useState<CreatorProfile | null>(null);
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [editingMemorial, setEditingMemorial] = useState<any>(null);
   const [stats, setStats] = useState<Stats>({
     totalMemories: 0,
     templatesPurchased: 0,
@@ -452,12 +454,15 @@ const Dashboard = () => {
                               View Memorial
                             </Button>
                           </Link>
-                          <Link to={`/memorial/${memorial.id}/edit`}>
-                            <Button variant="outline" size="sm" className="gap-2">
-                              <Settings className="h-4 w-4" />
-                              Edit
-                            </Button>
-                          </Link>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="gap-2"
+                            onClick={() => setEditingMemorial(memorial)}
+                          >
+                            <Settings className="h-4 w-4" />
+                            Edit
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -503,6 +508,15 @@ const Dashboard = () => {
             onOpenChange={setShowEditProfile}
             userId={user.id}
             onProfileUpdate={() => fetchProfile(user.id)}
+          />
+          <EditMemorialModal
+            open={!!editingMemorial}
+            onOpenChange={(open) => !open && setEditingMemorial(null)}
+            memorial={editingMemorial}
+            onMemorialUpdated={() => {
+              if (user) fetchUserMemorials(user.id);
+              setEditingMemorial(null);
+            }}
           />
         </>
       )}
