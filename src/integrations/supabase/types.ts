@@ -445,6 +445,48 @@ export type Database = {
         }
         Relationships: []
       }
+      memorial_tributes: {
+        Row: {
+          created_at: string
+          id: string
+          media_url: string | null
+          memorial_id: string
+          tribute_text: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          media_url?: string | null
+          memorial_id: string
+          tribute_text: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          media_url?: string | null
+          memorial_id?: string
+          tribute_text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_tributes_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "memorial_tributes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memorials: {
         Row: {
           bio: string | null

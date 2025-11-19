@@ -12,6 +12,7 @@ import type { User } from "@supabase/supabase-js";
 import { CommentsModal } from "@/components/CommentsModal";
 import { SharePostModal } from "@/components/SharePostModal";
 import { cn } from "@/utils";
+import { useTemplateBackground } from "@/hooks/useTemplateBackground";
 import {
   Tooltip,
   TooltipContent,
@@ -47,6 +48,7 @@ const Timeline = () => {
   const [selectedPostForComments, setSelectedPostForComments] = useState<string | null>(null);
   const [selectedPostForShare, setSelectedPostForShare] = useState<Post | null>(null);
   const { toast } = useToast();
+  const { backgroundUrl } = useTemplateBackground();
 
   useEffect(() => {
     // Get current user
@@ -284,14 +286,29 @@ const Timeline = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="min-h-screen">
+      {/* Hero Section with Template Background */}
+      {backgroundUrl && (
+        <section 
+          className="relative h-[300px] flex items-center justify-center mb-8"
+          style={{
+            backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${backgroundUrl})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            filter: "blur(10px)",
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background" style={{ filter: "none" }} />
+        </section>
+      )}
+      
+      <div className="container mx-auto px-4 py-8 max-w-4xl" style={{ marginTop: backgroundUrl ? '-200px' : '0' }}>
         {/* Header */}
-        <div className="text-center mb-8 animate-fade-in">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+        <div className="text-center mb-8 animate-fade-in relative z-10">
+          <h1 className="text-4xl font-bold mb-2 text-white drop-shadow-lg">
             Timeline
           </h1>
-          <p className="text-muted-foreground">Share and cherish memories together</p>
+          <p className="text-white/90 drop-shadow-md">Share and cherish memories together</p>
         </div>
 
         {/* Create Post Section */}

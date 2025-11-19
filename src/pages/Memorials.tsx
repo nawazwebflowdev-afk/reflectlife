@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
+import { useTemplateBackground } from "@/hooks/useTemplateBackground";
 import CreateMemorialModal from "@/components/CreateMemorialModal";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import timelineBg from "@/assets/timeline-bg.jpg";
@@ -32,6 +33,7 @@ const Memorials = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const templateTheme = useTemplateTheme();
+  const { backgroundUrl: purchasedBackground } = useTemplateBackground();
   const [searchQuery, setSearchQuery] = useState("");
   const [memorials, setMemorials] = useState<Memorial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -96,7 +98,7 @@ const Memorials = () => {
     memorial.location?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const backgroundImage = templateTheme.backgroundUrl || timelineBg;
+  const backgroundImage = purchasedBackground || templateTheme.backgroundUrl || timelineBg;
 
   return (
     <div className="min-h-screen">
@@ -104,12 +106,13 @@ const Memorials = () => {
       <section 
         className="relative h-[400px] flex items-center transition-smooth"
         style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${backgroundImage})`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${backgroundImage})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
+          filter: purchasedBackground ? "blur(10px)" : "none",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background" style={{ filter: "none" }} />
         
         <div className="relative container mx-auto px-4 text-center">
           <h1 className="font-serif text-4xl md:text-6xl font-bold mb-4 text-white drop-shadow-lg animate-fade-in">
