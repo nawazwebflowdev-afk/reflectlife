@@ -80,11 +80,11 @@ const Templates = () => {
   };
 
   const fetchTemplates = async () => {
-    // Fetch platform templates (not creator templates)
+    // Fetch system templates (creator_id is null)
     const { data, error } = await supabase
       .from("site_templates")
       .select("*")
-      .eq("is_creator_template", false)
+      .is("creator_id", null)
       .order("is_free", { ascending: false })
       .order("created_at", { ascending: false });
 
@@ -92,14 +92,14 @@ const Templates = () => {
       setTemplates(data);
     }
 
-    // Fetch creator templates with creator information
+    // Fetch creator templates (creator_id is not null) with creator information
     const { data: creatorData, error: creatorError } = await supabase
       .from("site_templates")
       .select(`
         *,
         profiles!site_templates_creator_id_fkey(full_name, first_name, last_name)
       `)
-      .eq("is_creator_template", true)
+      .not("creator_id", "is", null)
       .order("created_at", { ascending: false });
 
     if (creatorData && !creatorError) {
@@ -183,6 +183,16 @@ const Templates = () => {
             </p>
           </div>
 
+          {/* Featured Templates Section Header */}
+          <div className="text-center mb-8 animate-fade-in">
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
+              Featured Templates
+            </h2>
+            <p className="text-muted-foreground">
+              Handpicked designs curated by the ReflectLife team
+            </p>
+          </div>
+
           {loading ? (
             <div className="flex justify-center py-20">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -212,10 +222,10 @@ const Templates = () => {
                 </Select>
               </div>
 
-              {/* Templates Grid */}
+              {/* Featured Templates Grid */}
               {filteredTemplates.length === 0 ? (
-                <div className="text-center py-20">
-                  <p className="text-muted-foreground">No templates found matching your criteria.</p>
+                <div className="text-center py-20 mb-16">
+                  <p className="text-muted-foreground">No featured templates found matching your criteria.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto mb-16">
@@ -273,19 +283,22 @@ const Templates = () => {
               )}
 
               {/* Creator Templates Section */}
-              {creatorTemplates.length > 0 && (
-                <>
-                  <div className="text-center mb-8 mt-16 animate-fade-in">
-                    <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                      Creator Templates
-                    </h2>
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                      Unique designs from our community of talented creators • Updated in real-time
-                    </p>
-                  </div>
+              <div className="text-center mb-8 mt-16 animate-fade-in">
+                <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  Creator Templates
+                </h2>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  Unique designs from our community of talented creators • Updated in real-time
+                </p>
+              </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
-                    {creatorTemplates.map((template, index) => (
+              {creatorTemplates.length === 0 ? (
+                <div className="text-center py-20">
+                  <p className="text-muted-foreground">No creator templates available yet. Check back soon!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
+                  {creatorTemplates.map((template, index) => (
                       <Card
                         key={template.id}
                         className={`border-2 hover:shadow-elegant transition-smooth hover:-translate-y-1 bg-card overflow-hidden animate-fade-in ${
@@ -337,12 +350,11 @@ const Templates = () => {
                           </div>
                         </CardContent>
                       </Card>
-                    ))}
-                  </div>
-                </>
-              )}
-            </>
-          )}
+                      ))}
+                    </div>
+                  )}
+              </>
+            )}
         </div>
     </div>
   );
