@@ -11,7 +11,6 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import { useTemplateBackground } from "@/hooks/useTemplateBackground";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
@@ -53,9 +52,7 @@ const Tree = () => {
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const { toast } = useToast();
-  const templateTheme = useTemplateTheme();
-  const { backgroundUrl: purchasedBackground } = useTemplateBackground();
-  const backgroundUrl = purchasedBackground || templateTheme.backgroundUrl;
+  const { backgroundUrl } = useTemplateBackground();
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);

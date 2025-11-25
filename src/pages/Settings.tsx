@@ -9,11 +9,13 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useTemplateBackground } from "@/hooks/useTemplateBackground";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import DeleteAccountModal from "@/components/DeleteAccountModal";
 import { Textarea } from "@/components/ui/textarea";
 import { ThemeSelector } from "@/components/ThemeSelector";
+import { TemplateBackgroundSelector } from "@/components/TemplateBackgroundSelector";
 import {
   Select,
   SelectContent,
@@ -40,6 +42,7 @@ const Settings = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { backgroundUrl } = useTemplateBackground();
 
   useEffect(() => {
     checkAuth();
@@ -264,8 +267,18 @@ const Settings = () => {
 
 
   return (
-    <div className="min-h-screen py-12">
-      <div className="container mx-auto px-4 max-w-4xl">
+    <div 
+      className="min-h-screen py-12"
+      style={{
+        backgroundImage: backgroundUrl 
+          ? `linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), url(${backgroundUrl})`
+          : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      <div className="container mx-auto px-4 max-w-4xl relative">
         <div className="mb-8 animate-fade-in">
           <h1 className="font-serif text-4xl font-bold mb-2">Settings</h1>
           <p className="text-muted-foreground">Manage your account and preferences</p>
@@ -418,6 +431,20 @@ const Settings = () => {
             </CardHeader>
             <CardContent>
               <ThemeSelector />
+            </CardContent>
+          </Card>
+
+          {/* Template Background */}
+          <Card className="shadow-elegant">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Palette className="h-5 w-5 text-primary" />
+                <CardTitle>Background Template</CardTitle>
+              </div>
+              <CardDescription>Choose your active memorial template background</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TemplateBackgroundSelector />
             </CardContent>
           </Card>
 
