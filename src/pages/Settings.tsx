@@ -13,6 +13,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import DeleteAccountModal from "@/components/DeleteAccountModal";
 import { Textarea } from "@/components/ui/textarea";
+import { ThemeSelector } from "@/components/ThemeSelector";
 import {
   Select,
   SelectContent,
@@ -26,7 +27,6 @@ const Settings = () => {
   
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [colorTheme, setColorTheme] = useState("light");
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -65,7 +65,6 @@ const Settings = () => {
 
     if (data) {
       setFullName(data.full_name || "");
-      setColorTheme(data.color_theme || "light");
       setAvatarUrl(data.avatar_url || null);
     }
 
@@ -204,7 +203,6 @@ const Settings = () => {
       .from("profiles")
       .update({
         full_name: fullName,
-        color_theme: colorTheme,
       })
       .eq("id", userId);
 
@@ -416,27 +414,10 @@ const Settings = () => {
                 <Palette className="h-5 w-5 text-primary" />
                 <CardTitle>Color Theme</CardTitle>
               </div>
-              <CardDescription>Choose your preferred color theme</CardDescription>
+              <CardDescription>Personalize your experience with a color that resonates with you</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="theme">Theme</Label>
-                <Select value={colorTheme} onValueChange={setColorTheme}>
-                  <SelectTrigger id="theme">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="blue">Blue</SelectItem>
-                    <SelectItem value="green">Green</SelectItem>
-                    <SelectItem value="purple">Purple</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button onClick={handleSaveProfile} disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save Theme"}
-              </Button>
+            <CardContent>
+              <ThemeSelector />
             </CardContent>
           </Card>
 
