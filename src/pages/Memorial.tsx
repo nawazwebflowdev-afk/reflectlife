@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Calendar, MapPin, Heart, MessageCircle, Image as ImageIcon, Edit, Palette, Loader2 } from "lucide-react";
+import { Calendar, MapPin, Heart, MessageCircle, Image as ImageIcon, Edit, Palette, Loader2, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +11,7 @@ import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import timelineBg from "@/assets/timeline-bg.jpg";
 import EditMemorialModal from "@/components/EditMemorialModal";
 import { TributeModal } from "@/components/TributeModal";
+import { ShareMemorialModal } from "@/components/ShareMemorialModal";
 import { Trash2 } from "lucide-react";
 
 const Memorial = () => {
@@ -24,6 +25,7 @@ const Memorial = () => {
   const [likeCount, setLikeCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   useEffect(() => {
     fetchMemorial();
@@ -330,6 +332,15 @@ const Memorial = () => {
                 <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
                 {likeCount}
               </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2"
+                onClick={() => setIsShareModalOpen(true)}
+              >
+                <Share2 className="h-4 w-4" />
+                Share
+              </Button>
               {isCreator && (
                 <Button 
                   variant="outline" 
@@ -589,6 +600,15 @@ const Memorial = () => {
         onOpenChange={setIsEditModalOpen}
         memorial={memorial}
         onMemorialUpdated={fetchMemorial}
+      />
+
+      {/* Share Modal */}
+      <ShareMemorialModal
+        open={isShareModalOpen}
+        onOpenChange={setIsShareModalOpen}
+        memorialId={memorial.id}
+        memorialName={memorial.name}
+        memorialDescription={memorial.bio || memorial.description}
       />
     </div>
   );
