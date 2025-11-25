@@ -7,6 +7,15 @@ export const useTemplateBackground = () => {
 
   useEffect(() => {
     fetchTemplateBackground();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      fetchTemplateBackground();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchTemplateBackground = async () => {
@@ -18,28 +27,26 @@ export const useTemplateBackground = () => {
         return;
       }
 
-      // Query user's template purchases
-      const { data: purchases, error } = await supabase
-        .from('template_purchases')
-        .select(`
-          template_id,
-          site_templates:template_id (
-            preview_url
-          )
-        `)
-        .eq('buyer_id', user.id)
-        .eq('payment_status', 'succeeded')
-        .order('created_at', { ascending: false })
-        .limit(1);
+      // Fetch user's active template from profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('template_id')
+        .eq('id', user.id)
+        .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching template purchases:', error);
+      if (!profile?.template_id) {
         setLoading(false);
         return;
       }
 
-      if (purchases && purchases.length > 0 && purchases[0].site_templates) {
-        const template = purchases[0].site_templates as any;
+      // Fetch the active template details
+      const { data: template } = await supabase
+        .from('site_templates')
+        .select('preview_url')
+        .eq('id', profile.template_id)
+        .maybeSingle();
+
+      if (template?.preview_url) {
         setBackgroundUrl(template.preview_url);
       }
     } catch (error) {

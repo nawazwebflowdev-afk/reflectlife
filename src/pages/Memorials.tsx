@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import { useTemplateBackground } from "@/hooks/useTemplateBackground";
 import CreateMemorialModal from "@/components/CreateMemorialModal";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
@@ -32,7 +31,6 @@ interface Memorial {
 const Memorials = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const templateTheme = useTemplateTheme();
   const { backgroundUrl: purchasedBackground } = useTemplateBackground();
   const [searchQuery, setSearchQuery] = useState("");
   const [memorials, setMemorials] = useState<Memorial[]>([]);
@@ -98,7 +96,7 @@ const Memorials = () => {
     memorial.location?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const backgroundImage = purchasedBackground || templateTheme.backgroundUrl || timelineBg;
+  const backgroundImage = purchasedBackground || timelineBg;
 
   return (
     <div className="min-h-screen">

@@ -286,19 +286,35 @@ const Timeline = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div 
+      className="min-h-screen"
+      style={{
+        backgroundImage: backgroundUrl 
+          ? `linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), url(${backgroundUrl})`
+          : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
       {/* Hero Section with Template Background */}
       {backgroundUrl && (
         <section 
           className="relative h-[300px] flex items-center justify-center mb-8"
           style={{
             backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${backgroundUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            filter: "blur(10px)",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background" style={{ filter: "none" }} />
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="font-serif text-4xl md:text-5xl font-bold text-white drop-shadow-lg animate-fade-in">
+              Timeline Posts
+            </h1>
+            <p className="text-lg text-white/90 max-w-2xl mx-auto mt-4 drop-shadow-md">
+              Share and connect through memories
+            </p>
+          </div>
         </section>
       )}
       
