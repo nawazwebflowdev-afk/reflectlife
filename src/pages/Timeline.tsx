@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,9 @@ import { CommentsModal } from "@/components/CommentsModal";
 import { SharePostModal } from "@/components/SharePostModal";
 import { cn } from "@/utils";
 import { useTemplateBackground } from "@/hooks/useTemplateBackground";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import { LazyImage } from "@/components/LazyImage";
+import { PostSkeleton } from "@/components/PostSkeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -29,17 +33,18 @@ interface Post {
   created_at: string;
   likes_count: number;
   comments_count: number;
-  profiles?: {
+  profiles: {
     full_name: string | null;
     avatar_url: string | null;
-  };
+  } | null;
   isLikedByUser?: boolean;
 }
 
+const POSTS_PER_PAGE = 10;
+
 const Timeline = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
   const [uploading, setUploading] = useState(false);
   const [caption, setCaption] = useState("");
   const [location, setLocation] = useState("");
@@ -48,10 +53,10 @@ const Timeline = () => {
   const [selectedPostForComments, setSelectedPostForComments] = useState<string | null>(null);
   const [selectedPostForShare, setSelectedPostForShare] = useState<Post | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { backgroundUrl } = useTemplateBackground();
 
   useEffect(() => {
-    // Get current user
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
@@ -62,77 +67,82 @@ const Timeline = () => {
       }
     );
 
-    fetchPosts();
-
-    // Set up real-time subscription for posts
+    // Real-time subscription for posts
     const channel = supabase
       .channel('memorial-posts-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'memorial_posts'
-        },
-        () => {
-          fetchPosts();
-        }
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'memorial_posts' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['posts'] });
+      })
       .subscribe();
 
     return () => {
       subscription.unsubscribe();
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [queryClient]);
 
-  const fetchPosts = async () => {
-    setLoading(true);
+  const fetchPosts = async (pageNum: number): Promise<Post[]> => {
+    const from = (pageNum - 1) * POSTS_PER_PAGE;
+    const to = from + POSTS_PER_PAGE - 1;
+
     const { data, error } = await supabase
       .from("memorial_posts")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .select(`
+        *,
+        profiles!memorial_posts_user_id_fkey(full_name, avatar_url)
+      `)
+      .order("created_at", { ascending: false })
+      .range(from, to);
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load posts",
-        variant: "destructive",
-      });
-    } else {
-      // Fetch profile data and like status for each post
-      const postsWithProfiles = await Promise.all(
-        (data || []).map(async (post) => {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("full_name, avatar_url")
-            .eq("id", post.user_id)
-            .single();
-          
-          // Check if current user has liked this post
-          let isLikedByUser = false;
-          if (user) {
-            const { data: likeData } = await supabase
-              .from("memorial_likes")
-              .select("id")
-              .eq("post_id", post.id)
-              .eq("user_id", user.id)
-              .single();
-            
-            isLikedByUser = !!likeData;
-          }
-          
-          return {
-            ...post,
-            profiles: profile || { full_name: null, avatar_url: null },
-            isLikedByUser
-          };
-        })
-      );
-      setPosts(postsWithProfiles);
-    }
-    setLoading(false);
+    if (error) throw error;
+
+    const postsWithLikes = await Promise.all(
+      (data || []).map(async (post) => {
+        let isLikedByUser = false;
+        if (user) {
+          const { data: likeData } = await supabase
+            .from("memorial_likes")
+            .select("id")
+            .eq("post_id", post.id)
+            .eq("user_id", user.id)
+            .maybeSingle();
+          isLikedByUser = !!likeData;
+        }
+        
+        // Handle profiles array from Supabase join
+        const profiles = Array.isArray(post.profiles) && post.profiles.length > 0 
+          ? post.profiles[0] 
+          : null;
+        
+        return { 
+          ...post, 
+          profiles,
+          isLikedByUser 
+        };
+      })
+    );
+
+    return postsWithLikes as Post[];
   };
+
+  const { data: posts = [], isLoading, isFetching } = useQuery({
+    queryKey: ['posts', page, user?.id],
+    queryFn: () => fetchPosts(page),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
+  });
+
+  const loadMore = useCallback(() => {
+    if (!isFetching) {
+      setPage((prev) => prev + 1);
+    }
+  }, [isFetching]);
+
+  const loadMoreRef = useInfiniteScroll({
+    loading: isFetching,
+    hasMore: posts.length === page * POSTS_PER_PAGE,
+    onLoadMore: loadMore,
+  });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -225,7 +235,7 @@ const Timeline = () => {
       setLocation("");
       setMediaFile(null);
       setMediaPreview(null);
-      fetchPosts();
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
     }
 
     setUploading(false);
@@ -274,8 +284,7 @@ const Timeline = () => {
       }
     }
 
-    // Refresh posts to update like counts
-    fetchPosts();
+    queryClient.invalidateQueries({ queryKey: ['posts'] });
   };
 
   const getUserInitials = (name: string | null, email?: string) => {
@@ -308,10 +317,10 @@ const Timeline = () => {
           }}
         >
           <div className="container mx-auto px-4 text-center">
-            <h1 className="font-serif text-4xl md:text-5xl font-bold text-white drop-shadow-lg animate-fade-in">
+            <h1 className="font-serif text-4xl md:text-5xl font-bold text-premium-plum-foreground drop-shadow-lg animate-fade-in">
               Timeline Posts
             </h1>
-            <p className="text-lg text-white/90 max-w-2xl mx-auto mt-4 drop-shadow-md">
+            <p className="text-lg text-premium-plum-foreground/90 max-w-2xl mx-auto mt-4 drop-shadow-md">
               Share and connect through memories
             </p>
           </div>
@@ -321,10 +330,11 @@ const Timeline = () => {
       <div className="container mx-auto px-4 py-8 max-w-4xl" style={{ marginTop: backgroundUrl ? '-200px' : '0' }}>
         {/* Header */}
         <div className="text-center mb-8 animate-fade-in relative z-10">
-          <h1 className="text-4xl font-bold mb-2 text-white drop-shadow-lg">
+          <h1 className="text-4xl font-bold mb-2 text-premium-plum drop-shadow-lg">
             Timeline
           </h1>
-          <p className="text-white/90 drop-shadow-md">Share and cherish memories together</p>
+          <div className="w-24 h-1 bg-premium-plum mx-auto mb-2 rounded-full" />
+          <p className="text-foreground/80 drop-shadow-md">Share and cherish memories together</p>
         </div>
 
         {/* Create Post Section */}
@@ -416,17 +426,19 @@ const Timeline = () => {
 
         {/* Posts Feed */}
         <div className="space-y-6">
-          {loading ? (
-            <div className="text-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-              <p className="text-muted-foreground mt-2">Loading memories...</p>
-            </div>
+          {isLoading && page === 1 ? (
+            <>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <PostSkeleton key={i} />
+              ))}
+            </>
           ) : posts.length === 0 ? (
             <Card className="p-12 text-center">
               <p className="text-muted-foreground">No memories shared yet. Be the first!</p>
             </Card>
           ) : (
-            posts.map((post, index) => (
+            <>
+              {posts.map((post, index) => (
               <Card
                 key={post.id}
                 className="overflow-hidden shadow-elegant hover:shadow-lg transition-all duration-300 animate-fade-in"
@@ -452,13 +464,12 @@ const Timeline = () => {
 
                 {/* Post Media */}
                 {post.media_url && (
-                  <div className="relative">
-                    <img
-                      src={post.media_url}
-                      alt="Memory"
-                      className="w-full h-auto max-h-[500px] object-cover"
-                    />
-                  </div>
+                  <LazyImage
+                    src={post.media_url}
+                    alt="Memory"
+                    className="w-full h-auto max-h-[500px] object-cover"
+                    containerClassName="w-full"
+                  />
                 )}
 
                 {/* Post Content */}
@@ -526,7 +537,18 @@ const Timeline = () => {
                       </div>
                 </div>
               </Card>
-            ))
+              ))}
+              
+              {/* Infinite Scroll Trigger */}
+              <div ref={loadMoreRef} className="py-8">
+                {isFetching && (
+                  <div className="text-center">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                    <p className="text-sm text-muted-foreground mt-2">Loading more...</p>
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
 

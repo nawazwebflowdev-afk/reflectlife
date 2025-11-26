@@ -47,6 +47,10 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        "premium-plum": {
+          DEFAULT: "hsl(var(--premium-plum))",
+          foreground: "hsl(var(--premium-plum-foreground))",
+        },
       },
       fontFamily: {
         serif: ['Playfair Display', 'Georgia', 'serif'],

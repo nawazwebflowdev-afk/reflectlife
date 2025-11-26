@@ -31,7 +31,16 @@ import Cancel from "./pages/Cancel";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Checkout from "./pages/Checkout";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 30, // 30 minutes
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
