@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Users, Plus, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import { useTemplateBackground } from "@/hooks/useTemplateBackground";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import { LazyImage } from "@/components/LazyImage";
+import { MemorialSkeleton } from "@/components/MemorialSkeleton";
 import CreateMemorialModal from "@/components/CreateMemorialModal";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import timelineBg from "@/assets/timeline-bg.jpg";
@@ -28,19 +32,19 @@ interface Memorial {
   };
 }
 
+const MEMORIALS_PER_PAGE = 12;
+
 const Memorials = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { backgroundUrl: purchasedBackground } = useTemplateBackground();
   const [searchQuery, setSearchQuery] = useState("");
-  const [memorials, setMemorials] = useState<Memorial[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     checkUser();
-    fetchMemorials();
   }, []);
 
   const checkUser = async () => {
@@ -48,34 +52,45 @@ const Memorials = () => {
     setUser(user);
   };
 
-  const fetchMemorials = async () => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('memorials')
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            first_name,
-            last_name
-          )
-        `)
-        .order('created_at', { ascending: false });
+  const fetchMemorials = async (pageNum: number): Promise<Memorial[]> => {
+    const from = (pageNum - 1) * MEMORIALS_PER_PAGE;
+    const to = from + MEMORIALS_PER_PAGE - 1;
 
-      if (error) throw error;
-      setMemorials(data || []);
-    } catch (error: any) {
-      console.error('Error fetching memorials:', error);
-      toast({
-        title: "Error loading memorials",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    const { data, error } = await supabase
+      .from('memorials')
+      .select(`
+        *,
+        profiles:user_id (
+          full_name,
+          first_name,
+          last_name
+        )
+      `)
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (error) throw error;
+    return data || [];
   };
+
+  const { data: memorials = [], isLoading, isFetching, refetch } = useQuery({
+    queryKey: ['memorials', page],
+    queryFn: () => fetchMemorials(page),
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+  });
+
+  const loadMore = useCallback(() => {
+    if (!isFetching && memorials.length === page * MEMORIALS_PER_PAGE) {
+      setPage((prev) => prev + 1);
+    }
+  }, [isFetching, memorials.length, page]);
+
+  const loadMoreRef = useInfiniteScroll({
+    loading: isFetching,
+    hasMore: memorials.length === page * MEMORIALS_PER_PAGE,
+    onLoadMore: loadMore,
+  });
 
   const handleCreateClick = () => {
     if (!user) {
@@ -113,10 +128,11 @@ const Memorials = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background" style={{ filter: "none" }} />
         
         <div className="relative container mx-auto px-4 text-center">
-          <h1 className="font-serif text-4xl md:text-6xl font-bold mb-4 text-white drop-shadow-lg animate-fade-in">
+          <h1 className="font-serif text-4xl md:text-6xl font-bold mb-4 text-premium-plum-foreground drop-shadow-lg animate-fade-in">
             Memorial Wall
           </h1>
-          <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-8 drop-shadow-md">
+          <div className="w-32 h-1 bg-premium-plum-foreground mx-auto mb-4 rounded-full" />
+          <p className="text-lg md:text-xl text-premium-plum-foreground/90 max-w-2xl mx-auto mb-8 drop-shadow-md">
             Celebrating lives and preserving legacies. Browse memorials or create one for your loved one.
           </p>
 
@@ -148,23 +164,28 @@ const Memorials = () => {
 
       <div className="container mx-auto px-4 py-12">
         {/* Memorials Grid */}
-        {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        {isLoading && page === 1 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <MemorialSkeleton key={i} />
+            ))}
           </div>
         ) : filteredMemorials.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredMemorials.map((memorial, index) => (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredMemorials.map((memorial, index) => (
               <Link key={memorial.id} to={`/memorial/${memorial.id}`}>
                 <Card 
                   className="overflow-hidden hover:shadow-elegant-lg transition-smooth group animate-fade-up"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="aspect-square overflow-hidden bg-muted">
-                    <img
+                    <LazyImage
                       src={memorial.preview_image_url || portraitPlaceholder}
                       alt={memorial.name}
+                      fallback={portraitPlaceholder}
                       className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
+                      containerClassName="w-full h-full"
                     />
                   </div>
                   <CardContent className="p-4 sm:p-6">
@@ -189,8 +210,19 @@ const Memorials = () => {
                   </CardContent>
                 </Card>
               </Link>
-            ))}
-          </div>
+              ))}
+            </div>
+            
+            {/* Infinite Scroll Trigger */}
+            <div ref={loadMoreRef} className="py-8">
+              {isFetching && (
+                <div className="text-center">
+                  <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                  <p className="text-sm text-muted-foreground mt-2">Loading more memorials...</p>
+                </div>
+              )}
+            </div>
+          </>
         ) : (
           <Card className="text-center py-16 max-w-2xl mx-auto">
             <CardContent>
@@ -214,7 +246,7 @@ const Memorials = () => {
         <CreateMemorialModal
           open={isCreateModalOpen}
           onOpenChange={setIsCreateModalOpen}
-          onMemorialCreated={fetchMemorials}
+          onMemorialCreated={refetch}
         />
       </div>
     </div>
