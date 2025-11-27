@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { AvatarSelector } from "@/components/EmojiAvatarSelector";
+import { AVATARS } from "@/config/avatars";
 
 interface TributeModalProps {
   open: boolean;
@@ -21,6 +23,9 @@ export const TributeModal = ({ open, onOpenChange, memorialId, onTributeAdded }:
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState<number>(0);
+  const [customAvatarFile, setCustomAvatarFile] = useState<File | null>(null);
+  const [customAvatarPreview, setCustomAvatarPreview] = useState<string | null>(null);
 
   const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -29,6 +34,18 @@ export const TributeModal = ({ open, onOpenChange, memorialId, onTributeAdded }:
       const reader = new FileReader();
       reader.onloadend = () => {
         setMediaPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCustomAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setCustomAvatarFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCustomAvatarPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -63,14 +80,41 @@ export const TributeModal = ({ open, onOpenChange, memorialId, onTributeAdded }:
     try {
       setUploading(true);
       let mediaUrl = null;
+      let avatarUrl = null;
+
+      // Import compression
+      const { compressImage } = await import('@/utils/imageCompression');
+
+      // Upload custom avatar if provided
+      if (customAvatarFile) {
+        const compressedBlob = await compressImage(customAvatarFile, 200, 200, 0.8);
+        const compressedFile = new File([compressedBlob], `avatar-${user.id}-${Date.now()}.webp`, { type: 'image/webp' });
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('memorial_uploads')
+          .upload(`tribute-avatars/${compressedFile.name}`, compressedFile);
+
+        if (uploadError) throw uploadError;
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('memorial_uploads')
+          .getPublicUrl(uploadData.path);
+        
+        avatarUrl = publicUrl;
+      } else {
+        // Use selected emoji avatar
+        avatarUrl = AVATARS[selectedAvatar];
+      }
 
       // Upload media if present
       if (mediaFile) {
-        const fileExt = mediaFile.name.split('.').pop();
-        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+        const compressedBlob = await compressImage(mediaFile, 1200, 1200, 0.85);
+        const fileName = `tribute-${user.id}-${Date.now()}.webp`;
+        const compressedFile = new File([compressedBlob], fileName, { type: 'image/webp' });
+        
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('memorial_uploads')
-          .upload(fileName, mediaFile);
+          .upload(fileName, compressedFile);
 
         if (uploadError) throw uploadError;
         
@@ -81,7 +125,14 @@ export const TributeModal = ({ open, onOpenChange, memorialId, onTributeAdded }:
         mediaUrl = publicUrl;
       }
 
-      // Insert tribute
+      // Get user profile for name
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, avatar_url')
+        .eq('id', user.id)
+        .single();
+
+      // Insert tribute with avatar
       const { error: insertError } = await supabase
         .from('memorial_tributes')
         .insert({
@@ -102,6 +153,9 @@ export const TributeModal = ({ open, onOpenChange, memorialId, onTributeAdded }:
       setTributeText("");
       setMediaFile(null);
       setMediaPreview(null);
+      setCustomAvatarFile(null);
+      setCustomAvatarPreview(null);
+      setSelectedAvatar(0);
       onOpenChange(false);
       onTributeAdded();
     } catch (error: any) {
@@ -118,12 +172,64 @@ export const TributeModal = ({ open, onOpenChange, memorialId, onTributeAdded }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl text-primary">Share a Memory 💐</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
+          {/* Avatar Selection */}
+          <div className="space-y-2">
+            <Label>Choose Your Avatar</Label>
+            <div className="flex gap-4 items-start">
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground mb-2">Select from avatars:</p>
+                <AvatarSelector 
+                  selectedAvatar={selectedAvatar}
+                  onSelectAvatar={setSelectedAvatar}
+                  size="sm"
+                />
+              </div>
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">Or upload custom:</p>
+                {customAvatarPreview ? (
+                  <div className="relative">
+                    <img 
+                      src={customAvatarPreview} 
+                      alt="Custom avatar"
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute -top-2 -right-2 h-6 w-6"
+                      onClick={() => {
+                        setCustomAvatarFile(null);
+                        setCustomAvatarPreview(null);
+                      }}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Label htmlFor="custom-avatar" className="cursor-pointer">
+                    <div className="w-16 h-16 rounded-full border-2 border-dashed border-muted-foreground/25 flex items-center justify-center hover:border-primary transition-colors">
+                      <Upload className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <Input
+                      id="custom-avatar"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCustomAvatarChange}
+                      className="hidden"
+                    />
+                  </Label>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="tribute">Your Memory</Label>
             <Textarea

@@ -13,6 +13,7 @@ import EditMemorialModal from "@/components/EditMemorialModal";
 import { TributeModal } from "@/components/TributeModal";
 import { ShareMemorialModal } from "@/components/ShareMemorialModal";
 import { Trash2 } from "lucide-react";
+import { LazyImage } from "@/components/LazyImage";
 
 const Memorial = () => {
   const { id } = useParams();
@@ -510,7 +511,12 @@ const Memorial = () => {
                             {tribute.media_url.includes('video') || tribute.media_url.includes('.mp4') ? (
                               <video src={tribute.media_url} controls className="w-full h-auto" />
                             ) : (
-                              <img src={tribute.media_url} alt="Tribute media" className="w-full h-auto" />
+                              <LazyImage 
+                                src={tribute.media_url} 
+                                alt="Tribute media" 
+                                className="w-full h-auto"
+                                containerClassName="w-full"
+                              />
                             )}
                           </div>
                         )}

@@ -16,6 +16,7 @@ import DeleteAccountModal from "@/components/DeleteAccountModal";
 import { Textarea } from "@/components/ui/textarea";
 import { ThemeSelector } from "@/components/ThemeSelector";
 import { TemplateBackgroundSelector } from "@/components/TemplateBackgroundSelector";
+import { exportUserDataToPDF } from "@/utils/exportUserData";
 import {
   Select,
   SelectContent,
@@ -39,6 +40,7 @@ const Settings = () => {
   const [rating, setRating] = useState(0);
   const [reviewMessage, setReviewMessage] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [isExportingData, setIsExportingData] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -101,19 +103,25 @@ const Settings = () => {
     setUploadProgress(0);
 
     try {
-      // Create file path in avatars bucket
-      const fileExt = file.name.split('.').pop();
-      const filePath = `user-avatars/${userId}.${fileExt}`;
-
-      // Simulate progress for better UX
+      // Simulate progress
       const progressInterval = setInterval(() => {
-        setUploadProgress(prev => Math.min(prev + 10, 90));
+        setUploadProgress(prev => Math.min(prev + 10, 70));
       }, 100);
+
+      // Import compression utility
+      const { compressImage } = await import('@/utils/imageCompression');
+      
+      // Compress image to WebP
+      const compressedBlob = await compressImage(file, 800, 800, 0.85);
+      const compressedFile = new File([compressedBlob], `${userId}.webp`, { type: 'image/webp' });
+
+      setUploadProgress(80);
+      const filePath = `user-avatars/${userId}.webp`;
 
       // Upload to Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, compressedFile, { upsert: true });
 
       clearInterval(progressInterval);
 
@@ -139,10 +147,10 @@ const Settings = () => {
 
       toast({
         title: "Success",
-        description: "Profile picture updated successfully",
+        description: "Profile picture optimized and updated",
       });
 
-      // Force refresh the page to update avatar in navigation
+      // Force refresh to update avatar everywhere
       window.location.reload();
     } catch (error: any) {
       console.error('Upload error:', error);
@@ -262,6 +270,28 @@ const Settings = () => {
       });
     } finally {
       setIsSubmittingReview(false);
+    }
+  };
+
+
+  const handleExportData = async () => {
+    if (!userId) return;
+    
+    setIsExportingData(true);
+    try {
+      await exportUserDataToPDF(userId);
+      toast({
+        title: "Export Successful",
+        description: "Your data has been downloaded as a PDF",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Export Failed",
+        description: error.message || "Failed to export data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExportingData(false);
     }
   };
 
@@ -555,13 +585,29 @@ const Settings = () => {
                 <Download className="h-5 w-5 text-primary" />
                 <CardTitle>Data Export</CardTitle>
               </div>
-              <CardDescription>Download your memorial data</CardDescription>
+              <CardDescription>Download all your memorial data as PDF</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Export all your memorial data including photos, tributes, and timeline entries as a downloadable archive.
+                Export all your data including profile, memorials, timeline posts, and tributes as a formatted PDF document.
               </p>
-              <Button variant="outline">Export Data (ZIP)</Button>
+              <Button 
+                variant="outline" 
+                onClick={handleExportData}
+                disabled={isExportingData}
+              >
+                {isExportingData ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-4 w-4" />
+                    Export Data (PDF)
+                  </>
+                )}
+              </Button>
             </CardContent>
           </Card>
 
