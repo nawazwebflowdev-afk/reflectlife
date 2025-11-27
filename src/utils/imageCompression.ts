@@ -10,7 +10,7 @@ export const compressImage = async (
   file: File,
   maxWidth: number = 1200,
   maxHeight: number = 1200,
-  quality: number = 0.8
+  quality: number = 0.85
 ): Promise<Blob> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -37,6 +37,10 @@ export const compressImage = async (
           reject(new Error('Failed to get canvas context'));
           return;
         }
+        
+        // Enable high-quality image smoothing
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         
         // Draw and compress
         ctx.drawImage(img, 0, 0, width, height);
