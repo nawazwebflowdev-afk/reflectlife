@@ -4,9 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, X, Loader2 } from "lucide-react";
+import { Upload, X, Loader2, Lock, Users, Globe } from "lucide-react";
 import { format } from "date-fns";
 
 interface CreateMemorialModalProps {
@@ -25,6 +32,7 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
     dateOfBirth: "",
     dateOfDeath: "",
     location: "",
+    privacyLevel: "public" as "public" | "friends" | "private",
   });
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -128,6 +136,8 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
           date_of_death: formData.dateOfDeath || null,
           location: formData.location || null,
           preview_image_url: uploadedImageUrls[0],
+          is_public: formData.privacyLevel === 'public',
+          privacy_level: formData.privacyLevel,
         })
         .select()
         .single();
@@ -160,6 +170,7 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
         dateOfBirth: "",
         dateOfDeath: "",
         location: "",
+        privacyLevel: "public",
       });
       setImages([]);
       setImagePreviews([]);
@@ -297,6 +308,50 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               placeholder="City, Country"
             />
+          </div>
+
+          {/* Privacy Settings */}
+          <div className="space-y-2">
+            <Label htmlFor="privacy">Privacy Settings</Label>
+            <Select
+              value={formData.privacyLevel}
+              onValueChange={(value: "public" | "friends" | "private") => 
+                setFormData({ ...formData, privacyLevel: value })
+              }
+            >
+              <SelectTrigger id="privacy">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="public">
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-4 w-4" />
+                    <div>
+                      <div className="font-medium">Public</div>
+                      <div className="text-xs text-muted-foreground">Anyone can view and share</div>
+                    </div>
+                  </div>
+                </SelectItem>
+                <SelectItem value="friends">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    <div>
+                      <div className="font-medium">Friends Only</div>
+                      <div className="text-xs text-muted-foreground">Only invited friends can view</div>
+                    </div>
+                  </div>
+                </SelectItem>
+                <SelectItem value="private">
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-4 w-4" />
+                    <div>
+                      <div className="font-medium">Private</div>
+                      <div className="text-xs text-muted-foreground">Only you can view</div>
+                    </div>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Actions */}

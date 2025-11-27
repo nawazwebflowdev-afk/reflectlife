@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,10 +6,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, MessageCircle, Users, Loader2 } from "lucide-react";
+import { Mail, MessageCircle, Users, Loader2, Copy, Link2, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
@@ -31,12 +41,85 @@ export const ShareMemorialModal = ({
   memorialName,
   memorialDescription,
 }: ShareMemorialModalProps) => {
-  const [shareMethod, setShareMethod] = useState<"email" | "whatsapp" | "internal" | null>(null);
+  const [shareMethod, setShareMethod] = useState<"email" | "whatsapp" | "internal" | "copy" | null>(null);
   const [recipientEmail, setRecipientEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [showPrivacyDialog, setShowPrivacyDialog] = useState(false);
   const { toast } = useToast();
 
   const memorialUrl = `${window.location.origin}/memorial/${memorialId}`;
+
+  useEffect(() => {
+    if (open) {
+      checkMemorialPrivacy();
+    }
+  }, [open, memorialId]);
+
+  const checkMemorialPrivacy = async () => {
+    const { data, error } = await supabase
+      .from('memorials')
+      .select('is_public, privacy_level')
+      .eq('id', memorialId)
+      .single();
+
+    if (data && (!data.is_public || data.privacy_level !== 'public')) {
+      setIsPrivate(true);
+    } else {
+      setIsPrivate(false);
+    }
+  };
+
+  const handleShareAttempt = (method: "email" | "whatsapp" | "internal" | "copy") => {
+    if (isPrivate) {
+      setShowPrivacyDialog(true);
+    } else {
+      setShareMethod(method);
+      if (method === "copy") {
+        handleCopyLink();
+      }
+    }
+  };
+
+  const makeMemorialPublic = async () => {
+    const { error } = await supabase
+      .from('memorials')
+      .update({ is_public: true, privacy_level: 'public' })
+      .eq('id', memorialId);
+
+    if (error) {
+      toast({
+        title: "Unable to update privacy",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsPrivate(false);
+    setShowPrivacyDialog(false);
+    toast({
+      title: "Memorial is now public",
+      description: "You can now share this memorial.",
+    });
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(memorialUrl);
+      toast({
+        title: "Link copied! 📋",
+        description: "Memorial link has been copied to your clipboard.",
+      });
+      onOpenChange(false);
+    } catch (error) {
+      toast({
+        title: "Unable to copy",
+        description: "Please try copying manually.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleEmailShare = async () => {
     try {
@@ -167,62 +250,97 @@ export const ShareMemorialModal = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      onOpenChange(isOpen);
-      if (!isOpen) resetModal();
-    }}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Share Memorial</DialogTitle>
-          <DialogDescription>
-            Invite others to view and honor {memorialName}
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <AlertDialog open={showPrivacyDialog} onOpenChange={setShowPrivacyDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5" />
+              This memorial is private
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This memorial is currently set to private. Do you want to make it public so you can share it?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={makeMemorialPublic}>
+              Make Public & Share
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-        {!shareMethod ? (
-          <div className="flex flex-col gap-3">
-            <Button
-              onClick={() => setShareMethod("email")}
-              className="w-full justify-start gap-3 h-auto py-4"
-              variant="outline"
-            >
-              <Mail className="h-5 w-5" />
-              <div className="text-left">
-                <div className="font-semibold">Share via Email</div>
-                <div className="text-xs text-muted-foreground">
-                  Send invitation to anyone via email
-                </div>
-              </div>
-            </Button>
+      <Dialog open={open} onOpenChange={(isOpen) => {
+        onOpenChange(isOpen);
+        if (!isOpen) resetModal();
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Share Memorial</DialogTitle>
+            <DialogDescription>
+              Invite others to view and honor {memorialName}
+            </DialogDescription>
+          </DialogHeader>
 
-            <Button
-              onClick={() => setShareMethod("whatsapp")}
-              className="w-full justify-start gap-3 h-auto py-4"
-              variant="outline"
-            >
-              <MessageCircle className="h-5 w-5" />
-              <div className="text-left">
-                <div className="font-semibold">Share via WhatsApp</div>
-                <div className="text-xs text-muted-foreground">
-                  Share instantly through WhatsApp
+          {!shareMethod ? (
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={() => handleShareAttempt("copy")}
+                className="w-full justify-start gap-3 h-auto py-4"
+                variant="outline"
+              >
+                <Copy className="h-5 w-5" />
+                <div className="text-left">
+                  <div className="font-semibold">Copy Link</div>
+                  <div className="text-xs text-muted-foreground">
+                    Copy memorial URL to clipboard
+                  </div>
                 </div>
-              </div>
-            </Button>
+              </Button>
 
-            <Button
-              onClick={() => setShareMethod("internal")}
-              className="w-full justify-start gap-3 h-auto py-4"
-              variant="outline"
-            >
-              <Users className="h-5 w-5" />
-              <div className="text-left">
-                <div className="font-semibold">Share with Reflectlife User</div>
-                <div className="text-xs text-muted-foreground">
-                  Notify a registered user on the platform
+              <Button
+                onClick={() => handleShareAttempt("email")}
+                className="w-full justify-start gap-3 h-auto py-4"
+                variant="outline"
+              >
+                <Mail className="h-5 w-5" />
+                <div className="text-left">
+                  <div className="font-semibold">Share via Email</div>
+                  <div className="text-xs text-muted-foreground">
+                    Send invitation to anyone via email
+                  </div>
                 </div>
-              </div>
-            </Button>
-          </div>
+              </Button>
+
+              <Button
+                onClick={() => handleShareAttempt("whatsapp")}
+                className="w-full justify-start gap-3 h-auto py-4"
+                variant="outline"
+              >
+                <MessageCircle className="h-5 w-5" />
+                <div className="text-left">
+                  <div className="font-semibold">Share via WhatsApp</div>
+                  <div className="text-xs text-muted-foreground">
+                    Share instantly through WhatsApp
+                  </div>
+                </div>
+              </Button>
+
+              <Button
+                onClick={() => handleShareAttempt("internal")}
+                className="w-full justify-start gap-3 h-auto py-4"
+                variant="outline"
+              >
+                <Users className="h-5 w-5" />
+                <div className="text-left">
+                  <div className="font-semibold">Share with Reflectlife User</div>
+                  <div className="text-xs text-muted-foreground">
+                    Notify a registered user on the platform
+                  </div>
+                </div>
+              </Button>
+            </div>
         ) : shareMethod === "email" ? (
           <div className="space-y-4">
             <div className="space-y-2">
@@ -309,7 +427,8 @@ export const ShareMemorialModal = ({
             </div>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
