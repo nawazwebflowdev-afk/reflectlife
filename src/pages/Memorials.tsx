@@ -66,30 +66,27 @@ const Memorials = () => {
         location,
         preview_image_url,
         bio,
-        user_id
+        user_id,
+        profiles:user_id (
+          full_name,
+          first_name,
+          last_name
+        )
       `)
+      .eq('is_public', true)
+      .eq('privacy_level', 'public')
       .order('created_at', { ascending: false })
       .range(from, to);
 
     if (error) throw error;
     
-    // Fetch profiles separately to avoid join issues
-    const memorialsWithProfiles = await Promise.all(
-      (data || []).map(async (memorial) => {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name, first_name, last_name')
-          .eq('id', memorial.user_id)
-          .maybeSingle();
-        
-        return {
-          ...memorial,
-          profiles: profile
-        };
-      })
-    );
-    
-    return memorialsWithProfiles;
+    // Handle profiles array from Supabase join
+    return (data || []).map(memorial => ({
+      ...memorial,
+      profiles: Array.isArray(memorial.profiles) && memorial.profiles.length > 0 
+        ? memorial.profiles[0] 
+        : null
+    }));
   };
 
   const { data: memorials = [], isLoading, isFetching, refetch } = useQuery({

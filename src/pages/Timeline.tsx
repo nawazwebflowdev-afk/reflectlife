@@ -17,6 +17,7 @@ import { useTemplateBackground } from "@/hooks/useTemplateBackground";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { LazyImage } from "@/components/LazyImage";
 import { PostSkeleton } from "@/components/PostSkeleton";
+import { useProfilePreload } from "@/hooks/useProfilePreload";
 import {
   Tooltip,
   TooltipContent,
@@ -56,6 +57,9 @@ const Timeline = () => {
   const queryClient = useQueryClient();
   const { backgroundUrl } = useTemplateBackground();
 
+  // Preload user profile data
+  useProfilePreload(user?.id);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -88,7 +92,14 @@ const Timeline = () => {
     const { data, error } = await supabase
       .from("memorial_posts")
       .select(`
-        *,
+        id,
+        user_id,
+        media_url,
+        caption,
+        location,
+        created_at,
+        likes_count,
+        comments_count,
         profiles!memorial_posts_user_id_fkey(full_name, avatar_url)
       `)
       .order("created_at", { ascending: false })
@@ -128,8 +139,8 @@ const Timeline = () => {
   const { data: posts = [], isLoading, isFetching } = useQuery({
     queryKey: ['posts', page, user?.id],
     queryFn: () => fetchPosts(page),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
   });
 
   const loadMore = useCallback(() => {
