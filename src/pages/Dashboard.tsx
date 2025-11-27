@@ -15,6 +15,8 @@ import { ProfileEditModal } from "@/components/ProfileEditModal";
 import EditMemorialModal from "@/components/EditMemorialModal";
 import { useQuery } from "@tanstack/react-query";
 import { LazyImage } from "@/components/LazyImage";
+import { MemorialSkeleton } from "@/components/MemorialSkeleton";
+import { useProfilePreload } from "@/hooks/useProfilePreload";
 
 interface Profile {
   id: string;
@@ -54,6 +56,9 @@ const Dashboard = () => {
     templatesPurchased: 0,
     likesReceived: 0,
   });
+
+  // Preload user profile data
+  useProfilePreload(user?.id);
 
   useEffect(() => {
     // Check authentication and fetch profile
@@ -171,14 +176,15 @@ const Dashboard = () => {
         .from("memorials")
         .select("id, name, date_of_birth, date_of_death, location, preview_image_url")
         .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(50);
 
       if (error) throw error;
       return data || [];
     },
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 15,
+    gcTime: 1000 * 60 * 30,
   });
 
   const formatYears = (dob: string | null, dod: string | null) => {
@@ -190,8 +196,23 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen py-8 flex items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
+      <div className="min-h-screen py-8">
+        <div className="container mx-auto px-4">
+          <div className="mb-8">
+            <div className="h-24 w-24 bg-muted rounded-full animate-pulse mx-auto md:mx-0 mb-4"></div>
+            <div className="h-8 w-48 bg-muted rounded animate-pulse mx-auto md:mx-0 mb-4"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-32 bg-muted rounded-lg animate-pulse"></div>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 gap-6">
+            {[1, 2].map((i) => (
+              <MemorialSkeleton key={i} />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

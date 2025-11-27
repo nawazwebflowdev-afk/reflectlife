@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, User, ArrowRight, Loader2, Phone, MapPin, Shield, CheckCircle2 } from "lucide-react";
 import zxcvbn from "zxcvbn";
@@ -11,9 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { countries } from "@/data/countries";
+import type { Session } from "@supabase/supabase-js";
 
 const Signup = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,6 +30,27 @@ const Signup = () => {
   
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Redirect logged-in users to dashboard
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+        if (session) {
+          navigate("/dashboard");
+        }
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        navigate("/dashboard");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   const checkPasswordStrength = useCallback((pwd: string) => {
     if (!pwd) {

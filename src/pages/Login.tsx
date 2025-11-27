@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useProfilePreload } from "@/hooks/useProfilePreload";
 import type { Session } from "@supabase/supabase-js";
 
 const Login = () => {
@@ -17,6 +18,9 @@ const Login = () => {
   
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Preload profile data for logged-in user
+  useProfilePreload(session?.user?.id);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
