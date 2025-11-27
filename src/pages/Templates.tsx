@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Check, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getCountryFlag } from "@/lib/countryFlags";
+import { useQuery } from "@tanstack/react-query";
+import { LazyImage } from "@/components/LazyImage";
 
 interface Template {
   id: string;
@@ -24,9 +26,6 @@ interface Template {
 }
 
 const Templates = () => {
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [creatorTemplates, setCreatorTemplates] = useState<Template[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<"all" | "free" | "paid">("all");
@@ -36,27 +35,6 @@ const Templates = () => {
 
   useEffect(() => {
     checkAuth();
-    fetchTemplates();
-
-    // Set up real-time subscription for template changes
-    const channel = supabase
-      .channel('templates-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'site_templates'
-        },
-        () => {
-          fetchTemplates();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   const checkAuth = async () => {
@@ -72,48 +50,58 @@ const Templates = () => {
       .from("profiles")
       .select("template_id")
       .eq("id", uid)
-      .single();
+      .maybeSingle();
     
     if (data?.template_id) {
       setSelectedTemplateId(data.template_id);
     }
   };
 
-  const fetchTemplates = async () => {
-    // Fetch system templates (creator_id is null)
-    const { data, error } = await supabase
-      .from("site_templates")
-      .select("*")
-      .is("creator_id", null)
-      .order("is_free", { ascending: false })
-      .order("created_at", { ascending: false });
+  // Fetch system templates with React Query
+  const { data: templates = [], isLoading: loadingTemplates } = useQuery({
+    queryKey: ['templates', 'system'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("site_templates")
+        .select("id, name, country, preview_url, price, is_free, description, is_creator_template, creator_id")
+        .is("creator_id", null)
+        .order("is_free", { ascending: false })
+        .order("created_at", { ascending: false });
 
-    if (data && !error) {
-      setTemplates(data);
-    }
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
+  });
 
-    // Fetch creator templates (creator_id is not null) with creator information
-    const { data: creatorData, error: creatorError } = await supabase
-      .from("site_templates")
-      .select(`
-        *,
-        profiles!site_templates_creator_id_fkey(full_name, first_name, last_name)
-      `)
-      .not("creator_id", "is", null)
-      .order("created_at", { ascending: false });
+  // Fetch creator templates with React Query
+  const { data: creatorTemplates = [], isLoading: loadingCreatorTemplates } = useQuery({
+    queryKey: ['templates', 'creator'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("site_templates")
+        .select(`
+          id, name, country, preview_url, price, is_free, description, is_creator_template, creator_id,
+          profiles!site_templates_creator_id_fkey(full_name, first_name, last_name)
+        `)
+        .not("creator_id", "is", null)
+        .order("created_at", { ascending: false });
 
-    if (creatorData && !creatorError) {
-      const templatesWithCreators = creatorData.map((template: any) => ({
+      if (error) throw error;
+      
+      return (data || []).map((template: any) => ({
         ...template,
         creator_name: template.profiles?.full_name || 
                      `${template.profiles?.first_name || ""} ${template.profiles?.last_name || ""}`.trim() ||
                      "Anonymous Creator"
       }));
-      setCreatorTemplates(templatesWithCreators);
-    }
+    },
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
+  });
 
-    setLoading(false);
-  };
+  const loading = loadingTemplates || loadingCreatorTemplates;
 
   const handleSelectTemplate = async (templateId: string, isFree: boolean) => {
     if (!userId) {
@@ -154,22 +142,24 @@ const Templates = () => {
   };
 
 
-  const filteredTemplates = templates.filter((template) => {
-    // Filter by type
-    if (filterType === "free" && !template.is_free) return false;
-    if (filterType === "paid" && template.is_free) return false;
+  const filteredTemplates = useMemo(() => {
+    return templates.filter((template) => {
+      // Filter by type
+      if (filterType === "free" && !template.is_free) return false;
+      if (filterType === "paid" && template.is_free) return false;
 
-    // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        template.name.toLowerCase().includes(query) ||
-        template.country.toLowerCase().includes(query)
-      );
-    }
+      // Filter by search query
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          template.name.toLowerCase().includes(query) ||
+          template.country.toLowerCase().includes(query)
+        );
+      }
 
-    return true;
-  });
+      return true;
+    });
+  }, [templates, filterType, searchQuery]);
 
   return (
     <div className="py-12 bg-gradient-subtle">
@@ -238,10 +228,11 @@ const Templates = () => {
                       style={{ animationDelay: `${index * 0.05}s` }}
                     >
                       <div className="aspect-[3/4] overflow-hidden relative">
-                        <img
+                        <LazyImage
                           src={template.preview_url || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
                           alt={template.name}
                           className="w-full h-full object-cover"
+                          containerClassName="w-full h-full"
                         />
                         {selectedTemplateId === template.id && (
                           <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-2">
@@ -307,10 +298,11 @@ const Templates = () => {
                         style={{ animationDelay: `${index * 0.05}s` }}
                       >
                         <div className="aspect-[3/4] overflow-hidden relative">
-                          <img
+                          <LazyImage
                             src={template.preview_url || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
                             alt={template.name}
                             className="w-full h-full object-cover"
+                            containerClassName="w-full h-full"
                           />
                           {selectedTemplateId === template.id && (
                             <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-2">

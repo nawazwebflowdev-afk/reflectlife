@@ -59,25 +59,45 @@ const Memorials = () => {
     const { data, error } = await supabase
       .from('memorials')
       .select(`
-        *,
-        profiles:user_id (
-          full_name,
-          first_name,
-          last_name
-        )
+        id,
+        name,
+        date_of_birth,
+        date_of_death,
+        location,
+        preview_image_url,
+        bio,
+        user_id
       `)
       .order('created_at', { ascending: false })
       .range(from, to);
 
     if (error) throw error;
-    return data || [];
+    
+    // Fetch profiles separately to avoid join issues
+    const memorialsWithProfiles = await Promise.all(
+      (data || []).map(async (memorial) => {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, first_name, last_name')
+          .eq('id', memorial.user_id)
+          .maybeSingle();
+        
+        return {
+          ...memorial,
+          profiles: profile
+        };
+      })
+    );
+    
+    return memorialsWithProfiles;
   };
 
   const { data: memorials = [], isLoading, isFetching, refetch } = useQuery({
     queryKey: ['memorials', page],
     queryFn: () => fetchMemorials(page),
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
+    refetchOnWindowFocus: false, // Don't refetch on window focus
   });
 
   const loadMore = useCallback(() => {

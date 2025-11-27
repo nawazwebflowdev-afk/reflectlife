@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Heart, Share2, Clock, Shield, MessageCircle, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,72 +10,64 @@ import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import FeaturedTemplates from "@/components/FeaturedTemplates";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import { LazyImage } from "@/components/LazyImage";
 
 const Landing = () => {
   const [user, setUser] = useState<any>(null);
-  const [timelinePosts, setTimelinePosts] = useState<any[]>([]);
-  const [loadingPosts, setLoadingPosts] = useState(false);
 
   useEffect(() => {
     checkUser();
   }, []);
 
-  useEffect(() => {
-    if (!user) return;
-
-    // Set up real-time subscription for new timeline posts
-    const channel = supabase
-      .channel('timeline-posts-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'memorial_posts'
-        },
-        () => {
-          fetchTimelinePosts();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user]);
-
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setUser(user);
-    if (user) {
-      fetchTimelinePosts();
-    }
   };
 
-  const fetchTimelinePosts = async () => {
-    setLoadingPosts(true);
-    try {
+  // Fetch timeline posts with React Query
+  const { data: timelinePosts = [], isLoading: loadingPosts } = useQuery({
+    queryKey: ['landing-timeline-posts', user?.id],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('memorial_posts')
         .select(`
-          *,
-          profiles:user_id (
-            username,
-            full_name,
-            avatar_url
-          )
+          id, 
+          caption, 
+          location, 
+          media_url, 
+          created_at, 
+          likes_count, 
+          comments_count,
+          user_id
         `)
         .order('created_at', { ascending: false })
         .limit(10);
 
       if (error) throw error;
-      setTimelinePosts(data || []);
-    } catch (error) {
-      console.error("Error fetching timeline posts:", error);
-    } finally {
-      setLoadingPosts(false);
-    }
-  };
+      
+      // Fetch profile data separately for each post
+      const postsWithProfiles = await Promise.all(
+        (data || []).map(async (post) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('username, full_name, avatar_url')
+            .eq('id', post.user_id)
+            .maybeSingle();
+          
+          return {
+            ...post,
+            profiles: profile
+          };
+        })
+      );
+      
+      return postsWithProfiles;
+    },
+    enabled: !!user,
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 5,
+  });
 
   const getUserInitials = (profile: any) => {
     if (!profile) return "?";
@@ -232,10 +224,11 @@ const Landing = () => {
 
                       {post.media_url && (
                         <div className="rounded-lg overflow-hidden mb-4">
-                          <img
+                          <LazyImage
                             src={post.media_url}
                             alt="Memory"
                             className="w-full h-auto max-h-96 object-cover"
+                            containerClassName="w-full"
                           />
                         </div>
                       )}

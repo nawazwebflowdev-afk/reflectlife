@@ -7,12 +7,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import type { User } from "@supabase/supabase-js";
 import { CreateTimelineModal } from "@/components/CreateTimelineModal";
 import CreatorDashboard from "@/components/CreatorDashboard";
 import { ProfileEditModal } from "@/components/ProfileEditModal";
 import EditMemorialModal from "@/components/EditMemorialModal";
+import { useQuery } from "@tanstack/react-query";
+import { LazyImage } from "@/components/LazyImage";
 
 interface Profile {
   id: string;
@@ -114,27 +116,26 @@ const Dashboard = () => {
 
   const fetchStats = async (userId: string) => {
     try {
-      // Total memories posted
-      const { count: memoriesCount } = await supabase
-        .from("memorial_posts")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", userId);
-
-      // Templates purchased
-      const { count: templatesCount } = await supabase
-        .from("template_purchases")
-        .select("*", { count: "exact", head: true })
-        .eq("buyer_id", userId);
-
-      // Likes received on user's posts
-      const { data: userPosts } = await supabase
-        .from("memorial_posts")
-        .select("id")
-        .eq("user_id", userId);
+      // Parallel execution for better performance
+      const [memoriesResult, templatesResult, userPostsResult] = await Promise.all([
+        supabase
+          .from("memorial_posts")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId),
+        supabase
+          .from("template_purchases")
+          .select("*", { count: "exact", head: true })
+          .eq("buyer_id", userId)
+          .eq("payment_status", "succeeded"),
+        supabase
+          .from("memorial_posts")
+          .select("id")
+          .eq("user_id", userId)
+      ]);
 
       let likesReceived = 0;
-      if (userPosts && userPosts.length > 0) {
-        const postIds = userPosts.map(p => p.id);
+      if (userPostsResult.data && userPostsResult.data.length > 0) {
+        const postIds = userPostsResult.data.map(p => p.id);
         const { count: likesCount } = await supabase
           .from("memorial_likes")
           .select("*", { count: "exact", head: true })
@@ -143,8 +144,8 @@ const Dashboard = () => {
       }
 
       setStats({
-        totalMemories: memoriesCount || 0,
-        templatesPurchased: templatesCount || 0,
+        totalMemories: memoriesResult.count || 0,
+        templatesPurchased: templatesResult.count || 0,
         likesReceived: likesReceived,
       });
     } catch (error) {
@@ -161,28 +162,24 @@ const Dashboard = () => {
     navigate("/");
   };
 
-  const [memorials, setMemorials] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (user) {
-      fetchUserMemorials(user.id);
-    }
-  }, [user]);
-
-  const fetchUserMemorials = async (userId: string) => {
-    try {
+  // Fetch memorials with React Query
+  const { data: memorials = [], refetch: refetchMemorials } = useQuery({
+    queryKey: ['memorials', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
       const { data, error } = await supabase
         .from("memorials")
-        .select("*")
-        .eq("user_id", userId)
+        .select("id, name, date_of_birth, date_of_death, location, preview_image_url")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setMemorials(data || []);
-    } catch (error) {
-      console.error("Error fetching memorials:", error);
-    }
-  };
+      return data || [];
+    },
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 15,
+  });
 
   const formatYears = (dob: string | null, dod: string | null) => {
     if (!dob || !dod) return "Unknown";
@@ -350,10 +347,12 @@ const Dashboard = () => {
                       <div className="flex flex-col md:flex-row gap-6">
                         {/* Image */}
                         <div className="w-24 h-24 flex-shrink-0">
-                          <img
+                          <LazyImage
                             src={memorial.preview_image_url || portraitPlaceholder}
                             alt={memorial.name}
+                            fallback={portraitPlaceholder}
                             className="w-full h-full object-cover rounded-lg"
+                            containerClassName="w-full h-full"
                           />
                         </div>
 
@@ -427,10 +426,12 @@ const Dashboard = () => {
                     <div className="flex flex-col md:flex-row gap-6">
                         {/* Image */}
                         <div className="w-24 h-24 flex-shrink-0">
-                          <img
+                          <LazyImage
                             src={memorial.preview_image_url || portraitPlaceholder}
                             alt={memorial.name}
+                            fallback={portraitPlaceholder}
                             className="w-full h-full object-cover rounded-lg"
+                            containerClassName="w-full h-full"
                           />
                         </div>
 
@@ -514,7 +515,7 @@ const Dashboard = () => {
             onOpenChange={(open) => !open && setEditingMemorial(null)}
             memorial={editingMemorial}
             onMemorialUpdated={() => {
-              if (user) fetchUserMemorials(user.id);
+              refetchMemorials();
               setEditingMemorial(null);
             }}
           />
