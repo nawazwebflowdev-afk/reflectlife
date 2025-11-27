@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AvatarSelector, AvatarDisplay } from "@/components/EmojiAvatarSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Upload } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 import { countries } from "@/data/countries";
 
 interface ProfileEditModalProps {
@@ -30,6 +30,7 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [profile, setProfile] = useState<ProfileData>({
     first_name: "",
     last_name: "",
@@ -70,6 +71,7 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       setUploading(true);
+      setUploadProgress(0);
       const file = event.target.files?.[0];
       if (!file) return;
 
@@ -84,24 +86,39 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
         return;
       }
 
-      const fileExt = file.name.split(".").pop();
-      const filePath = `user-avatars/${userId}.${fileExt}`;
+      setUploadProgress(30);
+
+      // Dynamically import compression utility
+      const { compressImage } = await import('@/utils/imageCompression');
+      
+      setUploadProgress(50);
+
+      // Compress image
+      const compressedBlob = await compressImage(file, 800, 800, 0.85);
+      const compressedFile = new File([compressedBlob], `${userId}.webp`, { type: 'image/webp' });
+
+      setUploadProgress(70);
+
+      const filePath = `user-avatars/${userId}.webp`;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, compressedFile, { upsert: true });
 
       if (uploadError) throw uploadError;
+
+      setUploadProgress(90);
 
       const { data: { publicUrl } } = supabase.storage
         .from("avatars")
         .getPublicUrl(filePath);
 
       setProfile({ ...profile, avatar_url: publicUrl });
+      setUploadProgress(100);
       
       toast({
         title: "Image uploaded",
-        description: "Your profile image has been uploaded successfully.",
+        description: "Your profile image has been uploaded and optimized.",
       });
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -111,7 +128,10 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
         variant: "destructive",
       });
     } finally {
-      setUploading(false);
+      setTimeout(() => {
+        setUploading(false);
+        setUploadProgress(0);
+      }, 500);
     }
   };
 
@@ -175,12 +195,12 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
               <AvatarImage src={profile.avatar_url} />
               <AvatarFallback className="text-2xl">{getInitials()}</AvatarFallback>
             </Avatar>
-            <div className="flex gap-2">
-              <Label htmlFor="avatar-upload" className="cursor-pointer">
-                <Button type="button" variant="outline" size="sm" disabled={uploading} asChild>
+            <div className="flex gap-2 flex-col items-center w-full">
+              <Label htmlFor="avatar-upload" className="cursor-pointer w-full">
+                <Button type="button" variant="outline" size="sm" disabled={uploading} asChild className="w-full">
                   <span>
                     <Upload className="h-4 w-4 mr-2" />
-                    {uploading ? "Uploading..." : "Upload Photo"}
+                    {uploading ? `Uploading... ${uploadProgress}%` : "Upload Photo"}
                   </span>
                 </Button>
               </Label>
@@ -192,6 +212,14 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
                 onChange={handleImageUpload}
                 disabled={uploading}
               />
+              {uploading && (
+                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                  <div 
+                    className="bg-primary h-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              )}
             </div>
           </div>
 

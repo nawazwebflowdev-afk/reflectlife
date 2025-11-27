@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { cn } from "@/utils";
 import { AVATARS } from "@/config/avatars";
+import { LazyImage } from "@/components/LazyImage";
 
 interface AvatarSelectorProps {
   selectedAvatar: number;
@@ -25,7 +26,7 @@ export const AvatarSelector = ({
         <Card
           key={index}
           className={cn(
-            "flex items-center justify-center cursor-pointer transition-all hover:scale-110 hover:shadow-md p-1",
+            "flex items-center justify-center cursor-pointer transition-all hover:scale-110 hover:shadow-md p-1 overflow-hidden",
             sizeClasses[size],
             selectedAvatar === index
               ? "ring-2 ring-primary shadow-lg scale-105"
@@ -33,7 +34,11 @@ export const AvatarSelector = ({
           )}
           onClick={() => onSelectAvatar(index)}
         >
-          <img src={avatar} alt={`Avatar ${index + 1}`} className="w-full h-full object-cover rounded" />
+          <LazyImage 
+            src={avatar} 
+            alt={`Avatar ${index + 1}`} 
+            className="w-full h-full object-cover rounded"
+          />
         </Card>
       ))}
     </div>
@@ -61,7 +66,7 @@ export const AvatarDisplay = ({ avatarIndex, size = "md", className }: AvatarDis
         className
       )}
     >
-      <img 
+      <LazyImage 
         src={AVATARS[avatarIndex % AVATARS.length]} 
         alt={`Avatar ${avatarIndex + 1}`} 
         className="w-full h-full object-cover"

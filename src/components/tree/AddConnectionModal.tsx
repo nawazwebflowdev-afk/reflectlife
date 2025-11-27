@@ -21,6 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Search, Loader2, Upload, X } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LazyImage } from "@/components/LazyImage";
 
 interface AddConnectionModalProps {
   open: boolean;
@@ -408,7 +409,12 @@ const AddConnectionModal = ({
                 <Label>Profile Picture (Optional)</Label>
                 {imagePreview ? (
                   <div className="relative w-32 h-32 rounded-lg overflow-hidden border">
-                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                    <LazyImage 
+                      src={imagePreview} 
+                      alt="Preview" 
+                      className="w-full h-full object-cover"
+                      containerClassName="w-full h-full"
+                    />
                     <Button
                       type="button"
                       variant="destructive"
