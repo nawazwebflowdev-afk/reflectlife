@@ -1,9 +1,16 @@
 import { useState, useEffect } from "react";
-import { X, Upload, Loader2 } from "lucide-react";
+import { X, Upload, Loader2, Lock, Users, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +31,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
     location: "",
     date_of_birth: "",
     date_of_death: "",
+    privacyLevel: "public" as "public" | "friends" | "private",
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
@@ -36,6 +44,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
         location: memorial.location || "",
         date_of_birth: memorial.date_of_birth || "",
         date_of_death: memorial.date_of_death || "",
+        privacyLevel: memorial.privacy_level || "public",
       });
       setImagePreview(memorial.preview_image_url || "");
     }
@@ -99,6 +108,8 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
           date_of_birth: formData.date_of_birth || null,
           date_of_death: formData.date_of_death || null,
           preview_image_url: previewImageUrl,
+          is_public: formData.privacyLevel === 'public',
+          privacy_level: formData.privacyLevel,
           updated_at: new Date().toISOString(),
         })
         .eq('id', memorial.id);
@@ -193,6 +204,50 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
             />
+          </div>
+
+          {/* Privacy Settings */}
+          <div className="space-y-2">
+            <Label htmlFor="privacy">Privacy Settings</Label>
+            <Select
+              value={formData.privacyLevel}
+              onValueChange={(value: "public" | "friends" | "private") => 
+                setFormData({ ...formData, privacyLevel: value })
+              }
+            >
+              <SelectTrigger id="privacy">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="public">
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-4 w-4" />
+                    <div>
+                      <div className="font-medium">Public</div>
+                      <div className="text-xs text-muted-foreground">Anyone can view and share</div>
+                    </div>
+                  </div>
+                </SelectItem>
+                <SelectItem value="friends">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    <div>
+                      <div className="font-medium">Friends Only</div>
+                      <div className="text-xs text-muted-foreground">Only invited friends can view</div>
+                    </div>
+                  </div>
+                </SelectItem>
+                <SelectItem value="private">
+                  <div className="flex items-center gap-2">
+                    <Lock className="h-4 w-4" />
+                    <div>
+                      <div className="font-medium">Private</div>
+                      <div className="text-xs text-muted-foreground">Only you can view</div>
+                    </div>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Image Upload */}

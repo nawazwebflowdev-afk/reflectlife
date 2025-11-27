@@ -496,9 +496,11 @@ export type Database = {
           description: string | null
           id: string
           images: string[] | null
+          is_public: boolean | null
           location: string | null
           name: string
           preview_image_url: string | null
+          privacy_level: string | null
           updated_at: string | null
           user_id: string
         }
@@ -510,9 +512,11 @@ export type Database = {
           description?: string | null
           id?: string
           images?: string[] | null
+          is_public?: boolean | null
           location?: string | null
           name: string
           preview_image_url?: string | null
+          privacy_level?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -524,9 +528,11 @@ export type Database = {
           description?: string | null
           id?: string
           images?: string[] | null
+          is_public?: boolean | null
           location?: string | null
           name?: string
           preview_image_url?: string | null
+          privacy_level?: string | null
           updated_at?: string | null
           user_id?: string
         }
