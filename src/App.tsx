@@ -30,6 +30,7 @@ import Success from "./pages/Success";
 import Cancel from "./pages/Cancel";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Checkout from "./pages/Checkout";
+import GuestTribute from "./pages/GuestTribute";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -76,7 +77,8 @@ const App = () => (
           <Route path="/success" element={<Success />} />
           <Route path="/cancel" element={<Cancel />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="*" element={<NotFound />} />
+               <Route path="*" element={<NotFound />} />
+               <Route path="/guest-tribute/:token" element={<GuestTribute />} />
               </Routes>
             </main>
             <Footer />
