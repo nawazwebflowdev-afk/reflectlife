@@ -102,30 +102,43 @@ export const AddChildConnectionModal = ({
         .eq("id", user.id)
         .single();
 
-      const { data, error } = await supabase.functions.invoke("send-invitation", {
+      // Create invitation record to generate token
+      const { data: invitation, error: inviteError } = await supabase
+        .from("memorial_invitations")
+        .insert({
+          inviter_id: user.id,
+          invitee_email: inviteEmail,
+          connection_id: parentConnectionId,
+          status: "pending",
+        })
+        .select()
+        .single();
+
+      if (inviteError) throw inviteError;
+
+      // Generate invitation URL with token
+      const invitationUrl = `${window.location.origin}/guest-tribute/${invitation.id}`;
+
+      const { error } = await supabase.functions.invoke("send-invitation", {
         body: {
           recipientEmail: inviteEmail,
           personName: name || "a loved one",
           senderName: profile?.full_name || "Someone",
-          connectionId: parentConnectionId,
+          invitationUrl,
           senderId: user.id,
         },
       });
 
       if (error) throw error;
 
-      const isRegistered = data?.isRegistered;
-      
       toast({
         title: "Invitation sent successfully! 💌",
-        description: isRegistered 
-          ? `${inviteEmail} will receive a notification to contribute`
-          : `${inviteEmail} will receive an invitation to sign up and contribute`,
+        description: `${inviteEmail} can now contribute memories and tributes`,
       });
       setInviteEmail("");
     } catch (error: any) {
       toast({
-        title: "Unable to send invitation, please try again.",
+        title: "Unable to send invitation",
         description: error.message,
         variant: "destructive",
       });

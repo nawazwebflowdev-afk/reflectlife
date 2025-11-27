@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import ReactFlow, {
   Node,
   Edge,
@@ -12,12 +12,15 @@ import "reactflow/dist/style.css";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTemplateBackground } from "@/hooks/useTemplateBackground";
+import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2 } from "lucide-react";
 import AddConnectionModal from "@/components/tree/AddConnectionModal";
 import ConnectionDetailPanel from "@/components/tree/ConnectionDetailPanel";
 import EmptyTreeState from "@/components/tree/EmptyTreeState";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "@tanstack/react-query";
 
 type ConnectionType = "family" | "friendship";
 
@@ -46,41 +49,37 @@ interface Connection {
 
 const Tree = () => {
   const [mode, setMode] = useState<ConnectionType>("family");
-  const [connections, setConnections] = useState<Connection[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
-  const [currentUser, setCurrentUser] = useState<any>(null);
   const { toast } = useToast();
   const { backgroundUrl } = useTemplateBackground();
+  const { backgroundUrl: themeBackgroundUrl } = useTemplateTheme();
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  useEffect(() => {
-    fetchCurrentUser();
-    fetchConnections();
-  }, []);
-
-  useEffect(() => {
-    buildGraph();
-  }, [connections, mode, currentUser]);
-
-  const fetchCurrentUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
+  // Fetch current user with caching
+  const { data: currentUser } = useQuery({
+    queryKey: ['current-user-profile'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      
       const { data: profile } = await supabase
         .from("profiles")
-        .select("*")
+        .select("id, full_name, avatar_url")
         .eq("id", user.id)
         .single();
-      setCurrentUser(profile);
-    }
-  };
+      
+      return profile;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
 
-  const fetchConnections = async () => {
-    try {
-      setLoading(true);
+  // Fetch connections with caching
+  const { data: connections = [], isLoading: loading, refetch: refetchConnections } = useQuery({
+    queryKey: ['tree-connections'],
+    queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -89,7 +88,7 @@ const Tree = () => {
           description: "Please sign in to view your connection tree.",
           variant: "destructive",
         });
-        return;
+        return [];
       }
 
       const { data, error } = await supabase
@@ -106,27 +105,26 @@ const Tree = () => {
             is_deceased
           )
         `)
-        .eq("owner_id", user.id);
+        .eq("owner_id", user.id)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setConnections(data as Connection[]);
-    } catch (error: any) {
-      toast({
-        title: "Error loading connections",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+      return (data as Connection[]) || [];
+    },
+    enabled: !!currentUser,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes
+  });
 
-  const buildGraph = () => {
+  // Memoize filtered connections to prevent unnecessary recalculations
+  const filteredConnections = useMemo(() => 
+    connections.filter((conn) => conn.connection_type === mode),
+    [connections, mode]
+  );
+
+  // Build graph structure with memoization
+  useEffect(() => {
     if (!currentUser) return;
-
-    const filteredConnections = connections.filter(
-      (conn) => conn.connection_type === mode
-    );
 
     if (filteredConnections.length === 0) {
       setNodes([]);
@@ -353,7 +351,7 @@ const Tree = () => {
 
     setNodes([centerNode, ...connectionNodes]);
     setEdges(connectionEdges);
-  };
+  }, [filteredConnections, currentUser, mode]);
 
   // Save node position when dragging ends
   const onNodeDragStop = useCallback(async (_: any, node: Node) => {
@@ -388,21 +386,39 @@ const Tree = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div 
+        className="min-h-screen flex flex-col"
+        style={{
+          backgroundImage: themeBackgroundUrl ? `linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), url(${themeBackgroundUrl})` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <div className="py-6 px-4 bg-card border-b">
+          <div className="container mx-auto">
+            <Skeleton className="h-10 w-64 mb-2" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+            <p className="text-muted-foreground">Loading your connection tree...</p>
+          </div>
+        </div>
       </div>
     );
   }
-
-  const filteredConnections = connections.filter(
-    (conn) => conn.connection_type === mode
-  );
 
   return (
     <div 
       className="h-screen flex flex-col"
       style={{
-        backgroundImage: backgroundUrl ? `linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), url(${backgroundUrl})` : undefined,
+        backgroundImage: themeBackgroundUrl 
+          ? `linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.92)), url(${themeBackgroundUrl})` 
+          : backgroundUrl 
+          ? `linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.92)), url(${backgroundUrl})`
+          : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',
@@ -494,14 +510,14 @@ const Tree = () => {
       <AddConnectionModal
         open={showAddModal}
         onOpenChange={setShowAddModal}
-        onConnectionAdded={fetchConnections}
+        onConnectionAdded={refetchConnections}
         defaultMode={mode}
       />
 
       <ConnectionDetailPanel
         connection={selectedConnection}
         onClose={() => setSelectedConnection(null)}
-        onUpdate={fetchConnections}
+        onUpdate={refetchConnections}
       />
     </div>
   );
