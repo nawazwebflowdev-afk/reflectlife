@@ -7,68 +7,41 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { CreateTimelineModal } from "@/components/CreateTimelineModal";
 import CreatorDashboard from "@/components/CreatorDashboard";
 import { ProfileEditModal } from "@/components/ProfileEditModal";
 import EditMemorialModal from "@/components/EditMemorialModal";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LazyImage } from "@/components/LazyImage";
 import { MemorialSkeleton } from "@/components/MemorialSkeleton";
 import { useProfilePreload } from "@/hooks/useProfilePreload";
-
-interface Profile {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  full_name: string | null;
-  avatar_url: string | null;
-  bio: string | null;
-  country: string | null;
-  color_theme: string | null;
-}
-
-interface Stats {
-  totalMemories: number;
-  templatesPurchased: number;
-  likesReceived: number;
-}
-
-interface CreatorProfile {
-  approved: boolean;
-  id: string;
-}
+import { useUserData } from "@/hooks/useUserData";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [showCreateTimeline, setShowCreateTimeline] = useState(false);
-  const [isCreator, setIsCreator] = useState(false);
-  const [creatorProfile, setCreatorProfile] = useState<CreatorProfile | null>(null);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [editingMemorial, setEditingMemorial] = useState<any>(null);
-  const [stats, setStats] = useState<Stats>({
-    totalMemories: 0,
-    templatesPurchased: 0,
-    likesReceived: 0,
-  });
 
-  // Preload user profile data
+  // Preload user data immediately
   useProfilePreload(user?.id);
+  
+  // Fetch all user data with single hook
+  const { data: userData, isLoading } = useUserData(user?.id);
 
   useEffect(() => {
-    // Check authentication and fetch profile
+    // Check authentication
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         navigate("/login");
         return;
       }
       setUser(session.user);
-      fetchProfile(session.user.id);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -77,86 +50,12 @@ const Dashboard = () => {
           navigate("/login");
         } else {
           setUser(session.user);
-          fetchProfile(session.user.id);
         }
       }
     );
 
     return () => subscription.unsubscribe();
   }, [navigate]);
-
-  const fetchProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .maybeSingle();
-
-      if (error) throw error;
-      setProfile(data);
-
-      // Check if user is an approved creator
-      const { data: creatorData } = await supabase
-        .from("template_creators")
-        .select("*")
-        .eq("user_id", userId)
-        .maybeSingle();
-
-      if (creatorData) {
-        setCreatorProfile(creatorData);
-        if (creatorData.approved) {
-          setIsCreator(true);
-        }
-      }
-
-      // Fetch stats
-      await fetchStats(userId);
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchStats = async (userId: string) => {
-    try {
-      // Parallel execution for better performance
-      const [memoriesResult, templatesResult, userPostsResult] = await Promise.all([
-        supabase
-          .from("memorial_posts")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", userId),
-        supabase
-          .from("template_purchases")
-          .select("*", { count: "exact", head: true })
-          .eq("buyer_id", userId)
-          .eq("payment_status", "succeeded"),
-        supabase
-          .from("memorial_posts")
-          .select("id")
-          .eq("user_id", userId)
-      ]);
-
-      let likesReceived = 0;
-      if (userPostsResult.data && userPostsResult.data.length > 0) {
-        const postIds = userPostsResult.data.map(p => p.id);
-        const { count: likesCount } = await supabase
-          .from("memorial_likes")
-          .select("*", { count: "exact", head: true })
-          .in("post_id", postIds);
-        likesReceived = likesCount || 0;
-      }
-
-      setStats({
-        totalMemories: memoriesResult.count || 0,
-        templatesPurchased: templatesResult.count || 0,
-        likesReceived: likesReceived,
-      });
-    } catch (error) {
-      console.error("Error fetching stats:", error);
-    }
-  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -221,11 +120,17 @@ const Dashboard = () => {
   }
 
   const getInitials = () => {
+    const profile = userData?.profile;
     if (profile?.first_name && profile?.last_name) {
       return `${profile.first_name[0]}${profile.last_name[0]}`.toUpperCase();
     }
     return profile?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U";
   };
+
+  const profile = userData?.profile;
+  const stats = userData?.stats || { totalMemories: 0, templatesPurchased: 0, likesReceived: 0 };
+  const isCreator = userData?.isCreator || false;
+  const creatorProfile = userData?.creatorProfile;
 
   return (
     <div className="min-h-screen py-8">
@@ -545,7 +450,10 @@ const Dashboard = () => {
             open={showEditProfile}
             onOpenChange={setShowEditProfile}
             userId={user.id}
-            onProfileUpdate={() => fetchProfile(user.id)}
+            onProfileUpdate={() => {
+              // Invalidate user data cache to refetch
+              queryClient.invalidateQueries({ queryKey: ['user-data', user.id] });
+            }}
           />
           <EditMemorialModal
             open={!!editingMemorial}

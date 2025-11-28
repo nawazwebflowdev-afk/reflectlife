@@ -3,8 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 
 /**
- * Preload user profile data immediately after authentication
- * to prevent UI flicker and ensure fast page loads
+ * Preload all critical user data immediately after authentication
+ * Prevents UI flicker and ensures instant page loads
  */
 export const useProfilePreload = (userId: string | undefined) => {
   const queryClient = useQueryClient();
@@ -12,18 +12,48 @@ export const useProfilePreload = (userId: string | undefined) => {
   useEffect(() => {
     if (!userId) return;
 
-    const preloadProfile = async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, full_name, avatar_url, bio, country, color_theme, template_id')
-        .eq('id', userId)
-        .maybeSingle();
+    const preloadUserData = async () => {
+      // Preload profile, creator status, and basic stats in parallel
+      const [profileResult, creatorResult, statsResults] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('id, full_name, first_name, last_name, avatar_url, bio, country, color_theme, template_id, email')
+          .eq('id', userId)
+          .maybeSingle(),
+        
+        supabase
+          .from('template_creators')
+          .select('id, approved')
+          .eq('user_id', userId)
+          .maybeSingle(),
+        
+        Promise.all([
+          supabase.from('memorial_posts').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+          supabase.from('template_purchases').select('id', { count: 'exact', head: true }).eq('buyer_id', userId).eq('payment_status', 'succeeded'),
+        ])
+      ]);
 
-      if (data && !error) {
-        queryClient.setQueryData(['user-profile', userId], data);
+      // Cache profile data
+      if (profileResult.data && !profileResult.error) {
+        queryClient.setQueryData(['user-profile', userId], profileResult.data);
+      }
+
+      // Cache full user data
+      if (profileResult.data || creatorResult.data) {
+        const [memoriesResult, templatesResult] = statsResults;
+        queryClient.setQueryData(['user-data', userId], {
+          profile: profileResult.data,
+          stats: {
+            totalMemories: memoriesResult.count || 0,
+            templatesPurchased: templatesResult.count || 0,
+            likesReceived: 0, // Will be calculated on demand
+          },
+          creatorProfile: creatorResult.data,
+          isCreator: creatorResult.data?.approved || false,
+        });
       }
     };
 
-    preloadProfile();
+    preloadUserData();
   }, [userId, queryClient]);
 };

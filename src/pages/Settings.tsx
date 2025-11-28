@@ -17,6 +17,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ThemeSelector } from "@/components/ThemeSelector";
 import { TemplateBackgroundSelector } from "@/components/TemplateBackgroundSelector";
 import { exportUserDataToPDF } from "@/utils/exportUserData";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Select,
   SelectContent,
@@ -25,17 +27,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-
 const Settings = () => {
-  
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
-  const [isApprovedCreator, setIsApprovedCreator] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [rating, setRating] = useState(0);
   const [reviewMessage, setReviewMessage] = useState("");
@@ -45,6 +41,38 @@ const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { backgroundUrl } = useTemplateBackground();
+  const queryClient = useQueryClient();
+
+  // Use React Query for profile data
+  const { data: profile, isLoading: profileLoading } = useUserProfile(userId || undefined);
+  
+  // Fetch creator status
+  const { data: creatorData } = useQuery({
+    queryKey: ['creator-status', userId],
+    queryFn: async () => {
+      if (!userId) return null;
+      const { data } = await supabase
+        .from('template_creators')
+        .select('approved')
+        .eq('user_id', userId)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  // Update local state when profile loads
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name || "");
+      setAvatarUrl(profile.avatar_url || null);
+    }
+  }, [profile]);
 
   useEffect(() => {
     checkAuth();
@@ -58,32 +86,9 @@ const Settings = () => {
     }
     setUserId(session.user.id);
     setEmail(session.user.email || "");
-    await fetchProfile(session.user.id);
   };
 
-  const fetchProfile = async (id: string) => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (data) {
-      setFullName(data.full_name || "");
-      setAvatarUrl(data.avatar_url || null);
-    }
-
-    // Check if user is an approved creator
-    const { data: creatorData } = await supabase
-      .from("template_creators")
-      .select("approved")
-      .eq("user_id", id)
-      .single();
-
-    if (creatorData?.approved) {
-      setIsApprovedCreator(true);
-    }
-  };
+  const isApprovedCreator = creatorData?.approved || false;
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -226,6 +231,10 @@ const Settings = () => {
         variant: "destructive",
       });
     } else {
+      // Invalidate cache to refetch
+      queryClient.invalidateQueries({ queryKey: ['user-profile', userId] });
+      queryClient.invalidateQueries({ queryKey: ['user-data', userId] });
+      
       toast({
         title: "Success",
         description: "Profile updated successfully",
