@@ -136,7 +136,7 @@ const Timeline = () => {
     return postsWithLikes as Post[];
   };
 
-  const { data: posts = [], isLoading, isFetching } = useQuery({
+  const { data: posts = [], isLoading, isFetching, error: postsError } = useQuery({
     queryKey: ['posts', page, user?.id],
     queryFn: () => fetchPosts(page),
     staleTime: 1000 * 60 * 5,
@@ -443,6 +443,11 @@ const Timeline = () => {
                 <PostSkeleton key={i} />
               ))}
             </>
+          ) : postsError ? (
+            <Card className="p-12 text-center">
+              <p className="text-muted-foreground mb-4">Failed to load posts</p>
+              <Button onClick={() => window.location.reload()}>Retry</Button>
+            </Card>
           ) : posts.length === 0 ? (
             <Card className="p-12 text-center">
               <p className="text-muted-foreground">No memories shared yet. Be the first!</p>

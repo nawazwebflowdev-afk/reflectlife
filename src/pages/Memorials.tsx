@@ -89,7 +89,7 @@ const Memorials = () => {
     }));
   };
 
-  const { data: memorials = [], isLoading, isFetching, refetch } = useQuery({
+  const { data: memorials = [], isLoading, isFetching, error: memorialsError, refetch } = useQuery({
     queryKey: ['memorials', page],
     queryFn: () => fetchMemorials(page),
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -187,6 +187,13 @@ const Memorials = () => {
               <MemorialSkeleton key={i} />
             ))}
           </div>
+        ) : memorialsError ? (
+          <Card className="text-center py-16 max-w-2xl mx-auto">
+            <CardContent className="p-6">
+              <p className="text-muted-foreground mb-4">Failed to load memorials</p>
+              <Button onClick={() => refetch()}>Retry</Button>
+            </CardContent>
+          </Card>
         ) : filteredMemorials.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

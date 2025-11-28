@@ -168,7 +168,7 @@ const Dashboard = () => {
   };
 
   // Fetch memorials with React Query
-  const { data: memorials = [], refetch: refetchMemorials } = useQuery({
+  const { data: memorials = [], isLoading: memorialsLoading, error: memorialsError, refetch: refetchMemorials } = useQuery({
     queryKey: ['memorials', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
@@ -177,9 +177,12 @@ const Dashboard = () => {
         .select("id, name, date_of_birth, date_of_death, location, preview_image_url")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
-        .limit(50);
+        .limit(20);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching memorials:', error);
+        throw error;
+      }
       return data || [];
     },
     enabled: !!user?.id,
@@ -361,21 +364,34 @@ const Dashboard = () => {
             </TabsList>
 
             <TabsContent value="memorials" className="space-y-4">
-              {memorials.length > 0 ? (
-                memorials.map((memorial) => (
-                  <Card key={memorial.id} className="hover:shadow-elegant transition-smooth">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col md:flex-row gap-6">
-                        {/* Image */}
-                        <div className="w-24 h-24 flex-shrink-0">
-                          <LazyImage
-                            src={memorial.preview_image_url || portraitPlaceholder}
-                            alt={memorial.name}
-                            fallback={portraitPlaceholder}
-                            className="w-full h-full object-cover rounded-lg"
-                            containerClassName="w-full h-full"
-                          />
-                        </div>
+            {memorialsLoading ? (
+              <>
+                <MemorialSkeleton />
+                <MemorialSkeleton />
+                <MemorialSkeleton />
+              </>
+            ) : memorialsError ? (
+              <Card className="col-span-full">
+                <CardContent className="p-6 text-center">
+                  <p className="text-muted-foreground mb-4">Failed to load memorials</p>
+                  <Button onClick={() => refetchMemorials()}>Retry</Button>
+                </CardContent>
+              </Card>
+            ) : memorials.length > 0 ? (
+              memorials.map((memorial) => (
+                <Card key={memorial.id} className="hover:shadow-elegant transition-smooth">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row gap-6">
+                      {/* Image */}
+                      <div className="w-24 h-24 flex-shrink-0">
+                        <LazyImage
+                          src={memorial.preview_image_url || portraitPlaceholder}
+                          alt={memorial.name}
+                          fallback={portraitPlaceholder}
+                          className="w-full h-full object-cover rounded-lg"
+                          containerClassName="w-full h-full"
+                        />
+                      </div>
 
                         {/* Info */}
                         <div className="flex-grow">
