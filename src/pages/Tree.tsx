@@ -15,8 +15,9 @@ import { useTemplateBackground } from "@/hooks/useTemplateBackground";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Share2 } from "lucide-react";
 import AddConnectionModal from "@/components/tree/AddConnectionModal";
+import ShareTreeModal from "@/components/tree/ShareTreeModal";
 import ConnectionDetailPanel from "@/components/tree/ConnectionDetailPanel";
 import EmptyTreeState from "@/components/tree/EmptyTreeState";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -50,6 +51,7 @@ interface Connection {
 const Tree = () => {
   const [mode, setMode] = useState<ConnectionType>("family");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
   const { toast } = useToast();
   const { backgroundUrl } = useTemplateBackground();
@@ -460,6 +462,12 @@ const Tree = () => {
                 <span className="hidden sm:inline">Add Connection</span>
                 <span className="sm:hidden">Add</span>
               </Button>
+
+              <Button onClick={() => setShowShareModal(true)} variant="outline" className="gap-2">
+                <Share2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Share Tree</span>
+                <span className="sm:hidden">Share</span>
+              </Button>
             </div>
           </div>
         </div>
@@ -512,6 +520,13 @@ const Tree = () => {
         onOpenChange={setShowAddModal}
         onConnectionAdded={refetchConnections}
         defaultMode={mode}
+      />
+
+      <ShareTreeModal
+        open={showShareModal}
+        onOpenChange={setShowShareModal}
+        userId={currentUser?.id || ""}
+        userName={currentUser?.full_name || ""}
       />
 
       <ConnectionDetailPanel
