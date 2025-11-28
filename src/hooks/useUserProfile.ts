@@ -6,6 +6,7 @@ interface Profile {
   first_name: string | null;
   last_name: string | null;
   full_name: string | null;
+  username: string | null;
   avatar_url: string | null;
   bio: string | null;
   country: string | null;
@@ -21,7 +22,7 @@ export const useUserProfile = (userId: string | undefined) => {
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, full_name, avatar_url, bio, country, color_theme, template_id')
+        .select('id, first_name, last_name, full_name, username, avatar_url, bio, country, color_theme, template_id')
         .eq('id', userId)
         .maybeSingle();
 

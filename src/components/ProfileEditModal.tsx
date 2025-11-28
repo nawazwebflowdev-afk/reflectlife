@@ -21,6 +21,7 @@ interface ProfileEditModalProps {
 interface ProfileData {
   first_name: string;
   last_name: string;
+  username: string;
   country: string;
   avatar_url: string;
   color_theme: string;
@@ -34,6 +35,7 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
   const [profile, setProfile] = useState<ProfileData>({
     first_name: "",
     last_name: "",
+    username: "",
     country: "",
     avatar_url: "",
     color_theme: "#3b82f6",
@@ -49,7 +51,7 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("first_name, last_name, country, avatar_url, color_theme")
+        .select("first_name, last_name, username, country, avatar_url, color_theme")
         .eq("id", userId)
         .single();
 
@@ -58,6 +60,7 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
         setProfile({
           first_name: data.first_name || "",
           last_name: data.last_name || "",
+          username: data.username || "",
           country: data.country || "",
           avatar_url: data.avatar_url || "",
           color_theme: data.color_theme || "#3b82f6",
@@ -139,11 +142,32 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
     try {
       setLoading(true);
       
+      // Validate username uniqueness if changed
+      if (profile.username) {
+        const { data: existingUser } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("username", profile.username)
+          .neq("id", userId)
+          .maybeSingle();
+
+        if (existingUser) {
+          toast({
+            title: "Username taken",
+            description: "This username is already in use. Please choose another.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
       const { error } = await supabase
         .from("profiles")
         .update({
           first_name: profile.first_name,
           last_name: profile.last_name,
+          username: profile.username || null,
           full_name: `${profile.first_name} ${profile.last_name}`.trim(),
           country: profile.country,
           avatar_url: profile.avatar_url,
@@ -244,6 +268,19 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
                   placeholder="Enter last name"
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="username">Username (optional)</Label>
+              <Input
+                id="username"
+                value={profile.username}
+                onChange={(e) => setProfile({ ...profile, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') })}
+                placeholder="Choose a unique username"
+              />
+              <p className="text-xs text-muted-foreground">
+                Lowercase letters, numbers, and underscores only
+              </p>
             </div>
 
             <div className="space-y-2">
