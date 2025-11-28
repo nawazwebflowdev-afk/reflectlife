@@ -84,7 +84,7 @@ const Settings = () => {
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !userId) return;
+    if (!file || !user?.id) return;
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
@@ -110,10 +110,10 @@ const Settings = () => {
       
       // Compress image to WebP
       const compressedBlob = await compressImage(file, 800, 800, 0.85);
-      const compressedFile = new File([compressedBlob], `${userId}.webp`, { type: 'image/webp' });
+      const compressedFile = new File([compressedBlob], `${user.id}.webp`, { type: 'image/webp' });
 
       setUploadProgress(80);
-      const filePath = `user-avatars/${userId}.webp`;
+      const filePath = `user-avatars/${user.id}.webp`;
 
       // Upload to Supabase Storage
       const { error: uploadError } = await supabase.storage
@@ -135,7 +135,7 @@ const Settings = () => {
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl })
-        .eq('id', userId);
+        .eq('id', user.id);
 
       if (updateError) throw updateError;
 
@@ -166,7 +166,7 @@ const Settings = () => {
   };
 
   const handleRemoveAvatar = async () => {
-    if (!userId) return;
+    if (!user?.id) return;
     
     setIsLoading(true);
 
@@ -174,7 +174,7 @@ const Settings = () => {
       const { error } = await supabase
         .from('profiles')
         .update({ avatar_url: null })
-        .eq('id', userId);
+        .eq('id', user.id);
 
       if (error) throw error;
 
@@ -204,7 +204,7 @@ const Settings = () => {
   };
 
   const handleSaveProfile = async () => {
-    if (!userId) return;
+    if (!user?.id) return;
     setIsLoading(true);
 
     // Validate username uniqueness if changed
@@ -213,7 +213,7 @@ const Settings = () => {
         .from("profiles")
         .select("id")
         .eq("username", username)
-        .neq("id", userId)
+        .neq("id", user.id)
         .maybeSingle();
 
       if (existingUser) {
@@ -233,7 +233,7 @@ const Settings = () => {
         full_name: fullName,
         username: username || null,
       })
-      .eq("id", userId);
+      .eq("id", user.id);
 
     setIsLoading(false);
 
@@ -245,8 +245,8 @@ const Settings = () => {
       });
     } else {
       // Invalidate cache to refetch
-      queryClient.invalidateQueries({ queryKey: ['user-profile', userId] });
-      queryClient.invalidateQueries({ queryKey: ['user-data', userId] });
+      queryClient.invalidateQueries({ queryKey: ['user-profile', user.id] });
+      queryClient.invalidateQueries({ queryKey: ['user-data', user.id] });
       
       toast({
         title: "Success",
@@ -297,11 +297,11 @@ const Settings = () => {
 
 
   const handleExportData = async () => {
-    if (!userId) return;
+    if (!user?.id) return;
     
     setIsExportingData(true);
     try {
-      await exportUserDataToPDF(userId);
+      await exportUserDataToPDF(user.id);
       toast({
         title: "Export Successful",
         description: "Your data has been downloaded as a PDF",
@@ -670,11 +670,11 @@ const Settings = () => {
       </div>
 
       {/* Delete Account Modal */}
-      {userId && (
+      {user?.id && (
         <DeleteAccountModal
           open={showDeleteModal}
           onOpenChange={setShowDeleteModal}
-          userId={userId}
+          userId={user.id}
         />
       )}
     </div>
