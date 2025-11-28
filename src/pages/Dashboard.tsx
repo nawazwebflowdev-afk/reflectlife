@@ -318,12 +318,15 @@ const Dashboard = () => {
                                 View Memorial
                               </Button>
                             </Link>
-                            <Link to={`/memorial/${memorial.id}/edit`}>
-                              <Button variant="outline" size="sm" className="gap-2">
-                                <Settings className="h-4 w-4" />
-                                Edit
-                              </Button>
-                            </Link>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="gap-2"
+                              onClick={() => setEditingMemorial(memorial)}
+                            >
+                              <Edit className="h-4 w-4" />
+                              Edit
+                            </Button>
                           </div>
                         </div>
                       </div>

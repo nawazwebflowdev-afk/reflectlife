@@ -63,6 +63,7 @@ const Settings = () => {
   });
 
   const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
@@ -70,6 +71,7 @@ const Settings = () => {
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || "");
+      setUsername(profile.username || "");
       setAvatarUrl(profile.avatar_url || null);
     }
   }, [profile]);
@@ -215,10 +217,31 @@ const Settings = () => {
     if (!userId) return;
     setIsLoading(true);
 
+    // Validate username uniqueness if changed
+    if (username && username !== profile?.username) {
+      const { data: existingUser } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("username", username)
+        .neq("id", userId)
+        .maybeSingle();
+
+      if (existingUser) {
+        toast({
+          title: "Username taken",
+          description: "This username is already in use. Please choose another.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+    }
+
     const { error } = await supabase
       .from("profiles")
       .update({
         full_name: fullName,
+        username: username || null,
       })
       .eq("id", userId);
 
@@ -413,6 +436,18 @@ const Settings = () => {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="username">Username (optional)</Label>
+                <Input 
+                  id="username" 
+                  placeholder="your_username" 
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Lowercase letters, numbers, and underscores only
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
