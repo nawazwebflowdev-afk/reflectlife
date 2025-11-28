@@ -7,8 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect, useState } from "react";
-import type { User } from "@supabase/supabase-js";
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { CreateTimelineModal } from "@/components/CreateTimelineModal";
 import CreatorDashboard from "@/components/CreatorDashboard";
 import { ProfileEditModal } from "@/components/ProfileEditModal";
@@ -16,55 +16,19 @@ import EditMemorialModal from "@/components/EditMemorialModal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LazyImage } from "@/components/LazyImage";
 import { MemorialSkeleton } from "@/components/MemorialSkeleton";
-import { useProfilePreload } from "@/hooks/useProfilePreload";
 import { useUserData } from "@/hooks/useUserData";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
   const [showCreateTimeline, setShowCreateTimeline] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [editingMemorial, setEditingMemorial] = useState<any>(null);
-
-  // Preload user data immediately
-  useProfilePreload(user?.id);
   
   // Fetch all user data with single hook
   const { data: userData, isLoading } = useUserData(user?.id);
-
-  useEffect(() => {
-    // Check authentication
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate("/login");
-        return;
-      }
-      setUser(session.user);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (!session) {
-          navigate("/login");
-        } else {
-          setUser(session.user);
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    toast({
-      title: "Signed out",
-      description: "You've been successfully signed out.",
-    });
-    navigate("/");
-  };
 
   // Fetch memorials with React Query
   const { data: memorials = [], isLoading: memorialsLoading, error: memorialsError, refetch: refetchMemorials } = useQuery({

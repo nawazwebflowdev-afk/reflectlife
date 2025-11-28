@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, User, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
 import reflectlifeLogo from "@/assets/reflectlife-logo.png";
 import {
   DropdownMenu,
@@ -19,42 +19,20 @@ import NotificationsDropdown from "@/components/NotificationsDropdown";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [profile, setProfile] = useState<{ full_name?: string; avatar_url?: string } | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, signOut } = useAuth();
   const isAuthenticated = !!user;
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          const uid = session.user.id;
-          setTimeout(() => {
-            fetchProfile(uid);
-          }, 0);
-        } else {
-          setProfile(null);
-        }
-      }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        const uid = session.user.id;
-        setTimeout(() => {
-          fetchProfile(uid);
-        }, 0);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+    if (user?.id) {
+      fetchProfile(user.id);
+    } else {
+      setProfile(null);
+    }
+  }, [user?.id]);
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
@@ -69,20 +47,18 @@ const Navigation = () => {
   };
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to sign out",
-        variant: "destructive",
-      });
-    } else {
-      setUser(null);
-      setProfile(null);
+    try {
+      await signOut();
       navigate("/");
       toast({
         title: "Signed out",
         description: "You've been successfully signed out",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
       });
     }
   };

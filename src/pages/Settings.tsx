@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTemplateBackground } from "@/hooks/useTemplateBackground";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
@@ -29,7 +30,6 @@ import {
 
 const Settings = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -40,25 +40,26 @@ const Settings = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const { backgroundUrl } = useTemplateBackground();
   const queryClient = useQueryClient();
 
   // Use React Query for profile data
-  const { data: profile, isLoading: profileLoading } = useUserProfile(userId || undefined);
+  const { data: profile, isLoading: profileLoading } = useUserProfile(user?.id);
   
   // Fetch creator status
   const { data: creatorData } = useQuery({
-    queryKey: ['creator-status', userId],
+    queryKey: ['creator-status', user?.id],
     queryFn: async () => {
-      if (!userId) return null;
+      if (!user?.id) return null;
       const { data } = await supabase
         .from('template_creators')
         .select('approved')
-        .eq('user_id', userId)
+        .eq('user_id', user.id)
         .maybeSingle();
       return data;
     },
-    enabled: !!userId,
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -67,28 +68,17 @@ const Settings = () => {
   const [email, setEmail] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-  // Update local state when profile loads
+  // Update local state when profile loads and user data
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || "");
       setUsername(profile.username || "");
       setAvatarUrl(profile.avatar_url || null);
     }
-  }, [profile]);
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-      return;
+    if (user?.email) {
+      setEmail(user.email);
     }
-    setUserId(session.user.id);
-    setEmail(session.user.email || "");
-  };
+  }, [profile, user]);
 
   const isApprovedCreator = creatorData?.approved || false;
 
