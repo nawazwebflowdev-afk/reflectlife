@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getCountryFlag } from "@/lib/countryFlags";
 import { useQuery } from "@tanstack/react-query";
 import { LazyImage } from "@/components/LazyImage";
+import { MemorialSkeleton } from "@/components/MemorialSkeleton";
 
 interface Template {
   id: string;
@@ -58,7 +59,7 @@ const Templates = () => {
   };
 
   // Fetch system templates with React Query
-  const { data: templates = [], isLoading: loadingTemplates } = useQuery({
+  const { data: templates = [], isLoading: loadingTemplates, error: templatesError } = useQuery({
     queryKey: ['templates', 'system'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -66,9 +67,13 @@ const Templates = () => {
         .select("id, name, country, preview_url, price, is_free, description, is_creator_template, creator_id")
         .is("creator_id", null)
         .order("is_free", { ascending: false })
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(20);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching templates:', error);
+        throw error;
+      }
       return data || [];
     },
     staleTime: 1000 * 60 * 10, // 10 minutes
@@ -76,7 +81,7 @@ const Templates = () => {
   });
 
   // Fetch creator templates with React Query
-  const { data: creatorTemplates = [], isLoading: loadingCreatorTemplates } = useQuery({
+  const { data: creatorTemplates = [], isLoading: loadingCreatorTemplates, error: creatorTemplatesError } = useQuery({
     queryKey: ['templates', 'creator'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -86,9 +91,13 @@ const Templates = () => {
           profiles!site_templates_creator_id_fkey(full_name, first_name, last_name)
         `)
         .not("creator_id", "is", null)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(20);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching creator templates:', error);
+        throw error;
+      }
       
       return (data || []).map((template: any) => ({
         ...template,
@@ -213,7 +222,20 @@ const Templates = () => {
               </div>
 
               {/* Featured Templates Grid */}
-              {filteredTemplates.length === 0 ? (
+              {loadingTemplates ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto mb-16">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <MemorialSkeleton key={i} />
+                  ))}
+                </div>
+              ) : templatesError ? (
+                <Card className="mb-16">
+                  <CardContent className="p-6 text-center">
+                    <p className="text-muted-foreground mb-4">Failed to load templates</p>
+                    <Button onClick={() => window.location.reload()}>Retry</Button>
+                  </CardContent>
+                </Card>
+              ) : filteredTemplates.length === 0 ? (
                 <div className="text-center py-20 mb-16">
                   <p className="text-muted-foreground">No featured templates found matching your criteria.</p>
                 </div>
@@ -283,7 +305,20 @@ const Templates = () => {
                 </p>
               </div>
 
-              {creatorTemplates.length === 0 ? (
+              {loadingCreatorTemplates ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <MemorialSkeleton key={i} />
+                  ))}
+                </div>
+              ) : creatorTemplatesError ? (
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <p className="text-muted-foreground mb-4">Failed to load creator templates</p>
+                    <Button onClick={() => window.location.reload()}>Retry</Button>
+                  </CardContent>
+                </Card>
+              ) : creatorTemplates.length === 0 ? (
                 <div className="text-center py-20">
                   <p className="text-muted-foreground">No creator templates available yet. Check back soon!</p>
                 </div>

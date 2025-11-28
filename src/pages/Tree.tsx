@@ -22,6 +22,7 @@ import ConnectionDetailPanel from "@/components/tree/ConnectionDetailPanel";
 import EmptyTreeState from "@/components/tree/EmptyTreeState";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent } from "@/components/ui/card";
 
 type ConnectionType = "family" | "friendship";
 
@@ -79,7 +80,7 @@ const Tree = () => {
   });
 
   // Fetch connections with caching
-  const { data: connections = [], isLoading: loading, refetch: refetchConnections } = useQuery({
+  const { data: connections = [], isLoading: loading, error: connectionsError, refetch: refetchConnections } = useQuery({
     queryKey: ['tree-connections'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -110,7 +111,10 @@ const Tree = () => {
         .eq("owner_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching tree connections:', error);
+        throw error;
+      }
       return (data as Connection[]) || [];
     },
     enabled: !!currentUser,
@@ -474,7 +478,16 @@ const Tree = () => {
       </div>
 
       <div className="flex-1 relative">
-        {filteredConnections.length === 0 ? (
+        {connectionsError ? (
+          <div className="flex items-center justify-center h-full">
+            <Card>
+              <CardContent className="p-6 text-center">
+                <p className="text-muted-foreground mb-4">Failed to load tree connections</p>
+                <Button onClick={() => refetchConnections()}>Retry</Button>
+              </CardContent>
+            </Card>
+          </div>
+        ) : filteredConnections.length === 0 ? (
           <EmptyTreeState mode={mode} onAddConnection={() => setShowAddModal(true)} />
         ) : (
           <div className="w-full h-full relative overflow-hidden">
