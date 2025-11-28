@@ -43,18 +43,17 @@ const Memorial = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("memorials")
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            first_name,
-            last_name
-          )
-        `)
+        .select('id, name, date_of_birth, date_of_death, location, bio, preview_image_url, user_id, is_public, privacy_level, profiles:user_id(full_name, first_name, last_name)')
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      
+      if (!data) {
+        setMemorial(null);
+        return;
+      }
+      
       setMemorial(data);
     } catch (error: any) {
       console.error("Error fetching memorial:", error);
@@ -85,12 +84,13 @@ const Memorial = () => {
 
   const fetchTimelineData = async () => {
     try {
-      // Fetch real timeline entries from memorial_entries table
+      // Optimized query with specific fields and limit
       const { data, error } = await supabase
         .from("memorial_entries")
-        .select("*")
+        .select('id, caption, content_type, content_url, event_date, created_at')
         .eq("timeline_id", memorial?.id)
-        .order("event_date", { ascending: false });
+        .order("event_date", { ascending: false })
+        .limit(50); // Pagination for performance
 
       if (error) throw error;
       setTimelineEntries(data || []);
@@ -101,19 +101,13 @@ const Memorial = () => {
 
   const fetchTributes = async () => {
     try {
-      // Fetch real tributes from memorial_tributes table
+      // Optimized query with specific fields only
       const { data, error } = await supabase
         .from("memorial_tributes")
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            avatar_url,
-            emoji_avatar
-          )
-        `)
+        .select('id, tribute_text, created_at, user_id, media_url, profiles:user_id(full_name, avatar_url, emoji_avatar)')
         .eq("memorial_id", memorial?.id)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(50); // Pagination for performance
 
       if (error) throw error;
       setTributePosts(data || []);
@@ -198,12 +192,13 @@ const Memorial = () => {
 
   const fetchGalleryMedia = async () => {
     try {
-      // Fetch real media from memorial_media table
+      // Optimized query with specific fields and limit
       const { data, error } = await supabase
         .from("memorial_media")
-        .select("*")
+        .select('id, media_url, media_type, caption, uploaded_at')
         .eq("memorial_id", memorial?.id)
-        .order("uploaded_at", { ascending: false });
+        .order("uploaded_at", { ascending: false })
+        .limit(50); // Pagination for performance
 
       if (error) throw error;
       setGalleryMedia(data || []);

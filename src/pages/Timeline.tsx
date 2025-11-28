@@ -89,51 +89,48 @@ const Timeline = () => {
     const from = (pageNum - 1) * POSTS_PER_PAGE;
     const to = from + POSTS_PER_PAGE - 1;
 
+    // Optimized: Fetch posts with specific fields only
     const { data, error } = await supabase
       .from("memorial_posts")
-      .select(`
-        id,
-        user_id,
-        media_url,
-        caption,
-        location,
-        created_at,
-        likes_count,
-        comments_count,
-        profiles!memorial_posts_user_id_fkey(full_name, avatar_url)
-      `)
+      .select('id, user_id, media_url, caption, location, created_at, likes_count, comments_count')
       .order("created_at", { ascending: false })
       .range(from, to);
 
     if (error) throw error;
+    if (!data || data.length === 0) return [];
 
-    const postsWithLikes = await Promise.all(
-      (data || []).map(async (post) => {
-        let isLikedByUser = false;
-        if (user) {
-          const { data: likeData } = await supabase
-            .from("memorial_likes")
-            .select("id")
-            .eq("post_id", post.id)
-            .eq("user_id", user.id)
-            .maybeSingle();
-          isLikedByUser = !!likeData;
-        }
-        
-        // Handle profiles array from Supabase join
-        const profiles = Array.isArray(post.profiles) && post.profiles.length > 0 
-          ? post.profiles[0] 
-          : null;
-        
-        return { 
-          ...post, 
-          profiles,
-          isLikedByUser 
-        };
-      })
+    // Batch fetch profiles for all users in one query
+    const userIds = [...new Set(data.map(p => p.user_id))];
+    const { data: profilesData } = await supabase
+      .from("profiles")
+      .select("id, full_name, avatar_url")
+      .in("id", userIds);
+    
+    const profilesMap = new Map(
+      (profilesData || []).map(p => [p.id, p])
     );
 
-    return postsWithLikes as Post[];
+    // Optimized: Batch fetch all likes for current user in single query
+    let userLikes: string[] = [];
+    if (user) {
+      const postIds = data.map(p => p.id);
+      const { data: likesData } = await supabase
+        .from("memorial_likes")
+        .select("post_id")
+        .eq("user_id", user.id)
+        .in("post_id", postIds);
+      
+      userLikes = (likesData || []).map(like => like.post_id);
+    }
+
+    // Map posts with profiles and like status
+    const postsWithData = data.map(post => ({
+      ...post,
+      profiles: profilesMap.get(post.user_id) || null,
+      isLikedByUser: userLikes.includes(post.id)
+    }));
+
+    return postsWithData as Post[];
   };
 
   const { data: posts = [], isLoading, isFetching, error: postsError } = useQuery({
