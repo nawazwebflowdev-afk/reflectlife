@@ -20,6 +20,7 @@ import { TemplateBackgroundSelector } from "@/components/TemplateBackgroundSelec
 import { exportUserDataToPDF } from "@/utils/exportUserData";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { CreatorWithdrawal } from "@/components/CreatorWithdrawal";
 import {
   Select,
   SelectContent,
@@ -590,6 +591,14 @@ const Settings = () => {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Creator Withdrawal - Only for Approved Creators */}
+          {isApprovedCreator && (
+            <div>
+              <h2 className="text-2xl font-serif font-bold mb-4">Creator Earnings</h2>
+              <CreatorWithdrawal />
+            </div>
+          )}
 
           {/* Share Your Design - Only for Approved Creators */}
           {isApprovedCreator && (
