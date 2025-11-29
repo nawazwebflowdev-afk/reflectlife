@@ -12,6 +12,7 @@ import { getCountryFlag } from "@/lib/countryFlags";
 import { useQuery } from "@tanstack/react-query";
 import { LazyImage } from "@/components/LazyImage";
 import { MemorialSkeleton } from "@/components/MemorialSkeleton";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Template {
   id: string;
@@ -28,23 +29,17 @@ interface Template {
 
 const Templates = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<"all" | "free" | "paid">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      setUserId(session.user.id);
-      fetchUserTemplate(session.user.id);
+    if (user?.id) {
+      fetchUserTemplate(user.id);
     }
-  };
+  }, [user?.id]);
 
   const fetchUserTemplate = async (uid: string) => {
     const { data } = await supabase
@@ -113,7 +108,7 @@ const Templates = () => {
   const loading = loadingTemplates || loadingCreatorTemplates;
 
   const handleSelectTemplate = async (templateId: string, isFree: boolean) => {
-    if (!userId) {
+    if (!user?.id) {
       toast({
         title: "Sign in required",
         description: "Please sign in to select a template",
@@ -133,7 +128,7 @@ const Templates = () => {
     const { error } = await supabase
       .from("profiles")
       .update({ template_id: templateId })
-      .eq("id", userId);
+      .eq("id", user.id);
 
     if (error) {
       toast({

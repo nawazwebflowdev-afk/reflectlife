@@ -21,6 +21,7 @@ import { countries } from "@/data/countries";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useAuth } from "@/contexts/AuthContext";
 
 const templateFormSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters").max(100, "Name must be less than 100 characters"),
@@ -38,13 +39,13 @@ const BecomeCreator = () => {
   const [description, setDescription] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
   const [isApprovedCreator, setIsApprovedCreator] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const form = useForm<TemplateFormValues>({
     resolver: zodResolver(templateFormSchema),
@@ -56,12 +57,7 @@ const BecomeCreator = () => {
   });
 
   useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) {
+    if (!user) {
       toast({
         title: "Sign in required",
         description: "Please sign in to become a creator",
@@ -70,15 +66,19 @@ const BecomeCreator = () => {
       navigate("/login");
       return;
     }
-    
-    setUserId(session.user.id);
-    setEmail(session.user.email || "");
-    
+
+    setEmail(user.email || "");
+    checkCreatorStatus();
+  }, [user]);
+
+  const checkCreatorStatus = async () => {
+    if (!user) return;
+
     // Check if already a creator
     const { data: creator } = await supabase
       .from("template_creators")
       .select("*")
-      .eq("user_id", session.user.id)
+      .eq("user_id", user.id)
       .maybeSingle();
     
     if (creator) {
@@ -103,14 +103,14 @@ const BecomeCreator = () => {
       return;
     }
 
-    if (!userId) return;
+    if (!user?.id) return;
 
     setLoading(true);
 
     const { error } = await supabase
       .from("template_creators")
       .insert({
-        user_id: userId,
+        user_id: user.id,
         display_name: displayName,
         country,
         portfolio: portfolio || null,
@@ -149,10 +149,7 @@ const BecomeCreator = () => {
     setUploadProgress(0);
 
     try {
-      // Get current authenticated user
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      
-      if (authError || !user) {
+      if (!user?.id) {
         throw new Error("You must be logged in to upload templates");
       }
 
