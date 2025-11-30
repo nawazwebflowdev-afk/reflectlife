@@ -25,7 +25,7 @@ const Landing = () => {
     setUser(user);
   };
 
-  // Fetch timeline posts with React Query
+  // Fetch timeline posts with React Query - optimized with JOIN
   const { data: timelinePosts = [], isLoading: loadingPosts } = useQuery({
     queryKey: ['landing-timeline-posts', user?.id],
     queryFn: async () => {
@@ -39,40 +39,29 @@ const Landing = () => {
           created_at, 
           likes_count, 
           comments_count,
-          user_id
+          user_id,
+          profiles!memorial_posts_user_id_fkey(username, full_name, avatar_url)
         `)
         .order('created_at', { ascending: false })
         .limit(10);
 
       if (error) throw error;
-      
-      // Fetch profile data separately for each post
-      const postsWithProfiles = await Promise.all(
-        (data || []).map(async (post) => {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('username, full_name, avatar_url')
-            .eq('id', post.user_id)
-            .maybeSingle();
-          
-          return {
-            ...post,
-            profiles: profile
-          };
-        })
-      );
-      
-      return postsWithProfiles;
+      return data || [];
     },
     enabled: !!user,
-    staleTime: 1000 * 60 * 2,
-    gcTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
   });
 
   const getUserInitials = (profile: any) => {
     if (!profile) return "?";
     const name = profile.full_name || profile.username || "";
     return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const getProfile = (post: any) => {
+    // Handle both array (from join) and object formats
+    return Array.isArray(post.profiles) ? post.profiles[0] : post.profiles;
   };
 
   const features = [
@@ -196,13 +185,13 @@ const Landing = () => {
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4 mb-4">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={post.profiles?.avatar_url} />
-                          <AvatarFallback>{getUserInitials(post.profiles)}</AvatarFallback>
+                          <AvatarImage src={getProfile(post)?.avatar_url} />
+                          <AvatarFallback>{getUserInitials(getProfile(post))}</AvatarFallback>
                         </Avatar>
                         <div className="flex-grow">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="font-semibold">
-                              {post.profiles?.full_name || post.profiles?.username || "Anonymous"}
+                              {getProfile(post)?.full_name || getProfile(post)?.username || "Anonymous"}
                             </span>
                             <span className="text-sm text-muted-foreground">•</span>
                             <span className="text-sm text-muted-foreground">

@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Check, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getCountryFlag } from "@/lib/countryFlags";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LazyImage } from "@/components/LazyImage";
 import { MemorialSkeleton } from "@/components/MemorialSkeleton";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,30 +28,31 @@ interface Template {
 }
 
 const Templates = () => {
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<"all" | "free" | "paid">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (user?.id) {
-      fetchUserTemplate(user.id);
-    }
-  }, [user?.id]);
+  // Fetch user's selected template with React Query
+  const { data: userTemplate } = useQuery({
+    queryKey: ['user-template', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("template_id")
+        .eq("id", user.id)
+        .maybeSingle();
+      return data?.template_id || null;
+    },
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
+  });
 
-  const fetchUserTemplate = async (uid: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("template_id")
-      .eq("id", uid)
-      .maybeSingle();
-    
-    if (data?.template_id) {
-      setSelectedTemplateId(data.template_id);
-    }
-  };
+  const selectedTemplateId = userTemplate;
 
   // Fetch system templates with React Query
   const { data: templates = [], isLoading: loadingTemplates, error: templatesError } = useQuery({
@@ -137,7 +138,8 @@ const Templates = () => {
         variant: "destructive",
       });
     } else {
-      setSelectedTemplateId(templateId);
+      // Invalidate the query to refetch
+      queryClient.invalidateQueries({ queryKey: ['user-template', user.id] });
       toast({
         title: "Template Applied!",
         description: "Your template has been applied to your memorials",

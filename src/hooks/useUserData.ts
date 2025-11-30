@@ -44,22 +44,23 @@ export const useUserData = (userId: string | undefined) => {
       }
 
       // Parallel execution for optimal performance
-      const [profileResult, creatorResult, memoriesResult, templatesResult, userPostsResult] = 
-        await Promise.all([
-          // Profile data
-          supabase
-            .from('profiles')
-            .select('id, full_name, first_name, last_name, avatar_url, bio, country, color_theme, template_id, email')
-            .eq('id', userId)
-            .maybeSingle(),
-          
-          // Creator status
-          supabase
-            .from('template_creators')
-            .select('id, approved')
-            .eq('user_id', userId)
-            .maybeSingle(),
-          
+      const [profileResult, creatorResult, statsResults] = await Promise.all([
+        // Profile data
+        supabase
+          .from('profiles')
+          .select('id, full_name, first_name, last_name, avatar_url, bio, country, color_theme, template_id, email')
+          .eq('id', userId)
+          .maybeSingle(),
+        
+        // Creator status
+        supabase
+          .from('template_creators')
+          .select('id, approved')
+          .eq('user_id', userId)
+          .maybeSingle(),
+        
+        // All stats in parallel
+        Promise.all([
           // Memory count
           supabase
             .from('memorial_posts')
@@ -73,23 +74,17 @@ export const useUserData = (userId: string | undefined) => {
             .eq('buyer_id', userId)
             .eq('payment_status', 'succeeded'),
           
-          // User posts for likes calculation
+          // Likes count - optimized with aggregation
           supabase
-            .from('memorial_posts')
-            .select('id')
-            .eq('user_id', userId)
-        ]);
+            .from('memorial_likes')
+            .select('id', { count: 'exact', head: true })
+            .eq('memorial_posts.user_id', userId)
+            .not('post_id', 'is', null)
+        ])
+      ]);
 
-      // Calculate likes received
-      let likesReceived = 0;
-      if (userPostsResult.data && userPostsResult.data.length > 0) {
-        const postIds = userPostsResult.data.map(p => p.id);
-        const { count } = await supabase
-          .from('memorial_likes')
-          .select('id', { count: 'exact', head: true })
-          .in('post_id', postIds);
-        likesReceived = count || 0;
-      }
+      const [memoriesResult, templatesResult, likesResult] = statsResults;
+      const likesReceived = likesResult.count || 0;
 
       return {
         profile: profileResult.data,
