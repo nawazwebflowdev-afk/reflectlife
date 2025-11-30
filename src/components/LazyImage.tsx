@@ -10,8 +10,8 @@ interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 }
 
 /**
- * Optimized lazy-loading image component with Supabase transforms
- * Automatically applies quality optimization and lazy loading
+ * Optimized lazy-loading image component with blur-up placeholder
+ * Automatically applies quality optimization and progressive loading
  */
 export const LazyImage = ({ 
   src, 
@@ -25,6 +25,7 @@ export const LazyImage = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [imageSrc, setImageSrc] = useState<string>('');
+  const [error, setError] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
@@ -63,32 +64,50 @@ export const LazyImage = ({
   }, []);
 
   return (
-    <div className={cn('relative overflow-hidden', containerClassName)}>
-      {!isLoaded && (
-        <div className="absolute inset-0 bg-muted animate-pulse" />
+    <div className={cn('relative overflow-hidden bg-muted/30', containerClassName)}>
+      {/* Blur placeholder - shows while loading */}
+      {!isLoaded && !error && (
+        <div className="absolute inset-0 bg-gradient-to-br from-muted/50 via-muted/30 to-muted/50 animate-pulse backdrop-blur-sm" />
       )}
+      
+      {/* Main image */}
       <img
         ref={imgRef}
-        src={isInView ? imageSrc : fallback}
+        src={isInView ? imageSrc : (fallback || '')}
         alt={alt}
         className={cn(
-          'transition-opacity duration-300',
-          isLoaded ? 'opacity-100' : 'opacity-0',
+          'transition-all duration-500 ease-out',
+          isLoaded ? 'opacity-100 scale-100 blur-0' : 'opacity-0 scale-95 blur-sm',
           className
         )}
-        onLoad={() => setIsLoaded(true)}
+        onLoad={() => {
+          setIsLoaded(true);
+          setError(false);
+        }}
         onError={(e) => {
           // Fallback to original src if optimized fails
-          if (optimize && imageSrc !== src) {
+          if (optimize && imageSrc !== src && !error) {
             setImageSrc(src);
-          } else if (fallback) {
+            setError(false);
+          } else if (fallback && !error) {
             e.currentTarget.src = fallback;
+            setError(false);
+          } else {
+            setError(true);
           }
           setIsLoaded(true);
         }}
         loading="lazy"
+        decoding="async"
         {...props}
       />
+      
+      {/* Error state */}
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-muted/20 text-muted-foreground text-sm">
+          Failed to load
+        </div>
+      )}
     </div>
   );
 };

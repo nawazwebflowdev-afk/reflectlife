@@ -127,6 +127,7 @@ const Timeline = () => {
     queryFn: () => fetchPosts(page),
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 30,
+    retry: 1,
   });
 
   const loadMore = useCallback(() => {

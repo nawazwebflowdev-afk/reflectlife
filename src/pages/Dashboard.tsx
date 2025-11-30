@@ -51,6 +51,7 @@ const Dashboard = () => {
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 30,
+    retry: 1,
   });
 
   const formatYears = (dob: string | null, dod: string | null) => {

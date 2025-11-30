@@ -79,16 +79,21 @@ const Diary = () => {
   };
 
   const fetchEntries = async () => {
+    if (!currentUser) return;
+    
     try {
       setLoading(true);
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("diary_entries")
         .select("*")
         .eq("user_id", currentUser.id)
         .order("entry_date", { ascending: false });
 
       if (error) throw error;
-      setEntries(data || []);
+      setEntries((data || []).map(entry => ({
+        ...entry,
+        reactions: (entry.reactions as Record<string, number>) || {}
+      })));
     } catch (error: any) {
       toast({
         title: "Error loading entries",
