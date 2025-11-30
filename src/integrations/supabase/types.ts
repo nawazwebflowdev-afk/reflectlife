@@ -608,6 +608,47 @@ export type Database = {
           },
         ]
       }
+      premium_subscriptions: {
+        Row: {
+          created_at: string | null
+          current_period_end: string | null
+          id: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_period_end?: string | null
+          id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_period_end?: string | null
+          id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "premium_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -622,6 +663,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_deceased: boolean | null
+          is_premium: boolean | null
           last_name: string | null
           logo_url: string | null
           phone_number: string | null
@@ -642,6 +684,7 @@ export type Database = {
           full_name?: string | null
           id: string
           is_deceased?: boolean | null
+          is_premium?: boolean | null
           last_name?: string | null
           logo_url?: string | null
           phone_number?: string | null
@@ -662,6 +705,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_deceased?: boolean | null
+          is_premium?: boolean | null
           last_name?: string | null
           logo_url?: string | null
           phone_number?: string | null
