@@ -4,12 +4,28 @@ import { supabase } from '@/integrations/supabase/client';
 export const exportUserDataToPDF = async (userId: string) => {
   try {
     // Fetch all user data
-    const [profile, templates, memorials, posts, tributes] = await Promise.all([
+    const [
+      profile, 
+      templates, 
+      memorials, 
+      posts, 
+      tributes,
+      timelines,
+      diaryEntries,
+      trees,
+      creatorProfile,
+      creatorTemplates
+    ] = await Promise.all([
       supabase.from('profiles').select('*').eq('id', userId).single(),
       supabase.from('template_purchases').select('*, site_templates(name)').eq('buyer_id', userId),
       supabase.from('memorials').select('*').eq('user_id', userId),
       supabase.from('memorial_posts').select('*').eq('user_id', userId),
       supabase.from('memorial_tributes').select('*').eq('user_id', userId),
+      supabase.from('memorial_timelines').select('*').eq('user_id', userId),
+      supabase.from('diary_entries').select('*').eq('user_id', userId),
+      supabase.from('trees').select('*').eq('user_id', userId),
+      supabase.from('template_creators').select('*').eq('user_id', userId).maybeSingle(),
+      supabase.from('site_templates').select('*').eq('creator_id', userId),
     ]);
 
     // Create PDF
@@ -109,6 +125,96 @@ export const exportUserDataToPDF = async (userId: string) => {
     } else {
       addText('No tributes shared');
     }
+    yPos += 5;
+
+    // Memorial Timelines Section
+    doc.setFontSize(16);
+    addText('Memorial Timelines', true);
+    doc.setFontSize(10);
+    if (timelines.data && timelines.data.length > 0) {
+      timelines.data.forEach((timeline: any) => {
+        addText(`- ${timeline.title} (${new Date(timeline.created_at).toLocaleDateString()})`, true);
+        if (timeline.description) {
+          const descLines = doc.splitTextToSize(`  ${timeline.description}`, 170);
+          descLines.forEach((line: string) => addText(line));
+        }
+        addText(`  Public: ${timeline.is_public ? 'Yes' : 'No'}`);
+      });
+    } else {
+      addText('No timelines created');
+    }
+    yPos += 5;
+
+    // Diary Entries Section
+    doc.setFontSize(16);
+    addText('Diary Entries', true);
+    doc.setFontSize(10);
+    if (diaryEntries.data && diaryEntries.data.length > 0) {
+      diaryEntries.data.forEach((entry: any) => {
+        addText(`- ${entry.title} (${new Date(entry.entry_date || entry.created_at).toLocaleDateString()})`, true);
+        if (entry.content) {
+          const contentLines = doc.splitTextToSize(`  ${entry.content}`, 170);
+          contentLines.forEach((line: string) => addText(line));
+        }
+        if (entry.tags && entry.tags.length > 0) {
+          addText(`  Tags: ${entry.tags.join(', ')}`);
+        }
+      });
+    } else {
+      addText('No diary entries');
+    }
+    yPos += 5;
+
+    // Trees Section
+    doc.setFontSize(16);
+    addText('Family & Friendship Trees', true);
+    doc.setFontSize(10);
+    if (trees.data && trees.data.length > 0) {
+      trees.data.forEach((tree: any) => {
+        addText(`- ${tree.name} (${tree.tree_type})`, true);
+        addText(`  Created: ${new Date(tree.created_at).toLocaleDateString()}`);
+        addText(`  Last Updated: ${new Date(tree.updated_at).toLocaleDateString()}`);
+      });
+    } else {
+      addText('No trees created');
+    }
+    yPos += 5;
+
+    // Creator Profile Section (if applicable)
+    if (creatorProfile.data) {
+      doc.setFontSize(16);
+      addText('Creator Profile', true);
+      doc.setFontSize(10);
+      addText(`Display Name: ${creatorProfile.data.display_name}`);
+      addText(`Country: ${creatorProfile.data.country}`);
+      addText(`Status: ${creatorProfile.data.approved ? 'Approved' : 'Pending Approval'}`);
+      if (creatorProfile.data.description) {
+        const descLines = doc.splitTextToSize(`Description: ${creatorProfile.data.description}`, 170);
+        descLines.forEach((line: string) => addText(line));
+      }
+      if (creatorProfile.data.portfolio) {
+        addText(`Portfolio: ${creatorProfile.data.portfolio}`);
+      }
+      yPos += 5;
+
+      // Creator Templates Section
+      doc.setFontSize(16);
+      addText('Templates Created', true);
+      doc.setFontSize(10);
+      if (creatorTemplates.data && creatorTemplates.data.length > 0) {
+        creatorTemplates.data.forEach((template: any) => {
+          addText(`- ${template.name} (€${template.price})`, true);
+          if (template.description) {
+            const descLines = doc.splitTextToSize(`  ${template.description}`, 170);
+            descLines.forEach((line: string) => addText(line));
+          }
+          addText(`  Country: ${template.country}`);
+          addText(`  Free: ${template.is_free ? 'Yes' : 'No'}`);
+        });
+      } else {
+        addText('No templates created');
+      }
+    }
 
     // Footer
     doc.setFontSize(8);
@@ -117,7 +223,7 @@ export const exportUserDataToPDF = async (userId: string) => {
     doc.text(footerText, 105, pageHeight - 10, { align: 'center' });
 
     // Download
-    doc.save('reflectlife-user-data-export.pdf');
+    doc.save(`user_export_${userId}.pdf`);
     return true;
   } catch (error) {
     console.error('Export error:', error);
