@@ -9,7 +9,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Image as ImageIcon, MapPin, Calendar, Loader2, Share2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import type { User } from "@supabase/supabase-js";
 import { CommentsModal } from "@/components/CommentsModal";
 import { SharePostModal } from "@/components/SharePostModal";
 import { cn } from "@/utils";
@@ -18,6 +17,7 @@ import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { LazyImage } from "@/components/LazyImage";
 import { PostSkeleton } from "@/components/PostSkeleton";
 import { useProfilePreload } from "@/hooks/useProfilePreload";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Tooltip,
   TooltipContent,
@@ -44,7 +44,7 @@ interface Post {
 const POSTS_PER_PAGE = 10;
 
 const Timeline = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
   const [page, setPage] = useState(1);
   const [uploading, setUploading] = useState(false);
   const [caption, setCaption] = useState("");
@@ -61,16 +61,6 @@ const Timeline = () => {
   useProfilePreload(user?.id);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-
     // Real-time subscription for posts
     const channel = supabase
       .channel('memorial-posts-changes')
@@ -80,7 +70,6 @@ const Timeline = () => {
       .subscribe();
 
     return () => {
-      subscription.unsubscribe();
       supabase.removeChannel(channel);
     };
   }, [queryClient]);

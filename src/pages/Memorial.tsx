@@ -14,15 +14,16 @@ import { TributeModal } from "@/components/TributeModal";
 import { ShareMemorialModal } from "@/components/ShareMemorialModal";
 import { Trash2 } from "lucide-react";
 import { LazyImage } from "@/components/LazyImage";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Memorial = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const templateTheme = useTemplateTheme();
   const [memorial, setMemorial] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [likeCount, setLikeCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -30,13 +31,7 @@ const Memorial = () => {
 
   useEffect(() => {
     fetchMemorial();
-    checkAuth();
   }, [id]);
-
-  const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setCurrentUserId(user?.id || null);
-  };
 
   const fetchMemorial = async () => {
     try {
@@ -67,7 +62,7 @@ const Memorial = () => {
     }
   };
 
-  const isCreator = currentUserId && memorial?.user_id === currentUserId;
+  const isCreator = user?.id && memorial?.user_id === user.id;
   const [timelineEntries, setTimelineEntries] = useState<any[]>([]);
   const [tributePosts, setTributePosts] = useState<any[]>([]);
   const [galleryMedia, setGalleryMedia] = useState<any[]>([]);
@@ -142,8 +137,6 @@ const Memorial = () => {
   };
 
   const handleSubmitTribute = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-
     if (!user) {
       toast({
         title: "Authentication required",
@@ -484,7 +477,7 @@ const Memorial = () => {
                           <span className="text-sm text-muted-foreground">
                             {new Date(tribute.created_at).toLocaleDateString()}
                           </span>
-                          {currentUserId === tribute.user_id && (
+                          {user?.id === tribute.user_id && (
                             <>
                               <span className="text-sm text-muted-foreground">•</span>
                               <Button

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Users, Plus, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import CreateMemorialModal from "@/components/CreateMemorialModal";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import timelineBg from "@/assets/timeline-bg.jpg";
 import { format } from "date-fns";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Memorial {
   id: string;
@@ -37,20 +38,11 @@ const MEMORIALS_PER_PAGE = 12;
 const Memorials = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const { backgroundUrl: purchasedBackground } = useTemplateBackground();
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setUser(user);
-  };
 
   const fetchMemorials = async (pageNum: number): Promise<Memorial[]> => {
     const from = (pageNum - 1) * MEMORIALS_PER_PAGE;
