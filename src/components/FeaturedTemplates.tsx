@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { getCountryFlag } from "@/lib/countryFlags";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
+import { LazyImage } from "./LazyImage";
 
 interface Template {
   id: string;
@@ -17,49 +19,40 @@ interface Template {
 }
 
 const FeaturedTemplates = () => {
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  useEffect(() => {
-    checkAuth();
-    fetchFreeTemplates();
-  }, []);
+  // Fetch featured templates with React Query
+  const { data: templates = [], isLoading } = useQuery({
+    queryKey: ['featured-templates'],
+    queryFn: async () => {
+      const [freeResult, paidResult] = await Promise.all([
+        supabase
+          .from("site_templates")
+          .select("id, name, country, preview_url, is_free, price")
+          .eq("is_free", true)
+          .order("created_at", { ascending: false })
+          .limit(2),
+        supabase
+          .from("site_templates")
+          .select("id, name, country, preview_url, is_free, price")
+          .eq("is_free", false)
+          .order("created_at", { ascending: false })
+          .limit(2)
+      ]);
 
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      setUserId(session.user.id);
-    }
-  };
+      if (freeResult.error) throw freeResult.error;
+      if (paidResult.error) throw paidResult.error;
 
-  const fetchFreeTemplates = async () => {
-    // Fetch 2 free templates
-    const { data: freeTemplates } = await supabase
-      .from("site_templates")
-      .select("id, name, country, preview_url, is_free, price")
-      .eq("is_free", true)
-      .order("created_at", { ascending: false })
-      .limit(2);
-
-    // Fetch 2 paid templates
-    const { data: paidTemplates } = await supabase
-      .from("site_templates")
-      .select("id, name, country, preview_url, is_free, price")
-      .eq("is_free", false)
-      .order("created_at", { ascending: false })
-      .limit(2);
-
-    if (freeTemplates && paidTemplates) {
-      setTemplates([...freeTemplates, ...paidTemplates]);
-    }
-    setLoading(false);
-  };
+      return [...(freeResult.data || []), ...(paidResult.data || [])];
+    },
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
+  });
 
   const handleBuyTemplate = (templateId: string, isFree: boolean) => {
-    if (!userId) {
+    if (!user) {
       toast({
         title: "Sign in required",
         description: "Please sign in to purchase a template",
@@ -74,11 +67,10 @@ const FeaturedTemplates = () => {
       return;
     }
 
-    // Redirect to checkout page
     navigate(`/checkout/${templateId}`);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -96,10 +88,11 @@ const FeaturedTemplates = () => {
             style={{ animationDelay: `${index * 100}ms` }}
           >
             <div className="aspect-[3/4] overflow-hidden">
-              <img
+              <LazyImage
                 src={template.preview_url || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
                 alt={template.name}
                 className="w-full h-full object-cover hover:scale-105 transition-smooth"
+                containerClassName="w-full h-full"
               />
             </div>
             <CardContent className="p-4 space-y-3">
