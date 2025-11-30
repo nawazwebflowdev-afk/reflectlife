@@ -23,7 +23,57 @@ Deno.serve(async (req) => {
 
     console.log('Webhook event received:', event.type);
 
-    if (event.type === 'checkout.session.completed') {
+    // Handle premium subscription checkout
+    if (event.type === 'checkout.session.completed' && event.data.object.mode === 'subscription') {
+      const session = event.data.object as Stripe.Checkout.Session;
+      
+      console.log('Processing premium subscription checkout:', session.id);
+      
+      const { user_id } = session.metadata || {};
+      
+      if (!user_id) {
+        console.error('Missing user_id in metadata');
+        return new Response('Missing user_id', { status: 400 });
+      }
+
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+      // Update user profile to premium
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ is_premium: true })
+        .eq('id', user_id);
+
+      if (profileError) {
+        console.error('Error updating profile to premium:', profileError);
+        return new Response('Error updating profile', { status: 500 });
+      }
+
+      // Create or update subscription record
+      const { error: subError } = await supabase
+        .from('premium_subscriptions')
+        .upsert({
+          user_id,
+          stripe_customer_id: session.customer as string,
+          stripe_subscription_id: session.subscription as string,
+          status: 'active',
+          current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+        });
+
+      if (subError) {
+        console.error('Error creating subscription record:', subError);
+        return new Response('Error creating subscription', { status: 500 });
+      }
+
+      console.log('Premium subscription activated successfully');
+      
+      return new Response(JSON.stringify({ received: true }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Handle template purchase checkout
+    if (event.type === 'checkout.session.completed' && event.data.object.mode === 'payment') {
       const session = event.data.object as Stripe.Checkout.Session;
       
       console.log('Processing checkout session:', session.id);

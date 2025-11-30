@@ -21,6 +21,7 @@ import { exportUserDataToPDF } from "@/utils/exportUserData";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CreatorWithdrawal } from "@/components/CreatorWithdrawal";
+import PremiumUpgrade from "@/components/PremiumUpgrade";
 import {
   Select,
   SelectContent,
@@ -66,6 +67,7 @@ const Settings = () => {
 
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
+  const [isPremium, setIsPremium] = useState(false);
   const [email, setEmail] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
@@ -75,6 +77,7 @@ const Settings = () => {
       setFullName(profile.full_name || "");
       setUsername(profile.username || "");
       setAvatarUrl(profile.avatar_url || null);
+      setIsPremium((profile as any).is_premium || false);
     }
     if (user?.email) {
       setEmail(user.email);
@@ -598,6 +601,11 @@ const Settings = () => {
               <h2 className="text-2xl font-serif font-bold mb-4">Creator Earnings</h2>
               <CreatorWithdrawal />
             </div>
+          )}
+
+          {/* Premium Upgrade - Only for non-premium users */}
+          {!isPremium && (
+            <PremiumUpgrade />
           )}
 
           {/* Share Your Design - Only for Approved Creators */}
