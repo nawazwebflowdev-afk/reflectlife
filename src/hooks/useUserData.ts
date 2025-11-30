@@ -74,12 +74,26 @@ export const useUserData = (userId: string | undefined) => {
             .eq('buyer_id', userId)
             .eq('payment_status', 'succeeded'),
           
-          // Likes count - optimized with aggregation
-          supabase
-            .from('memorial_likes')
-            .select('id', { count: 'exact', head: true })
-            .eq('memorial_posts.user_id', userId)
-            .not('post_id', 'is', null)
+          // Likes count - fetch user's posts first, then count likes
+          (async () => {
+            // Get user's post IDs
+            const { data: userPosts } = await supabase
+              .from('memorial_posts')
+              .select('id')
+              .eq('user_id', userId);
+            
+            if (!userPosts || userPosts.length === 0) {
+              return { count: 0, error: null };
+            }
+            
+            const postIds = userPosts.map(p => p.id);
+            
+            // Count likes on those posts
+            return supabase
+              .from('memorial_likes')
+              .select('id', { count: 'exact', head: true })
+              .in('post_id', postIds);
+          })()
         ])
       ]);
 
@@ -100,5 +114,6 @@ export const useUserData = (userId: string | undefined) => {
     enabled: !!userId,
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes
+    retry: 1,
   });
 };

@@ -410,7 +410,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "memorial_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       memorial_timelines: {
         Row: {
@@ -760,7 +768,15 @@ export type Database = {
           preview_url?: string | null
           price?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "site_templates_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       support_messages: {
         Row: {
