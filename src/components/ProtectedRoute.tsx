@@ -1,23 +1,61 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface ProtectedRouteProps {
   children: ReactNode;
 }
 
-export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
+const LOAD_TIMEOUT_MS = 8000; // 8 seconds max wait for auth
 
+export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+  const { user, loading, initialized } = useAuth();
+  const navigate = useNavigate();
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+
+  // Timeout to prevent infinite loading
   useEffect(() => {
-    if (!loading && !user) {
+    if (!initialized && !hasTimedOut) {
+      const timer = setTimeout(() => {
+        setHasTimedOut(true);
+      }, LOAD_TIMEOUT_MS);
+      return () => clearTimeout(timer);
+    }
+  }, [initialized, hasTimedOut]);
+
+  // Redirect to login if not authenticated (after initialization)
+  useEffect(() => {
+    if (initialized && !user) {
       navigate('/login', { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, initialized, navigate]);
 
-  if (loading) {
+  // Show timeout error
+  if (hasTimedOut && !initialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="p-6 text-center">
+            <AlertCircle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Connection Issue</h2>
+            <p className="text-muted-foreground mb-4">
+              We're having trouble connecting. Please check your internet and try again.
+            </p>
+            <Button onClick={() => window.location.reload()}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Page
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show loading while auth initializes
+  if (loading || !initialized) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -28,6 +66,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
+  // Not authenticated - will redirect
   if (!user) {
     return null;
   }
