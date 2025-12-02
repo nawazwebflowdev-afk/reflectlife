@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, User, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import reflectlifeLogo from "@/assets/reflectlife-logo.png";
 import {
   DropdownMenu,
@@ -19,32 +20,28 @@ import NotificationsDropdown from "@/components/NotificationsDropdown";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [profile, setProfile] = useState<{ full_name?: string; avatar_url?: string } | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, signOut } = useAuth();
   const isAuthenticated = !!user;
 
-  useEffect(() => {
-    if (user?.id) {
-      fetchProfile(user.id);
-    } else {
-      setProfile(null);
-    }
-  }, [user?.id]);
-
-  const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("full_name, avatar_url")
-      .eq("id", userId)
-      .single();
-    
-    if (data) {
-      setProfile(data);
-    }
-  };
+  // Use React Query for profile - cached and efficient
+  const { data: profile } = useQuery({
+    queryKey: ['nav-profile', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, avatar_url")
+        .eq("id", user.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
+  });
 
   const handleSignOut = async () => {
     try {

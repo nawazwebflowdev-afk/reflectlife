@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Heart, Share2, Clock, Shield, MessageCircle, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,18 +12,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { LazyImage } from "@/components/LazyImage";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Landing = () => {
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setUser(user);
-  };
+  // Use global auth context instead of local state
+  const { user, loading: authLoading } = useAuth();
 
   // Fetch timeline posts with React Query - optimized with JOIN
   const { data: timelinePosts = [], isLoading: loadingPosts } = useQuery({
