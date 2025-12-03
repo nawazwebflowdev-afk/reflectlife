@@ -13,6 +13,7 @@ export const exportUserDataToPDF = async (userId: string) => {
       timelines,
       diaryEntries,
       trees,
+      connections,
       creatorProfile,
       creatorTemplates
     ] = await Promise.all([
@@ -24,6 +25,7 @@ export const exportUserDataToPDF = async (userId: string) => {
       supabase.from('memorial_timelines').select('*').eq('user_id', userId),
       supabase.from('diary_entries').select('*').eq('user_id', userId),
       supabase.from('trees').select('*').eq('user_id', userId),
+      supabase.from('connections').select('*').eq('owner_id', userId),
       supabase.from('template_creators').select('*').eq('user_id', userId).maybeSingle(),
       supabase.from('site_templates').select('*').eq('creator_id', userId),
     ]);
@@ -177,6 +179,21 @@ export const exportUserDataToPDF = async (userId: string) => {
       });
     } else {
       addText('No trees created');
+    }
+    yPos += 5;
+
+    // Tree Connections Section
+    doc.setFontSize(16);
+    addText('Tree Connections', true);
+    doc.setFontSize(10);
+    if (connections.data && connections.data.length > 0) {
+      connections.data.forEach((connection: any) => {
+        addText(`- ${connection.related_person_name || 'Unnamed'} (${connection.relationship_type})`, true);
+        addText(`  Type: ${connection.connection_type}`);
+        addText(`  Added: ${new Date(connection.created_at).toLocaleDateString()}`);
+      });
+    } else {
+      addText('No tree connections');
     }
     yPos += 5;
 

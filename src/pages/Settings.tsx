@@ -1,4 +1,4 @@
-import { User, Bell, Lock, Download, Trash2, Palette, Upload, X, Loader2, Share2, Star } from "lucide-react";
+import { User, Bell, Lock, Download, Trash2, Palette, Upload, X, Loader2, Share2, Star, LogOut } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,6 @@ import { exportUserDataToPDF } from "@/utils/exportUserData";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CreatorWithdrawal } from "@/components/CreatorWithdrawal";
-import PremiumUpgrade from "@/components/PremiumUpgrade";
 import {
   Select,
   SelectContent,
@@ -39,6 +38,10 @@ const Settings = () => {
   const [reviewMessage, setReviewMessage] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [isExportingData, setIsExportingData] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -67,7 +70,6 @@ const Settings = () => {
 
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
-  const [isPremium, setIsPremium] = useState(false);
   const [email, setEmail] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
@@ -77,7 +79,6 @@ const Settings = () => {
       setFullName(profile.full_name || "");
       setUsername(profile.username || "");
       setAvatarUrl(profile.avatar_url || null);
-      setIsPremium((profile as any).is_premium || false);
     }
     if (user?.email) {
       setEmail(user.email);
@@ -321,6 +322,69 @@ const Settings = () => {
     }
   };
 
+  const handleUpdatePassword = async () => {
+    if (!newPassword) {
+      toast({
+        title: "Error",
+        description: "Please enter a new password",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Password updated successfully",
+      });
+      setCurrentPassword("");
+      setNewPassword("");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update password",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Signed Out",
+        description: "You have been signed out successfully",
+      });
+      navigate("/auth");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to sign out",
+        variant: "destructive",
+      });
+      setIsSigningOut(false);
+    }
+  };
+
 
   return (
     <div 
@@ -523,18 +587,35 @@ const Settings = () => {
                 <Lock className="h-5 w-5 text-primary" />
                 <CardTitle>Privacy & Security</CardTitle>
               </div>
-              <CardDescription>Control your privacy settings</CardDescription>
+              <CardDescription>Update your password</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="current-password">Current Password</Label>
-                <Input id="current-password" type="password" placeholder="••••••••" />
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="new-password">New Password</Label>
-                <Input id="new-password" type="password" placeholder="••••••••" />
+                <Input 
+                  id="new-password" 
+                  type="password" 
+                  placeholder="••••••••"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Password must be at least 6 characters
+                </p>
               </div>
-              <Button>Update Password</Button>
+              <Button 
+                onClick={handleUpdatePassword}
+                disabled={isUpdatingPassword || !newPassword}
+              >
+                {isUpdatingPassword ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update Password"
+                )}
+              </Button>
             </CardContent>
           </Card>
 
@@ -603,11 +684,6 @@ const Settings = () => {
             </div>
           )}
 
-          {/* Premium Upgrade - Only for non-premium users */}
-          {!isPremium && (
-            <PremiumUpgrade />
-          )}
-
           {/* Share Your Design - Only for Approved Creators */}
           {isApprovedCreator && (
             <Card className="shadow-elegant">
@@ -656,6 +732,39 @@ const Settings = () => {
                   <>
                     <Download className="mr-2 h-4 w-4" />
                     Export Data (PDF)
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Sign Out */}
+          <Card className="shadow-elegant">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <LogOut className="h-5 w-5 text-primary" />
+                <CardTitle>Sign Out</CardTitle>
+              </div>
+              <CardDescription>Sign out of your account</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Sign out from this device. You can sign back in anytime.
+              </p>
+              <Button 
+                variant="outline" 
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+              >
+                {isSigningOut ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing Out...
+                  </>
+                ) : (
+                  <>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
                   </>
                 )}
               </Button>
