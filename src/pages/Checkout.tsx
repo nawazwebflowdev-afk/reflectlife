@@ -26,81 +26,97 @@ const Checkout = () => {
   const [processing, setProcessing] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [alreadyOwned, setAlreadyOwned] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        setError("Loading timed out. Please try again.");
+      }
+    }, 10000); // 10 second timeout
+
     checkAuthAndFetchTemplate();
+    return () => clearTimeout(timeoutId);
   }, [templateId]);
 
   const checkAuthAndFetchTemplate = async () => {
-    // Check authentication
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session?.user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to purchase templates",
-        variant: "destructive",
-      });
-      navigate("/login");
-      return;
+    try {
+      // Check authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to purchase templates",
+          variant: "destructive",
+        });
+        navigate("/login");
+        return;
+      }
+
+      setUserId(session.user.id);
+
+      if (!templateId) {
+        toast({
+          title: "Invalid Template",
+          description: "Template not found",
+          variant: "destructive",
+        });
+        navigate("/templates");
+        return;
+      }
+
+      // Fetch template details
+      const { data: templateData, error: templateError } = await supabase
+        .from("site_templates")
+        .select("*")
+        .eq("id", templateId)
+        .single();
+
+      if (templateError || !templateData) {
+        setError("Template not found");
+        toast({
+          title: "Template Not Found",
+          description: "The requested template does not exist",
+          variant: "destructive",
+        });
+        navigate("/templates");
+        return;
+      }
+
+      // Check if template is free
+      if (templateData.is_free) {
+        toast({
+          title: "Free Template",
+          description: "This template is free. Redirecting...",
+        });
+        navigate("/templates");
+        return;
+      }
+
+      // Check if user already owns this template
+      const { data: purchaseData } = await supabase
+        .from("template_purchases")
+        .select("id")
+        .eq("buyer_id", session.user.id)
+        .eq("template_id", templateId)
+        .or("payment_status.eq.completed,payment_status.eq.succeeded")
+        .maybeSingle();
+
+      if (purchaseData) {
+        setAlreadyOwned(true);
+      }
+
+      setTemplate(templateData);
+      setLoading(false);
+    } catch (err: any) {
+      console.error("Checkout fetch error:", err);
+      setError(err.message || "Failed to load checkout");
+      setLoading(false);
     }
-
-    setUserId(session.user.id);
-
-    if (!templateId) {
-      toast({
-        title: "Invalid Template",
-        description: "Template not found",
-        variant: "destructive",
-      });
-      navigate("/templates");
-      return;
-    }
-
-    // Fetch template details
-    const { data: templateData, error: templateError } = await supabase
-      .from("site_templates")
-      .select("*")
-      .eq("id", templateId)
-      .single();
-
-    if (templateError || !templateData) {
-      toast({
-        title: "Template Not Found",
-        description: "The requested template does not exist",
-        variant: "destructive",
-      });
-      navigate("/templates");
-      return;
-    }
-
-    // Check if template is free
-    if (templateData.is_free) {
-      toast({
-        title: "Free Template",
-        description: "This template is free. Redirecting...",
-      });
-      navigate("/templates");
-      return;
-    }
-
-    // Check if user already owns this template
-    const { data: purchaseData } = await supabase
-      .from("template_purchases")
-      .select("id")
-      .eq("buyer_id", session.user.id)
-      .eq("template_id", templateId)
-      .eq("payment_status", "success")
-      .single();
-
-    if (purchaseData) {
-      setAlreadyOwned(true);
-    }
-
-    setTemplate(templateData);
-    setLoading(false);
   };
 
   const handlePayment = async () => {
@@ -137,13 +153,26 @@ const Checkout = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <div className="text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading checkout...</p>
+        </div>
       </div>
     );
   }
 
-  if (!template) {
-    return null;
+  if (error || !template) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="p-6 text-center">
+            <h2 className="text-xl font-semibold mb-2">Unable to Load Checkout</h2>
+            <p className="text-muted-foreground mb-4">{error || "Template not found"}</p>
+            <Button onClick={() => navigate("/templates")}>Browse Templates</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

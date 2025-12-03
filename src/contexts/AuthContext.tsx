@@ -25,41 +25,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let isMounted = true;
     let timeoutId: NodeJS.Timeout;
+    let hasInitialized = false;
 
-    // Set a timeout to prevent infinite loading
-    timeoutId = setTimeout(() => {
-      if (isMounted && loading) {
-        console.warn('Auth initialization timed out, proceeding without session');
-        setLoading(false);
-        setInitialized(true);
-      }
-    }, AUTH_TIMEOUT_MS);
-
-    // Set up auth state listener FIRST (critical order)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (isMounted) {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-        setInitialized(true);
-      }
-    });
-
-    // THEN get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (isMounted) {
-        setSession(session);
-        setUser(session?.user ?? null);
+    const finishInit = (newSession: Session | null) => {
+      if (isMounted && !hasInitialized) {
+        hasInitialized = true;
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
         setLoading(false);
         setInitialized(true);
         clearTimeout(timeoutId);
       }
+    };
+
+    // Set a timeout to prevent infinite loading
+    timeoutId = setTimeout(() => {
+      if (isMounted && !hasInitialized) {
+        console.warn('Auth initialization timed out, proceeding without session');
+        finishInit(null);
+      }
+    }, AUTH_TIMEOUT_MS);
+
+    // Set up auth state listener FIRST (critical order)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      if (isMounted) {
+        // Only update if already initialized or this is the first call
+        if (hasInitialized) {
+          setSession(newSession);
+          setUser(newSession?.user ?? null);
+        } else {
+          finishInit(newSession);
+        }
+      }
+    });
+
+    // THEN get initial session
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      finishInit(initialSession);
     }).catch((error) => {
       console.error('Error getting session:', error);
-      if (isMounted) {
-        setLoading(false);
-        setInitialized(true);
-      }
+      finishInit(null);
     });
 
     return () => {
@@ -71,6 +76,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = useCallback(async () => {
     try {
+      // Clear profile cache
+      try {
+        localStorage.removeItem('reflectlife_profile_cache');
+      } catch {}
+      
       await supabase.auth.signOut();
       setSession(null);
       setUser(null);
