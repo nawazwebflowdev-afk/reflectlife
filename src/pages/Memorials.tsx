@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Users, Plus, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTemplateBackground } from "@/hooks/useTemplateBackground";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { LazyImage } from "@/components/LazyImage";
@@ -43,6 +43,21 @@ const Memorials = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Real-time subscription for new memorials
+  useEffect(() => {
+    const channel = supabase
+      .channel('memorials-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'memorials' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['memorials'] });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const fetchMemorials = async (pageNum: number): Promise<Memorial[]> => {
     const from = (pageNum - 1) * MEMORIALS_PER_PAGE;

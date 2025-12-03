@@ -127,11 +127,11 @@ const BecomeCreator = () => {
         variant: "destructive",
       });
     } else {
+      setIsPending(true);
       toast({
-        title: "Application Submitted",
-        description: "Your application has been submitted. You'll be notified when approved.",
+        title: "Application Submitted! 🎨",
+        description: "Your creator application is under review. You'll be notified when approved!",
       });
-      navigate("/dashboard");
     }
   };
 
