@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, MessageCircle, Loader2 } from "lucide-react";
+import { Mail, MessageCircle, Loader2, Copy, Link2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
@@ -29,10 +29,29 @@ export const SharePostModal = ({
   postId,
   postCaption,
 }: SharePostModalProps) => {
-  const [shareMethod, setShareMethod] = useState<"email" | "whatsapp" | null>(null);
+  const [shareMethod, setShareMethod] = useState<"email" | "whatsapp" | "gmail" | null>(null);
   const [recipientEmail, setRecipientEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  const postUrl = `${window.location.origin}/timeline#post-${postId}`;
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(postUrl);
+      toast({
+        title: "Link copied! 📋",
+        description: "Post link has been copied to your clipboard.",
+      });
+      onOpenChange(false);
+    } catch (error) {
+      toast({
+        title: "Unable to copy",
+        description: "Please try copying manually.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleEmailShare = async () => {
     try {
@@ -77,8 +96,20 @@ export const SharePostModal = ({
     }
   };
 
+  const handleGmailShare = () => {
+    const subject = encodeURIComponent("A special memory from Reflectlife");
+    const body = encodeURIComponent(
+      `I'd like to share this memory with you from Reflectlife:\n\n${postCaption || "A special memory"}\n\nView it here: ${postUrl}`
+    );
+    window.open(`https://mail.google.com/mail/?view=cm&fs=1&su=${subject}&body=${body}`, "_blank");
+    toast({
+      title: "Opening Gmail",
+      description: "Compose your email in Gmail",
+    });
+    onOpenChange(false);
+  };
+
   const handleWhatsAppShare = () => {
-    const postUrl = `${window.location.origin}/timeline#post-${postId}`;
     const message = encodeURIComponent(
       `I'd like to share this memory with you from Reflectlife:\n\n${postCaption || "A special memory"}\n\n${postUrl}`
     );
@@ -111,15 +142,43 @@ export const SharePostModal = ({
         {!shareMethod ? (
           <div className="flex flex-col gap-3">
             <Button
-              onClick={() => setShareMethod("email")}
+              onClick={handleCopyLink}
+              className="w-full justify-start gap-3 h-auto py-4"
+              variant="outline"
+            >
+              <Copy className="h-5 w-5" />
+              <div className="text-left">
+                <div className="font-semibold">Copy Link</div>
+                <div className="text-xs text-muted-foreground">
+                  Copy post URL to clipboard
+                </div>
+              </div>
+            </Button>
+
+            <Button
+              onClick={() => setShareMethod("gmail")}
               className="w-full justify-start gap-3 h-auto py-4"
               variant="outline"
             >
               <Mail className="h-5 w-5" />
               <div className="text-left">
-                <div className="font-semibold">Share via Email</div>
+                <div className="font-semibold">Share via Gmail</div>
                 <div className="text-xs text-muted-foreground">
-                  Send this memory to a friend's inbox
+                  Open Gmail to compose an email
+                </div>
+              </div>
+            </Button>
+
+            <Button
+              onClick={() => setShareMethod("email")}
+              className="w-full justify-start gap-3 h-auto py-4"
+              variant="outline"
+            >
+              <Link2 className="h-5 w-5" />
+              <div className="text-left">
+                <div className="font-semibold">Send via Email</div>
+                <div className="text-xs text-muted-foreground">
+                  Send this memory directly to a friend's inbox
                 </div>
               </div>
             </Button>
@@ -167,6 +226,24 @@ export const SharePostModal = ({
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Send Email
+              </Button>
+            </div>
+          </div>
+        ) : shareMethod === "gmail" ? (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Clicking continue will open Gmail with a pre-filled email containing this memory.
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={resetModal}
+                className="flex-1"
+              >
+                Back
+              </Button>
+              <Button onClick={handleGmailShare} className="flex-1">
+                Continue to Gmail
               </Button>
             </div>
           </div>
