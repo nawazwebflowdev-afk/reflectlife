@@ -14,6 +14,7 @@ import { useTemplateBackground } from "@/hooks/useTemplateBackground";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import DeleteAccountModal from "@/components/DeleteAccountModal";
+import { SignOutModal } from "@/components/SignOutModal";
 import { Textarea } from "@/components/ui/textarea";
 import { ThemeSelector } from "@/components/ThemeSelector";
 import { TemplateBackgroundSelector } from "@/components/TemplateBackgroundSelector";
@@ -34,6 +35,7 @@ const Settings = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
   const [rating, setRating] = useState(0);
   const [reviewMessage, setReviewMessage] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -381,7 +383,9 @@ const Settings = () => {
         description: error.message || "Failed to sign out",
         variant: "destructive",
       });
+    } finally {
       setIsSigningOut(false);
+      setShowSignOutModal(false);
     }
   };
 
@@ -753,20 +757,10 @@ const Settings = () => {
               </p>
               <Button 
                 variant="outline" 
-                onClick={handleSignOut}
-                disabled={isSigningOut}
+                onClick={() => setShowSignOutModal(true)}
               >
-                {isSigningOut ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing Out...
-                  </>
-                ) : (
-                  <>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign Out
-                  </>
-                )}
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
               </Button>
             </CardContent>
           </Card>
@@ -794,6 +788,14 @@ const Settings = () => {
           </Card>
         </div>
       </div>
+
+      {/* Sign Out Modal */}
+      <SignOutModal
+        open={showSignOutModal}
+        onOpenChange={setShowSignOutModal}
+        onConfirm={handleSignOut}
+        isLoading={isSigningOut}
+      />
 
       {/* Delete Account Modal */}
       {user?.id && (
