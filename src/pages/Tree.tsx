@@ -343,18 +343,23 @@ const Tree = () => {
       };
     });
 
-    // Create edges
-    const connectionEdges: Edge[] = filteredConnections.map((conn) => ({
-      id: `edge-${conn.id}`,
-      source: currentUser.id,
-      target: conn.id,
-      type: "smoothstep",
-      style: {
-        stroke: mode === "family" ? "hsl(var(--primary))" : "hsl(var(--accent))",
-        strokeWidth: 2,
-      },
-      animated: mode === "friendship",
-    }));
+    // Create edges - respect parent_connection_id for hierarchical connections
+    const connectionEdges: Edge[] = filteredConnections.map((conn) => {
+      // If connection has a parent_connection_id, connect to that parent instead of center
+      const sourceId = conn.parent_connection_id || currentUser.id;
+      
+      return {
+        id: `edge-${conn.id}`,
+        source: sourceId,
+        target: conn.id,
+        type: "smoothstep",
+        style: {
+          stroke: mode === "family" ? "hsl(var(--primary))" : "hsl(var(--accent))",
+          strokeWidth: 2,
+        },
+        animated: mode === "friendship",
+      };
+    });
 
     setNodes([centerNode, ...connectionNodes]);
     setEdges(connectionEdges);
