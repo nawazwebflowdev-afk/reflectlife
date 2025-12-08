@@ -15,7 +15,7 @@ import { useTemplateBackground } from "@/hooks/useTemplateBackground";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, Share2 } from "lucide-react";
+import { Plus, Loader2, Share2, ChevronDown, ChevronRight } from "lucide-react";
 import AddConnectionModal from "@/components/tree/AddConnectionModal";
 import ShareTreeModal from "@/components/tree/ShareTreeModal";
 import ConnectionDetailPanel from "@/components/tree/ConnectionDetailPanel";
@@ -54,6 +54,7 @@ const Tree = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
+  const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const { backgroundUrl } = useTemplateBackground();
   const { backgroundUrl: themeBackgroundUrl } = useTemplateTheme();
@@ -128,6 +129,38 @@ const Tree = () => {
     connections.filter((conn) => conn.connection_type === mode),
     [connections, mode]
   );
+
+  // Get children count for a connection
+  const getChildrenCount = useCallback((connectionId: string) => {
+    return connections.filter(conn => conn.parent_connection_id === connectionId && conn.connection_type === mode).length;
+  }, [connections, mode]);
+
+  // Get all descendant IDs (for hiding when collapsed)
+  const getDescendantIds = useCallback((connectionId: string, visited = new Set<string>()): Set<string> => {
+    if (visited.has(connectionId)) return visited;
+    visited.add(connectionId);
+    
+    const children = connections.filter(conn => conn.parent_connection_id === connectionId && conn.connection_type === mode);
+    children.forEach(child => {
+      getDescendantIds(child.id, visited);
+    });
+    
+    return visited;
+  }, [connections, mode]);
+
+  // Toggle collapse state for a node
+  const toggleCollapse = useCallback((nodeId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCollapsedNodes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(nodeId)) {
+        newSet.delete(nodeId);
+      } else {
+        newSet.add(nodeId);
+      }
+      return newSet;
+    });
+  }, []);
 
   // Build graph structure with memoization
   useEffect(() => {
@@ -235,8 +268,20 @@ const Tree = () => {
       draggable: false,
     };
 
+    // Determine which nodes should be hidden due to collapsed ancestors
+    const hiddenNodeIds = new Set<string>();
+    collapsedNodes.forEach(collapsedId => {
+      const descendants = getDescendantIds(collapsedId);
+      descendants.forEach(id => {
+        if (id !== collapsedId) hiddenNodeIds.add(id);
+      });
+    });
+
+    // Filter visible connections
+    const visibleConnections = filteredConnections.filter(conn => !hiddenNodeIds.has(conn.id));
+
     // Create nodes for connected people
-    const connectionNodes: Node[] = filteredConnections.map((conn, index) => {
+    const connectionNodes: Node[] = visibleConnections.map((conn, index) => {
       // Use saved positions or calculate default layout
       let x, y;
       if (conn.x_pos !== undefined && conn.y_pos !== undefined && conn.x_pos !== 0 && conn.y_pos !== 0) {
@@ -245,22 +290,22 @@ const Tree = () => {
       } else {
         if (mode === "family") {
           // Hierarchical layout for family tree
-          const parentsCount = filteredConnections.filter(c => 
+          const parentsCount = visibleConnections.filter(c => 
             c.relationship_type.toLowerCase().includes("parent") || 
             c.relationship_type.toLowerCase().includes("grandparent")
           ).length;
-          const siblingsCount = filteredConnections.filter(c => 
+          const siblingsCount = visibleConnections.filter(c => 
             c.relationship_type.toLowerCase().includes("sibling") || 
             c.relationship_type.toLowerCase().includes("cousin")
           ).length;
-          const childrenCount = filteredConnections.filter(c => 
+          const childrenCount = visibleConnections.filter(c => 
             c.relationship_type.toLowerCase().includes("child") || 
             c.relationship_type.toLowerCase().includes("grandchild")
           ).length;
 
           if (conn.relationship_type.toLowerCase().includes("parent") || 
               conn.relationship_type.toLowerCase().includes("grandparent")) {
-            const parentIndex = filteredConnections.filter(c => 
+            const parentIndex = visibleConnections.filter(c => 
               c.relationship_type.toLowerCase().includes("parent") || 
               c.relationship_type.toLowerCase().includes("grandparent")
             ).indexOf(conn);
@@ -268,7 +313,7 @@ const Tree = () => {
             y = 50;
           } else if (conn.relationship_type.toLowerCase().includes("sibling") || 
                      conn.relationship_type.toLowerCase().includes("cousin")) {
-            const siblingIndex = filteredConnections.filter(c => 
+            const siblingIndex = visibleConnections.filter(c => 
               c.relationship_type.toLowerCase().includes("sibling") || 
               c.relationship_type.toLowerCase().includes("cousin")
             ).indexOf(conn);
@@ -276,7 +321,7 @@ const Tree = () => {
             y = 300;
           } else if (conn.relationship_type.toLowerCase().includes("child") || 
                      conn.relationship_type.toLowerCase().includes("grandchild")) {
-            const childIndex = filteredConnections.filter(c => 
+            const childIndex = visibleConnections.filter(c => 
               c.relationship_type.toLowerCase().includes("child") || 
               c.relationship_type.toLowerCase().includes("grandchild")
             ).indexOf(conn);
@@ -289,7 +334,7 @@ const Tree = () => {
           }
         } else {
           // Circular layout for friendship web
-          const angle = (2 * Math.PI * index) / filteredConnections.length;
+          const angle = (2 * Math.PI * index) / visibleConnections.length;
           const radius = 250;
           x = 400 + radius * Math.cos(angle);
           y = 300 + radius * Math.sin(angle);
@@ -304,6 +349,8 @@ const Tree = () => {
         ? (conn.profile?.avatar_url || "/placeholder.svg")
         : (conn.image_url || "/placeholder.svg");
       const isDeceased = conn.person_id && conn.profile?.is_deceased;
+      const childCount = getChildrenCount(conn.id);
+      const isCollapsed = collapsedNodes.has(conn.id);
 
       return {
         id: nodeId,
@@ -323,12 +370,29 @@ const Tree = () => {
                 {isDeceased && (
                   <div className="absolute -top-1 -right-1 text-xl">🕯️</div>
                 )}
+                {/* Child count badge */}
+                {childCount > 0 && (
+                  <button
+                    onClick={(e) => toggleCollapse(conn.id, e)}
+                    className="absolute -bottom-1 -right-1 flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full text-xs font-bold shadow-md hover:scale-110 transition-transform"
+                    title={isCollapsed ? `Expand ${childCount} connections` : `Collapse ${childCount} connections`}
+                  >
+                    {isCollapsed ? (
+                      <ChevronRight className="w-3 h-3" />
+                    ) : (
+                      <span>{childCount}</span>
+                    )}
+                  </button>
+                )}
               </div>
               <div className="text-xs font-medium text-center max-w-[100px] truncate bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded">
                 {displayName}
               </div>
-              <div className="text-xs text-muted-foreground text-center bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded">
+              <div className="flex items-center gap-1 text-xs text-muted-foreground text-center bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded">
                 {conn.relationship_type}
+                {childCount > 0 && isCollapsed && (
+                  <span className="text-primary font-medium">+{childCount}</span>
+                )}
               </div>
             </div>
           ),
@@ -343,8 +407,8 @@ const Tree = () => {
       };
     });
 
-    // Create edges - respect parent_connection_id for hierarchical connections
-    const connectionEdges: Edge[] = filteredConnections.map((conn) => {
+    // Create edges - only for visible connections
+    const connectionEdges: Edge[] = visibleConnections.map((conn) => {
       // If connection has a parent_connection_id, connect to that parent instead of center
       const sourceId = conn.parent_connection_id || currentUser.id;
       
@@ -363,7 +427,7 @@ const Tree = () => {
 
     setNodes([centerNode, ...connectionNodes]);
     setEdges(connectionEdges);
-  }, [filteredConnections, currentUser, mode]);
+  }, [filteredConnections, currentUser, mode, collapsedNodes, getChildrenCount, getDescendantIds, toggleCollapse]);
 
   // Save node position when dragging ends
   const onNodeDragStop = useCallback(async (_: any, node: Node) => {
