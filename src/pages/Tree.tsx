@@ -15,7 +15,7 @@ import { useTemplateBackground } from "@/hooks/useTemplateBackground";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, Share2, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Loader2, Share2, ChevronDown, ChevronRight, UserPlus } from "lucide-react";
 import AddConnectionModal from "@/components/tree/AddConnectionModal";
 import ShareTreeModal from "@/components/tree/ShareTreeModal";
 import ConnectionDetailPanel from "@/components/tree/ConnectionDetailPanel";
@@ -55,6 +55,7 @@ const Tree = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
+  const [addModalParentId, setAddModalParentId] = useState<string | null>(null);
   const { toast } = useToast();
   const { backgroundUrl } = useTemplateBackground();
   const { backgroundUrl: themeBackgroundUrl } = useTemplateTheme();
@@ -130,6 +131,17 @@ const Tree = () => {
     [connections, mode]
   );
 
+  // Create list of existing connections for parent selector
+  const existingConnectionsList = useMemo(() => 
+    filteredConnections.map(conn => ({
+      id: conn.id,
+      name: conn.person_id 
+        ? (conn.profile?.full_name || "Unknown")
+        : (conn.related_person_name || "Unknown")
+    })),
+    [filteredConnections]
+  );
+
   // Get children count for a connection
   const getChildrenCount = useCallback((connectionId: string) => {
     return connections.filter(conn => conn.parent_connection_id === connectionId && conn.connection_type === mode).length;
@@ -160,6 +172,13 @@ const Tree = () => {
       }
       return newSet;
     });
+  }, []);
+
+  // Open add modal with a pre-selected parent
+  const handleAddChildFromNode = useCallback((parentId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setAddModalParentId(parentId);
+    setShowAddModal(true);
   }, []);
 
   // Build graph structure with memoization
@@ -280,64 +299,88 @@ const Tree = () => {
     // Filter visible connections
     const visibleConnections = filteredConnections.filter(conn => !hiddenNodeIds.has(conn.id));
 
+    // Helper to calculate hierarchy level (depth from root)
+    const getHierarchyLevel = (connId: string, visited = new Set<string>()): number => {
+      if (visited.has(connId)) return 0;
+      visited.add(connId);
+      const conn = filteredConnections.find(c => c.id === connId);
+      if (!conn || !conn.parent_connection_id) return 0;
+      return 1 + getHierarchyLevel(conn.parent_connection_id, visited);
+    };
+
+    // Group connections by their parent for proper layout
+    const connectionsByParent = new Map<string | null, typeof visibleConnections>();
+    visibleConnections.forEach(conn => {
+      const parentId = conn.parent_connection_id || null;
+      if (!connectionsByParent.has(parentId)) {
+        connectionsByParent.set(parentId, []);
+      }
+      connectionsByParent.get(parentId)!.push(conn);
+    });
+
+    // Calculate positions based on hierarchy
+    const nodePositions = new Map<string, { x: number; y: number }>();
+    const centerX = 400;
+    const centerY = 300;
+    const levelSpacing = 150;
+    const nodeSpacing = 160;
+
+    // Position root-level nodes (directly connected to user)
+    const rootNodes = connectionsByParent.get(null) || [];
+    rootNodes.forEach((conn, index) => {
+      const totalWidth = (rootNodes.length - 1) * nodeSpacing;
+      const startX = centerX - totalWidth / 2;
+      nodePositions.set(conn.id, {
+        x: startX + index * nodeSpacing,
+        y: centerY + levelSpacing
+      });
+    });
+
+    // Position child nodes recursively
+    const positionChildren = (parentId: string, level: number) => {
+      const children = connectionsByParent.get(parentId) || [];
+      if (children.length === 0) return;
+      
+      const parentPos = nodePositions.get(parentId);
+      if (!parentPos) return;
+      
+      const totalWidth = (children.length - 1) * nodeSpacing;
+      const startX = parentPos.x - totalWidth / 2;
+      
+      children.forEach((conn, index) => {
+        nodePositions.set(conn.id, {
+          x: startX + index * nodeSpacing,
+          y: parentPos.y + levelSpacing
+        });
+        positionChildren(conn.id, level + 1);
+      });
+    };
+
+    // Position all child nodes
+    rootNodes.forEach(conn => positionChildren(conn.id, 1));
+
     // Create nodes for connected people
     const connectionNodes: Node[] = visibleConnections.map((conn, index) => {
-      // Use saved positions or calculate default layout
+      // Use saved positions or calculated hierarchical layout
       let x, y;
       if (conn.x_pos !== undefined && conn.y_pos !== undefined && conn.x_pos !== 0 && conn.y_pos !== 0) {
         x = conn.x_pos;
         y = conn.y_pos;
       } else {
-        if (mode === "family") {
-          // Hierarchical layout for family tree
-          const parentsCount = visibleConnections.filter(c => 
-            c.relationship_type.toLowerCase().includes("parent") || 
-            c.relationship_type.toLowerCase().includes("grandparent")
-          ).length;
-          const siblingsCount = visibleConnections.filter(c => 
-            c.relationship_type.toLowerCase().includes("sibling") || 
-            c.relationship_type.toLowerCase().includes("cousin")
-          ).length;
-          const childrenCount = visibleConnections.filter(c => 
-            c.relationship_type.toLowerCase().includes("child") || 
-            c.relationship_type.toLowerCase().includes("grandchild")
-          ).length;
-
-          if (conn.relationship_type.toLowerCase().includes("parent") || 
-              conn.relationship_type.toLowerCase().includes("grandparent")) {
-            const parentIndex = visibleConnections.filter(c => 
-              c.relationship_type.toLowerCase().includes("parent") || 
-              c.relationship_type.toLowerCase().includes("grandparent")
-            ).indexOf(conn);
-            x = 200 + (parentIndex * 200);
-            y = 50;
-          } else if (conn.relationship_type.toLowerCase().includes("sibling") || 
-                     conn.relationship_type.toLowerCase().includes("cousin")) {
-            const siblingIndex = visibleConnections.filter(c => 
-              c.relationship_type.toLowerCase().includes("sibling") || 
-              c.relationship_type.toLowerCase().includes("cousin")
-            ).indexOf(conn);
-            x = 200 + (siblingIndex * 150);
-            y = 300;
-          } else if (conn.relationship_type.toLowerCase().includes("child") || 
-                     conn.relationship_type.toLowerCase().includes("grandchild")) {
-            const childIndex = visibleConnections.filter(c => 
-              c.relationship_type.toLowerCase().includes("child") || 
-              c.relationship_type.toLowerCase().includes("grandchild")
-            ).indexOf(conn);
-            x = 200 + (childIndex * 150);
-            y = 550;
-          } else {
-            // Spouse or other - place beside center
-            x = 600;
-            y = 300;
-          }
-        } else {
+        const calculatedPos = nodePositions.get(conn.id);
+        if (calculatedPos) {
+          x = calculatedPos.x;
+          y = calculatedPos.y;
+        } else if (mode === "friendship") {
           // Circular layout for friendship web
           const angle = (2 * Math.PI * index) / visibleConnections.length;
           const radius = 250;
-          x = 400 + radius * Math.cos(angle);
-          y = 300 + radius * Math.sin(angle);
+          x = centerX + radius * Math.cos(angle);
+          y = centerY + radius * Math.sin(angle);
+        } else {
+          // Fallback layout
+          x = centerX + (index - visibleConnections.length / 2) * nodeSpacing;
+          y = centerY + levelSpacing;
         }
       }
 
@@ -358,7 +401,7 @@ const Tree = () => {
         position: { x, y },
         data: {
           label: (
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-2 group">
               <div className="relative">
                 <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-border shadow-md bg-background">
                   <img
@@ -370,7 +413,7 @@ const Tree = () => {
                 {isDeceased && (
                   <div className="absolute -top-1 -right-1 text-xl">🕯️</div>
                 )}
-                {/* Child count badge */}
+                {/* Child count badge or expand/collapse button */}
                 {childCount > 0 && (
                   <button
                     onClick={(e) => toggleCollapse(conn.id, e)}
@@ -384,6 +427,14 @@ const Tree = () => {
                     )}
                   </button>
                 )}
+                {/* Add child button - shows on left when no children or when collapsed */}
+                <button
+                  onClick={(e) => handleAddChildFromNode(conn.id, e)}
+                  className="absolute -bottom-1 -left-1 flex items-center justify-center w-5 h-5 bg-secondary text-secondary-foreground rounded-full text-xs shadow-md hover:scale-110 hover:bg-primary hover:text-primary-foreground transition-all opacity-0 group-hover:opacity-100"
+                  title="Add connection to this person"
+                >
+                  <UserPlus className="w-3 h-3" />
+                </button>
               </div>
               <div className="text-xs font-medium text-center max-w-[100px] truncate bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded">
                 {displayName}
@@ -427,7 +478,7 @@ const Tree = () => {
 
     setNodes([centerNode, ...connectionNodes]);
     setEdges(connectionEdges);
-  }, [filteredConnections, currentUser, mode, collapsedNodes, getChildrenCount, getDescendantIds, toggleCollapse]);
+  }, [filteredConnections, currentUser, mode, collapsedNodes, getChildrenCount, getDescendantIds, toggleCollapse, handleAddChildFromNode]);
 
   // Save node position when dragging ends
   const onNodeDragStop = useCallback(async (_: any, node: Node) => {
@@ -600,9 +651,14 @@ const Tree = () => {
 
       <AddConnectionModal
         open={showAddModal}
-        onOpenChange={setShowAddModal}
+        onOpenChange={(open) => {
+          setShowAddModal(open);
+          if (!open) setAddModalParentId(null);
+        }}
         onConnectionAdded={refetchConnections}
         defaultMode={mode}
+        existingConnections={existingConnectionsList}
+        defaultParentId={addModalParentId}
       />
 
       <ShareTreeModal

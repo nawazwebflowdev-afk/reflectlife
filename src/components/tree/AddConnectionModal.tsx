@@ -23,11 +23,18 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LazyImage } from "@/components/LazyImage";
 
+interface ExistingConnection {
+  id: string;
+  name: string;
+}
+
 interface AddConnectionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConnectionAdded: () => void;
   defaultMode?: "family" | "friendship";
+  existingConnections?: ExistingConnection[];
+  defaultParentId?: string | null;
 }
 
 interface Profile {
@@ -67,6 +74,8 @@ const AddConnectionModal = ({
   onOpenChange,
   onConnectionAdded,
   defaultMode = "family",
+  existingConnections = [],
+  defaultParentId = null,
 }: AddConnectionModalProps) => {
   const [connectionType, setConnectionType] = useState<"family" | "friendship">(defaultMode);
   const [relationshipType, setRelationshipType] = useState("");
@@ -82,6 +91,7 @@ const AddConnectionModal = ({
   const [uploadingImage, setUploadingImage] = useState(false);
   const [sharedMemories, setSharedMemories] = useState<any[]>([]);
   const [selectedMemoryId, setSelectedMemoryId] = useState<string>("");
+  const [selectedParentId, setSelectedParentId] = useState<string | null>(defaultParentId);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -234,6 +244,7 @@ const AddConnectionModal = ({
         relationship_type: relationshipType,
         connection_type: connectionType,
         image_url: imageUrl,
+        parent_connection_id: selectedParentId || null,
         x_pos: 0,
         y_pos: 0,
       };
@@ -280,6 +291,7 @@ const AddConnectionModal = ({
     setImageFile(null);
     setImagePreview("");
     setSelectedMemoryId("");
+    setSelectedParentId(null);
     setAddType("existing");
     onOpenChange(false);
   };
@@ -465,6 +477,34 @@ const AddConnectionModal = ({
               </SelectContent>
             </Select>
           </div>
+
+          {/* Parent Node Selector for hierarchical structure */}
+          {existingConnections.length > 0 && (
+            <div className="space-y-2">
+              <Label>Add Under (Parent Connection)</Label>
+              <Select 
+                value={selectedParentId || "root"} 
+                onValueChange={(value) => setSelectedParentId(value === "root" ? null : value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select parent node..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="root">
+                    👤 Directly connected to me
+                  </SelectItem>
+                  {existingConnections.map((conn) => (
+                    <SelectItem key={conn.id} value={conn.id}>
+                      └ {conn.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Choose who this person is connected to in your tree
+              </p>
+            </div>
+          )}
 
           {connectionType === "friendship" && sharedMemories.length > 0 && (
             <div className="space-y-2">
