@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,14 +15,18 @@ const Login = () => {
   const [password, setPassword] = useState("");
   
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
 
+  // Get the redirect path from location state or default to dashboard
+  const from = (location.state as { from?: string })?.from || "/dashboard";
+
   useEffect(() => {
     if (user) {
-      navigate("/dashboard", { replace: true });
+      navigate(from, { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, from]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -77,7 +81,7 @@ const Login = () => {
         title: "Welcome back! 🌸",
         description: "You've successfully signed in.",
       });
-      navigate("/dashboard");
+      navigate(from, { replace: true });
 
     } catch (error: any) {
       toast({

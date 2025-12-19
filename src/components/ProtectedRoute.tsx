@@ -1,5 +1,5 @@
-import { ReactNode, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { ReactNode, useEffect, useState, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,12 +9,14 @@ interface ProtectedRouteProps {
   children: ReactNode;
 }
 
-const LOAD_TIMEOUT_MS = 8000; // 8 seconds max wait for auth
+const LOAD_TIMEOUT_MS = 5000; // 5 seconds max wait for auth
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading, initialized } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [hasTimedOut, setHasTimedOut] = useState(false);
+  const redirectedRef = useRef(false);
 
   // Timeout to prevent infinite loading
   useEffect(() => {
@@ -28,10 +30,11 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // Redirect to login if not authenticated (after initialization)
   useEffect(() => {
-    if (initialized && !user) {
-      navigate('/login', { replace: true });
+    if (initialized && !user && !redirectedRef.current) {
+      redirectedRef.current = true;
+      navigate('/login', { replace: true, state: { from: location.pathname } });
     }
-  }, [user, initialized, navigate]);
+  }, [user, initialized, navigate, location.pathname]);
 
   // Show timeout error
   if (hasTimedOut && !initialized) {
