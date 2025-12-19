@@ -185,9 +185,9 @@ export const ShareMemorialModal = ({
       // Check if recipient exists in the system
       const { data: recipientProfile, error: profileError } = await supabase
         .from("profiles")
-        .select("id, email")
+        .select("id")
         .eq("email", recipientEmail)
-        .single();
+        .maybeSingle();
 
       if (profileError || !recipientProfile) {
         toast({
@@ -229,7 +229,7 @@ export const ShareMemorialModal = ({
 
       toast({
         title: "Memorial shared successfully! 💌",
-        description: `Notification sent to ${recipientProfile.email}`,
+        description: `Notification sent to ${recipientEmail}`,
       });
       onOpenChange(false);
       setRecipientEmail("");
