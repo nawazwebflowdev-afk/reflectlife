@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -13,7 +13,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_TIMEOUT_MS = 5000; // 5 seconds timeout for auth initialization
+const AUTH_TIMEOUT_MS = 3000; // 3 seconds timeout for auth initialization
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -21,10 +21,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
   const queryClient = useQueryClient();
+  const initRef = useRef(false);
 
   useEffect(() => {
+    // Prevent double initialization in StrictMode
+    if (initRef.current) return;
+    initRef.current = true;
+
     let isMounted = true;
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     let hasInitialized = false;
 
     const finishInit = (newSession: Session | null) => {
