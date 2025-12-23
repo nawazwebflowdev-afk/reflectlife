@@ -304,7 +304,14 @@ const Settings = () => {
 
 
   const handleExportData = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      toast({
+        title: "Not Authenticated",
+        description: "Please sign in to export your data",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsExportingData(true);
     try {
@@ -314,6 +321,7 @@ const Settings = () => {
         description: "Your data has been downloaded as a PDF",
       });
     } catch (error: any) {
+      console.error('Export error:', error);
       toast({
         title: "Export Failed",
         description: error.message || "Failed to export data",

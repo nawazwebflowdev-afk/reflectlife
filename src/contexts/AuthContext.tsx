@@ -103,14 +103,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  // If something renders outside the provider (or during an unexpected mount order),
-  // never leave the app stuck in an infinite "loading" state.
+  // This should never happen since AuthProvider wraps the entire app,
+  // but provide a safe fallback that keeps loading state true
+  // so ProtectedRoute waits rather than redirecting prematurely
   if (context === undefined) {
+    console.warn('useAuth called outside AuthProvider');
     return {
       user: null,
       session: null,
-      loading: false,
-      initialized: true,
+      loading: true,
+      initialized: false,
       signOut: async () => {},
     };
   }
