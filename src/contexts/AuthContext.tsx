@@ -13,7 +13,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_TIMEOUT_MS = 3000; // 3 seconds timeout for auth initialization
+const AUTH_TIMEOUT_MS = 2000; // 2 seconds timeout for auth initialization
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);

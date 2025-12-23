@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
   children: ReactNode;
 }
 
-const LOAD_TIMEOUT_MS = 5000; // 5 seconds max wait for auth
+const LOAD_TIMEOUT_MS = 3000; // 3 seconds max wait for auth
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading, initialized } = useAuth();
@@ -61,9 +61,9 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   if (loading || !initialized) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-4 animate-pulse">
           <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground text-sm">Authenticating...</p>
         </div>
       </div>
     );

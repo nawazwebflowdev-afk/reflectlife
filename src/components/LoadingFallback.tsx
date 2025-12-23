@@ -15,7 +15,7 @@ interface LoadingFallbackProps {
  */
 export const LoadingFallback = ({ 
   message = "Loading...", 
-  timeoutMs = 10000,
+  timeoutMs = 6000,
   onTimeout 
 }: LoadingFallbackProps) => {
   const [hasTimedOut, setHasTimedOut] = useState(false);

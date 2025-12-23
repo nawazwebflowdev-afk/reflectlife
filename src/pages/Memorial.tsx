@@ -313,7 +313,7 @@ const Memorial = () => {
 
             {/* Actions */}
             <div className="flex flex-wrap gap-3 pb-2">
-              <CandleVideoModal memorialName={memorial.name} />
+              <CandleVideoModal memorialId={memorial.id} memorialName={memorial.name} />
               <Button
                 variant={isLiked ? "default" : "outline"}
                 size="sm"
