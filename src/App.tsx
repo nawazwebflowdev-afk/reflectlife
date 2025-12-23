@@ -44,7 +44,7 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false, // Don't refetch on window focus
       refetchOnMount: false, // Don't refetch on component mount if data exists
       retry: 1, // Single retry to prevent long waits
-      retryDelay: 1000, // 1 second delay between retries
+      retryDelay: 500, // 500ms delay between retries (faster)
       networkMode: 'always', // Always attempt queries even offline
     },
   },
