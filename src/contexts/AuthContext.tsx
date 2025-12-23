@@ -21,13 +21,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
   const queryClient = useQueryClient();
-  const initRef = useRef(false);
 
   useEffect(() => {
-    // Prevent double initialization in StrictMode
-    if (initRef.current) return;
-    initRef.current = true;
-
     let isMounted = true;
     let timeoutId: ReturnType<typeof setTimeout>;
     let hasInitialized = false;
@@ -108,8 +103,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
+  // Return safe defaults during initial render before provider is ready
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    return { 
+      user: null, 
+      session: null, 
+      loading: true, 
+      initialized: false, 
+      signOut: async () => {} 
+    };
   }
   return context;
 };
