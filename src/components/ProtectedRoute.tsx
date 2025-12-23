@@ -33,9 +33,16 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  // Not authenticated - will redirect
+  // Not authenticated - redirect effect will run; render a small placeholder instead of a blank screen
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground text-sm">Redirecting…</p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;
