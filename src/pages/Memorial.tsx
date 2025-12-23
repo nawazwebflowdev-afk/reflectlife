@@ -12,6 +12,7 @@ import timelineBg from "@/assets/timeline-bg.jpg";
 import EditMemorialModal from "@/components/EditMemorialModal";
 import { TributeModal } from "@/components/TributeModal";
 import { ShareMemorialModal } from "@/components/ShareMemorialModal";
+import { CandleVideoModal } from "@/components/CandleVideoModal";
 import { Trash2 } from "lucide-react";
 import { LazyImage } from "@/components/LazyImage";
 import { useAuth } from "@/contexts/AuthContext";
@@ -311,7 +312,8 @@ const Memorial = () => {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pb-2">
+            <div className="flex flex-wrap gap-3 pb-2">
+              <CandleVideoModal memorialName={memorial.name} />
               <Button
                 variant={isLiked ? "default" : "outline"}
                 size="sm"
