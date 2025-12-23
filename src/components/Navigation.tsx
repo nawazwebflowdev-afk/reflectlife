@@ -23,8 +23,9 @@ const Navigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, signOut } = useAuth();
+  const { user, loading, initialized, signOut } = useAuth();
   const isAuthenticated = !!user;
+  const isAuthLoading = loading || !initialized;
 
   // Use React Query for profile - cached and efficient
   const { data: profile } = useQuery({
@@ -112,7 +113,9 @@ const Navigation = () => {
               );
             })}
 
-            {isAuthenticated ? (
+            {isAuthLoading ? (
+              <div className="h-8 w-20 bg-muted animate-pulse rounded" />
+            ) : isAuthenticated ? (
               <div className="flex items-center gap-2">
                 <NotificationsDropdown />
                 <DropdownMenu>
@@ -152,8 +155,6 @@ const Navigation = () => {
               </Link>
             )}
           </div>
-
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="md:hidden p-2 text-foreground hover:bg-muted rounded-lg transition-smooth"
