@@ -103,14 +103,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  // Return safe defaults during initial render before provider is ready
+  // If something renders outside the provider (or during an unexpected mount order),
+  // never leave the app stuck in an infinite "loading" state.
   if (context === undefined) {
-    return { 
-      user: null, 
-      session: null, 
-      loading: true, 
-      initialized: false, 
-      signOut: async () => {} 
+    return {
+      user: null,
+      session: null,
+      loading: false,
+      initialized: true,
+      signOut: async () => {},
     };
   }
   return context;
