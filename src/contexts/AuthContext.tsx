@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -13,7 +13,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_TIMEOUT_MS = 2000; // 2 seconds timeout for auth initialization
+const AUTH_TIMEOUT_MS = 3000; // 3 seconds timeout for auth initialization
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -25,47 +25,59 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let isMounted = true;
     let timeoutId: ReturnType<typeof setTimeout>;
-    let hasInitialized = false;
 
-    const finishInit = (newSession: Session | null) => {
-      if (isMounted && !hasInitialized) {
-        hasInitialized = true;
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
-        setLoading(false);
-        setInitialized(true);
-        clearTimeout(timeoutId);
+    const initializeAuth = async () => {
+      try {
+        // Get initial session first
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+        }
+        
+        if (isMounted) {
+          setSession(initialSession);
+          setUser(initialSession?.user ?? null);
+          setLoading(false);
+          setInitialized(true);
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        if (isMounted) {
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+          setInitialized(true);
+        }
       }
     };
 
-    // Set a timeout to prevent infinite loading
-    timeoutId = setTimeout(() => {
-      if (isMounted && !hasInitialized) {
-        console.warn('Auth initialization timed out, proceeding without session');
-        finishInit(null);
-      }
-    }, AUTH_TIMEOUT_MS);
-
-    // Set up auth state listener FIRST (critical order)
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
       if (isMounted) {
-        // Only update if already initialized or this is the first call
-        if (hasInitialized) {
-          setSession(newSession);
-          setUser(newSession?.user ?? null);
-        } else {
-          finishInit(newSession);
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        // Mark as initialized on any auth state change
+        if (!initialized) {
+          setLoading(false);
+          setInitialized(true);
         }
       }
     });
 
-    // THEN get initial session
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      finishInit(initialSession);
-    }).catch((error) => {
-      console.error('Error getting session:', error);
-      finishInit(null);
-    });
+    // Initialize auth
+    initializeAuth();
+
+    // Set a timeout to prevent infinite loading
+    timeoutId = setTimeout(() => {
+      if (isMounted && !initialized) {
+        console.warn('Auth initialization timed out, proceeding without session');
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+        setInitialized(true);
+      }
+    }, AUTH_TIMEOUT_MS);
 
     return () => {
       isMounted = false;
@@ -103,18 +115,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  // This should never happen since AuthProvider wraps the entire app,
-  // but provide a safe fallback that keeps loading state true
-  // so ProtectedRoute waits rather than redirecting prematurely
   if (context === undefined) {
-    console.warn('useAuth called outside AuthProvider');
-    return {
-      user: null,
-      session: null,
-      loading: true,
-      initialized: false,
-      signOut: async () => {},
-    };
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
