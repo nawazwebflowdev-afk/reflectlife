@@ -9,8 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Search, Filter, FileDown, Palette } from "lucide-react";
 import DiaryEntryModal from "@/components/DiaryEntryModal";
 import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DiaryEntry {
   id: string;
@@ -43,6 +43,7 @@ const THEME_EMOJIS = {
 };
 
 const Diary = () => {
+  const { user } = useAuth();
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<DiaryEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,42 +52,27 @@ const Diary = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterPrivacy, setFilterPrivacy] = useState<"all" | "private" | "public">("all");
   const [currentTheme, setCurrentTheme] = useState<DiaryTheme>("default");
-  const [currentUser, setCurrentUser] = useState<any>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   useEffect(() => {
-    checkAuth();
-  }, []);
-
-  useEffect(() => {
-    if (currentUser) {
+    if (user?.id) {
       fetchEntries();
     }
-  }, [currentUser]);
+  }, [user?.id]);
 
   useEffect(() => {
     filterEntries();
   }, [entries, searchQuery, filterPrivacy]);
 
-  const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      navigate("/login");
-      return;
-    }
-    setCurrentUser(user);
-  };
-
   const fetchEntries = async () => {
-    if (!currentUser) return;
+    if (!user?.id) return;
     
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from("diary_entries")
         .select("*")
-        .eq("user_id", currentUser.id)
+        .eq("user_id", user.id)
         .order("entry_date", { ascending: false });
 
       if (error) throw error;
