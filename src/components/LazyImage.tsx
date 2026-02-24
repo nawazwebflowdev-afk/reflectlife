@@ -29,19 +29,8 @@ export const LazyImage = ({
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    // Apply Supabase image optimization transforms for better performance
-    let optimizedSrc = src;
-    
-    if (optimize && src.includes('supabase.co/storage')) {
-      // Add quality and size transforms to Supabase Storage URLs
-      const url = new URL(src);
-      url.searchParams.set('quality', '70');
-      url.searchParams.set('width', '1200'); // Max width for responsive images
-      optimizedSrc = url.toString();
-    }
-    
-    setImageSrc(optimizedSrc);
-  }, [src, optimize]);
+    setImageSrc(src);
+  }, [src]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
