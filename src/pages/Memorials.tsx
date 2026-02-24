@@ -142,15 +142,19 @@ const Memorials = () => {
     <div className="min-h-screen">
       {/* Hero Header with Template Background */}
       <section 
-        className="relative h-[400px] flex items-center transition-smooth"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${backgroundImage})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          filter: purchasedBackground ? "blur(10px)" : "none",
-        }}
+        className="relative h-[400px] flex items-center transition-smooth overflow-hidden"
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background" style={{ filter: "none" }} />
+        {/* Blurred background layer — separate from content so text stays sharp */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${backgroundImage})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            filter: purchasedBackground ? "blur(10px)" : "none",
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background" />
         
         <div className="relative container mx-auto px-4 text-center">
           <h1 className="font-serif text-4xl md:text-6xl font-bold mb-4 text-premium-plum-foreground drop-shadow-lg animate-fade-in">

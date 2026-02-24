@@ -100,20 +100,27 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/verify`,
-          data: { 
-            full_name: fullName,
-            phone_number: phoneNumber,
-            country: country
-          }
-        }
+      // Use secure-signup edge function for server-side validation
+      const { data: fnData, error: fnError } = await supabase.functions.invoke('secure-signup', {
+        body: {
+          email,
+          password,
+          fullName,
+          phoneNumber,
+          country,
+          recaptchaToken: '', // reCAPTCHA not enforced on this flow
+        },
       });
 
-      if (error) throw error;
+      if (fnError) throw fnError;
+      if (fnData?.error) throw new Error(fnData.error);
+
+      // Auto sign-in after successful signup
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        // Sign-in may fail if email confirmation required — that's OK
+        console.log('Auto sign-in skipped (email confirmation may be required)');
+      }
 
       toast({
         title: "Account created!",
