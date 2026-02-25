@@ -45,11 +45,15 @@ interface Profile {
 }
 
 const familyRelationships = [
+  "Mother",
+  "Father",
   "Parent",
+  "Grandmother",
+  "Grandfather",
+  "Grandparent",
   "Sibling",
   "Spouse",
   "Child",
-  "Grandparent",
   "Grandchild",
   "Cousin",
   "Aunt/Uncle",

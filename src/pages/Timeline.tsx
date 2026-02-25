@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { PageTemplateSelector } from "@/components/PageTemplateSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -12,7 +13,7 @@ import { formatDistanceToNow } from "date-fns";
 import { CommentsModal } from "@/components/CommentsModal";
 import { SharePostModal } from "@/components/SharePostModal";
 import { cn } from "@/utils";
-import { useTemplateBackground } from "@/hooks/useTemplateBackground";
+import { usePageTemplate } from "@/hooks/usePageTemplate";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { LazyImage } from "@/components/LazyImage";
 import { PostSkeleton } from "@/components/PostSkeleton";
@@ -55,7 +56,7 @@ const Timeline = () => {
   const [selectedPostForShare, setSelectedPostForShare] = useState<Post | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { backgroundUrl } = useTemplateBackground();
+  const { backgroundUrl, activeTemplateId, purchasedTemplates, setPageTemplate } = usePageTemplate("timeline");
 
   // Preload user profile data
   useProfilePreload(user?.id);
@@ -342,6 +343,14 @@ const Timeline = () => {
           </h1>
           <div className="w-24 h-1 bg-premium-plum mx-auto mb-2 rounded-full" />
           <p className="text-foreground/80 drop-shadow-md">Share and cherish memories together</p>
+          <div className="mt-3">
+            <PageTemplateSelector
+              activeTemplateId={activeTemplateId}
+              templates={purchasedTemplates}
+              onSelect={setPageTemplate}
+              label="Timeline Template"
+            />
+          </div>
         </div>
 
         {/* Create Post Section */}
