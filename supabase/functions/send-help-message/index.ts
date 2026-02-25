@@ -25,21 +25,76 @@ const escapeHtml = (str: string): string => {
     .replace(/'/g, '&#039;');
 };
 
+// In-memory rate limiting (resets on cold start, acceptable for edge functions)
+const rateLimitStore = new Map<string, { attempts: number; resetAt: number }>();
+
+const checkRateLimit = (ip: string, maxAttempts = 3, windowMinutes = 60): { allowed: boolean; remaining: number } => {
+  const now = Date.now();
+  const record = rateLimitStore.get(ip);
+
+  if (!record || now > record.resetAt) {
+    rateLimitStore.set(ip, { attempts: 1, resetAt: now + windowMinutes * 60 * 1000 });
+    return { allowed: true, remaining: maxAttempts - 1 };
+  }
+
+  if (record.attempts >= maxAttempts) {
+    return { allowed: false, remaining: 0 };
+  }
+
+  record.attempts++;
+  return { allowed: true, remaining: maxAttempts - record.attempts };
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Rate limiting: 3 requests per hour per IP
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const rateLimitResult = checkRateLimit(ip, 3, 60);
+
+    if (!rateLimitResult.allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Too many help requests. Please try again in 1 hour.' }),
+        { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     const { name, email, country, message }: HelpMessageRequest = await req.json();
 
-    console.log("Sending help message:", { name, email, country });
+    // Input validation
+    if (!name || !email || !country || !message) {
+      return new Response(
+        JSON.stringify({ error: "All fields are required." }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    if (name.length > 200 || email.length > 320 || country.length > 100 || message.length > 5000) {
+      return new Response(
+        JSON.stringify({ error: "Input exceeds maximum allowed length." }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid email format." }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    console.log("Sending help message:", { name, country });
 
     const emailResponse = await resend.emails.send({
       from: "Reflectlife Support <onboarding@resend.dev>",
       to: ["sypera.sylvia@gmail.com"],
       reply_to: email,
-      subject: `Help Request from ${name} (${country})`,
+      subject: `Help Request from ${escapeHtml(name)} (${escapeHtml(country)})`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #8B7355;">New Help Request</h2>
