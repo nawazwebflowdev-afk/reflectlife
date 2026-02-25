@@ -17,6 +17,19 @@ interface ShareEmailRequest {
   senderName: string;
 }
 
+const escapeHtml = (str: string): string => {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
+const isValidEmail = (email: string): boolean => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 255;
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -49,12 +62,36 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { recipientEmail, postId, postCaption, senderName }: ShareEmailRequest = await req.json();
 
-    const postUrl = `https://reflectlife.lovable.app/timeline#post-${postId}`;
+    // Validate inputs
+    if (!recipientEmail || !postId || !senderName) {
+      return new Response(JSON.stringify({ error: "Missing required fields" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    if (!isValidEmail(recipientEmail)) {
+      return new Response(JSON.stringify({ error: "Invalid email address" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    if (senderName.length > 100 || (postCaption && postCaption.length > 5000)) {
+      return new Response(JSON.stringify({ error: "Input exceeds maximum length" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const safeSenderName = escapeHtml(senderName);
+    const safeCaption = escapeHtml(postCaption || "A meaningful memory from their journey");
+    const postUrl = `https://reflectlife.lovable.app/timeline#post-${encodeURIComponent(postId)}`;
     
     const emailResponse = await resend.emails.send({
       from: "Reflectlife <onboarding@resend.dev>",
       to: [recipientEmail],
-      subject: `${senderName} shared a memory with you`,
+      subject: `${safeSenderName} shared a memory with you`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 30px;">
@@ -64,12 +101,12 @@ const handler = async (req: Request): Promise<Response> => {
 
           <div style="background: linear-gradient(135deg, #f5f5f5 0%, #faf8f6 100%); padding: 30px; border-radius: 12px; margin: 20px 0;">
             <p style="font-size: 16px; color: #333; margin-bottom: 20px;">
-              <strong>${senderName}</strong> has shared a special memory with you:
+              <strong>${safeSenderName}</strong> has shared a special memory with you:
             </p>
             
             <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #8B7355;">
               <p style="color: #555; line-height: 1.6; margin: 0;">
-                ${postCaption || "A meaningful memory from their journey"}
+                ${safeCaption}
               </p>
             </div>
 
@@ -89,7 +126,7 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    return new Response(JSON.stringify(emailResponse), {
+    return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });

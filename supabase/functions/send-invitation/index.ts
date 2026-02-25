@@ -18,6 +18,19 @@ interface InvitationRequest {
   senderId: string;
 }
 
+const escapeHtml = (str: string): string => {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
+const isValidEmail = (email: string): boolean => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 255;
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -68,7 +81,21 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    console.log("Sending invitation email:", { recipientEmail, personName, senderName, connectionId, senderId });
+    if (!isValidEmail(recipientEmail)) {
+      return new Response(JSON.stringify({ error: "Invalid email address" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    if (personName.length > 200 || senderName.length > 100) {
+      return new Response(JSON.stringify({ error: "Input exceeds maximum length" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    console.log("Sending invitation email to:", recipientEmail);
 
     // Use service role for DB operations
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -83,7 +110,6 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     const isRegistered = !!existingUser;
-    console.log(`Recipient ${recipientEmail} is ${isRegistered ? 'registered' : 'not registered'}`);
 
     // Log invitation in database
     const { error: inviteError } = await supabase
@@ -99,6 +125,9 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("Error logging invitation:", inviteError);
     }
 
+    const safePersonName = escapeHtml(personName);
+    const safeSenderName = escapeHtml(senderName);
+
     // Prepare URLs based on registration status
     let ctaUrl: string;
     let ctaText: string;
@@ -106,16 +135,16 @@ const handler = async (req: Request): Promise<Response> => {
     let emailIntro: string;
 
     if (isRegistered) {
-      ctaUrl = `https://reflectlife.lovable.app/tree?connection=${connectionId}`;
-      ctaText = "View & Contribute 🌿";
-      emailSubject = `${senderName} invited you to contribute to ${personName}'s tree`;
-      emailIntro = `<strong>${senderName}</strong> has invited you to contribute memories and tributes for:`;
+      ctaUrl = `https://reflectlife.lovable.app/tree?connection=${encodeURIComponent(connectionId)}`;
+      ctaText = "View &amp; Contribute 🌿";
+      emailSubject = `${safeSenderName} invited you to contribute to ${safePersonName}'s tree`;
+      emailIntro = `<strong>${safeSenderName}</strong> has invited you to contribute memories and tributes for:`;
     } else {
       const redirectUrl = encodeURIComponent(`/tree?connection=${connectionId}`);
       ctaUrl = `https://reflectlife.lovable.app/signup?redirect=${redirectUrl}`;
-      ctaText = "Sign Up & Contribute 🌿";
-      emailSubject = `${senderName} invited you to join Reflectlife and contribute to ${personName}'s tree`;
-      emailIntro = `<strong>${senderName}</strong> has invited you to join Reflectlife and contribute memories for:`;
+      ctaText = "Sign Up &amp; Contribute 🌿";
+      emailSubject = `${safeSenderName} invited you to join Reflectlife and contribute to ${safePersonName}'s tree`;
+      emailIntro = `<strong>${safeSenderName}</strong> has invited you to join Reflectlife and contribute memories for:`;
     }
     
     const emailResponse = await resend.emails.send({
@@ -135,12 +164,12 @@ const handler = async (req: Request): Promise<Response> => {
             </p>
             
             <div style="text-align: center; background: white; padding: 25px; border-radius: 8px; margin: 20px 0;">
-              <h2 style="color: #8B7355; margin: 0 0 10px 0; font-size: 24px;">${personName}</h2>
+              <h2 style="color: #8B7355; margin: 0 0 10px 0; font-size: 24px;">${safePersonName}</h2>
               <p style="color: #666; margin: 0;">Share your stories, photos, and memories</p>
             </div>
 
             <p style="color: #555; line-height: 1.6; margin: 20px 0;">
-              Your contributions will help celebrate and honor ${personName}'s life and legacy. 
+              Your contributions will help celebrate and honor ${safePersonName}'s life and legacy. 
               This is a space where friends and family can come together to remember and share.
             </p>
 
@@ -167,23 +196,19 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Invitation email sent successfully:", emailResponse);
+    console.log("Invitation email sent successfully");
 
     return new Response(JSON.stringify({ 
       success: true, 
       isRegistered,
-      emailResponse 
     }), {
       status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
+      headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (error: any) {
     console.error("Error in send-invitation function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "An error occurred while sending the invitation" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

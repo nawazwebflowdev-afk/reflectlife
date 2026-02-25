@@ -19,6 +19,28 @@ interface MemorialInvitationRequest {
   senderName: string;
 }
 
+const escapeHtml = (str: string): string => {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
+const isValidEmail = (email: string): boolean => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 255;
+};
+
+const isValidUrl = (url: string): boolean => {
+  try {
+    new URL(url);
+    return url.length <= 500;
+  } catch {
+    return false;
+  }
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -66,12 +88,37 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    if (!isValidEmail(recipientEmail)) {
+      return new Response(JSON.stringify({ error: "Invalid email address" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    if (!isValidUrl(memorialUrl)) {
+      return new Response(JSON.stringify({ error: "Invalid memorial URL" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    if (memorialName.length > 200 || (memorialDescription && memorialDescription.length > 1000) || (senderName && senderName.length > 100)) {
+      return new Response(JSON.stringify({ error: "Input exceeds maximum length" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
     console.log("Sending memorial invitation to:", recipientEmail);
+
+    const safeSenderName = escapeHtml(senderName || "Someone");
+    const safeMemorialName = escapeHtml(memorialName);
+    const safeDescription = memorialDescription ? escapeHtml(memorialDescription) : "";
 
     const emailResponse = await resend.emails.send({
       from: "Reflectlife <onboarding@resend.dev>",
       to: [recipientEmail],
-      subject: `${senderName} shared a memorial with you`,
+      subject: `${safeSenderName} shared a memorial with you`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -79,79 +126,16 @@ const handler = async (req: Request): Promise<Response> => {
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-              body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                line-height: 1.6;
-                color: #333;
-                max-width: 600px;
-                margin: 0 auto;
-                padding: 20px;
-                background-color: #f9fafb;
-              }
-              .container {
-                background-color: #ffffff;
-                border-radius: 12px;
-                padding: 32px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-              }
-              .header {
-                text-align: center;
-                margin-bottom: 32px;
-              }
-              .logo {
-                font-size: 28px;
-                font-weight: 600;
-                color: #1a1a1a;
-                margin-bottom: 8px;
-              }
-              .subtitle {
-                color: #6b7280;
-                font-size: 14px;
-              }
-              .memorial-name {
-                font-size: 24px;
-                font-weight: 600;
-                color: #1a1a1a;
-                margin: 24px 0 16px;
-                text-align: center;
-              }
-              .description {
-                color: #4b5563;
-                font-size: 16px;
-                margin-bottom: 24px;
-                text-align: center;
-                line-height: 1.8;
-              }
-              .cta-button {
-                display: inline-block;
-                background-color: #6366f1;
-                color: #ffffff !important;
-                text-decoration: none;
-                padding: 14px 32px;
-                border-radius: 8px;
-                font-weight: 600;
-                text-align: center;
-                margin: 24px auto;
-                display: block;
-                width: fit-content;
-                transition: background-color 0.2s;
-              }
-              .cta-button:hover {
-                background-color: #4f46e5;
-              }
-              .footer {
-                margin-top: 32px;
-                padding-top: 24px;
-                border-top: 1px solid #e5e7eb;
-                text-align: center;
-                color: #6b7280;
-                font-size: 14px;
-              }
-              .divider {
-                height: 1px;
-                background-color: #e5e7eb;
-                margin: 24px 0;
-              }
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb; }
+              .container { background-color: #ffffff; border-radius: 12px; padding: 32px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
+              .header { text-align: center; margin-bottom: 32px; }
+              .logo { font-size: 28px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px; }
+              .subtitle { color: #6b7280; font-size: 14px; }
+              .memorial-name { font-size: 24px; font-weight: 600; color: #1a1a1a; margin: 24px 0 16px; text-align: center; }
+              .description { color: #4b5563; font-size: 16px; margin-bottom: 24px; text-align: center; line-height: 1.8; }
+              .cta-button { display: inline-block; background-color: #6366f1; color: #ffffff !important; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; text-align: center; margin: 24px auto; display: block; width: fit-content; }
+              .footer { margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 14px; }
+              .divider { height: 1px; background-color: #e5e7eb; margin: 24px 0; }
             </style>
           </head>
           <body>
@@ -161,31 +145,21 @@ const handler = async (req: Request): Promise<Response> => {
                 <div class="subtitle">Honoring memories, celebrating lives</div>
               </div>
               
-              <p style="font-size: 16px; color: #1a1a1a; margin-bottom: 24px;">
-                Hello,
-              </p>
+              <p style="font-size: 16px; color: #1a1a1a; margin-bottom: 24px;">Hello,</p>
               
               <p style="font-size: 16px; color: #4b5563; margin-bottom: 16px;">
-                <strong>${senderName}</strong> has invited you to view and honor a memorial on Reflectlife.
+                <strong>${safeSenderName}</strong> has invited you to view and honor a memorial on Reflectlife.
               </p>
               
-              <div class="memorial-name">${memorialName}</div>
+              <div class="memorial-name">${safeMemorialName}</div>
               
-              ${memorialDescription ? `
-                <div class="description">
-                  ${memorialDescription}
-                </div>
-              ` : ''}
+              ${safeDescription ? `<div class="description">${safeDescription}</div>` : ''}
               
-              <a href="${memorialUrl}" class="cta-button">
-                View Memorial & Add Tribute
-              </a>
+              <a href="${encodeURI(memorialUrl)}" class="cta-button">View Memorial & Add Tribute</a>
               
               <div class="divider"></div>
               
-              <p style="font-size: 14px; color: #6b7280; text-align: center; margin-top: 24px;">
-                On this memorial page, you can:
-              </p>
+              <p style="font-size: 14px; color: #6b7280; text-align: center; margin-top: 24px;">On this memorial page, you can:</p>
               <ul style="color: #4b5563; font-size: 14px; text-align: left; margin: 16px auto; max-width: 400px;">
                 <li>View cherished memories and photos</li>
                 <li>Leave a heartfelt tribute message</li>
@@ -193,15 +167,10 @@ const handler = async (req: Request): Promise<Response> => {
               </ul>
               
               <div class="footer">
-                <p style="margin: 8px 0;">
-                  With compassion,<br>
-                  <strong>The Reflectlife Team</strong>
-                </p>
+                <p style="margin: 8px 0;">With compassion,<br><strong>The Reflectlife Team</strong></p>
                 <p style="margin: 16px 0 0; font-size: 12px;">
                   If you have questions, please reach out to us at 
-                  <a href="mailto:sypera.sylvia@gmail.com" style="color: #6366f1; text-decoration: none;">
-                    sypera.sylvia@gmail.com
-                  </a>
+                  <a href="mailto:sypera.sylvia@gmail.com" style="color: #6366f1; text-decoration: none;">sypera.sylvia@gmail.com</a>
                 </p>
               </div>
             </div>
@@ -214,15 +183,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(JSON.stringify(emailResponse), {
       status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
+      headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (error: any) {
     console.error("Error sending memorial invitation:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "An error occurred while sending the invitation" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
