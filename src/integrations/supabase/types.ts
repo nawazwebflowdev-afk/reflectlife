@@ -570,6 +570,8 @@ export type Database = {
           last_name: string | null
           phone: string | null
           template_id: string | null
+          timeline_template_id: string | null
+          tree_template_id: string | null
           updated_at: string
           username: string | null
         }
@@ -590,6 +592,8 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           template_id?: string | null
+          timeline_template_id?: string | null
+          tree_template_id?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -610,6 +614,8 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           template_id?: string | null
+          timeline_template_id?: string | null
+          tree_template_id?: string | null
           updated_at?: string
           username?: string | null
         }
@@ -617,6 +623,20 @@ export type Database = {
           {
             foreignKeyName: "profiles_template_id_fkey"
             columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "site_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_timeline_template_id_fkey"
+            columns: ["timeline_template_id"]
+            isOneToOne: false
+            referencedRelation: "site_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_tree_template_id_fkey"
+            columns: ["tree_template_id"]
             isOneToOne: false
             referencedRelation: "site_templates"
             referencedColumns: ["id"]

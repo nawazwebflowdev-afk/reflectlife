@@ -11,8 +11,9 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useTemplateBackground } from "@/hooks/useTemplateBackground";
+import { usePageTemplate } from "@/hooks/usePageTemplate";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
+import { PageTemplateSelector } from "@/components/PageTemplateSelector";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2, Share2, ChevronDown, ChevronRight, UserPlus } from "lucide-react";
@@ -57,7 +58,7 @@ const Tree = () => {
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
   const [addModalParentId, setAddModalParentId] = useState<string | null>(null);
   const { toast } = useToast();
-  const { backgroundUrl } = useTemplateBackground();
+  const { backgroundUrl, activeTemplateId, purchasedTemplates, setPageTemplate } = usePageTemplate("tree");
   const { backgroundUrl: themeBackgroundUrl } = useTemplateTheme();
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -323,18 +324,53 @@ const Tree = () => {
     const centerX = 400;
     const centerY = 300;
     const levelSpacing = 150;
-    const nodeSpacing = 160;
+    const nodeSpacing = 200;
+
+    // Ancestor relationship types (positioned ABOVE user)
+    const ancestorTypes = new Set(["Parent", "Mother", "Father", "Grandparent", "Grandmother", "Grandfather", "Great-Grandparent"]);
 
     // Position root-level nodes (directly connected to user)
     const rootNodes = connectionsByParent.get(null) || [];
-    rootNodes.forEach((conn, index) => {
-      const totalWidth = (rootNodes.length - 1) * nodeSpacing;
-      const startX = centerX - totalWidth / 2;
-      nodePositions.set(conn.id, {
-        x: startX + index * nodeSpacing,
-        y: centerY + levelSpacing
+    
+    if (mode === "family") {
+      // Separate ancestors from descendants
+      const ancestors = rootNodes.filter(conn => ancestorTypes.has(conn.relationship_type));
+      const descendants = rootNodes.filter(conn => !ancestorTypes.has(conn.relationship_type));
+
+      // Position ancestors ABOVE user, side by side
+      if (ancestors.length > 0) {
+        const totalWidth = (ancestors.length - 1) * nodeSpacing;
+        const startX = centerX - totalWidth / 2;
+        ancestors.forEach((conn, index) => {
+          nodePositions.set(conn.id, {
+            x: startX + index * nodeSpacing,
+            y: centerY - levelSpacing
+          });
+        });
+      }
+
+      // Position descendants BELOW user
+      if (descendants.length > 0) {
+        const totalWidth = (descendants.length - 1) * nodeSpacing;
+        const startX = centerX - totalWidth / 2;
+        descendants.forEach((conn, index) => {
+          nodePositions.set(conn.id, {
+            x: startX + index * nodeSpacing,
+            y: centerY + levelSpacing
+          });
+        });
+      }
+    } else {
+      // Default: all below for friendship mode
+      rootNodes.forEach((conn, index) => {
+        const totalWidth = (rootNodes.length - 1) * nodeSpacing;
+        const startX = centerX - totalWidth / 2;
+        nodePositions.set(conn.id, {
+          x: startX + index * nodeSpacing,
+          y: centerY + levelSpacing
+        });
       });
-    });
+    }
 
     // Position child nodes recursively
     const positionChildren = (parentId: string, level: number) => {
@@ -344,16 +380,40 @@ const Tree = () => {
       const parentPos = nodePositions.get(parentId);
       if (!parentPos) return;
       
-      const totalWidth = (children.length - 1) * nodeSpacing;
-      const startX = parentPos.x - totalWidth / 2;
+      // Determine if parent is an ancestor (children go further up)
+      const parentConn = visibleConnections.find(c => c.id === parentId);
+      const isAncestorBranch = parentConn && ancestorTypes.has(parentConn.relationship_type) && mode === "family";
       
-      children.forEach((conn, index) => {
-        nodePositions.set(conn.id, {
-          x: startX + index * nodeSpacing,
-          y: parentPos.y + levelSpacing
+      // For ancestor branches, children of ancestors (grandparents) go UP
+      // For children that are themselves ancestors (grandparents under parents), go up
+      const ancestorChildren = children.filter(c => ancestorTypes.has(c.relationship_type));
+      const otherChildren = children.filter(c => !ancestorTypes.has(c.relationship_type));
+      
+      // Position ancestor children above
+      if (ancestorChildren.length > 0) {
+        const totalWidth = (ancestorChildren.length - 1) * nodeSpacing;
+        const startX = parentPos.x - totalWidth / 2;
+        ancestorChildren.forEach((conn, index) => {
+          nodePositions.set(conn.id, {
+            x: startX + index * nodeSpacing,
+            y: parentPos.y - levelSpacing
+          });
+          positionChildren(conn.id, level + 1);
         });
-        positionChildren(conn.id, level + 1);
-      });
+      }
+      
+      // Position other children below
+      if (otherChildren.length > 0) {
+        const totalWidth = (otherChildren.length - 1) * nodeSpacing;
+        const startX = parentPos.x - totalWidth / 2;
+        otherChildren.forEach((conn, index) => {
+          nodePositions.set(conn.id, {
+            x: startX + index * nodeSpacing,
+            y: parentPos.y + levelSpacing
+          });
+          positionChildren(conn.id, level + 1);
+        });
+      }
     };
 
     // Position all child nodes
@@ -593,6 +653,13 @@ const Tree = () => {
                 <span className="hidden sm:inline">Share Tree</span>
                 <span className="sm:hidden">Share</span>
               </Button>
+
+              <PageTemplateSelector
+                activeTemplateId={activeTemplateId}
+                templates={purchasedTemplates}
+                onSelect={setPageTemplate}
+                label="Tree Template"
+              />
             </div>
           </div>
         </div>
