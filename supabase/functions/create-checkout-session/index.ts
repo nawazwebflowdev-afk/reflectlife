@@ -7,12 +7,37 @@ const corsHeaders = {
 };
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Authenticate the caller
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const authSupabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await authSupabase.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const authenticatedUserId = claimsData.claims.sub;
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')!;
@@ -23,6 +48,14 @@ Deno.serve(async (req) => {
     });
 
     const { buyer_id, template_id } = await req.json();
+
+    // Verify buyer_id matches authenticated user
+    if (buyer_id !== authenticatedUserId) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     console.log('Creating checkout session for buyer:', buyer_id, 'template:', template_id);
 
@@ -42,7 +75,6 @@ Deno.serve(async (req) => {
     }
 
     if (template.is_free) {
-      console.log('Template is free, no checkout needed');
       return new Response(
         JSON.stringify({ error: 'This template is free' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -57,7 +89,6 @@ Deno.serve(async (req) => {
       .single();
 
     if (profileError || !profile) {
-      console.error('Buyer profile not found:', profileError);
       return new Response(
         JSON.stringify({ error: 'User profile not found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -80,7 +111,7 @@ Deno.serve(async (req) => {
               description: `Memorial template from ${template.country}`,
               images: template.preview_url ? [template.preview_url] : [],
             },
-            unit_amount: Math.round(template.price * 100), // Convert to cents
+            unit_amount: Math.round(template.price * 100),
           },
           quantity: 1,
         },
