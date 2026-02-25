@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
       console.log('Processing checkout session:', session.id);
       console.log('Metadata:', session.metadata);
 
-      const { buyer_id, template_id, creator_id, platform_fee } = session.metadata || {};
+      const { buyer_id, template_id } = session.metadata || {};
 
       if (!buyer_id || !template_id) {
         console.error('Missing required metadata:', { buyer_id, template_id });
@@ -88,10 +88,10 @@ Deno.serve(async (req) => {
 
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-      // Fetch template to get price
+      // Fetch template to get price and creator_id from database (not metadata)
       const { data: template, error: templateError } = await supabase
         .from('site_templates')
-        .select('price')
+        .select('price, creator_id')
         .eq('id', template_id)
         .single();
 
@@ -100,17 +100,22 @@ Deno.serve(async (req) => {
         return new Response('Template not found', { status: 404 });
       }
 
+      // Validate that amount paid matches template price
+      const amountPaid = (session.amount_total || 0) / 100;
+      if (Math.abs(amountPaid - template.price) > 0.01) {
+        console.error('Price mismatch: paid', amountPaid, 'expected', template.price);
+        return new Response('Price mismatch', { status: 400 });
+      }
+
       // Insert purchase record
       const { error: purchaseError } = await supabase
         .from('template_purchases')
         .insert({
           buyer_id,
           template_id,
-          creator_id: creator_id || null,
           amount: template.price,
           payment_status: 'completed',
-          stripe_payment_intent_id: session.payment_intent as string,
-          currency: 'EUR',
+          stripe_session_id: session.id,
         });
 
       if (purchaseError) {
@@ -128,14 +133,15 @@ Deno.serve(async (req) => {
         console.error('Error updating profile:', profileError);
       }
 
-      // If there's a creator, update their balance
-      if (creator_id && platform_fee) {
-        const creatorAmount = template.price - parseFloat(platform_fee) / 100;
+      // If there's a creator, calculate and update their balance server-side
+      if (template.creator_id) {
+        const platformFeePercent = parseFloat(Deno.env.get('PLATFORM_FEE_PERCENT') || '10');
+        const creatorAmount = template.price * (1 - platformFeePercent / 100);
         
         const { data: currentProfile } = await supabase
           .from('profiles')
           .select('earnings_balance')
-          .eq('id', creator_id)
+          .eq('id', template.creator_id)
           .single();
 
         const currentBalance = currentProfile?.earnings_balance || 0;
@@ -144,7 +150,7 @@ Deno.serve(async (req) => {
         const { error: balanceError } = await supabase
           .from('profiles')
           .update({ earnings_balance: newBalance })
-          .eq('id', creator_id);
+          .eq('id', template.creator_id);
 
         if (balanceError) {
           console.error('Error updating creator balance:', balanceError);
