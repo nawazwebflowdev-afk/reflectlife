@@ -33,7 +33,6 @@ interface Profile {
   id: string;
   full_name: string;
   avatar_url: string;
-  email: string;
   country: string;
 }
 
@@ -124,10 +123,10 @@ const AddConnectionModal = ({
       if (!user) return;
 
       const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name, avatar_url, email, country")
+        .from("public_profiles")
+        .select("id, full_name, avatar_url, country")
         .neq("id", user.id)
-        .or(`full_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`)
+        .or(`full_name.ilike.%${searchQuery}%`)
         .limit(10);
 
       if (error) throw error;
@@ -359,7 +358,7 @@ const AddConnectionModal = ({
                         <div className="text-left flex-1">
                           <div className="font-medium">{profile.full_name}</div>
                           <div className="text-sm text-muted-foreground">
-                            {profile.email}
+                            {profile.country || ""}
                           </div>
                         </div>
                       </button>
@@ -378,7 +377,7 @@ const AddConnectionModal = ({
                     <div className="flex-1">
                       <div className="font-medium">{selectedPerson.full_name}</div>
                       <div className="text-sm text-muted-foreground">
-                        {selectedPerson.email}
+                        {selectedPerson.country || ""}
                       </div>
                     </div>
                     <Button
