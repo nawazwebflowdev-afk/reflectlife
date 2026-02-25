@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, User, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 import reflectlifeLogo from "@/assets/reflectlife-logo.png";
 import {
   DropdownMenu,
@@ -20,43 +19,70 @@ import NotificationsDropdown from "@/components/NotificationsDropdown";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [profile, setProfile] = useState<{ full_name?: string; avatar_url?: string } | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, loading, initialized, signOut } = useAuth();
   const isAuthenticated = !!user;
-  const isAuthLoading = loading || !initialized;
 
-  // Use React Query for profile - cached and efficient
-  const { data: profile } = useQuery({
-    queryKey: ['nav-profile', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const { data } = await supabase
-        .from("profiles")
-        .select("full_name, avatar_url")
-        .eq("id", user.id)
-        .maybeSingle();
-      return data;
-    },
-    enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 30, // 30 minutes
-  });
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          const uid = session.user.id;
+          setTimeout(() => {
+            fetchProfile(uid);
+          }, 0);
+        } else {
+          setProfile(null);
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        const uid = session.user.id;
+        setTimeout(() => {
+          fetchProfile(uid);
+        }, 0);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("full_name, avatar_url")
+      .eq("id", userId)
+      .single();
+    
+    if (data) {
+      setProfile(data);
+    }
+  };
 
   const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate("/");
-      toast({
-        title: "Signed out",
-        description: "You've been successfully signed out",
-      });
-    } catch (error) {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
       toast({
         title: "Error",
         description: "Failed to sign out",
         variant: "destructive",
+      });
+    } else {
+      setUser(null);
+      setProfile(null);
+      navigate("/");
+      toast({
+        title: "Signed out",
+        description: "You've been successfully signed out",
       });
     }
   };
@@ -113,9 +139,7 @@ const Navigation = () => {
               );
             })}
 
-            {isAuthLoading ? (
-              <div className="h-8 w-20 bg-muted animate-pulse rounded" />
-            ) : isAuthenticated ? (
+            {isAuthenticated ? (
               <div className="flex items-center gap-2">
                 <NotificationsDropdown />
                 <DropdownMenu>
@@ -155,11 +179,12 @@ const Navigation = () => {
               </Link>
             )}
           </div>
+
+          {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="md:hidden p-2 text-foreground hover:bg-muted rounded-lg transition-smooth"
-            aria-label={isOpen ? "Close menu" : "Open menu"}
-            aria-expanded={isOpen}
+            aria-label="Toggle menu"
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>

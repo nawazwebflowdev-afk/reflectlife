@@ -91,10 +91,8 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
     try {
       setUploading(true);
       const fileExt = mediaFile.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
-      const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user?.id;
-      const filePath = `${userId}/diary/${fileName}`;
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `diary/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("memorial_uploads")
@@ -124,24 +122,6 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
       toast({
         title: "Title required",
         description: "Please enter a title for your entry",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (title.length > 200) {
-      toast({
-        title: "Title too long",
-        description: "Please keep titles under 200 characters",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (content && content.length > 50000) {
-      toast({
-        title: "Content too long",
-        description: "Please keep content under 50,000 characters",
         variant: "destructive",
       });
       return;

@@ -75,7 +75,7 @@ const Footer = () => {
 
         <div className="border-t border-border mt-8 pt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} Sypera. All rights reserved.
+            © {currentYear} Reflectlife. All rights reserved.
           </p>
         </div>
       </div>

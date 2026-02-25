@@ -1,8 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import { PageTemplateSelector } from "@/components/PageTemplateSelector";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,15 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Image as ImageIcon, MapPin, Calendar, Loader2, Share2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import type { User } from "@supabase/supabase-js";
 import { CommentsModal } from "@/components/CommentsModal";
 import { SharePostModal } from "@/components/SharePostModal";
 import { cn } from "@/utils";
-import { usePageTemplate } from "@/hooks/usePageTemplate";
-import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
-import { LazyImage } from "@/components/LazyImage";
-import { PostSkeleton } from "@/components/PostSkeleton";
-import { useProfilePreload } from "@/hooks/useProfilePreload";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   Tooltip,
   TooltipContent,
@@ -35,18 +28,17 @@ interface Post {
   created_at: string;
   likes_count: number;
   comments_count: number;
-  profiles: {
+  profiles?: {
     full_name: string | null;
     avatar_url: string | null;
-  } | null;
+  };
   isLikedByUser?: boolean;
 }
 
-const POSTS_PER_PAGE = 10;
-
 const Timeline = () => {
-  const { user } = useAuth();
-  const [page, setPage] = useState(1);
+  const [user, setUser] = useState<User | null>(null);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [caption, setCaption] = useState("");
   const [location, setLocation] = useState("");
@@ -55,93 +47,90 @@ const Timeline = () => {
   const [selectedPostForComments, setSelectedPostForComments] = useState<string | null>(null);
   const [selectedPostForShare, setSelectedPostForShare] = useState<Post | null>(null);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const { backgroundUrl, activeTemplateId, purchasedTemplates, setPageTemplate } = usePageTemplate("timeline");
-
-  // Preload user profile data
-  useProfilePreload(user?.id);
 
   useEffect(() => {
-    // Real-time subscription for posts
+    // Get current user
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    fetchPosts();
+
+    // Set up real-time subscription for posts
     const channel = supabase
       .channel('memorial-posts-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'memorial_posts' }, () => {
-        queryClient.invalidateQueries({ queryKey: ['posts'] });
-      })
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'memorial_posts'
+        },
+        () => {
+          fetchPosts();
+        }
+      )
       .subscribe();
 
     return () => {
+      subscription.unsubscribe();
       supabase.removeChannel(channel);
     };
-  }, [queryClient]);
+  }, []);
 
-  const fetchPosts = async (pageNum: number): Promise<Post[]> => {
-    const from = (pageNum - 1) * POSTS_PER_PAGE;
-    const to = from + POSTS_PER_PAGE - 1;
-
-    // Optimized: Fetch posts with specific fields only
+  const fetchPosts = async () => {
+    setLoading(true);
     const { data, error } = await supabase
       .from("memorial_posts")
-      .select('id, user_id, media_url, caption, location, created_at, likes_count, comments_count')
-      .order("created_at", { ascending: false })
-      .range(from, to);
+      .select("*")
+      .order("created_at", { ascending: false });
 
-    if (error) throw error;
-    if (!data || data.length === 0) return [];
-
-    // Batch fetch profiles for all users in one query
-    const userIds = [...new Set(data.map(p => p.user_id))];
-    const { data: profilesData } = await supabase
-      .from("profiles")
-      .select("id, full_name, avatar_url")
-      .in("id", userIds);
-    
-    const profilesMap = new Map(
-      (profilesData || []).map(p => [p.id, p])
-    );
-
-    // Optimized: Batch fetch all likes for current user in single query
-    let userLikes: string[] = [];
-    if (user) {
-      const postIds = data.map(p => p.id);
-      const { data: likesData } = await supabase
-        .from("memorial_likes")
-        .select("post_id")
-        .eq("user_id", user.id)
-        .in("post_id", postIds);
-      
-      userLikes = (likesData || []).map(like => like.post_id);
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load posts",
+        variant: "destructive",
+      });
+    } else {
+      // Fetch profile data and like status for each post
+      const postsWithProfiles = await Promise.all(
+        (data || []).map(async (post) => {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("full_name, avatar_url")
+            .eq("id", post.user_id)
+            .single();
+          
+          // Check if current user has liked this post
+          let isLikedByUser = false;
+          if (user) {
+            const { data: likeData } = await supabase
+              .from("memorial_likes")
+              .select("id")
+              .eq("post_id", post.id)
+              .eq("user_id", user.id)
+              .single();
+            
+            isLikedByUser = !!likeData;
+          }
+          
+          return {
+            ...post,
+            profiles: profile || { full_name: null, avatar_url: null },
+            isLikedByUser
+          };
+        })
+      );
+      setPosts(postsWithProfiles);
     }
-
-    // Map posts with profiles and like status
-    const postsWithData = data.map(post => ({
-      ...post,
-      profiles: profilesMap.get(post.user_id) || null,
-      isLikedByUser: userLikes.includes(post.id)
-    }));
-
-    return postsWithData as Post[];
+    setLoading(false);
   };
-
-  const { data: posts = [], isLoading, isFetching, error: postsError } = useQuery({
-    queryKey: ['posts', page, user?.id],
-    queryFn: () => fetchPosts(page),
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 30,
-    retry: 1,
-  });
-
-  const loadMore = useCallback(() => {
-    if (!isFetching) {
-      setPage((prev) => prev + 1);
-    }
-  }, [isFetching]);
-
-  const loadMoreRef = useInfiniteScroll({
-    loading: isFetching,
-    hasMore: posts.length === page * POSTS_PER_PAGE,
-    onLoadMore: loadMore,
-  });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -157,8 +146,8 @@ const Timeline = () => {
 
   const uploadMedia = async (file: File): Promise<string | null> => {
     const fileExt = file.name.split(".").pop();
-    const fileName = `${Date.now()}.${fileExt}`;
-    const filePath = `${user?.id}/posts/${fileName}`;
+    const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
+    const filePath = `posts/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from("memorial_uploads")
@@ -199,15 +188,6 @@ const Timeline = () => {
       return;
     }
 
-    if (caption && caption.length > 5000) {
-      toast({
-        title: "Caption too long",
-        description: "Please keep captions under 5000 characters",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setUploading(true);
 
     let mediaUrl = null;
@@ -243,7 +223,7 @@ const Timeline = () => {
       setLocation("");
       setMediaFile(null);
       setMediaPreview(null);
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      fetchPosts();
     }
 
     setUploading(false);
@@ -292,7 +272,8 @@ const Timeline = () => {
       }
     }
 
-    queryClient.invalidateQueries({ queryKey: ['posts'] });
+    // Refresh posts to update like counts
+    fetchPosts();
   };
 
   const getUserInitials = (name: string | null, email?: string) => {
@@ -303,54 +284,14 @@ const Timeline = () => {
   };
 
   return (
-    <div 
-      className="min-h-screen"
-      style={{
-        backgroundImage: backgroundUrl 
-          ? `linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), url(${backgroundUrl})`
-          : undefined,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-      }}
-    >
-      {/* Hero Section with Template Background */}
-      {backgroundUrl && (
-        <section 
-          className="relative h-[300px] flex items-center justify-center mb-8"
-          style={{
-            backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${backgroundUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        >
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="font-serif text-4xl md:text-5xl font-bold text-premium-plum-foreground drop-shadow-lg animate-fade-in">
-              Timeline Posts
-            </h1>
-            <p className="text-lg text-premium-plum-foreground/90 max-w-2xl mx-auto mt-4 drop-shadow-md">
-              Share and connect through memories
-            </p>
-          </div>
-        </section>
-      )}
-      
-      <div className="container mx-auto px-4 py-8 max-w-4xl" style={{ marginTop: backgroundUrl ? '-200px' : '0' }}>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-8 animate-fade-in relative z-10">
-          <h1 className="text-4xl font-bold mb-2 text-premium-plum drop-shadow-lg">
+        <div className="text-center mb-8 animate-fade-in">
+          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Timeline
           </h1>
-          <div className="w-24 h-1 bg-premium-plum mx-auto mb-2 rounded-full" />
-          <p className="text-foreground/80 drop-shadow-md">Share and cherish memories together</p>
-          <div className="mt-3">
-            <PageTemplateSelector
-              activeTemplateId={activeTemplateId}
-              templates={purchasedTemplates}
-              onSelect={setPageTemplate}
-              label="Timeline Template"
-            />
-          </div>
+          <p className="text-muted-foreground">Share and cherish memories together</p>
         </div>
 
         {/* Create Post Section */}
@@ -442,24 +383,17 @@ const Timeline = () => {
 
         {/* Posts Feed */}
         <div className="space-y-6">
-          {isLoading && page === 1 ? (
-            <>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <PostSkeleton key={i} />
-              ))}
-            </>
-          ) : postsError ? (
-            <Card className="p-12 text-center">
-              <p className="text-muted-foreground mb-4">Failed to load posts</p>
-              <Button onClick={() => window.location.reload()}>Retry</Button>
-            </Card>
+          {loading ? (
+            <div className="text-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+              <p className="text-muted-foreground mt-2">Loading memories...</p>
+            </div>
           ) : posts.length === 0 ? (
             <Card className="p-12 text-center">
               <p className="text-muted-foreground">No memories shared yet. Be the first!</p>
             </Card>
           ) : (
-            <>
-              {posts.map((post, index) => (
+            posts.map((post, index) => (
               <Card
                 key={post.id}
                 className="overflow-hidden shadow-elegant hover:shadow-lg transition-all duration-300 animate-fade-in"
@@ -485,12 +419,13 @@ const Timeline = () => {
 
                 {/* Post Media */}
                 {post.media_url && (
-                  <LazyImage
-                    src={post.media_url}
-                    alt="Memory"
-                    className="w-full h-auto max-h-[500px] object-cover"
-                    containerClassName="w-full"
-                  />
+                  <div className="relative">
+                    <img
+                      src={post.media_url}
+                      alt="Memory"
+                      className="w-full h-auto max-h-[500px] object-cover"
+                    />
+                  </div>
                 )}
 
                 {/* Post Content */}
@@ -558,18 +493,7 @@ const Timeline = () => {
                       </div>
                 </div>
               </Card>
-              ))}
-              
-              {/* Infinite Scroll Trigger */}
-              <div ref={loadMoreRef} className="py-8">
-                {isFetching && (
-                  <div className="text-center">
-                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
-                    <p className="text-sm text-muted-foreground mt-2">Loading more...</p>
-                  </div>
-                )}
-              </div>
-            </>
+            ))
           )}
         </div>
 
@@ -587,14 +511,6 @@ const Timeline = () => {
         onOpenChange={(open) => !open && setSelectedPostForComments(null)}
         postId={selectedPostForComments || ""}
         user={user}
-      />
-
-      {/* Share Modal */}
-      <SharePostModal
-        open={!!selectedPostForShare}
-        onOpenChange={(open) => !open && setSelectedPostForShare(null)}
-        postId={selectedPostForShare?.id || ""}
-        postCaption={selectedPostForShare?.caption || "A special memory"}
       />
     </div>
   );

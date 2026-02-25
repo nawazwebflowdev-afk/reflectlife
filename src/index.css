@@ -34,10 +34,6 @@ All colors MUST be HSL.
     --accent: 105 10% 45%;
     --accent-foreground: 42 35% 96%;
 
-    /* Premium Plum for headers */
-    --premium-plum: 297 84% 25%;
-    --premium-plum-foreground: 42 35% 96%;
-
     --destructive: 0 72% 51%;
     --destructive-foreground: 42 35% 96%;
 

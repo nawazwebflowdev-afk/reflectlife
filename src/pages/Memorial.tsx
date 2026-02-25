@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Calendar, MapPin, Heart, MessageCircle, Image as ImageIcon, Edit, Palette, Loader2, Share2 } from "lucide-react";
+import { Calendar, MapPin, Heart, MessageCircle, Image as ImageIcon, Edit, Palette, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,46 +10,46 @@ import { useToast } from "@/hooks/use-toast";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import timelineBg from "@/assets/timeline-bg.jpg";
 import EditMemorialModal from "@/components/EditMemorialModal";
-import { TributeModal } from "@/components/TributeModal";
-import { ShareMemorialModal } from "@/components/ShareMemorialModal";
-import { CandleVideoModal } from "@/components/CandleVideoModal";
-import { Trash2 } from "lucide-react";
-import { LazyImage } from "@/components/LazyImage";
-import { useAuth } from "@/contexts/AuthContext";
 
 const Memorial = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
   const templateTheme = useTemplateTheme();
   const [memorial, setMemorial] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [likeCount, setLikeCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   useEffect(() => {
     fetchMemorial();
+    checkAuth();
   }, [id]);
+
+  const checkAuth = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setCurrentUserId(user?.id || null);
+  };
 
   const fetchMemorial = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from("memorials")
-        .select('id, name, date_of_birth, date_of_death, location, bio, preview_image_url, user_id, is_public, privacy_level, profiles:user_id(full_name, first_name, last_name)')
+        .select(`
+          *,
+          profiles:user_id (
+            full_name,
+            first_name,
+            last_name
+          )
+        `)
         .eq("id", id)
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
-      
-      if (!data) {
-        setMemorial(null);
-        return;
-      }
-      
       setMemorial(data);
     } catch (error: any) {
       console.error("Error fetching memorial:", error);
@@ -63,7 +63,7 @@ const Memorial = () => {
     }
   };
 
-  const isCreator = user?.id && memorial?.user_id === user.id;
+  const isCreator = currentUserId && memorial?.user_id === currentUserId;
   const [timelineEntries, setTimelineEntries] = useState<any[]>([]);
   const [tributePosts, setTributePosts] = useState<any[]>([]);
   const [galleryMedia, setGalleryMedia] = useState<any[]>([]);
@@ -80,13 +80,12 @@ const Memorial = () => {
 
   const fetchTimelineData = async () => {
     try {
-      // Optimized query with specific fields and limit
+      // Fetch real timeline entries from memorial_entries table
       const { data, error } = await supabase
         .from("memorial_entries")
-        .select('id, caption, content_type, content_url, event_date, created_at')
+        .select("*")
         .eq("timeline_id", memorial?.id)
-        .order("event_date", { ascending: false })
-        .limit(50); // Pagination for performance
+        .order("event_date", { ascending: false });
 
       if (error) throw error;
       setTimelineEntries(data || []);
@@ -97,13 +96,18 @@ const Memorial = () => {
 
   const fetchTributes = async () => {
     try {
-      // Optimized query with specific fields only
+      // Fetch real tributes from tributes table
       const { data, error } = await supabase
-        .from("memorial_tributes")
-        .select('id, tribute_text, created_at, user_id, media_url, profiles:user_id(full_name, avatar_url, emoji_avatar)')
+        .from("tributes" as any)
+        .select(`
+          *,
+          profiles:user_id (
+            full_name,
+            avatar_url
+          )
+        `)
         .eq("memorial_id", memorial?.id)
-        .order("created_at", { ascending: false })
-        .limit(50); // Pagination for performance
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setTributePosts(data || []);
@@ -112,32 +116,9 @@ const Memorial = () => {
     }
   };
 
-  const handleDeleteTribute = async (tributeId: string) => {
-    try {
-      const { error } = await supabase
-        .from('memorial_tributes')
-        .delete()
-        .eq('id', tributeId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Tribute deleted",
-        description: "Your tribute has been removed",
-      });
-      
-      fetchTributes();
-    } catch (error: any) {
-      console.error("Error deleting tribute:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete tribute",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleSubmitTribute = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+
     if (!user) {
       toast({
         title: "Authentication required",
@@ -186,13 +167,12 @@ const Memorial = () => {
 
   const fetchGalleryMedia = async () => {
     try {
-      // Optimized query with specific fields and limit
+      // Fetch real media from memorial_media table
       const { data, error } = await supabase
         .from("memorial_media")
-        .select('id, media_url, media_type, caption, uploaded_at')
+        .select("*")
         .eq("memorial_id", memorial?.id)
-        .order("uploaded_at", { ascending: false })
-        .limit(50); // Pagination for performance
+        .order("uploaded_at", { ascending: false });
 
       if (error) throw error;
       setGalleryMedia(data || []);
@@ -312,8 +292,7 @@ const Memorial = () => {
             </div>
 
             {/* Actions */}
-            <div className="flex flex-wrap gap-3 pb-2">
-              <CandleVideoModal memorialId={memorial.id} memorialName={memorial.name} />
+            <div className="flex gap-3 pb-2">
               <Button
                 variant={isLiked ? "default" : "outline"}
                 size="sm"
@@ -322,15 +301,6 @@ const Memorial = () => {
               >
                 <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
                 {likeCount}
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="gap-2"
-                onClick={() => setIsShareModalOpen(true)}
-              >
-                <Share2 className="h-4 w-4" />
-                Share
               </Button>
               {isCreator && (
                 <Button 
@@ -462,8 +432,6 @@ const Memorial = () => {
                             alt={tribute.profiles.full_name || 'User'}
                             className="w-full h-full object-cover rounded-full"
                           />
-                        ) : tribute.profiles?.emoji_avatar ? (
-                          <span className="text-2xl">{tribute.profiles.emoji_avatar}</span>
                         ) : (
                           <span className="text-accent font-semibold">
                             {tribute.profiles?.full_name?.charAt(0) || 'A'}
@@ -479,36 +447,9 @@ const Memorial = () => {
                           <span className="text-sm text-muted-foreground">
                             {new Date(tribute.created_at).toLocaleDateString()}
                           </span>
-                          {user?.id === tribute.user_id && (
-                            <>
-                              <span className="text-sm text-muted-foreground">•</span>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteTribute(tribute.id)}
-                                className="h-auto p-1 text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </>
-                          )}
                         </div>
                         {tribute.tribute_text && (
                           <p className="text-muted-foreground mb-3">{tribute.tribute_text}</p>
-                        )}
-                        {tribute.media_url && (
-                          <div className="mt-3 rounded-lg overflow-hidden max-w-md">
-                            {tribute.media_url.includes('video') || tribute.media_url.includes('.mp4') ? (
-                              <video src={tribute.media_url} controls className="w-full h-auto" />
-                            ) : (
-                              <LazyImage 
-                                src={tribute.media_url} 
-                                alt="Tribute media" 
-                                className="w-full h-auto"
-                                containerClassName="w-full"
-                              />
-                            )}
-                          </div>
                         )}
                       </div>
                     </div>
@@ -534,12 +475,32 @@ const Memorial = () => {
               </CardContent>
             </Card>
 
-            <TributeModal
-              open={showTributeModal}
-              onOpenChange={setShowTributeModal}
-              memorialId={memorial?.id}
-              onTributeAdded={fetchTributes}
-            />
+            {/* Tribute Modal */}
+            {showTributeModal && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-background p-6 rounded-xl max-w-lg w-full mx-4 shadow-lg">
+                  <h2 className="text-xl font-bold mb-4">Share a Tribute</h2>
+
+                  <textarea
+                    className="w-full border border-input rounded-md p-3 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    rows={4}
+                    value={tribute}
+                    onChange={(e) => setTribute(e.target.value)}
+                    placeholder="Write your tribute..."
+                  />
+
+                  <div className="flex justify-end gap-3 mt-4">
+                    <Button variant="ghost" onClick={() => setShowTributeModal(false)}>
+                      Cancel
+                    </Button>
+
+                    <Button onClick={handleSubmitTribute}>
+                      Post Tribute
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           {/* Gallery */}
@@ -596,15 +557,6 @@ const Memorial = () => {
         onOpenChange={setIsEditModalOpen}
         memorial={memorial}
         onMemorialUpdated={fetchMemorial}
-      />
-
-      {/* Share Modal */}
-      <ShareMemorialModal
-        open={isShareModalOpen}
-        onOpenChange={setIsShareModalOpen}
-        memorialId={memorial.id}
-        memorialName={memorial.name}
-        memorialDescription={memorial.bio || memorial.description}
       />
     </div>
   );

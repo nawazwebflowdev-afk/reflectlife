@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Heart, Share2, Clock, Shield, MessageCircle, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,52 +10,53 @@ import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import FeaturedTemplates from "@/components/FeaturedTemplates";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
-import { useQuery } from "@tanstack/react-query";
-import { LazyImage } from "@/components/LazyImage";
-import { useAuth } from "@/contexts/AuthContext";
 
 const Landing = () => {
-  // Use global auth context instead of local state
-  const { user, loading: authLoading } = useAuth();
+  const [user, setUser] = useState<any>(null);
+  const [timelinePosts, setTimelinePosts] = useState<any[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
 
-  // Fetch timeline posts with React Query - optimized with JOIN
-  const { data: timelinePosts = [], isLoading: loadingPosts } = useQuery({
-    queryKey: ['landing-timeline-posts', user?.id],
-    queryFn: async () => {
+  useEffect(() => {
+    checkUser();
+  }, []);
+
+  const checkUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setUser(user);
+    if (user) {
+      fetchTimelinePosts();
+    }
+  };
+
+  const fetchTimelinePosts = async () => {
+    setLoadingPosts(true);
+    try {
       const { data, error } = await supabase
         .from('memorial_posts')
         .select(`
-          id, 
-          caption, 
-          location, 
-          media_url, 
-          created_at, 
-          likes_count, 
-          comments_count,
-          user_id,
-          profiles!memorial_posts_user_id_fkey(username, full_name, avatar_url)
+          *,
+          profiles:user_id (
+            username,
+            full_name,
+            avatar_url
+          )
         `)
         .order('created_at', { ascending: false })
         .limit(10);
 
       if (error) throw error;
-      return data || [];
-    },
-    enabled: !!user,
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 10,
-    retry: 1,
-  });
+      setTimelinePosts(data || []);
+    } catch (error) {
+      console.error("Error fetching timeline posts:", error);
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
 
   const getUserInitials = (profile: any) => {
     if (!profile) return "?";
     const name = profile.full_name || profile.username || "";
     return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
-  };
-
-  const getProfile = (post: any) => {
-    // Handle both array (from join) and object formats
-    return Array.isArray(post.profiles) ? post.profiles[0] : post.profiles;
   };
 
   const features = [
@@ -179,13 +180,13 @@ const Landing = () => {
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4 mb-4">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={getProfile(post)?.avatar_url} />
-                          <AvatarFallback>{getUserInitials(getProfile(post))}</AvatarFallback>
+                          <AvatarImage src={post.profiles?.avatar_url} />
+                          <AvatarFallback>{getUserInitials(post.profiles)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-grow">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="font-semibold">
-                              {getProfile(post)?.full_name || getProfile(post)?.username || "Anonymous"}
+                              {post.profiles?.full_name || post.profiles?.username || "Anonymous"}
                             </span>
                             <span className="text-sm text-muted-foreground">•</span>
                             <span className="text-sm text-muted-foreground">
@@ -207,11 +208,10 @@ const Landing = () => {
 
                       {post.media_url && (
                         <div className="rounded-lg overflow-hidden mb-4">
-                          <LazyImage
+                          <img
                             src={post.media_url}
                             alt="Memory"
                             className="w-full h-auto max-h-96 object-cover"
-                            containerClassName="w-full"
                           />
                         </div>
                       )}

@@ -70,14 +70,7 @@ const TimelineView = () => {
         .order("created_at", { ascending: false });
 
       if (entriesError) throw entriesError;
-
-      const normalizedEntries: Entry[] = (entriesData || []).map((e: any) => ({
-        ...e,
-        // DB default is 'text' but the UI expects 'note'
-        content_type: (e.content_type === 'text' ? 'note' : e.content_type) as Entry['content_type'],
-      }));
-
-      setEntries(normalizedEntries);
+      setEntries(entriesData || []);
     } catch (error: any) {
       toast({
         title: "Error",

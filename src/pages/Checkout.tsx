@@ -26,97 +26,81 @@ const Checkout = () => {
   const [processing, setProcessing] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [alreadyOwned, setAlreadyOwned] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (loading) {
-        setLoading(false);
-        setError("Loading timed out. Please try again.");
-      }
-    }, 10000); // 10 second timeout
-
     checkAuthAndFetchTemplate();
-    return () => clearTimeout(timeoutId);
   }, [templateId]);
 
   const checkAuthAndFetchTemplate = async () => {
-    try {
-      // Check authentication
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session?.user) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to purchase templates",
-          variant: "destructive",
-        });
-        navigate("/login");
-        return;
-      }
-
-      setUserId(session.user.id);
-
-      if (!templateId) {
-        toast({
-          title: "Invalid Template",
-          description: "Template not found",
-          variant: "destructive",
-        });
-        navigate("/templates");
-        return;
-      }
-
-      // Fetch template details
-      const { data: templateData, error: templateError } = await supabase
-        .from("site_templates")
-        .select("*")
-        .eq("id", templateId)
-        .single();
-
-      if (templateError || !templateData) {
-        setError("Template not found");
-        toast({
-          title: "Template Not Found",
-          description: "The requested template does not exist",
-          variant: "destructive",
-        });
-        navigate("/templates");
-        return;
-      }
-
-      // Check if template is free
-      if (templateData.is_free) {
-        toast({
-          title: "Free Template",
-          description: "This template is free. Redirecting...",
-        });
-        navigate("/templates");
-        return;
-      }
-
-      // Check if user already owns this template
-      const { data: purchaseData } = await supabase
-        .from("template_purchases")
-        .select("id")
-        .eq("buyer_id", session.user.id)
-        .eq("template_id", templateId)
-        .or("payment_status.eq.completed,payment_status.eq.succeeded")
-        .maybeSingle();
-
-      if (purchaseData) {
-        setAlreadyOwned(true);
-      }
-
-      setTemplate(templateData);
-      setLoading(false);
-    } catch (err: any) {
-      console.error("Checkout fetch error:", err);
-      setError(err.message || "Failed to load checkout");
-      setLoading(false);
+    // Check authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to purchase templates",
+        variant: "destructive",
+      });
+      navigate("/login");
+      return;
     }
+
+    setUserId(session.user.id);
+
+    if (!templateId) {
+      toast({
+        title: "Invalid Template",
+        description: "Template not found",
+        variant: "destructive",
+      });
+      navigate("/templates");
+      return;
+    }
+
+    // Fetch template details
+    const { data: templateData, error: templateError } = await supabase
+      .from("site_templates")
+      .select("*")
+      .eq("id", templateId)
+      .single();
+
+    if (templateError || !templateData) {
+      toast({
+        title: "Template Not Found",
+        description: "The requested template does not exist",
+        variant: "destructive",
+      });
+      navigate("/templates");
+      return;
+    }
+
+    // Check if template is free
+    if (templateData.is_free) {
+      toast({
+        title: "Free Template",
+        description: "This template is free. Redirecting...",
+      });
+      navigate("/templates");
+      return;
+    }
+
+    // Check if user already owns this template
+    const { data: purchaseData } = await supabase
+      .from("template_purchases")
+      .select("id")
+      .eq("buyer_id", session.user.id)
+      .eq("template_id", templateId)
+      .eq("payment_status", "success")
+      .single();
+
+    if (purchaseData) {
+      setAlreadyOwned(true);
+    }
+
+    setTemplate(templateData);
+    setLoading(false);
   };
 
   const handlePayment = async () => {
@@ -153,26 +137,13 @@ const Checkout = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading checkout...</p>
-        </div>
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
 
-  if (error || !template) {
-    return (
-      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
-        <Card className="max-w-md w-full">
-          <CardContent className="p-6 text-center">
-            <h2 className="text-xl font-semibold mb-2">Unable to Load Checkout</h2>
-            <p className="text-muted-foreground mb-4">{error || "Template not found"}</p>
-            <Button onClick={() => navigate("/templates")}>Browse Templates</Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
+  if (!template) {
+    return null;
   }
 
   return (
@@ -183,7 +154,7 @@ const Checkout = () => {
             Complete Your Purchase
           </h1>
           <p className="text-muted-foreground">
-            Secure checkout powered by Stripe
+            Secure checkout powered by Stripe (Test Mode)
           </p>
         </div>
 
@@ -269,6 +240,15 @@ const Checkout = () => {
                   </div>
                 ) : (
                   <>
+                    <div className="bg-accent/50 border border-border rounded-md p-4 space-y-2">
+                      <p className="text-sm font-semibold">Test Mode - Use Test Card:</p>
+                      <div className="space-y-1 text-xs text-muted-foreground">
+                        <p>Card: <code className="bg-muted px-2 py-1 rounded">4242 4242 4242 4242</code></p>
+                        <p>Expiry: Any future date</p>
+                        <p>CVC: Any 3 digits</p>
+                      </div>
+                    </div>
+
                     <Button 
                       className="w-full shadow-elegant" 
                       size="lg"

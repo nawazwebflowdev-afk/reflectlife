@@ -1,4 +1,4 @@
-import { User, Bell, Lock, Download, Trash2, Palette, Upload, X, Loader2, Share2, Star, LogOut } from "lucide-react";
+import { User, Bell, Lock, Download, Trash2, Palette, Upload, X, Loader2, Share2, Star } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,19 +9,10 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { useTemplateBackground } from "@/hooks/useTemplateBackground";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import DeleteAccountModal from "@/components/DeleteAccountModal";
-import { SignOutModal } from "@/components/SignOutModal";
 import { Textarea } from "@/components/ui/textarea";
-import { ThemeSelector } from "@/components/ThemeSelector";
-import { TemplateBackgroundSelector } from "@/components/TemplateBackgroundSelector";
-import { exportUserDataToPDF } from "@/utils/exportUserData";
-import { useUserProfile } from "@/hooks/useUserProfile";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CreatorWithdrawal } from "@/components/CreatorWithdrawal";
 import {
   Select,
   SelectContent,
@@ -30,68 +21,69 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+
 const Settings = () => {
+  
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [colorTheme, setColorTheme] = useState("light");
   const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [isApprovedCreator, setIsApprovedCreator] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showSignOutModal, setShowSignOutModal] = useState(false);
   const [rating, setRating] = useState(0);
   const [reviewMessage, setReviewMessage] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-  const [isExportingData, setIsExportingData] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-  const [isSigningOut, setIsSigningOut] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
-  const { backgroundUrl } = useTemplateBackground();
-  const queryClient = useQueryClient();
 
-  // Use React Query for profile data
-  const { data: profile, isLoading: profileLoading } = useUserProfile(user?.id);
-  
-  // Fetch creator status
-  const { data: creatorData } = useQuery({
-    queryKey: ['creator-status', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const { data } = await supabase
-        .from('template_creators')
-        .select('approved')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      return data;
-    },
-    enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5,
-  });
-
-  const [fullName, setFullName] = useState("");
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-
-  // Update local state when profile loads and user data
   useEffect(() => {
-    if (profile) {
-      setFullName(profile.full_name || "");
-      setUsername(profile.username || "");
-      setAvatarUrl(profile.avatar_url || null);
-    }
-    if (user?.email) {
-      setEmail(user.email);
-    }
-  }, [profile, user]);
+    checkAuth();
+  }, []);
 
-  const isApprovedCreator = creatorData?.approved || false;
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/auth");
+      return;
+    }
+    setUserId(session.user.id);
+    setEmail(session.user.email || "");
+    await fetchProfile(session.user.id);
+  };
+
+  const fetchProfile = async (id: string) => {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (data) {
+      setFullName(data.full_name || "");
+      setColorTheme(data.color_theme || "light");
+      setAvatarUrl(data.avatar_url || null);
+    }
+
+    // Check if user is an approved creator
+    const { data: creatorData } = await supabase
+      .from("template_creators")
+      .select("approved")
+      .eq("user_id", id)
+      .single();
+
+    if (creatorData?.approved) {
+      setIsApprovedCreator(true);
+    }
+  };
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !user?.id) return;
+    if (!file || !userId) return;
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
@@ -107,25 +99,19 @@ const Settings = () => {
     setUploadProgress(0);
 
     try {
-      // Simulate progress
+      // Create file path in avatars bucket
+      const fileExt = file.name.split('.').pop();
+      const filePath = `user-avatars/${userId}.${fileExt}`;
+
+      // Simulate progress for better UX
       const progressInterval = setInterval(() => {
-        setUploadProgress(prev => Math.min(prev + 10, 70));
+        setUploadProgress(prev => Math.min(prev + 10, 90));
       }, 100);
-
-      // Import compression utility
-      const { compressImage } = await import('@/utils/imageCompression');
-      
-      // Compress image to WebP
-      const compressedBlob = await compressImage(file, 800, 800, 0.85);
-      const compressedFile = new File([compressedBlob], `${user.id}.webp`, { type: 'image/webp' });
-
-      setUploadProgress(80);
-      const filePath = `user-avatars/${user.id}.webp`;
 
       // Upload to Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, compressedFile, { upsert: true });
+        .upload(filePath, file, { upsert: true });
 
       clearInterval(progressInterval);
 
@@ -142,7 +128,7 @@ const Settings = () => {
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl })
-        .eq('id', user.id);
+        .eq('id', userId);
 
       if (updateError) throw updateError;
 
@@ -151,10 +137,10 @@ const Settings = () => {
 
       toast({
         title: "Success",
-        description: "Profile picture optimized and updated",
+        description: "Profile picture updated successfully",
       });
 
-      // Force refresh to update avatar everywhere
+      // Force refresh the page to update avatar in navigation
       window.location.reload();
     } catch (error: any) {
       console.error('Upload error:', error);
@@ -173,7 +159,7 @@ const Settings = () => {
   };
 
   const handleRemoveAvatar = async () => {
-    if (!user?.id) return;
+    if (!userId) return;
     
     setIsLoading(true);
 
@@ -181,7 +167,7 @@ const Settings = () => {
       const { error } = await supabase
         .from('profiles')
         .update({ avatar_url: null })
-        .eq('id', user.id);
+        .eq('id', userId);
 
       if (error) throw error;
 
@@ -211,36 +197,16 @@ const Settings = () => {
   };
 
   const handleSaveProfile = async () => {
-    if (!user?.id) return;
+    if (!userId) return;
     setIsLoading(true);
-
-    // Validate username uniqueness if changed
-    if (username && username !== profile?.username) {
-      const { data: existingUser } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("username", username)
-        .neq("id", user.id)
-        .maybeSingle();
-
-      if (existingUser) {
-        toast({
-          title: "Username taken",
-          description: "This username is already in use. Please choose another.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-    }
 
     const { error } = await supabase
       .from("profiles")
       .update({
         full_name: fullName,
-        username: username || null,
+        color_theme: colorTheme,
       })
-      .eq("id", user.id);
+      .eq("id", userId);
 
     setIsLoading(false);
 
@@ -251,10 +217,6 @@ const Settings = () => {
         variant: "destructive",
       });
     } else {
-      // Invalidate cache to refetch
-      queryClient.invalidateQueries({ queryKey: ['user-profile', user.id] });
-      queryClient.invalidateQueries({ queryKey: ['user-data', user.id] });
-      
       toast({
         title: "Success",
         description: "Profile updated successfully",
@@ -276,6 +238,8 @@ const Settings = () => {
     try {
       const { error } = await supabase.functions.invoke("send-review", {
         body: {
+          userName: fullName,
+          userEmail: email,
           rating,
           message: reviewMessage,
         },
@@ -301,114 +265,9 @@ const Settings = () => {
   };
 
 
-  const handleExportData = async () => {
-    if (!user?.id) {
-      toast({
-        title: "Not Authenticated",
-        description: "Please sign in to export your data",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsExportingData(true);
-    try {
-      await exportUserDataToPDF(user.id);
-      toast({
-        title: "Export Successful",
-        description: "Your data has been downloaded as a PDF",
-      });
-    } catch (error: any) {
-      console.error('Export error:', error);
-      toast({
-        title: "Export Failed",
-        description: error.message || "Failed to export data",
-        variant: "destructive",
-      });
-    } finally {
-      setIsExportingData(false);
-    }
-  };
-
-  const handleUpdatePassword = async () => {
-    if (!newPassword) {
-      toast({
-        title: "Error",
-        description: "Please enter a new password",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      toast({
-        title: "Error",
-        description: "Password must be at least 6 characters",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsUpdatingPassword(true);
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Password updated successfully",
-      });
-      setCurrentPassword("");
-      setNewPassword("");
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update password",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUpdatingPassword(false);
-    }
-  };
-
-  const handleSignOut = async () => {
-    setIsSigningOut(true);
-    try {
-      await supabase.auth.signOut();
-      toast({
-        title: "Signed Out",
-        description: "You have been signed out successfully",
-      });
-      navigate("/auth");
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to sign out",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSigningOut(false);
-      setShowSignOutModal(false);
-    }
-  };
-
-
   return (
-    <div 
-      className="min-h-screen py-12"
-      style={{
-        backgroundImage: backgroundUrl 
-          ? `linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), url(${backgroundUrl})`
-          : undefined,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-      }}
-    >
-      <div className="container mx-auto px-4 max-w-4xl relative">
+    <div className="min-h-screen py-12">
+      <div className="container mx-auto px-4 max-w-4xl">
         <div className="mb-8 animate-fade-in">
           <h1 className="font-serif text-4xl font-bold mb-2">Settings</h1>
           <p className="text-muted-foreground">Manage your account and preferences</p>
@@ -506,18 +365,6 @@ const Settings = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="username">Username (optional)</Label>
-                <Input 
-                  id="username" 
-                  placeholder="your_username" 
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Lowercase letters, numbers, and underscores only
-                </p>
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input 
                   id="email" 
@@ -569,24 +416,27 @@ const Settings = () => {
                 <Palette className="h-5 w-5 text-primary" />
                 <CardTitle>Color Theme</CardTitle>
               </div>
-              <CardDescription>Personalize your experience with a color that resonates with you</CardDescription>
+              <CardDescription>Choose your preferred color theme</CardDescription>
             </CardHeader>
-            <CardContent>
-              <ThemeSelector />
-            </CardContent>
-          </Card>
-
-          {/* Template Background */}
-          <Card className="shadow-elegant">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Palette className="h-5 w-5 text-primary" />
-                <CardTitle>Background Template</CardTitle>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="theme">Theme</Label>
+                <Select value={colorTheme} onValueChange={setColorTheme}>
+                  <SelectTrigger id="theme">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">Light</SelectItem>
+                    <SelectItem value="dark">Dark</SelectItem>
+                    <SelectItem value="blue">Blue</SelectItem>
+                    <SelectItem value="green">Green</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <CardDescription>Choose your active memorial template background</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TemplateBackgroundSelector />
+              <Button onClick={handleSaveProfile} disabled={isLoading}>
+                {isLoading ? "Saving..." : "Save Theme"}
+              </Button>
             </CardContent>
           </Card>
 
@@ -597,35 +447,18 @@ const Settings = () => {
                 <Lock className="h-5 w-5 text-primary" />
                 <CardTitle>Privacy & Security</CardTitle>
               </div>
-              <CardDescription>Update your password</CardDescription>
+              <CardDescription>Control your privacy settings</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="new-password">New Password</Label>
-                <Input 
-                  id="new-password" 
-                  type="password" 
-                  placeholder="••••••••"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Password must be at least 6 characters
-                </p>
+                <Label htmlFor="current-password">Current Password</Label>
+                <Input id="current-password" type="password" placeholder="••••••••" />
               </div>
-              <Button 
-                onClick={handleUpdatePassword}
-                disabled={isUpdatingPassword || !newPassword}
-              >
-                {isUpdatingPassword ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Updating...
-                  </>
-                ) : (
-                  "Update Password"
-                )}
-              </Button>
+              <div className="space-y-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <Input id="new-password" type="password" placeholder="••••••••" />
+              </div>
+              <Button>Update Password</Button>
             </CardContent>
           </Card>
 
@@ -686,14 +519,6 @@ const Settings = () => {
             </CardContent>
           </Card>
 
-          {/* Creator Withdrawal - Only for Approved Creators */}
-          {isApprovedCreator && (
-            <div>
-              <h2 className="text-2xl font-serif font-bold mb-4">Creator Earnings</h2>
-              <CreatorWithdrawal />
-            </div>
-          )}
-
           {/* Share Your Design - Only for Approved Creators */}
           {isApprovedCreator && (
             <Card className="shadow-elegant">
@@ -722,52 +547,13 @@ const Settings = () => {
                 <Download className="h-5 w-5 text-primary" />
                 <CardTitle>Data Export</CardTitle>
               </div>
-              <CardDescription>Download all your memorial data as PDF</CardDescription>
+              <CardDescription>Download your memorial data</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Export all your data including profile, memorials, timeline posts, and tributes as a formatted PDF document.
+                Export all your memorial data including photos, tributes, and timeline entries as a downloadable archive.
               </p>
-              <Button 
-                variant="outline" 
-                onClick={handleExportData}
-                disabled={isExportingData}
-              >
-                {isExportingData ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Exporting...
-                  </>
-                ) : (
-                  <>
-                    <Download className="mr-2 h-4 w-4" />
-                    Export Data (PDF)
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Sign Out */}
-          <Card className="shadow-elegant">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <LogOut className="h-5 w-5 text-primary" />
-                <CardTitle>Sign Out</CardTitle>
-              </div>
-              <CardDescription>Sign out of your account</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Sign out from this device. You can sign back in anytime.
-              </p>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowSignOutModal(true)}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign Out
-              </Button>
+              <Button variant="outline">Export Data (ZIP)</Button>
             </CardContent>
           </Card>
 
@@ -795,20 +581,12 @@ const Settings = () => {
         </div>
       </div>
 
-      {/* Sign Out Modal */}
-      <SignOutModal
-        open={showSignOutModal}
-        onOpenChange={setShowSignOutModal}
-        onConfirm={handleSignOut}
-        isLoading={isSigningOut}
-      />
-
       {/* Delete Account Modal */}
-      {user?.id && (
+      {userId && (
         <DeleteAccountModal
           open={showDeleteModal}
           onOpenChange={setShowDeleteModal}
-          userId={user.id}
+          userId={userId}
         />
       )}
     </div>

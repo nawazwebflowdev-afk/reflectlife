@@ -34,37 +34,24 @@ const NotificationsDropdown = () => {
   useEffect(() => {
     fetchNotifications();
 
-    // Get current user for real-time subscription
-    const setupRealtime = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Set up real-time subscription filtered by user_id
-      const channel = supabase
-        .channel('notifications-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'notifications',
-            filter: `user_id=eq.${user.id}`
-          },
-          () => {
-            fetchNotifications();
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    };
-
-    const cleanup = setupRealtime();
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('notifications-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+        },
+        () => {
+          fetchNotifications();
+        }
+      )
+      .subscribe();
 
     return () => {
-      cleanup.then(cleanupFn => cleanupFn?.());
+      supabase.removeChannel(channel);
     };
   }, []);
 

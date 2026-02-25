@@ -23,63 +23,13 @@ Deno.serve(async (req) => {
 
     console.log('Webhook event received:', event.type);
 
-    // Handle premium subscription checkout
-    if (event.type === 'checkout.session.completed' && event.data.object.mode === 'subscription') {
-      const session = event.data.object as Stripe.Checkout.Session;
-      
-      console.log('Processing premium subscription checkout:', session.id);
-      
-      const { user_id } = session.metadata || {};
-      
-      if (!user_id) {
-        console.error('Missing user_id in metadata');
-        return new Response('Missing user_id', { status: 400 });
-      }
-
-      const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-      // Update user profile to premium
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ is_premium: true })
-        .eq('id', user_id);
-
-      if (profileError) {
-        console.error('Error updating profile to premium:', profileError);
-        return new Response('Error updating profile', { status: 500 });
-      }
-
-      // Create or update subscription record
-      const { error: subError } = await supabase
-        .from('premium_subscriptions')
-        .upsert({
-          user_id,
-          stripe_customer_id: session.customer as string,
-          stripe_subscription_id: session.subscription as string,
-          status: 'active',
-          current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-        });
-
-      if (subError) {
-        console.error('Error creating subscription record:', subError);
-        return new Response('Error creating subscription', { status: 500 });
-      }
-
-      console.log('Premium subscription activated successfully');
-      
-      return new Response(JSON.stringify({ received: true }), {
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Handle template purchase checkout
-    if (event.type === 'checkout.session.completed' && event.data.object.mode === 'payment') {
+    if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
       
       console.log('Processing checkout session:', session.id);
       console.log('Metadata:', session.metadata);
 
-      const { buyer_id, template_id } = session.metadata || {};
+      const { buyer_id, template_id, creator_id, platform_fee } = session.metadata || {};
 
       if (!buyer_id || !template_id) {
         console.error('Missing required metadata:', { buyer_id, template_id });
@@ -88,10 +38,10 @@ Deno.serve(async (req) => {
 
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-      // Fetch template to get price and creator_id from database (not metadata)
+      // Fetch template to get price
       const { data: template, error: templateError } = await supabase
         .from('site_templates')
-        .select('price, creator_id')
+        .select('price')
         .eq('id', template_id)
         .single();
 
@@ -100,22 +50,17 @@ Deno.serve(async (req) => {
         return new Response('Template not found', { status: 404 });
       }
 
-      // Validate that amount paid matches template price
-      const amountPaid = (session.amount_total || 0) / 100;
-      if (Math.abs(amountPaid - template.price) > 0.01) {
-        console.error('Price mismatch: paid', amountPaid, 'expected', template.price);
-        return new Response('Price mismatch', { status: 400 });
-      }
-
       // Insert purchase record
       const { error: purchaseError } = await supabase
         .from('template_purchases')
         .insert({
           buyer_id,
           template_id,
+          creator_id: creator_id || null,
           amount: template.price,
           payment_status: 'completed',
-          stripe_session_id: session.id,
+          stripe_payment_intent_id: session.payment_intent as string,
+          currency: 'EUR',
         });
 
       if (purchaseError) {
@@ -133,15 +78,14 @@ Deno.serve(async (req) => {
         console.error('Error updating profile:', profileError);
       }
 
-      // If there's a creator, calculate and update their balance server-side
-      if (template.creator_id) {
-        const platformFeePercent = parseFloat(Deno.env.get('PLATFORM_FEE_PERCENT') || '10');
-        const creatorAmount = template.price * (1 - platformFeePercent / 100);
+      // If there's a creator, update their balance
+      if (creator_id && platform_fee) {
+        const creatorAmount = template.price - parseFloat(platform_fee) / 100;
         
         const { data: currentProfile } = await supabase
           .from('profiles')
           .select('earnings_balance')
-          .eq('id', template.creator_id)
+          .eq('id', creator_id)
           .single();
 
         const currentBalance = currentProfile?.earnings_balance || 0;
@@ -150,7 +94,7 @@ Deno.serve(async (req) => {
         const { error: balanceError } = await supabase
           .from('profiles')
           .update({ earnings_balance: newBalance })
-          .eq('id', template.creator_id);
+          .eq('id', creator_id);
 
         if (balanceError) {
           console.error('Error updating creator balance:', balanceError);
@@ -166,7 +110,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Webhook error:', error);
     return new Response(
-      JSON.stringify({ error: 'Webhook processing failed' }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 400, headers: { 'Content-Type': 'application/json' } }
     );
   }

@@ -77,7 +77,6 @@ export const CreateTimelineModal = ({ open, onOpenChange, userId }: CreateTimeli
         .single();
 
       if (error) throw error;
-      if (!data) throw new Error("Failed to create timeline");
 
       toast({
         title: "Timeline created",

@@ -115,12 +115,12 @@ const ResetPassword = () => {
     setPasswordReset(true);
     toast({
       title: "Password Reset Successful",
-      description: "Your password has been successfully reset. Redirecting to your dashboard...",
+      description: "Your password has been successfully reset. You can now log in.",
     });
 
-    // Redirect to dashboard after 2 seconds
+    // Redirect to auth page after 2 seconds
     setTimeout(() => {
-      navigate("/dashboard");
+      navigate("/login");
     }, 2000);
   };
 
@@ -136,7 +136,7 @@ const ResetPassword = () => {
               <div className="space-y-2">
                 <CardTitle className="font-serif text-2xl">Password Reset!</CardTitle>
                 <CardDescription className="text-base">
-                  Your password has been successfully reset. Redirecting you to your dashboard...
+                  Your password has been successfully reset. Redirecting you to sign in...
                 </CardDescription>
               </div>
             </CardHeader>

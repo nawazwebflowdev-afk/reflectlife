@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,10 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Check, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getCountryFlag } from "@/lib/countryFlags";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LazyImage } from "@/components/LazyImage";
-import { MemorialSkeleton } from "@/components/MemorialSkeleton";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface Template {
   id: string;
@@ -28,90 +24,79 @@ interface Template {
 }
 
 const Templates = () => {
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [creatorTemplates, setCreatorTemplates] = useState<Template[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<"all" | "free" | "paid">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
 
-  // Fetch user's selected template with React Query
-  const { data: userTemplate } = useQuery({
-    queryKey: ['user-template', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const { data } = await supabase
-        .from("profiles")
-        .select("template_id")
-        .eq("id", user.id)
-        .maybeSingle();
-      return data?.template_id || null;
-    },
-    enabled: !!user?.id,
-    staleTime: 1000 * 60 * 10,
-    gcTime: 1000 * 60 * 30,
-  });
+  useEffect(() => {
+    checkAuth();
+    fetchTemplates();
+  }, []);
 
-  const selectedTemplateId = userTemplate;
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      setUserId(session.user.id);
+      fetchUserTemplate(session.user.id);
+    }
+  };
 
-  // Fetch system templates with React Query
-  const { data: templates = [], isLoading: loadingTemplates, error: templatesError } = useQuery({
-    queryKey: ['templates', 'system'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("site_templates")
-        .select("id, name, country, preview_url, price, is_free, description, is_creator_template, creator_id")
-        .is("creator_id", null)
-        .order("is_free", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(20);
+  const fetchUserTemplate = async (uid: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("template_id")
+      .eq("id", uid)
+      .single();
+    
+    if (data?.template_id) {
+      setSelectedTemplateId(data.template_id);
+    }
+  };
 
-      if (error) {
-        console.error('Error fetching templates:', error);
-        throw error;
-      }
-      return data || [];
-    },
-    staleTime: 1000 * 60 * 10, // 10 minutes
-    gcTime: 1000 * 60 * 30, // 30 minutes
-    retry: 1,
-  });
+  const fetchTemplates = async () => {
+    // Fetch platform templates (not creator templates)
+    const { data, error } = await supabase
+      .from("site_templates")
+      .select("*")
+      .eq("is_creator_template", false)
+      .order("is_free", { ascending: false })
+      .order("created_at", { ascending: false });
 
-  // Fetch creator templates with React Query
-  const { data: creatorTemplates = [], isLoading: loadingCreatorTemplates, error: creatorTemplatesError } = useQuery({
-    queryKey: ['templates', 'creator'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("site_templates")
-        .select(`
-          id, name, country, preview_url, price, is_free, description, is_creator_template, creator_id,
-          profiles!site_templates_creator_id_fkey(full_name, first_name, last_name)
-        `)
-        .not("creator_id", "is", null)
-        .order("created_at", { ascending: false })
-        .limit(20);
+    if (data && !error) {
+      setTemplates(data);
+    }
 
-      if (error) {
-        console.error('Error fetching creator templates:', error);
-        throw error;
-      }
-      
-      return (data || []).map((template: any) => ({
+    // Fetch creator templates with creator information
+    const { data: creatorData, error: creatorError } = await supabase
+      .from("site_templates")
+      .select(`
+        *,
+        profiles!site_templates_creator_id_fkey(full_name, first_name, last_name)
+      `)
+      .eq("is_creator_template", true)
+      .order("created_at", { ascending: false });
+
+    if (creatorData && !creatorError) {
+      const templatesWithCreators = creatorData.map((template: any) => ({
         ...template,
         creator_name: template.profiles?.full_name || 
                      `${template.profiles?.first_name || ""} ${template.profiles?.last_name || ""}`.trim() ||
                      "Anonymous Creator"
       }));
-    },
-    staleTime: 1000 * 60 * 10,
-    gcTime: 1000 * 60 * 30,
-    retry: 1,
-  });
+      setCreatorTemplates(templatesWithCreators);
+    }
 
-  const loading = loadingTemplates || loadingCreatorTemplates;
+    setLoading(false);
+  };
 
   const handleSelectTemplate = async (templateId: string, isFree: boolean) => {
-    if (!user?.id) {
+    if (!userId) {
       toast({
         title: "Sign in required",
         description: "Please sign in to select a template",
@@ -131,7 +116,7 @@ const Templates = () => {
     const { error } = await supabase
       .from("profiles")
       .update({ template_id: templateId })
-      .eq("id", user.id);
+      .eq("id", userId);
 
     if (error) {
       toast({
@@ -140,8 +125,7 @@ const Templates = () => {
         variant: "destructive",
       });
     } else {
-      // Invalidate the query to refetch
-      queryClient.invalidateQueries({ queryKey: ['user-template', user.id] });
+      setSelectedTemplateId(templateId);
       toast({
         title: "Template Applied!",
         description: "Your template has been applied to your memorials",
@@ -150,24 +134,22 @@ const Templates = () => {
   };
 
 
-  const filteredTemplates = useMemo(() => {
-    return templates.filter((template) => {
-      // Filter by type
-      if (filterType === "free" && !template.is_free) return false;
-      if (filterType === "paid" && template.is_free) return false;
+  const filteredTemplates = templates.filter((template) => {
+    // Filter by type
+    if (filterType === "free" && !template.is_free) return false;
+    if (filterType === "paid" && template.is_free) return false;
 
-      // Filter by search query
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        return (
-          template.name.toLowerCase().includes(query) ||
-          template.country.toLowerCase().includes(query)
-        );
-      }
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return (
+        template.name.toLowerCase().includes(query) ||
+        template.country.toLowerCase().includes(query)
+      );
+    }
 
-      return true;
-    });
-  }, [templates, filterType, searchQuery]);
+    return true;
+  });
 
   return (
     <div className="py-12 bg-gradient-subtle">
@@ -178,16 +160,6 @@ const Templates = () => {
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Choose a beautiful template to personalize your memorial wall and timeline
-            </p>
-          </div>
-
-          {/* Featured Templates Section Header */}
-          <div className="text-center mb-8 animate-fade-in">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-              Featured Templates
-            </h2>
-            <p className="text-muted-foreground">
-              Handpicked designs curated by the ReflectLife team
             </p>
           </div>
 
@@ -220,23 +192,10 @@ const Templates = () => {
                 </Select>
               </div>
 
-              {/* Featured Templates Grid */}
-              {loadingTemplates ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto mb-16">
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <MemorialSkeleton key={i} />
-                  ))}
-                </div>
-              ) : templatesError ? (
-                <Card className="mb-16">
-                  <CardContent className="p-6 text-center">
-                    <p className="text-muted-foreground mb-4">Failed to load templates</p>
-                    <Button onClick={() => window.location.reload()}>Retry</Button>
-                  </CardContent>
-                </Card>
-              ) : filteredTemplates.length === 0 ? (
-                <div className="text-center py-20 mb-16">
-                  <p className="text-muted-foreground">No featured templates found matching your criteria.</p>
+              {/* Templates Grid */}
+              {filteredTemplates.length === 0 ? (
+                <div className="text-center py-20">
+                  <p className="text-muted-foreground">No templates found matching your criteria.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto mb-16">
@@ -249,11 +208,10 @@ const Templates = () => {
                       style={{ animationDelay: `${index * 0.05}s` }}
                     >
                       <div className="aspect-[3/4] overflow-hidden relative">
-                        <LazyImage
+                        <img
                           src={template.preview_url || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
                           alt={template.name}
                           className="w-full h-full object-cover"
-                          containerClassName="w-full h-full"
                         />
                         {selectedTemplateId === template.id && (
                           <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-2">
@@ -295,35 +253,19 @@ const Templates = () => {
               )}
 
               {/* Creator Templates Section */}
-              <div className="text-center mb-8 mt-16 animate-fade-in">
-                <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                  Creator Templates
-                </h2>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Unique designs from our community of talented creators • Updated in real-time
-                </p>
-              </div>
+              {creatorTemplates.length > 0 && (
+                <>
+                  <div className="text-center mb-8 mt-16">
+                    <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
+                      Templates by Other Creators
+                    </h2>
+                    <p className="text-lg text-muted-foreground">
+                      Unique designs from our community of talented creators
+                    </p>
+                  </div>
 
-              {loadingCreatorTemplates ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
-                  {Array.from({ length: 8 }).map((_, i) => (
-                    <MemorialSkeleton key={i} />
-                  ))}
-                </div>
-              ) : creatorTemplatesError ? (
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <p className="text-muted-foreground mb-4">Failed to load creator templates</p>
-                    <Button onClick={() => window.location.reload()}>Retry</Button>
-                  </CardContent>
-                </Card>
-              ) : creatorTemplates.length === 0 ? (
-                <div className="text-center py-20">
-                  <p className="text-muted-foreground">No creator templates available yet. Check back soon!</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
-                  {creatorTemplates.map((template, index) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
+                    {creatorTemplates.map((template, index) => (
                       <Card
                         key={template.id}
                         className={`border-2 hover:shadow-elegant transition-smooth hover:-translate-y-1 bg-card overflow-hidden animate-fade-in ${
@@ -332,11 +274,10 @@ const Templates = () => {
                         style={{ animationDelay: `${index * 0.05}s` }}
                       >
                         <div className="aspect-[3/4] overflow-hidden relative">
-                          <LazyImage
+                          <img
                             src={template.preview_url || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
                             alt={template.name}
                             className="w-full h-full object-cover"
-                            containerClassName="w-full h-full"
                           />
                           {selectedTemplateId === template.id && (
                             <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-2">
@@ -376,11 +317,12 @@ const Templates = () => {
                           </div>
                         </CardContent>
                       </Card>
-                      ))}
-                    </div>
-                  )}
-              </>
-            )}
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
+          )}
         </div>
     </div>
   );

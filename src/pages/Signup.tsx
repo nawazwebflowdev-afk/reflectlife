@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, User, ArrowRight, Loader2, Phone, MapPin, Shield, CheckCircle2 } from "lucide-react";
 import zxcvbn from "zxcvbn";
@@ -10,7 +10,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { countries } from "@/data/countries";
 
 const Signup = () => {
@@ -29,14 +28,6 @@ const Signup = () => {
   
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
-
-  // Redirect logged-in users to dashboard
-  useEffect(() => {
-    if (user) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [user, navigate]);
 
   const checkPasswordStrength = useCallback((pwd: string) => {
     if (!pwd) {
@@ -100,27 +91,20 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
-      // Use secure-signup edge function for server-side validation
-      const { data: fnData, error: fnError } = await supabase.functions.invoke('secure-signup', {
-        body: {
-          email,
-          password,
-          fullName,
-          phoneNumber,
-          country,
-          recaptchaToken: '', // reCAPTCHA not enforced on this flow
-        },
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/verify`,
+          data: { 
+            full_name: fullName,
+            phone_number: phoneNumber,
+            country: country
+          }
+        }
       });
 
-      if (fnError) throw fnError;
-      if (fnData?.error) throw new Error(fnData.error);
-
-      // Auto sign-in after successful signup
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (signInError) {
-        // Sign-in may fail if email confirmation required — that's OK
-        console.log('Auto sign-in skipped (email confirmation may be required)');
-      }
+      if (error) throw error;
 
       toast({
         title: "Account created!",

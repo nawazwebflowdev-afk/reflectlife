@@ -53,9 +53,7 @@ export const AddChildConnectionModal = ({
       }
 
       const fileExt = file.name.split(".").pop();
-      const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user?.id;
-      const filePath = `${userId}/connection-images/${Date.now()}.${fileExt}`;
+      const filePath = `connection-images/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("memorial_uploads")
@@ -104,43 +102,30 @@ export const AddChildConnectionModal = ({
         .eq("id", user.id)
         .single();
 
-      // Create invitation record to generate token
-      const { data: invitation, error: inviteError } = await supabase
-        .from("memorial_invitations")
-        .insert({
-          inviter_id: user.id,
-          invitee_email: inviteEmail,
-          connection_id: parentConnectionId,
-          status: "pending",
-        })
-        .select()
-        .single();
-
-      if (inviteError) throw inviteError;
-
-      // Generate invitation URL with token
-      const invitationUrl = `${window.location.origin}/guest-tribute/${invitation.id}`;
-
-      const { error } = await supabase.functions.invoke("send-invitation", {
+      const { data, error } = await supabase.functions.invoke("send-invitation", {
         body: {
           recipientEmail: inviteEmail,
           personName: name || "a loved one",
           senderName: profile?.full_name || "Someone",
-          invitationUrl,
+          connectionId: parentConnectionId,
           senderId: user.id,
         },
       });
 
       if (error) throw error;
 
+      const isRegistered = data?.isRegistered;
+      
       toast({
         title: "Invitation sent successfully! 💌",
-        description: `${inviteEmail} can now contribute memories and tributes`,
+        description: isRegistered 
+          ? `${inviteEmail} will receive a notification to contribute`
+          : `${inviteEmail} will receive an invitation to sign up and contribute`,
       });
       setInviteEmail("");
     } catch (error: any) {
       toast({
-        title: "Unable to send invitation",
+        title: "Unable to send invitation, please try again.",
         description: error.message,
         variant: "destructive",
       });

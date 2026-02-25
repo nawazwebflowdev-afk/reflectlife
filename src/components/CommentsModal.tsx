@@ -117,15 +117,6 @@ export const CommentsModal = ({ open, onOpenChange, postId, user }: CommentsModa
       return;
     }
 
-    if (newComment.length > 2000) {
-      toast({
-        title: "Comment too long",
-        description: "Please keep comments under 2000 characters",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setSubmitting(true);
 
     const { error } = await supabase

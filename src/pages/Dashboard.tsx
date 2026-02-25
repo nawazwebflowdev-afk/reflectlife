@@ -7,52 +7,180 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import type { User } from "@supabase/supabase-js";
 import { CreateTimelineModal } from "@/components/CreateTimelineModal";
 import CreatorDashboard from "@/components/CreatorDashboard";
 import { ProfileEditModal } from "@/components/ProfileEditModal";
-import EditMemorialModal from "@/components/EditMemorialModal";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LazyImage } from "@/components/LazyImage";
-import { MemorialSkeleton } from "@/components/MemorialSkeleton";
-import { useUserData } from "@/hooks/useUserData";
+
+interface Profile {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  country: string | null;
+  color_theme: string | null;
+}
+
+interface Stats {
+  totalMemories: number;
+  templatesPurchased: number;
+  likesReceived: number;
+}
+
+interface CreatorProfile {
+  approved: boolean;
+  id: string;
+}
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [showCreateTimeline, setShowCreateTimeline] = useState(false);
+  const [isCreator, setIsCreator] = useState(false);
+  const [creatorProfile, setCreatorProfile] = useState<CreatorProfile | null>(null);
   const [showEditProfile, setShowEditProfile] = useState(false);
-  const [editingMemorial, setEditingMemorial] = useState<any>(null);
-  
-  // Fetch all user data with single hook
-  const { data: userData, isLoading } = useUserData(user?.id);
+  const [stats, setStats] = useState<Stats>({
+    totalMemories: 0,
+    templatesPurchased: 0,
+    likesReceived: 0,
+  });
 
-  // Fetch memorials with React Query
-  const { data: memorials = [], isLoading: memorialsLoading, error: memorialsError, refetch: refetchMemorials } = useQuery({
-    queryKey: ['memorials', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return [];
+  useEffect(() => {
+    // Check authentication and fetch profile
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate("/login");
+        return;
+      }
+      setUser(session.user);
+      fetchProfile(session.user.id);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!session) {
+          navigate("/login");
+        } else {
+          setUser(session.user);
+          fetchProfile(session.user.id);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (error) throw error;
+      setProfile(data);
+
+      // Check if user is an approved creator
+      const { data: creatorData } = await supabase
+        .from("template_creators")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (creatorData) {
+        setCreatorProfile(creatorData);
+        if (creatorData.approved) {
+          setIsCreator(true);
+        }
+      }
+
+      // Fetch stats
+      await fetchStats(userId);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchStats = async (userId: string) => {
+    try {
+      // Total memories posted
+      const { count: memoriesCount } = await supabase
+        .from("memorial_posts")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId);
+
+      // Templates purchased
+      const { count: templatesCount } = await supabase
+        .from("template_purchases")
+        .select("*", { count: "exact", head: true })
+        .eq("buyer_id", userId);
+
+      // Likes received on user's posts
+      const { data: userPosts } = await supabase
+        .from("memorial_posts")
+        .select("id")
+        .eq("user_id", userId);
+
+      let likesReceived = 0;
+      if (userPosts && userPosts.length > 0) {
+        const postIds = userPosts.map(p => p.id);
+        const { count: likesCount } = await supabase
+          .from("memorial_likes")
+          .select("*", { count: "exact", head: true })
+          .in("post_id", postIds);
+        likesReceived = likesCount || 0;
+      }
+
+      setStats({
+        totalMemories: memoriesCount || 0,
+        templatesPurchased: templatesCount || 0,
+        likesReceived: likesReceived,
+      });
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: "Signed out",
+      description: "You've been successfully signed out.",
+    });
+    navigate("/");
+  };
+
+  const [memorials, setMemorials] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserMemorials(user.id);
+    }
+  }, [user]);
+
+  const fetchUserMemorials = async (userId: string) => {
+    try {
       const { data, error } = await supabase
         .from("memorials")
-        .select("id, name, date_of_birth, date_of_death, location, preview_image_url")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(20);
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error('Error fetching memorials:', error);
-        throw error;
-      }
-      return data || [];
-    },
-    enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 30,
-    retry: 1,
-  });
+      if (error) throw error;
+      setMemorials(data || []);
+    } catch (error) {
+      console.error("Error fetching memorials:", error);
+    }
+  };
 
   const formatYears = (dob: string | null, dod: string | null) => {
     if (!dob || !dod) return "Unknown";
@@ -63,39 +191,18 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen py-8">
-        <div className="container mx-auto px-4">
-          <div className="mb-8">
-            <div className="h-24 w-24 bg-muted rounded-full animate-pulse mx-auto md:mx-0 mb-4"></div>
-            <div className="h-8 w-48 bg-muted rounded animate-pulse mx-auto md:mx-0 mb-4"></div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 bg-muted rounded-lg animate-pulse"></div>
-            ))}
-          </div>
-          <div className="grid grid-cols-1 gap-6">
-            {[1, 2].map((i) => (
-              <MemorialSkeleton key={i} />
-            ))}
-          </div>
-        </div>
+      <div className="min-h-screen py-8 flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
       </div>
     );
   }
 
   const getInitials = () => {
-    const profile = userData?.profile;
     if (profile?.first_name && profile?.last_name) {
       return `${profile.first_name[0]}${profile.last_name[0]}`.toUpperCase();
     }
     return profile?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U";
   };
-
-  const profile = userData?.profile;
-  const stats = userData?.stats || { totalMemories: 0, templatesPurchased: 0, likesReceived: 0 };
-  const isCreator = userData?.isCreator || false;
-  const creatorProfile = userData?.creatorProfile;
 
   return (
     <div className="min-h-screen py-8">
@@ -234,34 +341,19 @@ const Dashboard = () => {
             </TabsList>
 
             <TabsContent value="memorials" className="space-y-4">
-            {memorialsLoading ? (
-              <>
-                <MemorialSkeleton />
-                <MemorialSkeleton />
-                <MemorialSkeleton />
-              </>
-            ) : memorialsError ? (
-              <Card className="col-span-full">
-                <CardContent className="p-6 text-center">
-                  <p className="text-muted-foreground mb-4">Failed to load memorials</p>
-                  <Button onClick={() => refetchMemorials()}>Retry</Button>
-                </CardContent>
-              </Card>
-            ) : memorials.length > 0 ? (
-              memorials.map((memorial) => (
-                <Card key={memorial.id} className="hover:shadow-elegant transition-smooth">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row gap-6">
-                      {/* Image */}
-                      <div className="w-24 h-24 flex-shrink-0">
-                        <LazyImage
-                          src={memorial.preview_image_url || portraitPlaceholder}
-                          alt={memorial.name}
-                          fallback={portraitPlaceholder}
-                          className="w-full h-full object-cover rounded-lg"
-                          containerClassName="w-full h-full"
-                        />
-                      </div>
+              {memorials.length > 0 ? (
+                memorials.map((memorial) => (
+                  <Card key={memorial.id} className="hover:shadow-elegant transition-smooth">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col md:flex-row gap-6">
+                        {/* Image */}
+                        <div className="w-24 h-24 flex-shrink-0">
+                          <img
+                            src={memorial.preview_image_url || portraitPlaceholder}
+                            alt={memorial.name}
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        </div>
 
                         {/* Info */}
                         <div className="flex-grow">
@@ -283,15 +375,12 @@ const Dashboard = () => {
                                 View Memorial
                               </Button>
                             </Link>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="gap-2"
-                              onClick={() => setEditingMemorial(memorial)}
-                            >
-                              <Edit className="h-4 w-4" />
-                              Edit
-                            </Button>
+                            <Link to={`/memorial/${memorial.id}/edit`}>
+                              <Button variant="outline" size="sm" className="gap-2">
+                                <Settings className="h-4 w-4" />
+                                Edit
+                              </Button>
+                            </Link>
                           </div>
                         </div>
                       </div>
@@ -336,12 +425,10 @@ const Dashboard = () => {
                     <div className="flex flex-col md:flex-row gap-6">
                         {/* Image */}
                         <div className="w-24 h-24 flex-shrink-0">
-                          <LazyImage
+                          <img
                             src={memorial.preview_image_url || portraitPlaceholder}
                             alt={memorial.name}
-                            fallback={portraitPlaceholder}
                             className="w-full h-full object-cover rounded-lg"
-                            containerClassName="w-full h-full"
                           />
                         </div>
 
@@ -365,15 +452,12 @@ const Dashboard = () => {
                               View Memorial
                             </Button>
                           </Link>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="gap-2"
-                            onClick={() => setEditingMemorial(memorial)}
-                          >
-                            <Settings className="h-4 w-4" />
-                            Edit
-                          </Button>
+                          <Link to={`/memorial/${memorial.id}/edit`}>
+                            <Button variant="outline" size="sm" className="gap-2">
+                              <Settings className="h-4 w-4" />
+                              Edit
+                            </Button>
+                          </Link>
                         </div>
                       </div>
                     </div>
@@ -418,19 +502,7 @@ const Dashboard = () => {
             open={showEditProfile}
             onOpenChange={setShowEditProfile}
             userId={user.id}
-            onProfileUpdate={() => {
-              // Invalidate user data cache to refetch
-              queryClient.invalidateQueries({ queryKey: ['user-data', user.id] });
-            }}
-          />
-          <EditMemorialModal
-            open={!!editingMemorial}
-            onOpenChange={(open) => !open && setEditingMemorial(null)}
-            memorial={editingMemorial}
-            onMemorialUpdated={() => {
-              refetchMemorials();
-              setEditingMemorial(null);
-            }}
+            onProfileUpdate={() => fetchProfile(user.id)}
           />
         </>
       )}

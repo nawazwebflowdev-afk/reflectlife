@@ -9,8 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Search, Filter, FileDown, Palette } from "lucide-react";
 import DiaryEntryModal from "@/components/DiaryEntryModal";
 import { format } from "date-fns";
-import jsPDF from "jspdf";
-import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface DiaryEntry {
   id: string;
@@ -43,7 +42,6 @@ const THEME_EMOJIS = {
 };
 
 const Diary = () => {
-  const { user } = useAuth();
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<DiaryEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,34 +50,44 @@ const Diary = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterPrivacy, setFilterPrivacy] = useState<"all" | "private" | "public">("all");
   const [currentTheme, setCurrentTheme] = useState<DiaryTheme>("default");
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (user?.id) {
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    if (currentUser) {
       fetchEntries();
     }
-  }, [user?.id]);
+  }, [currentUser]);
 
   useEffect(() => {
     filterEntries();
   }, [entries, searchQuery, filterPrivacy]);
 
+  const checkAuth = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    setCurrentUser(user);
+  };
+
   const fetchEntries = async () => {
-    if (!user?.id) return;
-    
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("diary_entries")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", currentUser.id)
         .order("entry_date", { ascending: false });
 
       if (error) throw error;
-      setEntries((data || []).map(entry => ({
-        ...entry,
-        reactions: (entry.reactions as Record<string, number>) || {}
-      })));
+      setEntries(data || []);
     } catch (error: any) {
       toast({
         title: "Error loading entries",
@@ -142,88 +150,10 @@ const Diary = () => {
   };
 
   const exportToPDF = () => {
-    try {
-      const pdf = new jsPDF();
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 20;
-      let yPosition = margin;
-
-      // Title
-      pdf.setFontSize(22);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("My Diary", pageWidth / 2, yPosition, { align: "center" });
-      yPosition += 15;
-
-      // Add date
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      pdf.text(`Exported on ${format(new Date(), "MMMM dd, yyyy")}`, pageWidth / 2, yPosition, { align: "center" });
-      yPosition += 15;
-
-      // Add entries
-      filteredEntries.forEach((entry, index) => {
-        // Check if we need a new page
-        if (yPosition > pageHeight - 40) {
-          pdf.addPage();
-          yPosition = margin;
-        }
-
-        // Entry title
-        pdf.setFontSize(14);
-        pdf.setFont("helvetica", "bold");
-        pdf.text(entry.title, margin, yPosition);
-        yPosition += 8;
-
-        // Entry date
-        pdf.setFontSize(10);
-        pdf.setFont("helvetica", "italic");
-        pdf.text(format(new Date(entry.entry_date), "MMMM dd, yyyy"), margin, yPosition);
-        yPosition += 8;
-
-        // Entry content
-        if (entry.content) {
-          pdf.setFontSize(11);
-          pdf.setFont("helvetica", "normal");
-          const contentLines = pdf.splitTextToSize(entry.content, pageWidth - 2 * margin);
-          
-          contentLines.forEach((line: string) => {
-            if (yPosition > pageHeight - 20) {
-              pdf.addPage();
-              yPosition = margin;
-            }
-            pdf.text(line, margin, yPosition);
-            yPosition += 6;
-          });
-        }
-
-        // Tags
-        if (entry.tags && entry.tags.length > 0) {
-          yPosition += 5;
-          pdf.setFontSize(9);
-          pdf.setFont("helvetica", "italic");
-          pdf.text(`Tags: ${entry.tags.join(", ")}`, margin, yPosition);
-          yPosition += 8;
-        }
-
-        // Add spacing between entries
-        yPosition += 10;
-      });
-
-      // Save the PDF
-      pdf.save(`diary-export-${format(new Date(), "yyyy-MM-dd")}.pdf`);
-      
-      toast({
-        title: "Diary exported successfully! 📄",
-        description: `${filteredEntries.length} entries exported to PDF`,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Export failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: "Export feature",
+      description: "PDF export will be available soon!",
+    });
   };
 
   if (loading) {
