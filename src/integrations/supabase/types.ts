@@ -10,49 +10,14 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
-      activity_timeline: {
-        Row: {
-          activity_type: string
-          created_at: string | null
-          description: string
-          id: string
-          related_id: string | null
-          user_id: string
-        }
-        Insert: {
-          activity_type: string
-          created_at?: string | null
-          description: string
-          id?: string
-          related_id?: string | null
-          user_id: string
-        }
-        Update: {
-          activity_type?: string
-          created_at?: string | null
-          description?: string
-          id?: string
-          related_id?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "activity_timeline_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       connections: {
         Row: {
           connection_type: string
-          created_at: string | null
+          created_at: string
           id: string
           image_url: string | null
           owner_id: string
@@ -65,8 +30,8 @@ export type Database = {
           y_pos: number | null
         }
         Insert: {
-          connection_type: string
-          created_at?: string | null
+          connection_type?: string
+          created_at?: string
           id?: string
           image_url?: string | null
           owner_id: string
@@ -80,7 +45,7 @@ export type Database = {
         }
         Update: {
           connection_type?: string
-          created_at?: string | null
+          created_at?: string
           id?: string
           image_url?: string | null
           owner_id?: string
@@ -107,48 +72,47 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "connections_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       creator_payouts: {
         Row: {
-          amount: number | null
-          created_at: string | null
-          creator_id: string | null
+          amount: number
+          created_at: string
+          creator_id: string
           id: string
           payout_method: Json | null
           status: string | null
         }
         Insert: {
-          amount?: number | null
-          created_at?: string | null
-          creator_id?: string | null
+          amount: number
+          created_at?: string
+          creator_id: string
           id?: string
           payout_method?: Json | null
           status?: string | null
         }
         Update: {
-          amount?: number | null
-          created_at?: string | null
-          creator_id?: string | null
+          amount?: number
+          created_at?: string
+          creator_id?: string
           id?: string
           payout_method?: Json | null
           status?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "creator_payouts_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       diary_entries: {
         Row: {
           content: string | null
-          created_at: string | null
-          entry_date: string | null
+          created_at: string
+          entry_date: string
           favorite_song_url: string | null
           id: string
           is_private: boolean | null
@@ -156,12 +120,13 @@ export type Database = {
           reactions: Json | null
           tags: string[] | null
           title: string
-          user_id: string | null
+          updated_at: string
+          user_id: string
         }
         Insert: {
           content?: string | null
-          created_at?: string | null
-          entry_date?: string | null
+          created_at?: string
+          entry_date?: string
           favorite_song_url?: string | null
           id?: string
           is_private?: boolean | null
@@ -169,12 +134,13 @@ export type Database = {
           reactions?: Json | null
           tags?: string[] | null
           title: string
-          user_id?: string | null
+          updated_at?: string
+          user_id: string
         }
         Update: {
           content?: string | null
-          created_at?: string | null
-          entry_date?: string | null
+          created_at?: string
+          entry_date?: string
           favorite_song_url?: string | null
           id?: string
           is_private?: boolean | null
@@ -182,14 +148,39 @@ export type Database = {
           reactions?: Json | null
           tags?: string[] | null
           title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      memorial_candles: {
+        Row: {
+          created_at: string
+          id: string
+          memorial_id: string
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          memorial_id: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          memorial_id?: string
+          session_id?: string | null
           user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "diary_entries_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "memorial_candles_memorial_id_fkey"
+            columns: ["memorial_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "memorials"
             referencedColumns: ["id"]
           },
         ]
@@ -229,27 +220,27 @@ export type Database = {
       memorial_entries: {
         Row: {
           caption: string | null
-          content_type: Database["public"]["Enums"]["content_type"]
+          content_type: string | null
           content_url: string | null
-          created_at: string | null
+          created_at: string
           event_date: string | null
           id: string
           timeline_id: string
         }
         Insert: {
           caption?: string | null
-          content_type: Database["public"]["Enums"]["content_type"]
+          content_type?: string | null
           content_url?: string | null
-          created_at?: string | null
+          created_at?: string
           event_date?: string | null
           id?: string
           timeline_id: string
         }
         Update: {
           caption?: string | null
-          content_type?: Database["public"]["Enums"]["content_type"]
+          content_type?: string | null
           content_url?: string | null
-          created_at?: string | null
+          created_at?: string
           event_date?: string | null
           id?: string
           timeline_id?: string
@@ -259,7 +250,7 @@ export type Database = {
             foreignKeyName: "memorial_entries_timeline_id_fkey"
             columns: ["timeline_id"]
             isOneToOne: false
-            referencedRelation: "memorial_timelines"
+            referencedRelation: "memorials"
             referencedColumns: ["id"]
           },
         ]
@@ -267,47 +258,29 @@ export type Database = {
       memorial_invitations: {
         Row: {
           connection_id: string | null
-          created_at: string | null
+          created_at: string
           id: string
-          invitee_email: string
-          inviter_id: string
-          memorial_id: string | null
-          status: string
+          invited_by: string | null
+          invitee_email: string | null
+          status: string | null
         }
         Insert: {
           connection_id?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: string
-          invitee_email: string
-          inviter_id: string
-          memorial_id?: string | null
-          status?: string
+          invited_by?: string | null
+          invitee_email?: string | null
+          status?: string | null
         }
         Update: {
           connection_id?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: string
-          invitee_email?: string
-          inviter_id?: string
-          memorial_id?: string | null
-          status?: string
+          invited_by?: string | null
+          invitee_email?: string | null
+          status?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "memorial_invitations_connection_id_fkey"
-            columns: ["connection_id"]
-            isOneToOne: false
-            referencedRelation: "connections"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "memorial_invitations_memorial_id_fkey"
-            columns: ["memorial_id"]
-            isOneToOne: false
-            referencedRelation: "memorials"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       memorial_likes: {
         Row: {
@@ -345,15 +318,15 @@ export type Database = {
           media_type: string
           media_url: string
           memorial_id: string
-          uploaded_at: string | null
+          uploaded_at: string
         }
         Insert: {
           caption?: string | null
           id?: string
-          media_type: string
+          media_type?: string
           media_url: string
           memorial_id: string
-          uploaded_at?: string | null
+          uploaded_at?: string
         }
         Update: {
           caption?: string | null
@@ -361,7 +334,7 @@ export type Database = {
           media_type?: string
           media_url?: string
           memorial_id?: string
-          uploaded_at?: string | null
+          uploaded_at?: string
         }
         Relationships: [
           {
@@ -377,132 +350,165 @@ export type Database = {
         Row: {
           caption: string | null
           comments_count: number | null
-          content: string | null
-          created_at: string | null
+          created_at: string
           id: string
           likes_count: number | null
           location: string | null
           media_url: string | null
-          updated_at: string | null
           user_id: string
         }
         Insert: {
           caption?: string | null
           comments_count?: number | null
-          content?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: string
           likes_count?: number | null
           location?: string | null
           media_url?: string | null
-          updated_at?: string | null
           user_id: string
         }
         Update: {
           caption?: string | null
           comments_count?: number | null
-          content?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: string
           likes_count?: number | null
           location?: string | null
           media_url?: string | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      memorial_timelines: {
-        Row: {
-          background_url: string | null
-          created_at: string | null
-          description: string | null
-          id: string
-          is_public: boolean | null
-          title: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          background_url?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          is_public?: boolean | null
-          title: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          background_url?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          is_public?: boolean | null
-          title?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      memorials: {
-        Row: {
-          bio: string | null
-          created_at: string | null
-          date_of_birth: string | null
-          date_of_death: string | null
-          description: string | null
-          id: string
-          images: string[] | null
-          location: string | null
-          name: string
-          preview_image_url: string | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          bio?: string | null
-          created_at?: string | null
-          date_of_birth?: string | null
-          date_of_death?: string | null
-          description?: string | null
-          id?: string
-          images?: string[] | null
-          location?: string | null
-          name: string
-          preview_image_url?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          bio?: string | null
-          created_at?: string | null
-          date_of_birth?: string | null
-          date_of_death?: string | null
-          description?: string | null
-          id?: string
-          images?: string[] | null
-          location?: string | null
-          name?: string
-          preview_image_url?: string | null
-          updated_at?: string | null
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "memorials_user_id_fkey"
+            foreignKeyName: "memorial_posts_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "memorial_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      memorial_timelines: {
+        Row: {
+          background_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          background_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          background_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      memorial_tributes: {
+        Row: {
+          created_at: string
+          id: string
+          media_url: string | null
+          memorial_id: string
+          tribute_text: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          media_url?: string | null
+          memorial_id: string
+          tribute_text: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          media_url?: string | null
+          memorial_id?: string
+          tribute_text?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_tributes_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memorials: {
+        Row: {
+          bio: string | null
+          created_at: string
+          date_of_birth: string | null
+          date_of_death: string | null
+          id: string
+          is_public: boolean | null
+          location: string | null
+          name: string
+          preview_image_url: string | null
+          privacy_level: Database["public"]["Enums"]["privacy_level"] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          date_of_death?: string | null
+          id?: string
+          is_public?: boolean | null
+          location?: string | null
+          name: string
+          preview_image_url?: string | null
+          privacy_level?: Database["public"]["Enums"]["privacy_level"] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          date_of_death?: string | null
+          id?: string
+          is_public?: boolean | null
+          location?: string | null
+          name?: string
+          preview_image_url?: string | null
+          privacy_level?: Database["public"]["Enums"]["privacy_level"] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
-          actor_id: string
+          actor_id: string | null
           comment_id: string | null
-          created_at: string | null
+          created_at: string
           id: string
           post_id: string | null
           read: boolean | null
@@ -510,9 +516,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          actor_id: string
+          actor_id?: string | null
           comment_id?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: string
           post_id?: string | null
           read?: boolean | null
@@ -520,9 +526,9 @@ export type Database = {
           user_id: string
         }
         Update: {
-          actor_id?: string
+          actor_id?: string | null
           comment_id?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: string
           post_id?: string | null
           read?: boolean | null
@@ -538,24 +544,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "notifications_comment_id_fkey"
-            columns: ["comment_id"]
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
             isOneToOne: false
-            referencedRelation: "memorial_comments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "memorial_posts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -566,7 +558,7 @@ export type Database = {
           bio: string | null
           color_theme: string | null
           country: string | null
-          created_at: string | null
+          created_at: string
           earnings_balance: number | null
           email: string | null
           emoji_avatar: string | null
@@ -574,11 +566,13 @@ export type Database = {
           full_name: string | null
           id: string
           is_deceased: boolean | null
+          is_premium: boolean | null
           last_name: string | null
-          logo_url: string | null
-          phone_number: string | null
+          phone: string | null
           template_id: string | null
-          updated_at: string | null
+          timeline_template_id: string | null
+          tree_template_id: string | null
+          updated_at: string
           username: string | null
         }
         Insert: {
@@ -586,7 +580,7 @@ export type Database = {
           bio?: string | null
           color_theme?: string | null
           country?: string | null
-          created_at?: string | null
+          created_at?: string
           earnings_balance?: number | null
           email?: string | null
           emoji_avatar?: string | null
@@ -594,11 +588,13 @@ export type Database = {
           full_name?: string | null
           id: string
           is_deceased?: boolean | null
+          is_premium?: boolean | null
           last_name?: string | null
-          logo_url?: string | null
-          phone_number?: string | null
+          phone?: string | null
           template_id?: string | null
-          updated_at?: string | null
+          timeline_template_id?: string | null
+          tree_template_id?: string | null
+          updated_at?: string
           username?: string | null
         }
         Update: {
@@ -606,7 +602,7 @@ export type Database = {
           bio?: string | null
           color_theme?: string | null
           country?: string | null
-          created_at?: string | null
+          created_at?: string
           earnings_balance?: number | null
           email?: string | null
           emoji_avatar?: string | null
@@ -614,11 +610,13 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_deceased?: boolean | null
+          is_premium?: boolean | null
           last_name?: string | null
-          logo_url?: string | null
-          phone_number?: string | null
+          phone?: string | null
           template_id?: string | null
-          updated_at?: string | null
+          timeline_template_id?: string | null
+          tree_template_id?: string | null
+          updated_at?: string
           username?: string | null
         }
         Relationships: [
@@ -629,101 +627,103 @@ export type Database = {
             referencedRelation: "site_templates"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "profiles_timeline_template_id_fkey"
+            columns: ["timeline_template_id"]
+            isOneToOne: false
+            referencedRelation: "site_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_tree_template_id_fkey"
+            columns: ["tree_template_id"]
+            isOneToOne: false
+            referencedRelation: "site_templates"
+            referencedColumns: ["id"]
+          },
         ]
       }
       site_templates: {
         Row: {
           country: string
-          created_at: string | null
+          created_at: string
           creator_id: string | null
           description: string | null
           id: string
-          is_creator_template: boolean
-          is_free: boolean
+          is_creator_template: boolean | null
+          is_free: boolean | null
           name: string
           preview_url: string | null
-          price: number
-        }
-        Insert: {
-          country: string
-          created_at?: string | null
-          creator_id?: string | null
-          description?: string | null
-          id?: string
-          is_creator_template?: boolean
-          is_free?: boolean
-          name: string
-          preview_url?: string | null
-          price?: number
-        }
-        Update: {
-          country?: string
-          created_at?: string | null
-          creator_id?: string | null
-          description?: string | null
-          id?: string
-          is_creator_template?: boolean
-          is_free?: boolean
-          name?: string
-          preview_url?: string | null
-          price?: number
-        }
-        Relationships: []
-      }
-      support_messages: {
-        Row: {
-          country: string
-          created_at: string
-          email: string
-          id: string
-          message: string
-          name: string
+          price: number | null
         }
         Insert: {
           country: string
           created_at?: string
-          email: string
+          creator_id?: string | null
+          description?: string | null
           id?: string
-          message: string
+          is_creator_template?: boolean | null
+          is_free?: boolean | null
           name: string
+          preview_url?: string | null
+          price?: number | null
         }
         Update: {
           country?: string
           created_at?: string
-          email?: string
+          creator_id?: string | null
+          description?: string | null
           id?: string
-          message?: string
+          is_creator_template?: boolean | null
+          is_free?: boolean | null
           name?: string
+          preview_url?: string | null
+          price?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "site_templates_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_templates_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       template_creators: {
         Row: {
-          approved: boolean
-          country: string
-          created_at: string | null
+          approved: boolean | null
+          country: string | null
+          created_at: string
           description: string | null
-          display_name: string
+          display_name: string | null
           id: string
           portfolio: string | null
           user_id: string
         }
         Insert: {
-          approved?: boolean
-          country: string
-          created_at?: string | null
+          approved?: boolean | null
+          country?: string | null
+          created_at?: string
           description?: string | null
-          display_name: string
+          display_name?: string | null
           id?: string
           portfolio?: string | null
           user_id: string
         }
         Update: {
-          approved?: boolean
-          country?: string
-          created_at?: string | null
+          approved?: boolean | null
+          country?: string | null
+          created_at?: string
           description?: string | null
-          display_name?: string
+          display_name?: string | null
           id?: string
           portfolio?: string | null
           user_id?: string
@@ -733,45 +733,32 @@ export type Database = {
       template_purchases: {
         Row: {
           amount: number | null
-          buyer_id: string | null
-          created_at: string | null
-          creator_id: string | null
-          currency: string | null
+          buyer_id: string
+          created_at: string
           id: string
           payment_status: string | null
-          stripe_payment_intent_id: string | null
-          template_id: string | null
+          stripe_session_id: string | null
+          template_id: string
         }
         Insert: {
           amount?: number | null
-          buyer_id?: string | null
-          created_at?: string | null
-          creator_id?: string | null
-          currency?: string | null
+          buyer_id: string
+          created_at?: string
           id?: string
           payment_status?: string | null
-          stripe_payment_intent_id?: string | null
-          template_id?: string | null
+          stripe_session_id?: string | null
+          template_id: string
         }
         Update: {
           amount?: number | null
-          buyer_id?: string | null
-          created_at?: string | null
-          creator_id?: string | null
-          currency?: string | null
+          buyer_id?: string
+          created_at?: string
           id?: string
           payment_status?: string | null
-          stripe_payment_intent_id?: string | null
-          template_id?: string | null
+          stripe_session_id?: string | null
+          template_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "template_purchases_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "template_purchases_template_id_fkey"
             columns: ["template_id"]
@@ -781,190 +768,161 @@ export type Database = {
           },
         ]
       }
-      tree_templates: {
+      tree_contributions: {
         Row: {
-          created_at: string | null
-          creator_id: string | null
+          connection_id: string | null
+          contributor_id: string | null
+          created_at: string
           id: string
-          is_paid: boolean | null
-          name: string
-          preview_image_url: string | null
-          price: number | null
-          style_data: Json | null
-          template_type: string
+          status: string | null
+          tree_id: string | null
         }
         Insert: {
-          created_at?: string | null
-          creator_id?: string | null
+          connection_id?: string | null
+          contributor_id?: string | null
+          created_at?: string
           id?: string
-          is_paid?: boolean | null
-          name: string
-          preview_image_url?: string | null
-          price?: number | null
-          style_data?: Json | null
-          template_type: string
+          status?: string | null
+          tree_id?: string | null
         }
         Update: {
-          created_at?: string | null
-          creator_id?: string | null
+          connection_id?: string | null
+          contributor_id?: string | null
+          created_at?: string
           id?: string
-          is_paid?: boolean | null
-          name?: string
-          preview_image_url?: string | null
-          price?: number | null
-          style_data?: Json | null
-          template_type?: string
-        }
-        Relationships: []
-      }
-      trees: {
-        Row: {
-          created_at: string | null
-          id: string
-          name: string
-          template_id: string | null
-          tree_data: Json | null
-          tree_type: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          name: string
-          template_id?: string | null
-          tree_data?: Json | null
-          tree_type: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          name?: string
-          template_id?: string | null
-          tree_data?: Json | null
-          tree_type?: string
-          updated_at?: string | null
-          user_id?: string
+          status?: string | null
+          tree_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "trees_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "tree_contributions_connection_id_fkey"
+            columns: ["connection_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_contributions_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
             referencedColumns: ["id"]
           },
         ]
       }
+      trees: {
+        Row: {
+          created_at: string
+          id: string
+          is_public: boolean | null
+          name: string | null
+          share_token: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_public?: boolean | null
+          name?: string | null
+          share_token?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_public?: boolean | null
+          name?: string | null
+          share_token?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tributes: {
         Row: {
-          created_at: string | null
+          created_at: string
           id: string
           memorial_id: string | null
           tribute_text: string
           user_id: string | null
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           memorial_id?: string | null
           tribute_text: string
           user_id?: string | null
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           memorial_id?: string | null
           tribute_text?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "tributes_memorial_id_fkey"
-            columns: ["memorial_id"]
-            isOneToOne: false
-            referencedRelation: "memorials"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_roles: {
         Row: {
-          created_at: string | null
+          created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
         Relationships: []
       }
-      user_wallets: {
-        Row: {
-          balance: number | null
-          currency: string | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          balance?: number | null
-          currency?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          balance?: number | null
-          currency?: string | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      wallet_transactions: {
-        Row: {
-          amount: number | null
-          balance_after: number | null
-          created_at: string | null
-          id: string
-          metadata: Json | null
-          type: string | null
-          user_id: string | null
-        }
-        Insert: {
-          amount?: number | null
-          balance_after?: number | null
-          created_at?: string | null
-          id?: string
-          metadata?: Json | null
-          type?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          amount?: number | null
-          balance_after?: number | null
-          created_at?: string | null
-          id?: string
-          metadata?: Json | null
-          type?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          country: string | null
+          emoji_avatar: string | null
+          first_name: string | null
+          full_name: string | null
+          id: string | null
+          is_deceased: boolean | null
+          last_name: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          country?: string | null
+          emoji_avatar?: string | null
+          first_name?: string | null
+          full_name?: string | null
+          id?: string | null
+          is_deceased?: boolean | null
+          last_name?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          country?: string | null
+          emoji_avatar?: string | null
+          first_name?: string | null
+          full_name?: string | null
+          id?: string | null
+          is_deceased?: boolean | null
+          last_name?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
@@ -974,14 +932,14 @@ export type Database = {
         }
         Returns: boolean
       }
-      update_creator_balance: {
-        Args: { amount: number; creator_id: string }
-        Returns: undefined
+      request_payout: {
+        Args: { p_amount: number; p_payout_method: Json }
+        Returns: string
       }
     }
     Enums: {
-      app_role: "admin" | "creator" | "user"
-      content_type: "photo" | "video" | "note"
+      app_role: "admin" | "moderator" | "user"
+      privacy_level: "public" | "friends" | "private"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1109,8 +1067,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "creator", "user"],
-      content_type: ["photo", "video", "note"],
+      app_role: ["admin", "moderator", "user"],
+      privacy_level: ["public", "friends", "private"],
     },
   },
 } as const
