@@ -3,8 +3,6 @@ import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.76.1";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -26,11 +24,55 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Authenticate the caller
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const authSupabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await authSupabase.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const authenticatedUserId = claimsData.claims.sub;
+
     const { recipientEmail, personName, senderName, connectionId, senderId }: InvitationRequest = await req.json();
+
+    // Verify senderId matches authenticated user
+    if (senderId !== authenticatedUserId) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // Validate inputs
+    if (!recipientEmail || !personName || !senderName) {
+      return new Response(JSON.stringify({ error: "Missing required fields" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
     console.log("Sending invitation email:", { recipientEmail, personName, senderName, connectionId, senderId });
 
-    // Initialize Supabase client with service role key
+    // Use service role for DB operations
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Check if recipient is already a registered user
@@ -55,7 +97,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (inviteError) {
       console.error("Error logging invitation:", inviteError);
-      // Continue with email sending even if logging fails
     }
 
     // Prepare URLs based on registration status
@@ -65,13 +106,11 @@ const handler = async (req: Request): Promise<Response> => {
     let emailIntro: string;
 
     if (isRegistered) {
-      // Registered user - direct link to tree
       ctaUrl = `https://reflectlife.lovable.app/tree?connection=${connectionId}`;
       ctaText = "View & Contribute 🌿";
       emailSubject = `${senderName} invited you to contribute to ${personName}'s tree`;
       emailIntro = `<strong>${senderName}</strong> has invited you to contribute memories and tributes for:`;
     } else {
-      // Non-registered user - signup with redirect
       const redirectUrl = encodeURIComponent(`/tree?connection=${connectionId}`);
       ctaUrl = `https://reflectlife.lovable.app/signup?redirect=${redirectUrl}`;
       ctaText = "Sign Up & Contribute 🌿";
