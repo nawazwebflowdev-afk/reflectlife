@@ -53,7 +53,9 @@ export const AddChildConnectionModal = ({
       }
 
       const fileExt = file.name.split(".").pop();
-      const filePath = `connection-images/${Date.now()}.${fileExt}`;
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+      const filePath = `${userId}/connection-images/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("memorial_uploads")

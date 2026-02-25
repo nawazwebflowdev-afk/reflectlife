@@ -113,8 +113,10 @@ const CreatorDashboard = () => {
     // Upload preview image if provided
     if (previewFile) {
       const fileExt = previewFile.name.split(".").pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `template-previews/${fileName}`;
+      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+      const filePath = `${userId}/template-previews/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("memorial_uploads")

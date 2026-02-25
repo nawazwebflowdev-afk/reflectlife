@@ -91,8 +91,10 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
     try {
       setUploading(true);
       const fileExt = mediaFile.name.split(".").pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `diary/${fileName}`;
+      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+      const filePath = `${userId}/diary/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("memorial_uploads")
