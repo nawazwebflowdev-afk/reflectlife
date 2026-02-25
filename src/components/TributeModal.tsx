@@ -101,7 +101,7 @@ export const TributeModal = ({ open, onOpenChange, memorialId, onTributeAdded }:
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('memorial_uploads')
-          .upload(`tribute-avatars/${compressedFile.name}`, compressedFile);
+          .upload(`${user.id}/tribute-avatars/${compressedFile.name}`, compressedFile);
 
         if (uploadError) throw uploadError;
         
@@ -118,12 +118,12 @@ export const TributeModal = ({ open, onOpenChange, memorialId, onTributeAdded }:
       // Upload media if present
       if (mediaFile) {
         const compressedBlob = await compressImage(mediaFile, 1200, 1200, 0.85);
-        const fileName = `tribute-${user.id}-${Date.now()}.webp`;
+        const fileName = `tribute-${Date.now()}.webp`;
         const compressedFile = new File([compressedBlob], fileName, { type: 'image/webp' });
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('memorial_uploads')
-          .upload(fileName, compressedFile);
+          .upload(`${user.id}/tributes/${fileName}`, compressedFile);
 
         if (uploadError) throw uploadError;
         

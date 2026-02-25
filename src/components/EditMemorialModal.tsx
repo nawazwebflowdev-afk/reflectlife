@@ -82,8 +82,8 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
       // Upload new image if selected
       if (imageFile) {
         const fileExt = imageFile.name.split('.').pop();
-        const fileName = `${memorial.id}-${Date.now()}.${fileExt}`;
-        const filePath = `memorial-images/${fileName}`;
+        const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+        const filePath = `${memorial.user_id}/memorial-images/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('memorial_uploads')

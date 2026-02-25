@@ -155,8 +155,8 @@ const BecomeCreator = () => {
 
       // Upload preview image
       const fileExt = previewFile.name.split(".").pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `templates/${fileName}`;
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/templates/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("memorial_uploads")

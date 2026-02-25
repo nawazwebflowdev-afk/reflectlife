@@ -157,8 +157,8 @@ const Timeline = () => {
 
   const uploadMedia = async (file: File): Promise<string | null> => {
     const fileExt = file.name.split(".").pop();
-    const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
-    const filePath = `posts/${fileName}`;
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = `${user?.id}/posts/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from("memorial_uploads")
