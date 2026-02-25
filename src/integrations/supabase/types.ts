@@ -245,7 +245,15 @@ export type Database = {
           id?: string
           timeline_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "memorial_entries_timeline_id_fkey"
+            columns: ["timeline_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       memorial_invitations: {
         Row: {

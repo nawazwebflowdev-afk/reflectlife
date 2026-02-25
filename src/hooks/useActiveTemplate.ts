@@ -64,10 +64,19 @@ export const useActiveTemplate = (): UseActiveTemplateReturn => {
         .order('created_at', { ascending: false });
 
       if (purchases && purchases.length > 0) {
-        const templates = purchases
-          .map(p => p.site_templates)
-          .filter((t): t is Template => t !== null) as Template[];
-        
+        const templates: Template[] = (purchases as any[])
+          .flatMap((p: any) => {
+            const t = p?.site_templates;
+            if (!t) return [];
+            return Array.isArray(t) ? t : [t];
+          })
+          .filter(Boolean)
+          .map((t: any) => ({
+            id: String(t.id),
+            name: String(t.name),
+            preview_url: (t.preview_url ?? null) as string | null,
+          }));
+
         setPurchasedTemplates(templates);
 
         // Set active template from profile or default to most recent purchase
