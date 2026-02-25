@@ -143,6 +143,7 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
         .single();
 
       if (memorialError) throw memorialError;
+      if (!memorial) throw new Error('Failed to create memorial');
 
       // Add all images to memorial_media table
       const mediaInserts = uploadedImageUrls.map(url => ({
