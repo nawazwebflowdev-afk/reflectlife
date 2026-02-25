@@ -127,6 +127,24 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
       return;
     }
 
+    if (title.length > 200) {
+      toast({
+        title: "Title too long",
+        description: "Please keep titles under 200 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (content && content.length > 50000) {
+      toast({
+        title: "Content too long",
+        description: "Please keep content under 50,000 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setSaving(true);
       const { data: { user } } = await supabase.auth.getUser();
