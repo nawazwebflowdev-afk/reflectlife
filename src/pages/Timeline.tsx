@@ -198,6 +198,15 @@ const Timeline = () => {
       return;
     }
 
+    if (caption && caption.length > 5000) {
+      toast({
+        title: "Caption too long",
+        description: "Please keep captions under 5000 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setUploading(true);
 
     let mediaUrl = null;

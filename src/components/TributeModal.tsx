@@ -77,6 +77,15 @@ export const TributeModal = ({ open, onOpenChange, memorialId, onTributeAdded }:
       return;
     }
 
+    if (tributeText.length > 5000) {
+      toast({
+        title: "Tribute too long",
+        description: "Please keep tributes under 5000 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setUploading(true);
       let mediaUrl = null;
