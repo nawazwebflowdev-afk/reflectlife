@@ -16,6 +16,15 @@ interface HelpMessageRequest {
   message: string;
 }
 
+const escapeHtml = (str: string): string => {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -36,14 +45,14 @@ const handler = async (req: Request): Promise<Response> => {
           <h2 style="color: #8B7355;">New Help Request</h2>
           
           <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Country:</strong> ${country}</p>
+            <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+            <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+            <p><strong>Country:</strong> ${escapeHtml(country)}</p>
           </div>
 
           <div style="background: white; padding: 20px; border-left: 4px solid #8B7355; margin: 20px 0;">
             <p style="margin: 0;"><strong>Message:</strong></p>
-            <p style="margin-top: 10px; color: #333; white-space: pre-wrap;">${message}</p>
+            <p style="margin-top: 10px; color: #333; white-space: pre-wrap;">${escapeHtml(message)}</p>
           </div>
 
           <p style="color: #666; font-size: 14px; margin-top: 30px;">
