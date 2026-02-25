@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -10,8 +11,6 @@ const corsHeaders = {
 };
 
 interface ReviewRequest {
-  userName: string;
-  userEmail: string;
   rating: number;
   message: string;
 }
@@ -25,8 +24,19 @@ const escapeHtml = (str: string): string => {
     .replace(/'/g, '&#039;');
 };
 
-const isValidEmail = (email: string): boolean => {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 255;
+// Rate limiting
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+const checkRateLimit = (key: string, max = 3, windowMin = 60): boolean => {
+  const now = Date.now();
+  const entry = rateLimitStore.get(key);
+  if (!entry || now > entry.resetAt) {
+    rateLimitStore.set(key, { count: 1, resetAt: now + windowMin * 60 * 1000 });
+    return true;
+  }
+  if (entry.count >= max) return false;
+  entry.count++;
+  return true;
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -35,18 +45,45 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { userName, userEmail, rating, message }: ReviewRequest = await req.json();
-
-    // Validate inputs
-    if (!userName || !userEmail || !message || rating === undefined) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), {
-        status: 400,
+    // Require authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
-    if (!isValidEmail(userEmail)) {
-      return new Response(JSON.stringify({ error: "Invalid email address" }), {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const userId = claimsData.claims.sub as string;
+    const userEmail = claimsData.claims.email as string;
+
+    // Rate limit per user
+    if (!checkRateLimit(userId, 3, 60)) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), {
+        status: 429,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const { rating, message }: ReviewRequest = await req.json();
+
+    if (!message || rating === undefined) {
+      return new Response(JSON.stringify({ error: "Missing required fields" }), {
         status: 400,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
@@ -59,12 +96,23 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    if (userName.length > 100 || message.length > 2000) {
-      return new Response(JSON.stringify({ error: "Input exceeds maximum length" }), {
+    if (message.length > 2000) {
+      return new Response(JSON.stringify({ error: "Message exceeds maximum length" }), {
         status: 400,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
+
+    // Get user profile name
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, first_name, last_name")
+      .eq("id", userId)
+      .single();
+
+    const userName = profile?.full_name || 
+      [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || 
+      "Anonymous User";
 
     const stars = "⭐".repeat(rating);
     
@@ -79,6 +127,7 @@ const handler = async (req: Request): Promise<Response> => {
           <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p><strong>From:</strong> ${escapeHtml(userName)}</p>
             <p><strong>Email:</strong> ${escapeHtml(userEmail)}</p>
+            <p><strong>User ID:</strong> ${userId}</p>
             <p><strong>Rating:</strong> ${stars} (${rating}/5)</p>
           </div>
 
