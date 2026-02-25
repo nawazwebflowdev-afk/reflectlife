@@ -1,1 +1,4 @@
 project_id = "osmyfzkcydvtwgnbjplx"
+
+[functions.send-review]
+verify_jwt = false

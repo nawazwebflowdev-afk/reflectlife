@@ -276,8 +276,6 @@ const Settings = () => {
     try {
       const { error } = await supabase.functions.invoke("send-review", {
         body: {
-          userName: fullName,
-          userEmail: email,
           rating,
           message: reviewMessage,
         },

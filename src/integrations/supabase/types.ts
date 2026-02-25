@@ -912,6 +912,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      request_payout: {
+        Args: { p_amount: number; p_payout_method: Json }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

@@ -101,17 +101,13 @@ export const CreatorWithdrawal = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('creator_payouts')
-        .insert({
-          creator_id: user.id,
-          amount,
-          status: 'pending',
-          payout_method: {
-            type: paymentMethod,
-            details: accountDetails,
-          },
-        });
+      const { error } = await supabase.rpc('request_payout', {
+        p_amount: amount,
+        p_payout_method: {
+          type: paymentMethod,
+          details: accountDetails,
+        },
+      });
 
       if (error) throw error;
 
