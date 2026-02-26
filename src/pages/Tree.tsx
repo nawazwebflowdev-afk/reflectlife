@@ -241,41 +241,37 @@ const Tree = () => {
       } else {
         if (mode === "family") {
           // Hierarchical layout for family tree
-          const parentsCount = filteredConnections.filter(c => 
-            c.relationship_type.toLowerCase().includes("parent") || 
-            c.relationship_type.toLowerCase().includes("grandparent")
-          ).length;
-          const siblingsCount = filteredConnections.filter(c => 
-            c.relationship_type.toLowerCase().includes("sibling") || 
-            c.relationship_type.toLowerCase().includes("cousin")
-          ).length;
-          const childrenCount = filteredConnections.filter(c => 
-            c.relationship_type.toLowerCase().includes("child") || 
-            c.relationship_type.toLowerCase().includes("grandchild")
-          ).length;
+          const relLower = conn.relationship_type.toLowerCase();
+          const isParentGen = relLower.includes("mother") || relLower.includes("father") || 
+            relLower.includes("parent") || relLower.includes("grandmother") || 
+            relLower.includes("grandfather") || relLower.includes("grandparent");
+          const isSiblingGen = relLower.includes("sibling") || relLower.includes("cousin") || 
+            relLower.includes("sister") || relLower.includes("brother");
+          const isChildGen = relLower.includes("child") || relLower.includes("son") || 
+            relLower.includes("daughter") || relLower.includes("grandchild") || 
+            relLower.includes("grandson") || relLower.includes("granddaughter");
 
-          if (conn.relationship_type.toLowerCase().includes("parent") || 
-              conn.relationship_type.toLowerCase().includes("grandparent")) {
-            const parentIndex = filteredConnections.filter(c => 
-              c.relationship_type.toLowerCase().includes("parent") || 
-              c.relationship_type.toLowerCase().includes("grandparent")
-            ).indexOf(conn);
+          if (isParentGen) {
+            const parentIndex = filteredConnections.filter(c => {
+              const r = c.relationship_type.toLowerCase();
+              return r.includes("mother") || r.includes("father") || r.includes("parent") || 
+                r.includes("grandmother") || r.includes("grandfather") || r.includes("grandparent");
+            }).indexOf(conn);
             x = 200 + (parentIndex * 200);
             y = 50;
-          } else if (conn.relationship_type.toLowerCase().includes("sibling") || 
-                     conn.relationship_type.toLowerCase().includes("cousin")) {
-            const siblingIndex = filteredConnections.filter(c => 
-              c.relationship_type.toLowerCase().includes("sibling") || 
-              c.relationship_type.toLowerCase().includes("cousin")
-            ).indexOf(conn);
+          } else if (isSiblingGen) {
+            const siblingIndex = filteredConnections.filter(c => {
+              const r = c.relationship_type.toLowerCase();
+              return r.includes("sibling") || r.includes("cousin") || r.includes("sister") || r.includes("brother");
+            }).indexOf(conn);
             x = 200 + (siblingIndex * 150);
             y = 300;
-          } else if (conn.relationship_type.toLowerCase().includes("child") || 
-                     conn.relationship_type.toLowerCase().includes("grandchild")) {
-            const childIndex = filteredConnections.filter(c => 
-              c.relationship_type.toLowerCase().includes("child") || 
-              c.relationship_type.toLowerCase().includes("grandchild")
-            ).indexOf(conn);
+          } else if (isChildGen) {
+            const childIndex = filteredConnections.filter(c => {
+              const r = c.relationship_type.toLowerCase();
+              return r.includes("child") || r.includes("son") || r.includes("daughter") || 
+                r.includes("grandchild") || r.includes("grandson") || r.includes("granddaughter");
+            }).indexOf(conn);
             x = 200 + (childIndex * 150);
             y = 550;
           } else {
