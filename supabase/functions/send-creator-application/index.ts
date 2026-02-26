@@ -9,6 +9,15 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 interface CreatorApplicationRequest {
   applicantEmail: string;
   displayName: string;
@@ -39,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
 
           <div style="background: linear-gradient(135deg, #f5f5f5 0%, #faf8f6 100%); padding: 30px; border-radius: 12px; margin: 20px 0;">
-            <h2 style="color: #333; margin-top: 0;">Hi ${displayName},</h2>
+            <h2 style="color: #333; margin-top: 0;">Hi ${escapeHtml(displayName)},</h2>
             <p style="font-size: 16px; color: #333; line-height: 1.6;">
               Thank you for applying to become a <strong>Reflectlife Creator</strong>! We're excited about your interest in designing memorial templates.
             </p>
@@ -69,15 +78,15 @@ const handler = async (req: Request): Promise<Response> => {
     const adminEmail$ = resend.emails.send({
       from: "Reflectlife <noreply@reflectlife.app>",
       to: ["sypera.sylvia@gmail.com"],
-      subject: `New Creator Application: ${displayName}`,
+      subject: `New Creator Application: ${escapeHtml(displayName)}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #8B7355;">New Creator Application</h2>
           <table style="width: 100%; border-collapse: collapse;">
-            <tr><td style="padding: 8px; font-weight: bold; color: #333;">Name:</td><td style="padding: 8px; color: #555;">${displayName}</td></tr>
-            <tr><td style="padding: 8px; font-weight: bold; color: #333;">Email:</td><td style="padding: 8px; color: #555;">${applicantEmail}</td></tr>
-            <tr><td style="padding: 8px; font-weight: bold; color: #333;">Country:</td><td style="padding: 8px; color: #555;">${country}</td></tr>
-            <tr><td style="padding: 8px; font-weight: bold; color: #333;">Description:</td><td style="padding: 8px; color: #555;">${description}</td></tr>
+            <tr><td style="padding: 8px; font-weight: bold; color: #333;">Name:</td><td style="padding: 8px; color: #555;">${escapeHtml(displayName)}</td></tr>
+            <tr><td style="padding: 8px; font-weight: bold; color: #333;">Email:</td><td style="padding: 8px; color: #555;">${escapeHtml(applicantEmail)}</td></tr>
+            <tr><td style="padding: 8px; font-weight: bold; color: #333;">Country:</td><td style="padding: 8px; color: #555;">${escapeHtml(country)}</td></tr>
+            <tr><td style="padding: 8px; font-weight: bold; color: #333;">Description:</td><td style="padding: 8px; color: #555;">${escapeHtml(description)}</td></tr>
           </table>
           <div style="margin-top: 20px; text-align: center;">
             <a href="https://reflectlife.lovable.app/admin/creator-requests" 

@@ -9,6 +9,15 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 interface ReviewRequest {
   userName: string;
   userEmail: string;
@@ -31,20 +40,20 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: "Reflectlife Reviews <onboarding@resend.dev>",
       to: ["sypera.sylvia@gmail.com"],
-      subject: `New Review from ${userName} - ${stars}`,
+      subject: `New Review from ${escapeHtml(userName)} - ${stars}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #8B7355;">New Review Received</h2>
           
           <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p><strong>From:</strong> ${userName}</p>
-            <p><strong>Email:</strong> ${userEmail}</p>
+            <p><strong>From:</strong> ${escapeHtml(userName)}</p>
+            <p><strong>Email:</strong> ${escapeHtml(userEmail)}</p>
             <p><strong>Rating:</strong> ${stars} (${rating}/5)</p>
           </div>
 
           <div style="background: white; padding: 20px; border-left: 4px solid #8B7355; margin: 20px 0;">
             <p style="margin: 0;"><strong>Review:</strong></p>
-            <p style="margin-top: 10px; color: #333;">${message}</p>
+            <p style="margin-top: 10px; color: #333;">${escapeHtml(message)}</p>
           </div>
 
           <p style="color: #666; font-size: 14px; margin-top: 30px;">

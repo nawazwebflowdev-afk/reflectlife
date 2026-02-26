@@ -9,6 +9,15 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 interface ShareEmailRequest {
   recipientEmail: string;
   postId: string;
@@ -31,7 +40,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: "Reflectlife <onboarding@resend.dev>",
       to: [recipientEmail],
-      subject: `${senderName} shared a memory with you`,
+      subject: `${escapeHtml(senderName)} shared a memory with you`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 30px;">
@@ -41,12 +50,12 @@ const handler = async (req: Request): Promise<Response> => {
 
           <div style="background: linear-gradient(135deg, #f5f5f5 0%, #faf8f6 100%); padding: 30px; border-radius: 12px; margin: 20px 0;">
             <p style="font-size: 16px; color: #333; margin-bottom: 20px;">
-              <strong>${senderName}</strong> has shared a special memory with you:
+              <strong>${escapeHtml(senderName)}</strong> has shared a special memory with you:
             </p>
             
             <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #8B7355;">
               <p style="color: #555; line-height: 1.6; margin: 0;">
-                ${postCaption || "A meaningful memory from their journey"}
+                ${postCaption ? escapeHtml(postCaption) : "A meaningful memory from their journey"}
               </p>
             </div>
 
