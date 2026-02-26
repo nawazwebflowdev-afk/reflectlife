@@ -28,7 +28,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email to applicant
     const applicantEmail$ = resend.emails.send({
-      from: "Reflectlife <onboarding@resend.dev>",
+      from: "Reflectlife <noreply@reflectlife.app>",
       to: [applicantEmail],
       subject: "We received your Creator application! 🎨",
       html: `
@@ -67,7 +67,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send notification email to admin
     const adminEmail$ = resend.emails.send({
-      from: "Reflectlife <onboarding@resend.dev>",
+      from: "Reflectlife <noreply@reflectlife.app>",
       to: ["sypera.sylvia@gmail.com"],
       subject: `New Creator Application: ${displayName}`,
       html: `
