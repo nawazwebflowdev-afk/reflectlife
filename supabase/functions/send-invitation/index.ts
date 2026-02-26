@@ -70,15 +70,14 @@ const handler = async (req: Request): Promise<Response> => {
     // Initialize Supabase client with service role key
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check if recipient is already a registered user
+    // Check if recipient is already a registered user (internal use only - never expose to client)
     const { data: existingUser } = await supabase
       .from("profiles")
-      .select("id, email")
+      .select("id")
       .eq("email", recipientEmail)
       .single();
 
     const isRegistered = !!existingUser;
-    console.log(`Recipient ${recipientEmail} is ${isRegistered ? 'registered' : 'not registered'}`);
 
     // Log invitation in database
     const { error: inviteError } = await supabase
@@ -168,9 +167,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Invitation email sent successfully:", emailResponse);
 
     return new Response(JSON.stringify({ 
-      success: true, 
-      isRegistered,
-      emailResponse 
+      success: true
     }), {
       status: 200,
       headers: {
