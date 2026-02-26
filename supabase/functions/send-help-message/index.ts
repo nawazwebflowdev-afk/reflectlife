@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -31,12 +32,36 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Authenticate the user
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     const { name, email, country, message }: HelpMessageRequest = await req.json();
 
-    console.log("Sending help message:", { name, email, country });
+    console.log("Sending help message:", { name, country });
 
     const emailResponse = await resend.emails.send({
-      from: "Reflectlife Support <onboarding@resend.dev>",
+      from: "Reflectlife Support <noreply@reflectlife.app>",
       to: ["sypera.sylvia@gmail.com"],
       reply_to: email,
       subject: `Help Request from ${escapeHtml(name)} (${escapeHtml(country)})`,
