@@ -153,6 +153,47 @@ export type Database = {
         }
         Relationships: []
       }
+      memorial_access: {
+        Row: {
+          created_at: string
+          id: string
+          invited_by: string
+          invited_email: string | null
+          memorial_id: string
+          permissions: string[]
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_by: string
+          invited_email?: string | null
+          memorial_id: string
+          permissions?: string[]
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_by?: string
+          invited_email?: string | null
+          memorial_id?: string
+          permissions?: string[]
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_access_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memorial_candles: {
         Row: {
           created_at: string
@@ -764,6 +805,47 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "site_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tree_access: {
+        Row: {
+          created_at: string
+          id: string
+          invited_by: string
+          invited_email: string | null
+          permissions: string[]
+          status: string
+          tree_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_by: string
+          invited_email?: string | null
+          permissions?: string[]
+          status?: string
+          tree_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_by?: string
+          invited_email?: string | null
+          permissions?: string[]
+          status?: string
+          tree_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_access_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "trees"
             referencedColumns: ["id"]
           },
         ]

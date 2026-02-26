@@ -14,10 +14,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, Settings } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import AddConnectionModal from "@/components/tree/AddConnectionModal";
 import ConnectionDetailPanel from "@/components/tree/ConnectionDetailPanel";
 import EmptyTreeState from "@/components/tree/EmptyTreeState";
+import { InviteAccessPanel } from "@/components/InviteAccessPanel";
 
 type ConnectionType = "family" | "friendship";
 
@@ -51,6 +53,7 @@ const Tree = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userTree, setUserTree] = useState<any>(null);
   const { toast } = useToast();
   const templateTheme = useTemplateTheme();
   const backgroundUrl = templateTheme.backgroundUrl;
@@ -61,6 +64,7 @@ const Tree = () => {
   useEffect(() => {
     fetchCurrentUser();
     fetchConnections();
+    fetchUserTree();
   }, []);
 
   useEffect(() => {
@@ -77,6 +81,29 @@ const Tree = () => {
         .single();
       setCurrentUser(profile);
     }
+  };
+
+  const fetchUserTree = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Get or create the user's tree
+    let { data: tree } = await supabase
+      .from("trees")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
+
+    if (!tree) {
+      const { data: newTree } = await supabase
+        .from("trees")
+        .insert({ user_id: user.id, name: "My Family Tree" })
+        .select()
+        .single();
+      tree = newTree;
+    }
+
+    setUserTree(tree);
   };
 
   const fetchConnections = async () => {
@@ -441,6 +468,42 @@ const Tree = () => {
                 <span className="hidden sm:inline">Add Connection</span>
                 <span className="sm:hidden">Add</span>
               </Button>
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="gap-2">
+                    <Settings className="h-4 w-4" />
+                    <span className="hidden sm:inline">Settings</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Tree Settings</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    {userTree ? (
+                      <InviteAccessPanel
+                        type="tree"
+                        resourceId={userTree.id}
+                        isPublic={userTree.is_public ?? false}
+                        onPrivacyChange={async (newIsPublic) => {
+                          const { error } = await supabase
+                            .from("trees")
+                            .update({ is_public: newIsPublic })
+                            .eq("id", userTree.id);
+                          if (error) {
+                            toast({ title: "Error", description: "Failed to update privacy", variant: "destructive" });
+                          } else {
+                            toast({ title: "Privacy updated" });
+                            setUserTree({ ...userTree, is_public: newIsPublic });
+                          }
+                        }}
+                      />
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Loading tree settings...</p>
+                    )}
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
         </div>
