@@ -512,6 +512,14 @@ const Timeline = () => {
         postId={selectedPostForComments || ""}
         user={user}
       />
+
+      {/* Share Modal */}
+      <SharePostModal
+        open={!!selectedPostForShare}
+        onOpenChange={(open) => !open && setSelectedPostForShare(null)}
+        postId={selectedPostForShare?.id || ""}
+        postCaption={selectedPostForShare?.caption || ""}
+      />
     </div>
   );
 };
