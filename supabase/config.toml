@@ -8,3 +8,15 @@ verify_jwt = false
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.send-help-message]
+verify_jwt = false
+
+[functions.send-review]
+verify_jwt = false
+
+[functions.send-share-email]
+verify_jwt = false
+
+[functions.send-creator-application]
+verify_jwt = false
