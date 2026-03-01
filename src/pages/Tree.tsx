@@ -114,6 +114,7 @@ const Tree = () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
+        setLoading(false);
         toast({
           title: "Authentication required",
           description: "Please sign in to view your connection tree.",
