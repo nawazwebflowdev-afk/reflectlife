@@ -135,6 +135,7 @@ export const CommentsModal = ({ open, onOpenChange, postId, user }: CommentsModa
       });
     } else {
       setNewComment("");
+      await fetchComments();
       toast({
         title: "Comment Posted",
         description: "Your comment has been shared",
