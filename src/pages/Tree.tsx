@@ -94,7 +94,7 @@ const Tree = () => {
       .from("trees")
       .select("*")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (!tree) {
       const { data: newTree } = await supabase
