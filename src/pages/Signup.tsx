@@ -111,14 +111,8 @@ const Signup = () => {
         description: "Please check your email to verify your account.",
       });
 
-      // Clear form
-      setFullName("");
-      setEmail("");
-      setPassword("");
-      setPhoneNumber("");
-      setCountry("");
-      setTermsAccepted(false);
-      setPasswordStrength({ score: 0, feedback: "", color: "bg-gray-200" });
+      // Navigate to verification page instead of clearing form
+      navigate("/verify");
 
     } catch (error: any) {
       console.error('Signup error:', error);
