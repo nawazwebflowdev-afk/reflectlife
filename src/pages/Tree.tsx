@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import ReactFlow, {
   Node,
   Edge,
@@ -14,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, Settings } from "lucide-react";
+import { Plus, Loader2, Settings, Palette } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import AddConnectionModal from "@/components/tree/AddConnectionModal";
 import ConnectionDetailPanel from "@/components/tree/ConnectionDetailPanel";
@@ -55,6 +56,7 @@ const Tree = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [userTree, setUserTree] = useState<any>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
   const templateTheme = useTemplateTheme();
   const backgroundUrl = templateTheme.backgroundUrl;
 
@@ -467,6 +469,11 @@ const Tree = () => {
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">Add Connection</span>
                 <span className="sm:hidden">Add</span>
+              </Button>
+
+              <Button variant="outline" onClick={() => navigate("/templates")} className="gap-2">
+                <Palette className="h-4 w-4" />
+                <span className="hidden sm:inline">Templates</span>
               </Button>
               <Sheet>
                 <SheetTrigger asChild>
