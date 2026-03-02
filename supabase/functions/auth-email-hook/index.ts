@@ -140,15 +140,8 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Send via Lovable Email API callback
-  const callbackUrl = Deno.env.get("CALLBACK_URL");
-  if (!callbackUrl) {
-    console.error("CALLBACK_URL not set");
-    return new Response(JSON.stringify({ error: "Email callback not configured" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
-  }
+  // Send via Lovable Email API
+  const callbackUrl = "https://email.gateway.lovable.dev/v1/send";
 
   try {
     const emailResponse = await fetch(callbackUrl, {
