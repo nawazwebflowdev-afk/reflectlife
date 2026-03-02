@@ -148,15 +148,21 @@ const Auth = () => {
     }
   };
 
-  const getSignupErrorDescription = (input: unknown) => {
+  const getSignupErrorDetails = (input: unknown) => {
     const raw = typeof input === "string" ? input : (input as any)?.message || "";
     const normalized = raw.toLowerCase();
 
     if (normalized.includes("rate limit") || normalized.includes("429") || normalized.includes("over_email_send_rate_limit")) {
-      return "Email rate limit exceeded. Please wait 30–60 minutes before trying again, or try from a different network.";
+      return {
+        title: "Email rate limit exceeded",
+        description: "Please wait 30–60 minutes before trying again, or try from a different network.",
+      };
     }
 
-    return raw || "An unexpected error occurred. Please try again.";
+    return {
+      title: "Sign up failed",
+      description: raw || "An unexpected error occurred. Please try again.",
+    };
   };
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -225,18 +231,20 @@ const Auth = () => {
       });
 
       if (error) {
+        const details = getSignupErrorDetails(error);
         toast({
-          title: "Sign up failed",
-          description: getSignupErrorDescription(error),
+          title: details.title,
+          description: details.description,
           variant: "destructive",
         });
         return;
       }
 
       if (data?.error) {
+        const details = getSignupErrorDetails(data.error);
         toast({
-          title: "Sign up failed",
-          description: getSignupErrorDescription(data.error),
+          title: details.title,
+          description: details.description,
           variant: "destructive",
         });
         return;
@@ -267,9 +275,10 @@ const Auth = () => {
 
     } catch (error: any) {
       console.error('Signup error:', error);
+      const details = getSignupErrorDetails(error);
       toast({
-        title: "Sign up failed",
-        description: getSignupErrorDescription(error),
+        title: details.title,
+        description: details.description,
         variant: "destructive",
       });
     } finally {

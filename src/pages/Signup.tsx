@@ -116,15 +116,21 @@ const SignupForm = () => {
     checkPasswordStrength(newPassword);
   };
 
-  const getSignupErrorDescription = (input: unknown) => {
+  const getSignupErrorDetails = (input: unknown) => {
     const raw = typeof input === "string" ? input : (input as any)?.message || "";
     const normalized = raw.toLowerCase();
 
     if (normalized.includes("rate limit") || normalized.includes("429") || normalized.includes("over_email_send_rate_limit")) {
-      return "Email rate limit exceeded. Please wait 30–60 minutes before trying again, or try from a different network.";
+      return {
+        title: "Email rate limit exceeded",
+        description: "Please wait 30–60 minutes before trying again, or try from a different network.",
+      };
     }
 
-    return raw || "An unexpected error occurred. Please try again.";
+    return {
+      title: "Sign up failed",
+      description: raw || "An unexpected error occurred. Please try again.",
+    };
   };
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -185,11 +191,11 @@ const SignupForm = () => {
 
     } catch (error: any) {
       console.error('Signup error:', error);
-      const description = getSignupErrorDescription(error);
-      setSignupError(description);
+      const details = getSignupErrorDetails(error);
+      setSignupError(details.description);
       toast({
-        title: "Sign up failed",
-        description,
+        title: details.title,
+        description: details.description,
         variant: "destructive",
       });
     } finally {
