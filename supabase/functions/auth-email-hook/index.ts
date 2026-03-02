@@ -37,22 +37,23 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Log the full payload structure for debugging
   console.log("Raw payload keys:", Object.keys(body));
-  console.log("Full payload:", JSON.stringify(body).substring(0, 500));
+  console.log("Full payload:", JSON.stringify(body).substring(0, 800));
 
-  // Extract event data - handle both direct and nested payload formats
-  const event = body.event || body;
-
-  // The action type can be in email_action_type (actual auth events) or type (health checks / some formats)
-  const email_action_type = event.email_action_type || event.type;
+  // Supabase Auth Hook "Send Email" payload format:
+  // { user: { id, email, ... }, email_data: { token, token_hash, redirect_to, email_action_type, site_url, ... } }
+  const user = body.user || {};
+  const emailData = body.email_data || {};
+  const email_action_type = emailData.email_action_type || body.email_action_type || body.type;
 
   console.log("Received auth email event:", email_action_type);
+  console.log("User email:", user.email);
+  console.log("Email data keys:", Object.keys(emailData));
 
-  // Health check pings only have { type: "..." } with no email data - respond OK
-  if (!event.email_data && !event.token_hash && !event.token && Object.keys(event).length <= 1) {
-    console.log("Health check ping for type:", email_action_type);
-    return new Response(JSON.stringify({ success: true }), {
+  // Health check pings - respond OK
+  if (!email_action_type || (!user.email && !emailData.token_hash)) {
+    console.log("Health check or empty ping");
+    return new Response(JSON.stringify({}), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
@@ -63,21 +64,16 @@ Deno.serve(async (req) => {
     token,
     redirect_to,
     site_url,
-    email_data,
-  } = event;
+    token_new,
+    token_hash_new,
+  } = emailData;
 
   const siteName = "ReflectLife";
   const siteUrl = site_url || "https://reflectlife.net";
 
-  // Build the confirmation URL (prefer provider-generated links when available)
-  let confirmationUrl =
-    event?.confirmation_url ||
-    event?.action_link ||
-    email_data?.confirmation_url ||
-    email_data?.action_link ||
-    "";
-
-  if (!confirmationUrl && token_hash && email_action_type) {
+  // Build confirmation URL using token_hash
+  let confirmationUrl = "";
+  if (token_hash && email_action_type) {
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
     const redirectTo = redirect_to || `${siteUrl}/verify`;
 
@@ -90,8 +86,8 @@ Deno.serve(async (req) => {
     }
   }
 
-  const recipient = email_data?.email || "";
-  const newEmail = email_data?.new_email || "";
+  const recipient = user.email || emailData.email || "";
+  const newEmail = emailData.new_email || "";
 
   let html = "";
   let subject = "";
@@ -178,7 +174,8 @@ Deno.serve(async (req) => {
     }
 
     console.log("Email sent successfully to:", recipient);
-    return new Response(JSON.stringify({ success: true }), {
+    // Supabase Auth Hook expects an empty JSON response on success
+    return new Response(JSON.stringify({}), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
