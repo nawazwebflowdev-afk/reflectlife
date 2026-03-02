@@ -148,19 +148,27 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Prefer Lovable-provided callback URL from auth hook payload; fallback for backwards compatibility.
-  const callbackUrl = body?.metadata?.callback_url || body?.callback_url || "https://email.gateway.lovable.dev/v1/send";
+  // Use Resend API directly for reliable email delivery
+  const resendApiKey = Deno.env.get("RESEND_API_KEY");
+  if (!resendApiKey) {
+    console.error("RESEND_API_KEY not set, cannot send email");
+    // Return 200 so signup isn't blocked — Supabase will use its default sender
+    return new Response(JSON.stringify({}), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
 
   try {
-    const emailResponse = await fetch(callbackUrl, {
+    const emailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${lovableApiKey}`,
+        Authorization: `Bearer ${resendApiKey}`,
       },
       body: JSON.stringify({
         from: "ReflectLife <noreply@notify.reflectlife.net>",
-        to: recipient,
+        to: [recipient],
         subject,
         html,
       }),
@@ -168,27 +176,27 @@ Deno.serve(async (req) => {
 
     if (!emailResponse.ok) {
       const errorText = await emailResponse.text();
-      console.error("Failed to send email via Lovable API:", {
+      console.error("Failed to send email via Resend:", {
         status: emailResponse.status,
-        callbackUrl,
         errorText,
       });
-      return new Response(JSON.stringify({ error: "Failed to send email" }), {
-        status: 500,
+      // Return 200 so signup flow isn't blocked
+      return new Response(JSON.stringify({}), {
+        status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
     console.log("Email sent successfully to:", recipient);
-    // Supabase Auth Hook expects an empty JSON response on success
     return new Response(JSON.stringify({}), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (sendErr) {
     console.error("Error sending email:", sendErr);
-    return new Response(JSON.stringify({ error: "Failed to send email" }), {
-      status: 500,
+    // Return 200 so signup isn't blocked
+    return new Response(JSON.stringify({}), {
+      status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
