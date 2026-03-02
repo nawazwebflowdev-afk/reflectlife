@@ -11,11 +11,22 @@ const Verify = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    const timeout = setTimeout(() => {
+      toast({
+        title: "Verification failed",
+        description: "Unable to verify your email. Please try signing up again.",
+        variant: "destructive",
+      });
+      setIsVerifying(false);
+      navigate("/login");
+    }, 10000);
+
     // Listen for auth state changes to handle the email confirmation callback
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth event:', event, 'Session:', session);
 
       if (event === 'SIGNED_IN' && session?.user) {
+        clearTimeout(timeout);
         const user = session.user;
 
         // Check if email is confirmed
@@ -68,8 +79,8 @@ const Verify = () => {
           setIsVerifying(false);
           navigate("/login");
         }
-      } else if (event === 'SIGNED_OUT' || (event === 'INITIAL_SESSION' && !session)) {
-        // No session found, redirect to login
+      } else if (event === 'SIGNED_OUT') {
+        clearTimeout(timeout);
         toast({
           title: "Verification failed",
           description: "Unable to verify your email. Please try signing up again.",
@@ -81,6 +92,7 @@ const Verify = () => {
     });
 
     return () => {
+      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, [navigate, toast]);
