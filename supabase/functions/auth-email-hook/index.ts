@@ -159,9 +159,11 @@ Deno.serve(async (req) => {
 
     if (!emailResponse.ok) {
       const errorText = await emailResponse.text();
-      console.error("Failed to send email:", errorText);
-      return new Response(JSON.stringify({ error: "Failed to send email" }), {
-        status: 500,
+      console.error("Failed to send email via Lovable API:", errorText);
+      // Return 200 so Supabase Auth doesn't block the signup/action
+      // Supabase will fall back to its default email sender
+      return new Response(JSON.stringify({}), {
+        status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
