@@ -69,12 +69,25 @@ Deno.serve(async (req) => {
   const siteName = "ReflectLife";
   const siteUrl = site_url || "https://reflectlife.net";
 
-  // Build the confirmation URL
-  let confirmationUrl = "";
-  if (token_hash) {
-    const baseUrl = redirect_to || siteUrl;
-    const separator = baseUrl.includes("?") ? "&" : "?";
-    confirmationUrl = `${baseUrl}${separator}token_hash=${token_hash}&type=${email_action_type}`;
+  // Build the confirmation URL (prefer provider-generated links when available)
+  let confirmationUrl =
+    event?.confirmation_url ||
+    event?.action_link ||
+    email_data?.confirmation_url ||
+    email_data?.action_link ||
+    "";
+
+  if (!confirmationUrl && token_hash && email_action_type) {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+    const redirectTo = redirect_to || `${siteUrl}/verify`;
+
+    if (supabaseUrl) {
+      const verifyUrl = new URL(`${supabaseUrl}/auth/v1/verify`);
+      verifyUrl.searchParams.set("token", token_hash);
+      verifyUrl.searchParams.set("type", email_action_type);
+      verifyUrl.searchParams.set("redirect_to", redirectTo);
+      confirmationUrl = verifyUrl.toString();
+    }
   }
 
   const recipient = email_data?.email || "";
