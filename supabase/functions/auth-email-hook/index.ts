@@ -1,4 +1,3 @@
-import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 import { renderAsync } from "npm:@react-email/components@0.0.22";
 
 import SignupEmail from "../_shared/email-templates/signup.tsx";
@@ -18,11 +17,8 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const payload = await req.text();
-  const headers = Object.fromEntries(req.headers);
-
-  const webhookSecret = Deno.env.get("LOVABLE_API_KEY");
-  if (!webhookSecret) {
+  const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+  if (!lovableApiKey) {
     console.error("LOVABLE_API_KEY not set");
     return new Response(JSON.stringify({ error: "Server configuration error" }), {
       status: 500,
@@ -30,23 +26,39 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Strip prefix if present for webhook verification
-  const secret = webhookSecret.replace(/^v1,whsec_/, "");
-
-  const wh = new Webhook(secret);
-  let event: any;
+  let body: any;
   try {
-    event = wh.verify(payload, headers);
+    body = await req.json();
   } catch (err) {
-    console.error("Webhook verification failed:", err);
-    return new Response(JSON.stringify({ error: "Invalid signature" }), {
-      status: 401,
+    console.error("Failed to parse request body:", err);
+    return new Response(JSON.stringify({ error: "Invalid request body" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+
+  // Log the full payload structure for debugging
+  console.log("Raw payload keys:", Object.keys(body));
+  console.log("Full payload:", JSON.stringify(body).substring(0, 500));
+
+  // Extract event data - handle both direct and nested payload formats
+  const event = body.event || body;
+
+  // The action type can be in email_action_type (actual auth events) or type (health checks / some formats)
+  const email_action_type = event.email_action_type || event.type;
+
+  console.log("Received auth email event:", email_action_type);
+
+  // Health check pings only have { type: "..." } with no email data - respond OK
+  if (!event.email_data && !event.token_hash && !event.token && Object.keys(event).length <= 1) {
+    console.log("Health check ping for type:", email_action_type);
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
 
   const {
-    email_action_type,
     token_hash,
     token,
     redirect_to,
@@ -71,44 +83,52 @@ Deno.serve(async (req) => {
   let html = "";
   let subject = "";
 
-  switch (email_action_type) {
-    case "signup": {
-      subject = "Welcome to ReflectLife — Confirm your email";
-      html = await renderAsync(SignupEmail({ siteName, siteUrl, confirmationUrl, recipient }));
-      break;
+  try {
+    switch (email_action_type) {
+      case "signup": {
+        subject = "Welcome to ReflectLife — Confirm your email";
+        html = await renderAsync(SignupEmail({ siteName, siteUrl, confirmationUrl, recipient }));
+        break;
+      }
+      case "recovery": {
+        subject = "Reset your ReflectLife password";
+        html = await renderAsync(RecoveryEmail({ siteName, siteUrl, confirmationUrl, recipient }));
+        break;
+      }
+      case "invite": {
+        subject = "You've been invited to ReflectLife";
+        html = await renderAsync(InviteEmail({ siteName, siteUrl, confirmationUrl, recipient }));
+        break;
+      }
+      case "magiclink": {
+        subject = "Sign in to ReflectLife";
+        html = await renderAsync(MagicLinkEmail({ siteName, siteUrl, confirmationUrl, recipient }));
+        break;
+      }
+      case "email_change": {
+        subject = "Confirm your email change — ReflectLife";
+        html = await renderAsync(EmailChangeEmail({ siteName, siteUrl, confirmationUrl, recipient, newEmail }));
+        break;
+      }
+      case "reauthentication": {
+        subject = "Your ReflectLife verification code";
+        html = await renderAsync(ReauthenticationEmail({ siteName, siteUrl, token, recipient }));
+        break;
+      }
+      default: {
+        console.error("Unknown email action type:", email_action_type);
+        return new Response(JSON.stringify({ error: `Unknown email action type: ${email_action_type}` }), {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
     }
-    case "recovery": {
-      subject = "Reset your ReflectLife password";
-      html = await renderAsync(RecoveryEmail({ siteName, siteUrl, confirmationUrl, recipient }));
-      break;
-    }
-    case "invite": {
-      subject = "You've been invited to ReflectLife";
-      html = await renderAsync(InviteEmail({ siteName, siteUrl, confirmationUrl, recipient }));
-      break;
-    }
-    case "magiclink": {
-      subject = "Sign in to ReflectLife";
-      html = await renderAsync(MagicLinkEmail({ siteName, siteUrl, confirmationUrl, recipient }));
-      break;
-    }
-    case "email_change": {
-      subject = "Confirm your email change — ReflectLife";
-      html = await renderAsync(EmailChangeEmail({ siteName, siteUrl, confirmationUrl, recipient, newEmail }));
-      break;
-    }
-    case "reauthentication": {
-      subject = "Your ReflectLife verification code";
-      html = await renderAsync(ReauthenticationEmail({ siteName, siteUrl, token, recipient }));
-      break;
-    }
-    default: {
-      console.error("Unknown email action type:", email_action_type);
-      return new Response(JSON.stringify({ error: `Unknown email action type: ${email_action_type}` }), {
-        status: 400,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      });
-    }
+  } catch (renderErr) {
+    console.error("Failed to render email template:", renderErr);
+    return new Response(JSON.stringify({ error: "Failed to render email" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 
   // Send via Lovable Email API callback
@@ -121,30 +141,39 @@ Deno.serve(async (req) => {
     });
   }
 
-  const emailResponse = await fetch(callbackUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${webhookSecret}`,
-    },
-    body: JSON.stringify({
-      to: recipient,
-      subject,
-      html,
-    }),
-  });
+  try {
+    const emailResponse = await fetch(callbackUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${lovableApiKey}`,
+      },
+      body: JSON.stringify({
+        to: recipient,
+        subject,
+        html,
+      }),
+    });
 
-  if (!emailResponse.ok) {
-    const errorText = await emailResponse.text();
-    console.error("Failed to send email:", errorText);
+    if (!emailResponse.ok) {
+      const errorText = await emailResponse.text();
+      console.error("Failed to send email:", errorText);
+      return new Response(JSON.stringify({ error: "Failed to send email" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    console.log("Email sent successfully to:", recipient);
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  } catch (sendErr) {
+    console.error("Error sending email:", sendErr);
     return new Response(JSON.stringify({ error: "Failed to send email" }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
-
-  return new Response(JSON.stringify({ success: true }), {
-    status: 200,
-    headers: { "Content-Type": "application/json", ...corsHeaders },
-  });
 });
