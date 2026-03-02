@@ -58,6 +58,17 @@ const Signup = () => {
     checkPasswordStrength(newPassword);
   };
 
+  const getSignupErrorDescription = (input: unknown) => {
+    const raw = typeof input === "string" ? input : (input as any)?.message || "";
+    const normalized = raw.toLowerCase();
+
+    if (normalized.includes("rate limit") || normalized.includes("429")) {
+      return "Too many signup attempts right now. Please wait a few minutes and try again.";
+    }
+
+    return raw || "An unexpected error occurred. Please try again.";
+  };
+
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
@@ -118,7 +129,7 @@ const Signup = () => {
       console.error('Signup error:', error);
       toast({
         title: "Sign up failed",
-        description: error.message || "An unexpected error occurred. Please try again.",
+        description: getSignupErrorDescription(error),
         variant: "destructive",
       });
     } finally {
