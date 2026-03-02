@@ -62,8 +62,8 @@ const Signup = () => {
     const raw = typeof input === "string" ? input : (input as any)?.message || "";
     const normalized = raw.toLowerCase();
 
-    if (normalized.includes("rate limit") || normalized.includes("429")) {
-      return "Too many signup attempts right now. Please wait a few minutes and try again.";
+    if (normalized.includes("rate limit") || normalized.includes("429") || normalized.includes("over_email_send_rate_limit")) {
+      return "Email rate limit exceeded. Please wait 30–60 minutes before trying again, or try from a different network.";
     }
 
     return raw || "An unexpected error occurred. Please try again.";
