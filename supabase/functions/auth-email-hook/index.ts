@@ -89,6 +89,14 @@ Deno.serve(async (req) => {
   const recipient = user.email || emailData.email || "";
   const newEmail = emailData.new_email || "";
 
+  if (!recipient) {
+    console.error("Missing recipient email in auth hook payload");
+    return new Response(JSON.stringify({ error: "Missing recipient" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+
   let html = "";
   let subject = "";
 
@@ -140,8 +148,8 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Send via Lovable Email API
-  const callbackUrl = "https://email.gateway.lovable.dev/v1/send";
+  // Prefer Lovable-provided callback URL from auth hook payload; fallback for backwards compatibility.
+  const callbackUrl = body?.metadata?.callback_url || body?.callback_url || "https://email.gateway.lovable.dev/v1/send";
 
   try {
     const emailResponse = await fetch(callbackUrl, {
@@ -160,11 +168,13 @@ Deno.serve(async (req) => {
 
     if (!emailResponse.ok) {
       const errorText = await emailResponse.text();
-      console.error("Failed to send email via Lovable API:", errorText);
-      // Return 200 so Supabase Auth doesn't block the signup/action
-      // Supabase will fall back to its default email sender
-      return new Response(JSON.stringify({}), {
-        status: 200,
+      console.error("Failed to send email via Lovable API:", {
+        status: emailResponse.status,
+        callbackUrl,
+        errorText,
+      });
+      return new Response(JSON.stringify({ error: "Failed to send email" }), {
+        status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
