@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Upload, Loader2, Mail } from "lucide-react";
 import { AvatarSelector, AvatarDisplay } from "@/components/EmojiAvatarSelector";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AVATARS } from "@/config/avatars";
 
 interface AddChildConnectionModalProps {
   open: boolean;
@@ -52,17 +53,20 @@ export const AddChildConnectionModal = ({
         return;
       }
 
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       const fileExt = file.name.split(".").pop();
-      const filePath = `connection-images/${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/connections/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
-        .from("memorial_uploads")
+        .from("profile-pictures")
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
-        .from("memorial_uploads")
+        .from("profile-pictures")
         .getPublicUrl(filePath);
 
       setImageUrl(publicUrl);
@@ -154,7 +158,28 @@ export const AddChildConnectionModal = ({
 
       if (!parentConnection) throw new Error("Parent connection not found");
 
-      const finalImageUrl = imageUrl;
+      let finalImageUrl = imageUrl;
+      
+      // If no uploaded image but avatar selected, upload avatar to storage
+      if (!finalImageUrl && avatarIndex >= 0) {
+        try {
+          const avatarSrc = AVATARS[avatarIndex % AVATARS.length];
+          const response = await fetch(avatarSrc);
+          const blob = await response.blob();
+          const filePath = `${user.id}/connections/${Date.now()}.png`;
+          const { error: uploadError } = await supabase.storage
+            .from("profile-pictures")
+            .upload(filePath, blob, { upsert: true });
+          if (!uploadError) {
+            const { data: urlData } = supabase.storage
+              .from("profile-pictures")
+              .getPublicUrl(filePath);
+            finalImageUrl = urlData.publicUrl;
+          }
+        } catch (e) {
+          console.error("Avatar upload error:", e);
+        }
+      }
 
       const { error } = await supabase.from("connections").insert({
         owner_id: user.id,
