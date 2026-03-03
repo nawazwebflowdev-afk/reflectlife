@@ -1007,6 +1007,10 @@ export type Database = {
       }
     }
     Functions: {
+      has_memorial_access: {
+        Args: { _memorial_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1016,6 +1020,10 @@ export type Database = {
       }
       has_tree_access: {
         Args: { _owner_id: string; _permission: string; _user_id: string }
+        Returns: boolean
+      }
+      is_memorial_owner: {
+        Args: { _memorial_id: string; _user_id: string }
         Returns: boolean
       }
       is_tree_owner: {
