@@ -365,10 +365,10 @@ const Tree = () => {
       };
     });
 
-    // Create edges
+    // Create edges - connect to parent connection if exists, otherwise to center "You" node
     const connectionEdges: Edge[] = filteredConnections.map((conn) => ({
       id: `edge-${conn.id}`,
-      source: currentUser.id,
+      source: conn.parent_connection_id || currentUser.id,
       target: conn.id,
       type: "smoothstep",
       style: {
