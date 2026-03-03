@@ -69,15 +69,13 @@ Deno.serve(async (req) => {
   } = emailData;
 
   const siteName = "ReflectLife";
-  // Always use production URL, never trust site_url from Supabase (can be localhost)
-  const siteUrl = "https://reflectlife.lovable.app";
+  const siteUrl = site_url || "https://reflectlife.net";
 
   // Build confirmation URL using token_hash
   let confirmationUrl = "";
   if (token_hash && email_action_type) {
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-    // Always redirect to production, ignore redirect_to from payload
-    const redirectTo = `${siteUrl}/verify`;
+    const redirectTo = redirect_to || `${siteUrl}/verify`;
 
     if (supabaseUrl) {
       const verifyUrl = new URL(`${supabaseUrl}/auth/v1/verify`);
