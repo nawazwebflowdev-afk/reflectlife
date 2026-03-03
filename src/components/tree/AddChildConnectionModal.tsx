@@ -150,13 +150,32 @@ export const AddChildConnectionModal = ({
       if (!user) throw new Error("Not authenticated");
 
       // Get parent connection to link properly
-      const { data: parentConnection } = await supabase
+      const { data: parentConnection, error: parentError } = await supabase
         .from("connections")
-        .select("*")
+        .select("id, x_pos, y_pos")
         .eq("id", parentConnectionId)
-        .single();
+        .maybeSingle();
 
+      if (parentError) throw parentError;
       if (!parentConnection) throw new Error("Parent connection not found");
+
+      // Count existing children to avoid overlapping nodes at identical coordinates
+      const { count: existingChildrenCount, error: childrenCountError } = await supabase
+        .from("connections")
+        .select("id", { count: "exact", head: true })
+        .eq("owner_id", user.id)
+        .eq("parent_connection_id", parentConnectionId);
+
+      if (childrenCountError) throw childrenCountError;
+
+      const siblingIndex = existingChildrenCount ?? 0;
+      const siblingSpacing = 120;
+      const baseX = parentConnection.x_pos ?? 0;
+      const baseY = parentConnection.y_pos ?? 0;
+
+      // Distribute siblings horizontally under the same parent
+      const xOffset = 150 + (siblingIndex * siblingSpacing);
+      const yOffset = 120;
 
       let finalImageUrl = imageUrl;
       
@@ -188,8 +207,8 @@ export const AddChildConnectionModal = ({
         relationship_type: relationship,
         connection_type: connectionType,
         image_url: finalImageUrl,
-        x_pos: (parentConnection.x_pos || 0) + 150,
-        y_pos: (parentConnection.y_pos || 0) + 100,
+        x_pos: baseX + xOffset,
+        y_pos: baseY + yOffset,
       });
 
       if (error) throw error;
