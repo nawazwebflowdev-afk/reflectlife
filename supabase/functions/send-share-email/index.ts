@@ -63,7 +63,7 @@ const handler = async (req: Request): Promise<Response> => {
     const postUrl = `https://reflectlife.lovable.app/timeline#post-${postId}`;
     
     const emailResponse = await resend.emails.send({
-      from: "Reflectlife <noreply@reflectlife.app>",
+      from: "Reflectlife <noreply@reflectlife.net>",
       to: [recipientEmail],
       subject: `${escapeHtml(senderName)} shared a memory with you`,
       html: `
