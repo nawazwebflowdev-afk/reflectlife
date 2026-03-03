@@ -16,6 +16,7 @@ interface AddChildConnectionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   parentConnectionId: string;
+  parentConnectionType?: "family" | "friendship";
   onUpdate: () => void;
 }
 
@@ -23,6 +24,7 @@ export const AddChildConnectionModal = ({
   open,
   onOpenChange,
   parentConnectionId,
+  parentConnectionType = "family",
   onUpdate,
 }: AddChildConnectionModalProps) => {
   const { toast } = useToast();
@@ -35,7 +37,7 @@ export const AddChildConnectionModal = ({
   const [details, setDetails] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [avatarIndex, setAvatarIndex] = useState(0);
-  const [connectionType, setConnectionType] = useState<"family" | "friendship">("family");
+  const [connectionType, setConnectionType] = useState<"family" | "friendship">(parentConnectionType);
   const [inviteEmail, setInviteEmail] = useState("");
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
