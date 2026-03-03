@@ -261,64 +261,27 @@ const Tree = () => {
       draggable: false,
     };
 
-    // Create nodes for connected people
-    const connectionNodes: Node[] = filteredConnections.map((conn, index) => {
-      // Use saved positions or calculate default layout
-      let x, y;
-      if (conn.x_pos !== undefined && conn.y_pos !== undefined && conn.x_pos !== 0 && conn.y_pos !== 0) {
-        x = conn.x_pos;
-        y = conn.y_pos;
-      } else {
-        if (mode === "family") {
-          // Hierarchical layout for family tree
-          const relLower = conn.relationship_type.toLowerCase();
-          const isParentGen = relLower.includes("mother") || relLower.includes("father") || 
-            relLower.includes("parent") || relLower.includes("grandmother") || 
-            relLower.includes("grandfather") || relLower.includes("grandparent");
-          const isSiblingGen = relLower.includes("sibling") || relLower.includes("cousin") || 
-            relLower.includes("sister") || relLower.includes("brother");
-          const isChildGen = relLower.includes("child") || relLower.includes("son") || 
-            relLower.includes("daughter") || relLower.includes("grandchild") || 
-            relLower.includes("grandson") || relLower.includes("granddaughter");
-
-          if (isParentGen) {
-            const parentIndex = filteredConnections.filter(c => {
-              const r = c.relationship_type.toLowerCase();
-              return r.includes("mother") || r.includes("father") || r.includes("parent") || 
-                r.includes("grandmother") || r.includes("grandfather") || r.includes("grandparent");
-            }).indexOf(conn);
-            x = 200 + (parentIndex * 200);
-            y = 50;
-          } else if (isSiblingGen) {
-            const siblingIndex = filteredConnections.filter(c => {
-              const r = c.relationship_type.toLowerCase();
-              return r.includes("sibling") || r.includes("cousin") || r.includes("sister") || r.includes("brother");
-            }).indexOf(conn);
-            x = 200 + (siblingIndex * 150);
-            y = 300;
-          } else if (isChildGen) {
-            const childIndex = filteredConnections.filter(c => {
-              const r = c.relationship_type.toLowerCase();
-              return r.includes("child") || r.includes("son") || r.includes("daughter") || 
-                r.includes("grandchild") || r.includes("grandson") || r.includes("granddaughter");
-            }).indexOf(conn);
-            x = 200 + (childIndex * 150);
-            y = 550;
-          } else {
-            // Spouse or other - place beside center
-            x = 600;
-            y = 300;
-          }
-        } else {
-          // Circular layout for friendship web
-          const angle = (2 * Math.PI * index) / filteredConnections.length;
-          const radius = 250;
-          x = 400 + radius * Math.cos(angle);
-          y = 300 + radius * Math.sin(angle);
-        }
+    // Build hierarchy-aware layout
+    const rootConnections = filteredConnections.filter(c => !c.parent_connection_id);
+    const childrenMap: Record<string, Connection[]> = {};
+    filteredConnections.forEach(conn => {
+      if (conn.parent_connection_id) {
+        if (!childrenMap[conn.parent_connection_id]) childrenMap[conn.parent_connection_id] = [];
+        childrenMap[conn.parent_connection_id].push(conn);
       }
+    });
 
-      const nodeId = conn.id;
+    const getGenerationLevel = (conn: Connection): number => {
+      const r = conn.relationship_type.toLowerCase();
+      if (r.includes("grandmother") || r.includes("grandfather") || r.includes("grandparent")) return -2;
+      if (r.includes("mother") || r.includes("father") || r.includes("parent") || r.includes("aunt") || r.includes("uncle")) return -1;
+      if (r.includes("sibling") || r.includes("cousin") || r.includes("sister") || r.includes("brother") || r.includes("spouse")) return 0;
+      if (r.includes("child") || r.includes("son") || r.includes("daughter") || r.includes("niece") || r.includes("nephew")) return 1;
+      if (r.includes("grandchild") || r.includes("grandson") || r.includes("granddaughter")) return 2;
+      return 0;
+    };
+
+    const createNodeEl = (conn: Connection, x: number, y: number): Node => {
       const displayName = conn.person_id 
         ? (conn.profile?.full_name || "Unknown")
         : (conn.related_person_name || "Unknown");
@@ -326,44 +289,80 @@ const Tree = () => {
         ? (conn.profile?.avatar_url || "/placeholder.svg")
         : (conn.image_url || "/placeholder.svg");
       const isDeceased = conn.person_id && conn.profile?.is_deceased;
-
       return {
-        id: nodeId,
-        type: "default",
-        position: { x, y },
+        id: conn.id, type: "default", position: { x, y },
         data: {
           label: (
             <div className="flex flex-col items-center gap-2">
               <div className="relative">
                 <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-border shadow-md bg-background">
-                  <img
-                    src={avatarUrl}
-                    alt={displayName}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
                 </div>
-                {isDeceased && (
-                  <div className="absolute -top-1 -right-1 text-xl">🕯️</div>
-                )}
+                {isDeceased && <div className="absolute -top-1 -right-1 text-xl">🕯️</div>}
               </div>
-              <div className="text-xs font-medium text-center max-w-[100px] truncate bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded">
-                {displayName}
-              </div>
-              <div className="text-xs text-muted-foreground text-center bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded">
-                {conn.relationship_type}
-              </div>
+              <div className="text-xs font-medium text-center max-w-[100px] truncate bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded">{displayName}</div>
+              <div className="text-xs text-muted-foreground text-center bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded">{conn.relationship_type}</div>
             </div>
           ),
         },
-        style: {
-          background: "transparent",
-          border: "none",
-          padding: 0,
-          cursor: "pointer",
-        },
+        style: { background: "transparent", border: "none", padding: 0, cursor: "pointer" },
         draggable: true,
       };
-    });
+    };
+
+    const collectTree = (conn: Connection, level: number, xOffset: number): { nodes: Node[]; maxX: number } => {
+      const children = childrenMap[conn.id] || [];
+      const useSaved = conn.x_pos && conn.y_pos && conn.x_pos !== 0 && conn.y_pos !== 0;
+      const resultNodes: Node[] = [];
+      let currentMaxX = xOffset;
+
+      if (children.length > 0 && !useSaved) {
+        let childX = xOffset;
+        children.forEach(child => {
+          const res = collectTree(child, level + 1, childX);
+          resultNodes.push(...res.nodes);
+          childX = res.maxX + 180;
+          currentMaxX = Math.max(currentMaxX, res.maxX);
+        });
+      }
+
+      const centerY = 300;
+      const vSpace = 160;
+      const x = useSaved ? conn.x_pos! : (children.length > 0 ? (xOffset + currentMaxX) / 2 : xOffset);
+      const y = useSaved ? conn.y_pos! : (centerY + level * vSpace);
+      resultNodes.unshift(createNodeEl(conn, x, y));
+      return { nodes: resultNodes, maxX: Math.max(currentMaxX, x) };
+    };
+
+    const connectionNodes: Node[] = [];
+
+    if (mode === "family") {
+      const generations: Record<number, Connection[]> = {};
+      rootConnections.forEach(conn => {
+        const gen = getGenerationLevel(conn);
+        if (!generations[gen]) generations[gen] = [];
+        generations[gen].push(conn);
+      });
+      let globalX = 0;
+      Object.keys(generations).map(Number).sort((a, b) => a - b).forEach(gen => {
+        let xOff = globalX;
+        generations[gen].forEach(conn => {
+          const res = collectTree(conn, gen, xOff);
+          connectionNodes.push(...res.nodes);
+          xOff = res.maxX + 200;
+        });
+        globalX = Math.max(globalX, xOff);
+      });
+    } else {
+      filteredConnections.forEach((conn, index) => {
+        const useSaved = conn.x_pos && conn.y_pos && conn.x_pos !== 0 && conn.y_pos !== 0;
+        const angle = (2 * Math.PI * index) / filteredConnections.length;
+        const radius = 250;
+        const x = useSaved ? conn.x_pos! : 400 + radius * Math.cos(angle);
+        const y = useSaved ? conn.y_pos! : 300 + radius * Math.sin(angle);
+        connectionNodes.push(createNodeEl(conn, x, y));
+      });
+    }
 
     // Create edges - connect to parent connection if exists, otherwise to center "You" node
     const connectionEdges: Edge[] = filteredConnections.map((conn) => ({
