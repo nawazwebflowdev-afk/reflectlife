@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { ExternalLink, Trash2, UserPlus } from "lucide-react";
+import { ExternalLink, Pencil, Trash2, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AddChildConnectionModal } from "./AddChildConnectionModal";
 import {
   AlertDialog,
@@ -19,6 +19,17 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ConnectionDetailPanelProps {
   connection: any;
@@ -34,6 +45,18 @@ const ConnectionDetailPanel = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showAddChildModal, setShowAddChildModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editRelationship, setEditRelationship] = useState("");
+  const [editConnectionType, setEditConnectionType] = useState<"family" | "friendship">("family");
+
+  useEffect(() => {
+    if (!connection) return;
+    setEditName(connection.related_person_name || "");
+    setEditRelationship(connection.relationship_type || "");
+    setEditConnectionType(connection.connection_type === "friendship" ? "friendship" : "family");
+  }, [connection]);
 
   if (!connection) return null;
 
@@ -62,6 +85,61 @@ const ConnectionDetailPanel = ({
     }
   };
 
+  const handleSaveEdit = async () => {
+    if (!editRelationship.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Relationship is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!connection.person_id && !editName.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Name is required for non-registered people.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSavingEdit(true);
+    try {
+      const updatePayload: Record<string, unknown> = {
+        relationship_type: editRelationship.trim(),
+        connection_type: editConnectionType,
+      };
+
+      if (!connection.person_id) {
+        updatePayload.related_person_name = editName.trim();
+      }
+
+      const { error } = await supabase
+        .from("connections")
+        .update(updatePayload)
+        .eq("id", connection.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Connection updated",
+        description: "Your tree changes were saved.",
+      });
+
+      setShowEditModal(false);
+      onUpdate();
+    } catch (error: any) {
+      toast({
+        title: "Error updating connection",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
   const handleViewProfile = () => {
     if (connection.person_id) {
       navigate(`/profile/${connection.person_id}`);
@@ -78,10 +156,10 @@ const ConnectionDetailPanel = ({
     }
   };
 
-  const displayName = connection.person_id 
+  const displayName = connection.person_id
     ? (connection.profile?.full_name || "Unknown")
     : (connection.related_person_name || "Unknown");
-  const avatarUrl = connection.person_id 
+  const avatarUrl = connection.person_id
     ? (connection.profile?.avatar_url || "/placeholder.svg")
     : (connection.image_url || "/placeholder.svg");
   const isRegisteredUser = !!connection.person_id;
@@ -143,6 +221,15 @@ const ConnectionDetailPanel = ({
           </div>
 
           <div className="space-y-2">
+            <Button
+              className="w-full justify-between"
+              variant="outline"
+              onClick={() => setShowEditModal(true)}
+            >
+              Edit Connection
+              <Pencil className="h-4 w-4" />
+            </Button>
+
             <Button
               className="w-full justify-between"
               variant="outline"
@@ -219,6 +306,63 @@ const ConnectionDetailPanel = ({
         parentConnectionType={connection.connection_type || "family"}
         onUpdate={onUpdate}
       />
+
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Connection</DialogTitle>
+            <DialogDescription>
+              Update this person in your tree.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {!connection.person_id && (
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Name</Label>
+                <Input
+                  id="edit-name"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="Enter name"
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-relationship">Relationship</Label>
+              <Input
+                id="edit-relationship"
+                value={editRelationship}
+                onChange={(e) => setEditRelationship(e.target.value)}
+                placeholder="e.g. Friend, Sister"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Connection Type</Label>
+              <Select value={editConnectionType} onValueChange={(v: "family" | "friendship") => setEditConnectionType(v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="family">🌳 Family</SelectItem>
+                  <SelectItem value="friendship">🌐 Friendship</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEdit} disabled={savingEdit}>
+              {savingEdit ? "Saving..." : "Save changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Sheet>
   );
 };
