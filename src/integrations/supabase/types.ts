@@ -1014,6 +1014,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_tree_access: {
+        Args: { _owner_id: string; _permission: string; _user_id: string }
+        Returns: boolean
+      }
       request_payout: {
         Args: { p_amount: number; p_payout_method: Json }
         Returns: string
