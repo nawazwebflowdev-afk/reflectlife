@@ -21,6 +21,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Search, Loader2, Upload, X } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AvatarSelector } from "@/components/EmojiAvatarSelector";
+import { AVATARS } from "@/config/avatars";
 
 interface AddConnectionModalProps {
   open: boolean;
@@ -33,20 +35,26 @@ interface Profile {
   id: string;
   full_name: string;
   avatar_url: string;
-  email: string;
   country: string;
 }
 
 const familyRelationships = [
-  "Parent",
-  "Sibling",
+  "Mother",
+  "Father",
+  "Sister",
+  "Brother",
   "Spouse",
-  "Child",
-  "Grandparent",
-  "Grandchild",
+  "Daughter",
+  "Son",
+  "Grandmother",
+  "Grandfather",
+  "Granddaughter",
+  "Grandson",
   "Cousin",
-  "Aunt/Uncle",
-  "Niece/Nephew",
+  "Aunt",
+  "Uncle",
+  "Niece",
+  "Nephew",
   "Other Relative",
 ];
 
@@ -79,6 +87,7 @@ const AddConnectionModal = ({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedAvatarIndex, setSelectedAvatarIndex] = useState<number | null>(null);
   const [sharedMemories, setSharedMemories] = useState<any[]>([]);
   const [selectedMemoryId, setSelectedMemoryId] = useState<string>("");
   const { toast } = useToast();
@@ -124,10 +133,10 @@ const AddConnectionModal = ({
       if (!user) return;
 
       const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name, avatar_url, email, country")
+        .from("public_profiles")
+        .select("id, full_name, avatar_url, country")
         .neq("id", user.id)
-        .or(`full_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`)
+        .or(`full_name.ilike.%${searchQuery}%`)
         .limit(10);
 
       if (error) throw error;
@@ -222,10 +231,11 @@ const AddConnectionModal = ({
       
       if (!user) throw new Error("Not authenticated");
 
-      // Upload image if provided
       let imageUrl = null;
       if (imageFile) {
         imageUrl = await uploadImage();
+      } else if (selectedAvatarIndex !== null) {
+        imageUrl = AVATARS[selectedAvatarIndex % AVATARS.length];
       }
 
       const connectionData: any = {
@@ -279,6 +289,7 @@ const AddConnectionModal = ({
     setImageFile(null);
     setImagePreview("");
     setSelectedMemoryId("");
+    setSelectedAvatarIndex(null);
     setAddType("existing");
     onOpenChange(false);
   };
@@ -359,7 +370,7 @@ const AddConnectionModal = ({
                         <div className="text-left flex-1">
                           <div className="font-medium">{profile.full_name}</div>
                           <div className="text-sm text-muted-foreground">
-                            {profile.email}
+                            {profile.country || ""}
                           </div>
                         </div>
                       </button>
@@ -378,7 +389,7 @@ const AddConnectionModal = ({
                     <div className="flex-1">
                       <div className="font-medium">{selectedPerson.full_name}</div>
                       <div className="text-sm text-muted-foreground">
-                        {selectedPerson.email}
+                        {selectedPerson.country || ""}
                       </div>
                     </div>
                     <Button
@@ -417,6 +428,7 @@ const AddConnectionModal = ({
                       onClick={() => {
                         setImageFile(null);
                         setImagePreview("");
+                        setSelectedAvatarIndex(null);
                       }}
                     >
                       <X className="h-3 w-3" />
@@ -440,6 +452,19 @@ const AddConnectionModal = ({
                     </Label>
                   </div>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Or choose an avatar</Label>
+                <AvatarSelector
+                  selectedAvatar={selectedAvatarIndex ?? -1}
+                  onSelectAvatar={(index) => {
+                    setSelectedAvatarIndex(index);
+                    setImageFile(null);
+                    setImagePreview("");
+                  }}
+                  size="sm"
+                />
               </div>
             </TabsContent>
           </Tabs>

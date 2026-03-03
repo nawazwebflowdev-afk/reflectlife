@@ -63,8 +63,8 @@ export const CommentsModal = ({ open, onOpenChange, postId, user }: CommentsModa
     }
   }, [open, postId]);
 
-  const fetchComments = async () => {
-    setLoading(true);
+  const fetchComments = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     const { data, error } = await supabase
       .from("memorial_comments")
       .select("*")
@@ -82,7 +82,7 @@ export const CommentsModal = ({ open, onOpenChange, postId, user }: CommentsModa
       const commentsWithProfiles = await Promise.all(
         (data || []).map(async (comment) => {
           const { data: profile } = await supabase
-            .from("profiles")
+            .from("public_profiles")
             .select("full_name, avatar_url")
             .eq("id", comment.user_id)
             .single();
@@ -135,6 +135,7 @@ export const CommentsModal = ({ open, onOpenChange, postId, user }: CommentsModa
       });
     } else {
       setNewComment("");
+      await fetchComments(false);
       toast({
         title: "Comment Posted",
         description: "Your comment has been shared",

@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, Component, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, User, ArrowRight, Loader2, Phone, MapPin, Shield, CheckCircle2 } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Loader2, Phone, MapPin, Shield, CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
 import zxcvbn from "zxcvbn";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,8 +12,66 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { countries } from "@/data/countries";
 
-const Signup = () => {
+// Error boundary to catch render crashes
+class SignupErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error("Signup page crash:", error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center py-12 px-4 gradient-subtle">
+          <Card className="w-full max-w-md shadow-elegant border-border/50">
+            <CardHeader className="text-center space-y-2">
+              <div className="mx-auto h-14 w-14 rounded-full bg-destructive/10 flex items-center justify-center">
+                <AlertTriangle className="h-7 w-7 text-destructive" />
+              </div>
+              <CardTitle className="font-serif text-2xl text-card-foreground">
+                Something went wrong
+              </CardTitle>
+              <CardDescription>
+                The signup page encountered an error. Please try again.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground text-center">
+                {this.state.error?.message || "An unexpected error occurred."}
+              </p>
+              <Button
+                className="w-full"
+                onClick={() => {
+                  this.setState({ hasError: false, error: null });
+                  window.location.reload();
+                }}
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Reload Page
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const SignupForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [signupError, setSignupError] = useState<string | null>(null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -58,8 +116,26 @@ const Signup = () => {
     checkPasswordStrength(newPassword);
   };
 
+  const getSignupErrorDetails = (input: unknown) => {
+    const raw = typeof input === "string" ? input : (input as any)?.message || "";
+    const normalized = raw.toLowerCase();
+
+    if (normalized.includes("rate limit") || normalized.includes("429") || normalized.includes("over_email_send_rate_limit")) {
+      return {
+        title: "Email rate limit exceeded",
+        description: "Please wait 30–60 minutes before trying again, or try from a different network.",
+      };
+    }
+
+    return {
+      title: "Sign up failed",
+      description: raw || "An unexpected error occurred. Please try again.",
+    };
+  };
+
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setSignupError(null);
     
     if (!fullName || !email || !password || !phoneNumber || !country) {
       toast({
@@ -111,20 +187,15 @@ const Signup = () => {
         description: "Please check your email to verify your account.",
       });
 
-      // Clear form
-      setFullName("");
-      setEmail("");
-      setPassword("");
-      setPhoneNumber("");
-      setCountry("");
-      setTermsAccepted(false);
-      setPasswordStrength({ score: 0, feedback: "", color: "bg-gray-200" });
+      navigate("/verify");
 
     } catch (error: any) {
       console.error('Signup error:', error);
+      const details = getSignupErrorDetails(error);
+      setSignupError(details.description);
       toast({
-        title: "Sign up failed",
-        description: error.message || "An unexpected error occurred. Please try again.",
+        title: details.title,
+        description: details.description,
         variant: "destructive",
       });
     } finally {
@@ -141,6 +212,26 @@ const Signup = () => {
             Begin your journey of remembrance securely
           </p>
         </div>
+
+        {signupError && (
+          <Card className="border-destructive/50 bg-destructive/5 animate-fade-in">
+            <CardContent className="flex items-start gap-3 py-4">
+              <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-destructive">Sign up failed</p>
+                <p className="text-sm text-muted-foreground">{signupError}</p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-1 h-auto p-0 text-primary underline underline-offset-4"
+                  onClick={() => setSignupError(null)}
+                >
+                  Dismiss
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="shadow-elegant animate-fade-up border-border/50">
           <CardHeader className="space-y-1">
@@ -315,5 +406,11 @@ const Signup = () => {
     </div>
   );
 };
+
+const Signup = () => (
+  <SignupErrorBoundary>
+    <SignupForm />
+  </SignupErrorBoundary>
+);
 
 export default Signup;

@@ -21,11 +21,6 @@ interface Memorial {
   preview_image_url: string | null;
   bio: string | null;
   user_id: string;
-  profiles?: {
-    full_name: string | null;
-    first_name: string | null;
-    last_name: string | null;
-  };
 }
 
 const Memorials = () => {
@@ -53,14 +48,7 @@ const Memorials = () => {
     try {
       const { data, error } = await supabase
         .from('memorials')
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            first_name,
-            last_name
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -176,13 +164,6 @@ const Memorials = () => {
                     {memorial.location && (
                       <p className="text-muted-foreground text-sm mb-2">
                         📍 {memorial.location}
-                      </p>
-                    )}
-                    {memorial.profiles && (
-                      <p className="text-xs text-muted-foreground/80 mt-2">
-                        Added by {memorial.profiles.full_name || 
-                          `${memorial.profiles.first_name || ''} ${memorial.profiles.last_name || ''}`.trim() || 
-                          'Anonymous'}
                       </p>
                     )}
                   </CardContent>

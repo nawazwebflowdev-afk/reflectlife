@@ -114,13 +114,9 @@ export const AddChildConnectionModal = ({
 
       if (error) throw error;
 
-      const isRegistered = data?.isRegistered;
-      
       toast({
         title: "Invitation sent successfully! 💌",
-        description: isRegistered 
-          ? `${inviteEmail} will receive a notification to contribute`
-          : `${inviteEmail} will receive an invitation to sign up and contribute`,
+        description: `${inviteEmail} will receive an invitation to contribute`,
       });
       setInviteEmail("");
     } catch (error: any) {

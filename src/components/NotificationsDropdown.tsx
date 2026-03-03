@@ -157,6 +157,8 @@ const NotificationsDropdown = () => {
         return `${actorName} liked your post`;
       case "comment":
         return `${actorName} commented on your post`;
+      case "creator_application":
+        return `${actorName} submitted a creator application`;
       default:
         return `${actorName} interacted with your content`;
     }
