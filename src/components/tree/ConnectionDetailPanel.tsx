@@ -216,6 +216,7 @@ const ConnectionDetailPanel = ({
         open={showAddChildModal}
         onOpenChange={setShowAddChildModal}
         parentConnectionId={connection.id}
+        parentConnectionType={connection.connection_type || "family"}
         onUpdate={onUpdate}
       />
     </Sheet>
