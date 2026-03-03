@@ -487,28 +487,75 @@ const Tree = () => {
                   <SheetHeader>
                     <SheetTitle>Tree Settings</SheetTitle>
                   </SheetHeader>
-                  <div className="mt-6">
-                    {userTree ? (
-                      <InviteAccessPanel
-                        type="tree"
-                        resourceId={userTree.id}
-                        isPublic={userTree.is_public ?? false}
-                        onPrivacyChange={async (newIsPublic) => {
-                          const { error } = await supabase
-                            .from("trees")
-                            .update({ is_public: newIsPublic })
-                            .eq("id", userTree.id);
-                          if (error) {
-                            toast({ title: "Error", description: "Failed to update privacy", variant: "destructive" });
-                          } else {
-                            toast({ title: "Privacy updated" });
-                            setUserTree({ ...userTree, is_public: newIsPublic });
-                          }
-                        }}
-                      />
-                    ) : (
-                      <p className="text-sm text-muted-foreground">Loading tree settings...</p>
-                    )}
+                  <div className="mt-6 space-y-6">
+                    {/* Connections List */}
+                    <div>
+                      <h3 className="text-sm font-semibold mb-3">People in your tree</h3>
+                      {connections.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">No connections yet. Add your first connection!</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {connections.map((conn) => {
+                            const displayName = conn.person_id
+                              ? (conn.profile?.full_name || "Unknown")
+                              : (conn.related_person_name || "Unknown");
+                            const avatarUrl = conn.person_id
+                              ? conn.profile?.avatar_url
+                              : conn.image_url;
+                            return (
+                              <button
+                                key={conn.id}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedConnection(conn);
+                                }}
+                                className="w-full flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors text-left"
+                              >
+                                <div className="w-10 h-10 rounded-full overflow-hidden border bg-muted flex-shrink-0">
+                                  {avatarUrl ? (
+                                    <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-sm font-medium text-muted-foreground">
+                                      {displayName[0] || "?"}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-medium text-sm truncate">{displayName}</div>
+                                  <div className="text-xs text-muted-foreground">{conn.relationship_type}</div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Privacy & Sharing */}
+                    <div className="border-t pt-4">
+                      <h3 className="text-sm font-semibold mb-3">Privacy & Sharing</h3>
+                      {userTree ? (
+                        <InviteAccessPanel
+                          type="tree"
+                          resourceId={userTree.id}
+                          isPublic={userTree.is_public ?? false}
+                          onPrivacyChange={async (newIsPublic) => {
+                            const { error } = await supabase
+                              .from("trees")
+                              .update({ is_public: newIsPublic })
+                              .eq("id", userTree.id);
+                            if (error) {
+                              toast({ title: "Error", description: "Failed to update privacy", variant: "destructive" });
+                            } else {
+                              toast({ title: "Privacy updated" });
+                              setUserTree({ ...userTree, is_public: newIsPublic });
+                            }
+                          }}
+                        />
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Loading privacy settings...</p>
+                      )}
+                    </div>
                   </div>
                 </SheetContent>
               </Sheet>
