@@ -1018,9 +1018,17 @@ export type Database = {
         Args: { _owner_id: string; _permission: string; _user_id: string }
         Returns: boolean
       }
+      is_tree_owner: {
+        Args: { _tree_id: string; _user_id: string }
+        Returns: boolean
+      }
       request_payout: {
         Args: { p_amount: number; p_payout_method: Json }
         Returns: string
+      }
+      user_has_tree_access: {
+        Args: { _tree_id: string; _user_id: string }
+        Returns: boolean
       }
     }
     Enums: {
