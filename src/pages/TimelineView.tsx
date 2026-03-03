@@ -19,7 +19,7 @@ interface Timeline {
 
 interface Entry {
   id: string;
-  content_type: string;
+  content_type: "photo" | "video" | "note";
   content_url: string | null;
   caption: string | null;
   event_date: string | null;

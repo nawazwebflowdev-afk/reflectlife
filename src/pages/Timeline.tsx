@@ -102,7 +102,7 @@ const Timeline = () => {
       const postsWithProfiles = await Promise.all(
         (data || []).map(async (post) => {
           const { data: profile } = await supabase
-            .from("public_profiles")
+            .from("profiles")
             .select("full_name, avatar_url")
             .eq("id", post.user_id)
             .single();
