@@ -5,10 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { InviteAccessPanel } from "@/components/InviteAccessPanel";
 
 interface EditMemorialModalProps {
   open: boolean;
@@ -139,164 +137,130 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
           <DialogTitle className="font-serif text-2xl">Edit Memorial</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="sharing">Privacy & Sharing</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="details">
-            <form onSubmit={handleSubmit} className="space-y-6 pt-4">
-              {/* Name */}
-              <div className="space-y-2">
-                <Label htmlFor="name">Name *</Label>
-                <Input
-                  id="name"
-                  placeholder="Full name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
-
-              {/* Bio */}
-              <div className="space-y-2">
-                <Label htmlFor="bio">Biography</Label>
-                <Textarea
-                  id="bio"
-                  placeholder="Share their story, passions, and what made them special..."
-                  value={formData.bio}
-                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                  rows={4}
-                />
-              </div>
-
-              {/* Dates */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="dob">Date of Birth</Label>
-                  <Input
-                    id="dob"
-                    type="date"
-                    value={formData.date_of_birth}
-                    onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="dod">Date of Passing</Label>
-                  <Input
-                    id="dod"
-                    type="date"
-                    value={formData.date_of_death}
-                    onChange={(e) => setFormData({ ...formData, date_of_death: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              {/* Location */}
-              <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  placeholder="City, Country"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                />
-              </div>
-
-              {/* Image Upload */}
-              <div className="space-y-2">
-                <Label>Profile Image</Label>
-                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-smooth">
-                  <input
-                    type="file"
-                    id="image-upload"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                  />
-                  <label htmlFor="image-upload" className="cursor-pointer">
-                    {imagePreview ? (
-                      <div className="relative inline-block">
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          className="max-h-48 rounded-lg mx-auto"
-                        />
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          className="mt-2"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            document.getElementById('image-upload')?.click();
-                          }}
-                        >
-                          Change Image
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">
-                          Click to upload an image
-                        </p>
-                      </div>
-                    )}
-                  </label>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-3 justify-end pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleClose}
-                  disabled={loading}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={loading}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    "Save Changes"
-                  )}
-                </Button>
-              </div>
-            </form>
-          </TabsContent>
-
-          <TabsContent value="sharing" className="pt-4">
-            <InviteAccessPanel
-              type="memorial"
-              resourceId={memorial?.id || ""}
-              isPublic={memorial?.is_public ?? true}
-              privacyLevel={memorial?.privacy_level || "public"}
-              onPrivacyChange={async (newIsPublic, newPrivacyLevel) => {
-                const { error } = await supabase
-                  .from("memorials")
-                  .update({
-                    is_public: newIsPublic,
-                    privacy_level: newPrivacyLevel as any,
-                  })
-                  .eq("id", memorial.id);
-
-                if (error) {
-                  toast({ title: "Error", description: "Failed to update privacy", variant: "destructive" });
-                } else {
-                  toast({ title: "Privacy updated" });
-                  onMemorialUpdated();
-                }
-              }}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Name */}
+          <div className="space-y-2">
+            <Label htmlFor="name">Name *</Label>
+            <Input
+              id="name"
+              placeholder="Full name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
             />
-          </TabsContent>
-        </Tabs>
+          </div>
+
+          {/* Bio */}
+          <div className="space-y-2">
+            <Label htmlFor="bio">Biography</Label>
+            <Textarea
+              id="bio"
+              placeholder="Share their story, passions, and what made them special..."
+              value={formData.bio}
+              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+              rows={4}
+            />
+          </div>
+
+          {/* Dates */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="dob">Date of Birth</Label>
+              <Input
+                id="dob"
+                type="date"
+                value={formData.date_of_birth}
+                onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="dod">Date of Passing</Label>
+              <Input
+                id="dod"
+                type="date"
+                value={formData.date_of_death}
+                onChange={(e) => setFormData({ ...formData, date_of_death: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {/* Location */}
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              placeholder="City, Country"
+              value={formData.location}
+              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+            />
+          </div>
+
+          {/* Image Upload */}
+          <div className="space-y-2">
+            <Label>Profile Image</Label>
+            <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-smooth">
+              <input
+                type="file"
+                id="image-upload"
+                className="hidden"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
+              <label htmlFor="image-upload" className="cursor-pointer">
+                {imagePreview ? (
+                  <div className="relative inline-block">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="max-h-48 rounded-lg mx-auto"
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      className="mt-2"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById('image-upload')?.click();
+                      }}
+                    >
+                      Change Image
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      Click to upload an image
+                    </p>
+                  </div>
+                )}
+              </label>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3 justify-end pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

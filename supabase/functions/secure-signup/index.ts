@@ -215,7 +215,7 @@ serve(async (req) => {
       }
       
       return new Response(
-        JSON.stringify({ error: 'Account creation failed. Please try again.' }),
+        JSON.stringify({ error: createError.message }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

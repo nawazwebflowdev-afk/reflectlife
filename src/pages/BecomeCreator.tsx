@@ -127,19 +127,9 @@ const BecomeCreator = () => {
         variant: "destructive",
       });
     } else {
-      // Send confirmation email to applicant and notify admin
-      supabase.functions.invoke("send-creator-application", {
-        body: {
-          applicantEmail: email,
-          displayName,
-          country,
-          description,
-        },
-      }).catch((err) => console.error("Email notification failed:", err));
-
       toast({
-        title: "Application Submitted! 🎨",
-        description: "We've sent a confirmation to your email. You'll be notified when approved.",
+        title: "Application Submitted",
+        description: "Your application has been submitted. You'll be notified when approved.",
       });
       navigate("/dashboard");
     }

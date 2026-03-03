@@ -12,15 +12,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-function escapeHtml(unsafe: string): string {
-  return unsafe
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
 interface InvitationRequest {
   recipientEmail: string;
   personName: string;
@@ -35,49 +26,22 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Verify the caller is authenticated
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-      });
-    }
-
-    const supabaseAnon = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: { user }, error: authError } = await supabaseAnon.auth.getUser();
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-      });
-    }
-
     const { recipientEmail, personName, senderName, connectionId, senderId }: InvitationRequest = await req.json();
 
-    // Ensure senderId matches authenticated user
-    if (senderId !== user.id) {
-      return new Response(JSON.stringify({ error: 'Forbidden' }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-      });
-    }
-
-    console.log("Sending invitation email:", { recipientEmail, personName, senderName, connectionId });
+    console.log("Sending invitation email:", { recipientEmail, personName, senderName, connectionId, senderId });
 
     // Initialize Supabase client with service role key
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check if recipient is already a registered user (internal use only - never expose to client)
+    // Check if recipient is already a registered user
     const { data: existingUser } = await supabase
       .from("profiles")
-      .select("id")
+      .select("id, email")
       .eq("email", recipientEmail)
       .single();
 
     const isRegistered = !!existingUser;
+    console.log(`Recipient ${recipientEmail} is ${isRegistered ? 'registered' : 'not registered'}`);
 
     // Log invitation in database
     const { error: inviteError } = await supabase
@@ -104,15 +68,15 @@ const handler = async (req: Request): Promise<Response> => {
       // Registered user - direct link to tree
       ctaUrl = `https://reflectlife.lovable.app/tree?connection=${connectionId}`;
       ctaText = "View & Contribute 🌿";
-      emailSubject = `${escapeHtml(senderName)} invited you to contribute to ${escapeHtml(personName)}'s tree`;
-      emailIntro = `<strong>${escapeHtml(senderName)}</strong> has invited you to contribute memories and tributes for:`;
+      emailSubject = `${senderName} invited you to contribute to ${personName}'s tree`;
+      emailIntro = `<strong>${senderName}</strong> has invited you to contribute memories and tributes for:`;
     } else {
       // Non-registered user - signup with redirect
       const redirectUrl = encodeURIComponent(`/tree?connection=${connectionId}`);
       ctaUrl = `https://reflectlife.lovable.app/signup?redirect=${redirectUrl}`;
       ctaText = "Sign Up & Contribute 🌿";
-      emailSubject = `${escapeHtml(senderName)} invited you to join Reflectlife and contribute to ${escapeHtml(personName)}'s tree`;
-      emailIntro = `<strong>${escapeHtml(senderName)}</strong> has invited you to join Reflectlife and contribute memories for:`;
+      emailSubject = `${senderName} invited you to join Reflectlife and contribute to ${personName}'s tree`;
+      emailIntro = `<strong>${senderName}</strong> has invited you to join Reflectlife and contribute memories for:`;
     }
     
     const emailResponse = await resend.emails.send({
@@ -132,12 +96,12 @@ const handler = async (req: Request): Promise<Response> => {
             </p>
             
             <div style="text-align: center; background: white; padding: 25px; border-radius: 8px; margin: 20px 0;">
-              <h2 style="color: #8B7355; margin: 0 0 10px 0; font-size: 24px;">${escapeHtml(personName)}</h2>
+              <h2 style="color: #8B7355; margin: 0 0 10px 0; font-size: 24px;">${personName}</h2>
               <p style="color: #666; margin: 0;">Share your stories, photos, and memories</p>
             </div>
 
             <p style="color: #555; line-height: 1.6; margin: 20px 0;">
-              Your contributions will help celebrate and honor ${escapeHtml(personName)}'s life and legacy. 
+              Your contributions will help celebrate and honor ${personName}'s life and legacy. 
               This is a space where friends and family can come together to remember and share.
             </p>
 
@@ -167,7 +131,9 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Invitation email sent successfully:", emailResponse);
 
     return new Response(JSON.stringify({ 
-      success: true
+      success: true, 
+      isRegistered,
+      emailResponse 
     }), {
       status: 200,
       headers: {
@@ -178,7 +144,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-invitation function:", error);
     return new Response(
-      JSON.stringify({ error: "Failed to send invitation. Please try again later." }),
+      JSON.stringify({ error: error.message }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

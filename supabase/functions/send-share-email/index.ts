@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -9,15 +8,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
-
-function escapeHtml(unsafe: string): string {
-  return unsafe
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
 
 interface ShareEmailRequest {
   recipientEmail: string;
@@ -32,40 +22,16 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Authenticate the user
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
-    }
-
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
-    }
-
     const { recipientEmail, postId, postCaption, senderName }: ShareEmailRequest = await req.json();
 
-    console.log("Sending share email:", { recipientEmail, postId });
+    console.log("Sending share email:", { recipientEmail, postId, senderName });
 
     const postUrl = `https://reflectlife.lovable.app/timeline#post-${postId}`;
     
     const emailResponse = await resend.emails.send({
-      from: "Reflectlife <noreply@reflectlife.app>",
+      from: "Reflectlife <onboarding@resend.dev>",
       to: [recipientEmail],
-      subject: `${escapeHtml(senderName)} shared a memory with you`,
+      subject: `${senderName} shared a memory with you`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 30px;">
@@ -75,12 +41,12 @@ const handler = async (req: Request): Promise<Response> => {
 
           <div style="background: linear-gradient(135deg, #f5f5f5 0%, #faf8f6 100%); padding: 30px; border-radius: 12px; margin: 20px 0;">
             <p style="font-size: 16px; color: #333; margin-bottom: 20px;">
-              <strong>${escapeHtml(senderName)}</strong> has shared a special memory with you:
+              <strong>${senderName}</strong> has shared a special memory with you:
             </p>
             
             <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #8B7355;">
               <p style="color: #555; line-height: 1.6; margin: 0;">
-                ${postCaption ? escapeHtml(postCaption) : "A meaningful memory from their journey"}
+                ${postCaption || "A meaningful memory from their journey"}
               </p>
             </div>
 
@@ -112,7 +78,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-share-email function:", error);
     return new Response(
-      JSON.stringify({ error: "Failed to share this memory. Please try again later." }),
+      JSON.stringify({ error: error.message }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

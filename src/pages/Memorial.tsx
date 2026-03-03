@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Calendar, MapPin, Heart, MessageCircle, Image as ImageIcon, Edit, Palette, Loader2, Plus, Upload } from "lucide-react";
+import { Calendar, MapPin, Heart, MessageCircle, Image as ImageIcon, Edit, Palette, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,7 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import timelineBg from "@/assets/timeline-bg.jpg";
 import EditMemorialModal from "@/components/EditMemorialModal";
-import { AddMemoryModal } from "@/components/AddMemoryModal";
 
 const Memorial = () => {
   const { id } = useParams();
@@ -23,8 +22,7 @@ const Memorial = () => {
   const [likeCount, setLikeCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [showAddMemoryModal, setShowAddMemoryModal] = useState(false);
-  const [galleryUploading, setGalleryUploading] = useState(false);
+
   useEffect(() => {
     fetchMemorial();
     checkAuth();
@@ -188,39 +186,6 @@ const Memorial = () => {
     setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
   };
 
-  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !e.target.files[0] || !currentUserId || !memorial) return;
-    const file = e.target.files[0];
-    setGalleryUploading(true);
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${currentUserId}/${memorial.id}/${Date.now()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
-        .from("memorial_uploads")
-        .upload(fileName, file);
-      if (uploadError) throw uploadError;
-      const { data: { publicUrl } } = supabase.storage
-        .from("memorial_uploads")
-        .getPublicUrl(fileName);
-      const mediaType = file.type.startsWith("video") ? "video" : "image";
-      const { error } = await supabase
-        .from("memorial_media")
-        .insert({
-          memorial_id: memorial.id,
-          media_url: publicUrl,
-          media_type: mediaType,
-        });
-      if (error) throw error;
-      toast({ title: "Uploaded!", description: "Media added to gallery." });
-      fetchGalleryMedia();
-    } catch (error: any) {
-      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
-    } finally {
-      setGalleryUploading(false);
-      e.target.value = "";
-    }
-  };
-
   const backgroundImage = templateTheme.backgroundUrl || timelineBg;
 
   if (loading) {
@@ -378,14 +343,6 @@ const Memorial = () => {
 
           {/* Timeline */}
           <TabsContent value="timeline" className="space-y-6">
-            {isCreator && (
-              <div className="flex justify-end">
-                <Button className="gap-2" onClick={() => setShowAddMemoryModal(true)}>
-                  <Plus className="h-4 w-4" />
-                  Add Memory
-                </Button>
-              </div>
-            )}
             {timelineEntries.length > 0 ? (
               timelineEntries.map((entry) => (
                 <Card 
@@ -452,10 +409,9 @@ const Memorial = () => {
                     No timeline memories yet.
                   </p>
                   {isCreator && (
-                    <Button className="gap-2" onClick={() => setShowAddMemoryModal(true)}>
-                      <Plus className="h-4 w-4" />
-                      Add Your First Memory
-                    </Button>
+                    <p className="text-sm text-muted-foreground">
+                      Start by adding stories, photos, or videos to preserve precious memories.
+                    </p>
                   )}
                 </CardContent>
               </Card>
@@ -549,22 +505,6 @@ const Memorial = () => {
 
           {/* Gallery */}
           <TabsContent value="gallery">
-            {isCreator && (
-              <div className="flex justify-end mb-4">
-                <Button className="gap-2" asChild disabled={galleryUploading}>
-                  <label className="cursor-pointer">
-                    <Upload className="h-4 w-4" />
-                    {galleryUploading ? "Uploading..." : "Upload Media"}
-                    <input
-                      type="file"
-                      accept="image/*,video/*"
-                      className="hidden"
-                      onChange={handleGalleryUpload}
-                    />
-                  </label>
-                </Button>
-              </div>
-            )}
             {galleryMedia.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {galleryMedia.map((media) => (
@@ -600,18 +540,9 @@ const Memorial = () => {
                     No photos or videos yet.
                   </p>
                   {isCreator && (
-                    <Button className="gap-2" asChild>
-                      <label className="cursor-pointer">
-                        <Upload className="h-4 w-4" />
-                        Upload Your First Photo
-                        <input
-                          type="file"
-                          accept="image/*,video/*"
-                          className="hidden"
-                          onChange={handleGalleryUpload}
-                        />
-                      </label>
-                    </Button>
+                    <p className="text-sm text-muted-foreground">
+                      Upload photos and videos to create a beautiful gallery of memories.
+                    </p>
                   )}
                 </CardContent>
               </Card>
@@ -627,17 +558,6 @@ const Memorial = () => {
         memorial={memorial}
         onMemorialUpdated={fetchMemorial}
       />
-
-      {/* Add Memory Modal */}
-      {currentUserId && memorial && (
-        <AddMemoryModal
-          open={showAddMemoryModal}
-          onOpenChange={setShowAddMemoryModal}
-          timelineId={memorial.id}
-          userId={currentUserId}
-          onMemoryAdded={fetchTimelineData}
-        />
-      )}
     </div>
   );
 };
