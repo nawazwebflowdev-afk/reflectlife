@@ -1,0 +1,1 @@
+UPDATE public.site_templates SET price = 9.99 WHERE is_free = false;
