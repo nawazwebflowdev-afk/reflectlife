@@ -160,21 +160,22 @@ const AddConnectionModal = ({
     }
   };
 
-  const uploadImage = async (): Promise<string | null> => {
-    if (!imageFile) return null;
+  const uploadImage = async (file?: File | Blob, ext?: string): Promise<string | null> => {
+    const fileToUpload = file || imageFile;
+    if (!fileToUpload) return null;
 
     try {
       setUploadingImage(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const fileExt = imageFile.name.split(".").pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const fileExt = ext || (imageFile ? imageFile.name.split(".").pop() : "png");
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/connections/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("profile-pictures")
-        .upload(filePath, imageFile, { upsert: true });
+        .upload(filePath, fileToUpload, { upsert: true });
 
       if (uploadError) throw uploadError;
 
@@ -192,6 +193,18 @@ const AddConnectionModal = ({
       return null;
     } finally {
       setUploadingImage(false);
+    }
+  };
+
+  const uploadAvatarToStorage = async (avatarIndex: number): Promise<string | null> => {
+    try {
+      const avatarSrc = AVATARS[avatarIndex % AVATARS.length];
+      const response = await fetch(avatarSrc);
+      const blob = await response.blob();
+      return await uploadImage(blob, "png");
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      return null;
     }
   };
 
@@ -235,7 +248,7 @@ const AddConnectionModal = ({
       if (imageFile) {
         imageUrl = await uploadImage();
       } else if (selectedAvatarIndex !== null) {
-        imageUrl = AVATARS[selectedAvatarIndex % AVATARS.length];
+        imageUrl = await uploadAvatarToStorage(selectedAvatarIndex);
       }
 
       const connectionData: any = {
