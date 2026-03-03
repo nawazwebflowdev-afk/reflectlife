@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,7 @@ export const AddChildConnectionModal = ({
   const [imageUrl, setImageUrl] = useState("");
   const [avatarIndex, setAvatarIndex] = useState(0);
   const [connectionType, setConnectionType] = useState<"family" | "friendship">(parentConnectionType);
+  const [didManuallySetConnectionType, setDidManuallySetConnectionType] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,6 +87,12 @@ export const AddChildConnectionModal = ({
       setUploading(false);
     }
   };
+
+  useEffect(() => {
+    if (!open) return;
+    setConnectionType(parentConnectionType);
+    setDidManuallySetConnectionType(false);
+  }, [open, parentConnectionType]);
 
   const handleSendInvitation = async () => {
     if (!inviteEmail.trim()) {
@@ -242,7 +249,8 @@ export const AddChildConnectionModal = ({
     setImageUrl("");
     setAvatarIndex(0);
     setInviteEmail("");
-    setConnectionType("family");
+    setConnectionType(parentConnectionType);
+    setDidManuallySetConnectionType(false);
   };
 
   return (
@@ -315,14 +323,35 @@ export const AddChildConnectionModal = ({
               <Input
                 id="relationship"
                 value={relationship}
-                onChange={(e) => setRelationship(e.target.value)}
+                onChange={(e) => {
+                  const nextRelationship = e.target.value;
+                  setRelationship(nextRelationship);
+
+                  if (didManuallySetConnectionType) return;
+
+                  const normalized = nextRelationship.toLowerCase();
+                  const looksLikeFriendship = /(friend|colleague|classmate|neighbor|mate)/.test(normalized);
+                  const looksLikeFamily = /(mother|father|parent|son|daughter|child|sister|brother|aunt|uncle|cousin|grand)/.test(normalized);
+
+                  if (looksLikeFriendship) {
+                    setConnectionType("friendship");
+                  } else if (looksLikeFamily) {
+                    setConnectionType("family");
+                  }
+                }}
                 placeholder="e.g., Daughter, Friend, Brother"
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="connection-type">Connection Type</Label>
-              <Select value={connectionType} onValueChange={(value: "family" | "friendship") => setConnectionType(value)}>
+              <Select
+                value={connectionType}
+                onValueChange={(value: "family" | "friendship") => {
+                  setConnectionType(value);
+                  setDidManuallySetConnectionType(true);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -331,6 +360,9 @@ export const AddChildConnectionModal = ({
                   <SelectItem value="friendship">Friendship</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                Family shows in 🌳 Family Tree. Friendship shows in 🌐 Friendship Web.
+              </p>
             </div>
 
             <div className="space-y-2">

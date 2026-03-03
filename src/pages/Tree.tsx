@@ -165,74 +165,7 @@ const Tree = () => {
       return;
     }
 
-    // Build hierarchical tree structure
-    const buildHierarchy = (parentId: string | null = null, level: number = 0, parentX: number = 0): { nodes: Node[]; edges: Edge[] } => {
-      const children = filteredConnections.filter(conn => 
-        parentId === null ? !conn.parent_connection_id : conn.parent_connection_id === parentId
-      );
-
-      const hierarchyNodes: Node[] = [];
-      const hierarchyEdges: Edge[] = [];
-      const spacing = 200;
-      const verticalSpacing = 150;
-      
-      children.forEach((conn, index) => {
-        const xPos = conn.x_pos ?? (parentX + (index - children.length / 2) * spacing);
-        const yPos = conn.y_pos ?? (level * verticalSpacing);
-
-        const displayName = conn.person_id 
-          ? (conn.profile?.full_name || "Unknown")
-          : (conn.related_person_name || "Unknown");
-        
-        const avatarUrl = conn.person_id 
-          ? (conn.profile?.avatar_url || "/placeholder.svg")
-          : (conn.image_url || "/placeholder.svg");
-
-        hierarchyNodes.push({
-          id: conn.id,
-          type: 'default',
-          position: { x: xPos, y: yPos },
-          data: { 
-            label: (
-              <div className="flex flex-col items-center gap-2 p-2">
-                <div className="relative">
-                  <img 
-                    src={avatarUrl} 
-                    alt={displayName}
-                    className="w-16 h-16 rounded-full object-cover border-2 border-primary"
-                  />
-                  {conn.profile?.is_deceased && (
-                    <div className="absolute -top-1 -right-1 text-xl">🕯️</div>
-                  )}
-                </div>
-                <div className="text-center">
-                  <div className="font-semibold text-sm">{displayName}</div>
-                  <div className="text-xs text-muted-foreground">{conn.relationship_type}</div>
-                </div>
-              </div>
-            ),
-            connection: conn
-          },
-        });
-
-        if (parentId) {
-          hierarchyEdges.push({
-            id: `${parentId}-${conn.id}`,
-            source: parentId,
-            target: conn.id,
-            type: 'smoothstep',
-            animated: true,
-          });
-        }
-
-        // Recursively add children
-        const childHierarchy = buildHierarchy(conn.id, level + 1, xPos);
-        hierarchyNodes.push(...childHierarchy.nodes);
-        hierarchyEdges.push(...childHierarchy.edges);
-      });
-
-      return { nodes: hierarchyNodes, edges: hierarchyEdges };
-    };
+    // Tree layout is built below from parent_connection_id + saved coordinates.
 
     // Create center node (current user)
     const centerNode: Node = {
@@ -281,7 +214,7 @@ const Tree = () => {
       return 0;
     };
 
-    const createNodeEl = (conn: Connection, x: number, y: number): Node => {
+    const createNodeEl = (conn: Connection, x: number, y: number, isContext = false): Node => {
       const displayName = conn.person_id 
         ? (conn.profile?.full_name || "Unknown")
         : (conn.related_person_name || "Unknown");
@@ -290,7 +223,9 @@ const Tree = () => {
         : (conn.image_url || "/placeholder.svg");
       const isDeceased = conn.person_id && conn.profile?.is_deceased;
       return {
-        id: conn.id, type: "default", position: { x, y },
+        id: conn.id,
+        type: "default",
+        position: { x, y },
         data: {
           label: (
             <div className="flex flex-col items-center gap-2">
@@ -300,13 +235,26 @@ const Tree = () => {
                 </div>
                 {isDeceased && <div className="absolute -top-1 -right-1 text-xl">🕯️</div>}
               </div>
-              <div className="text-xs font-medium text-center max-w-[100px] truncate bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded">{displayName}</div>
-              <div className="text-xs text-muted-foreground text-center bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded">{conn.relationship_type}</div>
+              <div className="text-xs font-medium text-center max-w-[120px] truncate bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded">
+                {displayName}
+              </div>
+              <div className="text-xs text-muted-foreground text-center bg-background/60 backdrop-blur-sm px-2 py-0.5 rounded">
+                {conn.relationship_type}
+              </div>
+              {isContext && (
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Context</div>
+              )}
             </div>
           ),
         },
-        style: { background: "transparent", border: "none", padding: 0, cursor: "pointer" },
-        draggable: true,
+        style: {
+          background: "transparent",
+          border: "none",
+          padding: 0,
+          cursor: isContext ? "default" : "pointer",
+          opacity: isContext ? 0.72 : 1,
+        },
+        draggable: !isContext,
       };
     };
 
@@ -335,6 +283,7 @@ const Tree = () => {
     };
 
     const connectionNodes: Node[] = [];
+    let edgeSourceIds = new Set<string>([currentUser.id]);
 
     if (mode === "family") {
       const generations: Record<number, Connection[]> = {};
@@ -353,29 +302,82 @@ const Tree = () => {
         });
         globalX = Math.max(globalX, xOff);
       });
+      edgeSourceIds = new Set<string>([currentUser.id, ...connectionNodes.map((node) => node.id)]);
     } else {
-      filteredConnections.forEach((conn, index) => {
+      const filteredIds = new Set(filteredConnections.map((conn) => conn.id));
+      const contextParentIds = new Set(
+        filteredConnections
+          .map((conn) => conn.parent_connection_id)
+          .filter((id): id is string => Boolean(id) && !filteredIds.has(id)),
+      );
+      const contextConnections = connections.filter((conn) => contextParentIds.has(conn.id));
+      const positionedContext = new Map<string, { x: number; y: number }>();
+
+      contextConnections.forEach((conn, index) => {
         const useSaved = conn.x_pos && conn.y_pos && conn.x_pos !== 0 && conn.y_pos !== 0;
-        const angle = (2 * Math.PI * index) / filteredConnections.length;
-        const radius = 250;
+        const angle = contextConnections.length > 0 ? (2 * Math.PI * index) / contextConnections.length : 0;
+        const radius = 170;
         const x = useSaved ? conn.x_pos! : 400 + radius * Math.cos(angle);
         const y = useSaved ? conn.y_pos! : 300 + radius * Math.sin(angle);
+
+        positionedContext.set(conn.id, { x, y });
+        connectionNodes.push(createNodeEl(conn, x, y, true));
+      });
+
+      filteredConnections.forEach((conn, index) => {
+        const useSaved = conn.x_pos && conn.y_pos && conn.x_pos !== 0 && conn.y_pos !== 0;
+
+        if (useSaved) {
+          connectionNodes.push(createNodeEl(conn, conn.x_pos!, conn.y_pos!));
+          return;
+        }
+
+        const contextParentPosition = conn.parent_connection_id
+          ? positionedContext.get(conn.parent_connection_id)
+          : undefined;
+
+        if (contextParentPosition) {
+          const siblings = filteredConnections.filter((candidate) => candidate.parent_connection_id === conn.parent_connection_id);
+          const siblingIndex = siblings.findIndex((candidate) => candidate.id === conn.id);
+          const fanStart = -0.8;
+          const step = siblings.length > 1 ? 1.6 / (siblings.length - 1) : 0;
+          const childAngle = fanStart + (siblingIndex * step);
+          const childRadius = 190;
+
+          const x = contextParentPosition.x + childRadius * Math.cos(childAngle);
+          const y = contextParentPosition.y + childRadius * Math.sin(childAngle);
+          connectionNodes.push(createNodeEl(conn, x, y));
+          return;
+        }
+
+        const angle = (2 * Math.PI * index) / Math.max(filteredConnections.length, 1);
+        const radius = 300;
+        const x = 400 + radius * Math.cos(angle);
+        const y = 300 + radius * Math.sin(angle);
         connectionNodes.push(createNodeEl(conn, x, y));
       });
+
+      edgeSourceIds = new Set<string>([currentUser.id, ...connectionNodes.map((node) => node.id)]);
     }
 
-    // Create edges - connect to parent connection if exists, otherwise to center "You" node
-    const connectionEdges: Edge[] = filteredConnections.map((conn) => ({
-      id: `edge-${conn.id}`,
-      source: conn.parent_connection_id || currentUser.id,
-      target: conn.id,
-      type: "smoothstep",
-      style: {
-        stroke: mode === "family" ? "hsl(var(--primary))" : "hsl(var(--accent))",
-        strokeWidth: 2,
-      },
-      animated: mode === "friendship",
-    }));
+    // Create edges - connect to parent connection if visible, otherwise fallback to center "You" node
+    const connectionEdges: Edge[] = filteredConnections.map((conn) => {
+      const source = conn.parent_connection_id && edgeSourceIds.has(conn.parent_connection_id)
+        ? conn.parent_connection_id
+        : currentUser.id;
+
+      return {
+        id: `edge-${conn.id}`,
+        source,
+        target: conn.id,
+        type: "smoothstep",
+        style: {
+          stroke: mode === "family" ? "hsl(var(--primary))" : "hsl(var(--accent))",
+          strokeWidth: 2,
+        },
+        animated: mode === "friendship",
+      };
+    });
 
     setNodes([centerNode, ...connectionNodes]);
     setEdges(connectionEdges);
