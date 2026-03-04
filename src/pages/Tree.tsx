@@ -415,14 +415,22 @@ const Tree = () => {
     }
   }, [connections, currentUser]);
 
+  const openConnectionPanel = useCallback((connection: Connection) => {
+    // Force remount/reopen even when user clicks the same connection repeatedly
+    setSelectedConnection(null);
+    requestAnimationFrame(() => {
+      setSelectedConnection(connection);
+    });
+  }, []);
+
   const onNodeClick = useCallback((_: any, node: Node) => {
     if (node.id === currentUser?.id) return;
-    
+
     const connection = connections.find((conn) => conn.id === node.id);
     if (connection) {
-      setSelectedConnection(connection);
+      openConnectionPanel(connection);
     }
-  }, [connections, currentUser]);
+  }, [connections, currentUser, openConnectionPanel]);
 
   if (loading) {
     return (
@@ -518,7 +526,7 @@ const Tree = () => {
                                 key={conn.id}
                                 type="button"
                                 onClick={() => {
-                                  setSelectedConnection(conn);
+                                  openConnectionPanel(conn);
                                 }}
                                 className="w-full flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors text-left"
                               >
