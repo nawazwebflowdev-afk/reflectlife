@@ -8,6 +8,7 @@ import { AvatarDisplay } from "@/components/EmojiAvatarSelector";
 import heroBanner from "@/assets/hero-banner.png";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import FeaturedTemplates from "@/components/FeaturedTemplates";
+import PostDetailModal from "@/components/PostDetailModal";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 
@@ -15,6 +16,7 @@ const Landing = () => {
   const [user, setUser] = useState<any>(null);
   const [timelinePosts, setTimelinePosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
 
   useEffect(() => {
     checkUser();
@@ -176,7 +178,7 @@ const Landing = () => {
                 </Card>
               ) : timelinePosts.length > 0 ? (
                 timelinePosts.map((post) => (
-                  <Card key={post.id} className="shadow-elegant hover:shadow-elegant-lg transition-smooth">
+                  <Card key={post.id} className="shadow-elegant hover:shadow-elegant-lg transition-smooth cursor-pointer" onClick={() => setSelectedPost(post)}>
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4 mb-4">
                         <Avatar className="h-12 w-12">
@@ -416,6 +418,14 @@ const Landing = () => {
           </div>
         </div>
       </section>
+
+      <PostDetailModal
+        open={!!selectedPost}
+        onOpenChange={(open) => !open && setSelectedPost(null)}
+        post={selectedPost}
+        user={user}
+        onPostUpdated={fetchTimelinePosts}
+      />
     </div>
   );
 };
