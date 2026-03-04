@@ -286,6 +286,23 @@ const Landing = () => {
           </div>
         </section>
       )}
+      {/* Memorial Wall CTA */}
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
+            Visit the Memorial Wall
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
+            Explore memorials created by our community and honour those who are remembered.
+          </p>
+          <Link to="/memorials">
+            <Button size="lg" className="px-10 py-6 text-base md:text-lg shadow-elegant-lg gap-2">
+              <Heart className="h-5 w-5" />
+              Memorial Wall
+            </Button>
+          </Link>
+        </div>
+      </section>
 
       {/* About / How It Works Section */}
       <section className="py-20 bg-gradient-subtle">
