@@ -137,7 +137,7 @@ const Tree = () => {
         .from("connections")
         .select(`
           *,
-          profile:person_id (
+          profile:public_profiles!connections_person_id_fkey (
             id,
             first_name,
             last_name,
@@ -149,7 +149,11 @@ const Tree = () => {
         `)
         .eq("owner_id", user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("fetchConnections error:", error);
+        throw error;
+      }
+      console.log("fetchConnections loaded:", data?.length, "connections");
       setConnections(data as Connection[]);
     } catch (error: any) {
       toast({
