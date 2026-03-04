@@ -38,29 +38,38 @@ const Memorial = () => {
   const fetchMemorial = async () => {
     try {
       setLoading(true);
+
+      if (!id) {
+        setMemorial(null);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("memorials")
         .select("*")
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 
+      if (!data) {
+        setMemorial(null);
+        return;
+      }
+
       // Fetch creator profile separately using public_profiles view
       let profileData = null;
-      if (data?.user_id) {
+      if (data.user_id) {
         const { data: profile } = await supabase
           .from("public_profiles")
           .select("full_name, first_name, last_name")
           .eq("id", data.user_id)
-          .single();
-        profileData = profile;
+          .maybeSingle();
+
+        profileData = profile ?? null;
       }
 
       setMemorial({ ...data, profiles: profileData });
-
-      if (error) throw error;
-      setMemorial(data);
     } catch (error: any) {
       console.error("Error fetching memorial:", error);
       toast({
@@ -68,6 +77,7 @@ const Memorial = () => {
         description: "Failed to load memorial",
         variant: "destructive",
       });
+      setMemorial(null);
     } finally {
       setLoading(false);
     }
