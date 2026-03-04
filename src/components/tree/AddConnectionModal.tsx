@@ -312,6 +312,7 @@ const AddConnectionModal = ({
   };
 
   const relationships = connectionType === "family" ? familyRelationships : friendshipRelationships;
+  const allRelationships = [...familyRelationships, ...friendshipRelationships];
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -488,15 +489,25 @@ const AddConnectionModal = ({
 
           <div className="space-y-2">
             <Label>Relationship Type</Label>
-            <Select value={relationshipType} onValueChange={setRelationshipType}>
+            <Select value={relationshipType} onValueChange={(value) => {
+              setRelationshipType(value);
+              if (familyRelationships.includes(value)) {
+                setConnectionType("family");
+              } else if (friendshipRelationships.includes(value)) {
+                setConnectionType("friendship");
+              }
+            }}>
               <SelectTrigger>
                 <SelectValue placeholder="Select relationship..." />
               </SelectTrigger>
               <SelectContent>
-                {relationships.map((rel) => (
-                  <SelectItem key={rel} value={rel}>
-                    {rel}
-                  </SelectItem>
+                <SelectItem value="__family_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60">Family</SelectItem>
+                {familyRelationships.map((rel) => (
+                  <SelectItem key={rel} value={rel}>{rel}</SelectItem>
+                ))}
+                <SelectItem value="__friend_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60 mt-2">Friendship</SelectItem>
+                {friendshipRelationships.map((rel) => (
+                  <SelectItem key={rel} value={rel}>{rel}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
