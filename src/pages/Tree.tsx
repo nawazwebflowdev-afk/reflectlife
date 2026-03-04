@@ -75,14 +75,23 @@ const Tree = () => {
 
   const fetchCurrentUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-      setCurrentUser(profile);
+    if (!user) {
+      setCurrentUser(null);
+      return;
     }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id, full_name, avatar_url")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    // Fallback to auth user data if profile row is missing
+    setCurrentUser({
+      id: user.id,
+      full_name: profile?.full_name || user.user_metadata?.full_name || user.email || "You",
+      avatar_url: profile?.avatar_url || "/placeholder.svg",
+    });
   };
 
   const fetchUserTree = async () => {
@@ -117,9 +126,10 @@ const Tree = () => {
         setLoading(false);
         toast({
           title: "Authentication required",
-          description: "Please sign in to view your connection tree.",
+          description: "Please sign in to view and edit your connection tree.",
           variant: "destructive",
         });
+        navigate("/login");
         return;
       }
 
