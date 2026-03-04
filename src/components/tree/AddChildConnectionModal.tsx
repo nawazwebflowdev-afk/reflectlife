@@ -331,27 +331,22 @@ export const AddChildConnectionModal = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="relationship">Relationship *</Label>
+              <Label>Relationship *</Label>
               <Select
                 value={relationship}
                 onValueChange={(value) => {
                   setRelationship(value);
-
-                  if (didManuallySetConnectionType) return;
-
-                  const normalized = value.toLowerCase();
-                  const looksLikeFriendship = /(friend|colleague|classmate|neighbor|mate|mentor|acquaintance)/.test(normalized);
-                  const looksLikeFamily = /(mother|father|parent|son|daughter|child|sister|brother|aunt|uncle|cousin|grand|spouse|nephew|niece|relative)/.test(normalized);
-
-                  if (looksLikeFriendship) {
-                    setConnectionType("friendship");
-                  } else if (looksLikeFamily) {
-                    setConnectionType("family");
+                  if (!didManuallySetConnectionType) {
+                    if (familyRelationships.includes(value)) {
+                      setConnectionType("family");
+                    } else if (friendshipRelationships.includes(value)) {
+                      setConnectionType("friendship");
+                    }
                   }
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select relationship" />
+                  <SelectValue placeholder="Select relationship..." />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__family_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60">Family</SelectItem>
