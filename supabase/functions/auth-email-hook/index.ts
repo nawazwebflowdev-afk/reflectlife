@@ -26,6 +26,16 @@ Deno.serve(async (req) => {
     });
   }
 
+  // Verify the incoming request is from Supabase Auth (hook secret check)
+  const incomingSecret = req.headers.get("Authorization")?.replace("Bearer ", "");
+  if (incomingSecret !== lovableApiKey) {
+    console.error("Unauthorized auth-email-hook call: invalid or missing Authorization header");
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+
   let body: any;
   try {
     body = await req.json();
