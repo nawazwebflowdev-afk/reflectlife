@@ -101,10 +101,13 @@ const AddConnectionModal = ({
   }, [searchQuery]);
 
   useEffect(() => {
-    if (open && connectionType === "friendship") {
+    if (!open) return;
+    // Keep modal type aligned with the current tree mode every time it opens
+    setConnectionType(defaultMode);
+    if (defaultMode === "friendship") {
       fetchSharedMemories();
     }
-  }, [open, connectionType]);
+  }, [open, defaultMode]);
 
   const fetchSharedMemories = async () => {
     try {
@@ -304,6 +307,7 @@ const AddConnectionModal = ({
     setSelectedMemoryId("");
     setSelectedAvatarIndex(null);
     setAddType("existing");
+    setConnectionType(defaultMode);
     onOpenChange(false);
   };
 
