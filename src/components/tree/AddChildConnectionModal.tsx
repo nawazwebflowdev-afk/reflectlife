@@ -45,6 +45,7 @@ export const AddChildConnectionModal = ({
   const [sendingInvite, setSendingInvite] = useState(false);
   const [name, setName] = useState("");
   const [relationship, setRelationship] = useState("");
+  const [customRelationship, setCustomRelationship] = useState("");
   const [notes, setNotes] = useState("");
   const [details, setDetails] = useState("");
   const [imageUrl, setImageUrl] = useState("");
@@ -156,7 +157,8 @@ export const AddChildConnectionModal = ({
   };
 
   const handleSubmit = async () => {
-    if (!name.trim() || !relationship.trim()) {
+    const finalRelationship = relationship === "__custom" ? customRelationship.trim() : relationship;
+    if (!name.trim() || !finalRelationship) {
       toast({
         title: "Missing information",
         description: "Please provide at least a name and relationship",
@@ -225,7 +227,7 @@ export const AddChildConnectionModal = ({
         owner_id: user.id,
         parent_connection_id: parentConnectionId,
         related_person_name: name,
-        relationship_type: relationship,
+        relationship_type: finalRelationship,
         connection_type: connectionType,
         image_url: finalImageUrl,
         x_pos: baseX + xOffset,
@@ -256,6 +258,7 @@ export const AddChildConnectionModal = ({
   const resetForm = () => {
     setName("");
     setRelationship("");
+    setCustomRelationship("");
     setNotes("");
     setDetails("");
     setImageUrl("");
@@ -336,11 +339,14 @@ export const AddChildConnectionModal = ({
                 value={relationship}
                 onValueChange={(value) => {
                   setRelationship(value);
-                  if (!didManuallySetConnectionType) {
-                    if (familyRelationships.includes(value)) {
-                      setConnectionType("family");
-                    } else if (friendshipRelationships.includes(value)) {
-                      setConnectionType("friendship");
+                  if (value !== "__custom") {
+                    setCustomRelationship("");
+                    if (!didManuallySetConnectionType) {
+                      if (familyRelationships.includes(value)) {
+                        setConnectionType("family");
+                      } else if (friendshipRelationships.includes(value)) {
+                        setConnectionType("friendship");
+                      }
                     }
                   }
                 }}
@@ -357,8 +363,17 @@ export const AddChildConnectionModal = ({
                   {friendshipRelationships.map((rel) => (
                     <SelectItem key={rel} value={rel}>{rel}</SelectItem>
                   ))}
+                  <SelectItem value="__custom" className="font-medium mt-1 border-t pt-1">✏️ Custom...</SelectItem>
                 </SelectContent>
               </Select>
+              {relationship === "__custom" && (
+                <Input
+                  value={customRelationship}
+                  onChange={(e) => setCustomRelationship(e.target.value)}
+                  placeholder="Enter custom relationship..."
+                  className="mt-2"
+                />
+              )}
             </div>
 
             <div className="space-y-2">
