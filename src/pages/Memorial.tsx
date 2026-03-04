@@ -40,16 +40,24 @@ const Memorial = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("memorials")
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            first_name,
-            last_name
-          )
-        `)
+        .select("*")
         .eq("id", id)
         .single();
+
+      if (error) throw error;
+
+      // Fetch creator profile separately using public_profiles view
+      let profileData = null;
+      if (data?.user_id) {
+        const { data: profile } = await supabase
+          .from("public_profiles")
+          .select("full_name, first_name, last_name")
+          .eq("id", data.user_id)
+          .single();
+        profileData = profile;
+      }
+
+      setMemorial({ ...data, profiles: profileData });
 
       if (error) throw error;
       setMemorial(data);
