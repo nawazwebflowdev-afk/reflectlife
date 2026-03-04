@@ -12,6 +12,18 @@ import { AvatarSelector, AvatarDisplay } from "@/components/EmojiAvatarSelector"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AVATARS } from "@/config/avatars";
 
+const familyRelationships = [
+  "Mother", "Father", "Sister", "Brother", "Spouse",
+  "Daughter", "Son", "Grandmother", "Grandfather",
+  "Granddaughter", "Grandson", "Cousin", "Aunt",
+  "Uncle", "Niece", "Nephew", "Other Relative",
+];
+
+const friendshipRelationships = [
+  "Friend", "Best Friend", "Mentor", "Classmate",
+  "Colleague", "Partner", "Acquaintance", "Other",
+];
+
 interface AddChildConnectionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -320,18 +332,16 @@ export const AddChildConnectionModal = ({
 
             <div className="space-y-2">
               <Label htmlFor="relationship">Relationship *</Label>
-              <Input
-                id="relationship"
+              <Select
                 value={relationship}
-                onChange={(e) => {
-                  const nextRelationship = e.target.value;
-                  setRelationship(nextRelationship);
+                onValueChange={(value) => {
+                  setRelationship(value);
 
                   if (didManuallySetConnectionType) return;
 
-                  const normalized = nextRelationship.toLowerCase();
-                  const looksLikeFriendship = /(friend|colleague|classmate|neighbor|mate)/.test(normalized);
-                  const looksLikeFamily = /(mother|father|parent|son|daughter|child|sister|brother|aunt|uncle|cousin|grand)/.test(normalized);
+                  const normalized = value.toLowerCase();
+                  const looksLikeFriendship = /(friend|colleague|classmate|neighbor|mate|mentor|acquaintance)/.test(normalized);
+                  const looksLikeFamily = /(mother|father|parent|son|daughter|child|sister|brother|aunt|uncle|cousin|grand|spouse|nephew|niece|relative)/.test(normalized);
 
                   if (looksLikeFriendship) {
                     setConnectionType("friendship");
@@ -339,8 +349,21 @@ export const AddChildConnectionModal = ({
                     setConnectionType("family");
                   }
                 }}
-                placeholder="e.g., Daughter, Friend, Brother"
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select relationship" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__family_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60">Family</SelectItem>
+                  {familyRelationships.map((rel) => (
+                    <SelectItem key={rel} value={rel}>{rel}</SelectItem>
+                  ))}
+                  <SelectItem value="__friend_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60 mt-2">Friendship</SelectItem>
+                  {friendshipRelationships.map((rel) => (
+                    <SelectItem key={rel} value={rel}>{rel}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
