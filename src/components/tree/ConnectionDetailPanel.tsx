@@ -2,11 +2,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
-import { ExternalLink, Pencil, Trash2, UserPlus } from "lucide-react";
+import { ExternalLink, Pencil, Trash2, UserPlus, Camera, CalendarDays, StickyNote } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AddChildConnectionModal } from "./AddChildConnectionModal";
 import {
   AlertDialog,
@@ -30,6 +31,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { format } from "date-fns";
 
 interface ConnectionDetailPanelProps {
   connection: any;
@@ -44,117 +47,28 @@ const ConnectionDetailPanel = ({
 }: ConnectionDetailPanelProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [showAddChildModal, setShowAddChildModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
   const [editName, setEditName] = useState("");
   const [editRelationship, setEditRelationship] = useState("");
   const [editConnectionType, setEditConnectionType] = useState<"family" | "friendship">("family");
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+  const [editImageFile, setEditImageFile] = useState<File | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     if (!connection) return;
     setEditName(connection.related_person_name || "");
     setEditRelationship(connection.relationship_type || "");
     setEditConnectionType(connection.connection_type === "friendship" ? "friendship" : "family");
+    setEditImagePreview(null);
+    setEditImageFile(null);
   }, [connection]);
 
   if (!connection) return null;
-
-  const handleDelete = async () => {
-    try {
-      const { error } = await supabase
-        .from("connections")
-        .delete()
-        .eq("id", connection.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Connection removed",
-        description: "The connection has been removed from your tree.",
-      });
-
-      onUpdate();
-      onClose();
-    } catch (error: any) {
-      toast({
-        title: "Error removing connection",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleSaveEdit = async () => {
-    if (!editRelationship.trim()) {
-      toast({
-        title: "Missing information",
-        description: "Relationship is required.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!connection.person_id && !editName.trim()) {
-      toast({
-        title: "Missing information",
-        description: "Name is required for non-registered people.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSavingEdit(true);
-    try {
-      const updatePayload: Record<string, unknown> = {
-        relationship_type: editRelationship.trim(),
-        connection_type: editConnectionType,
-      };
-
-      if (!connection.person_id) {
-        updatePayload.related_person_name = editName.trim();
-      }
-
-      const { error } = await supabase
-        .from("connections")
-        .update(updatePayload)
-        .eq("id", connection.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Connection updated",
-        description: "Your tree changes were saved.",
-      });
-
-      setShowEditModal(false);
-      onUpdate();
-    } catch (error: any) {
-      toast({
-        title: "Error updating connection",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setSavingEdit(false);
-    }
-  };
-
-  const handleViewProfile = () => {
-    if (connection.person_id) {
-      navigate(`/profile/${connection.person_id}`);
-    }
-  };
-
-  const handleViewTimeline = () => {
-    if (connection.person_id) {
-      if (connection.profile?.is_deceased) {
-        navigate(`/memorial/${connection.person_id}`);
-      } else {
-        navigate(`/timeline/${connection.person_id}`);
-      }
-    }
-  };
 
   const displayName = connection.person_id
     ? (connection.profile?.full_name || "Unknown")
@@ -165,96 +79,185 @@ const ConnectionDetailPanel = ({
   const isRegisteredUser = !!connection.person_id;
   const isDeceased = connection.person_id && connection.profile?.is_deceased;
 
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase
+        .from("connections")
+        .delete()
+        .eq("id", connection.id);
+      if (error) throw error;
+      toast({ title: "Connection removed", description: "The connection has been removed from your tree." });
+      onUpdate();
+      onClose();
+    } catch (error: any) {
+      toast({ title: "Error removing connection", description: error.message, variant: "destructive" });
+    }
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setEditImageFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setEditImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const uploadImage = async (): Promise<string | null> => {
+    if (!editImageFile) return null;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const ext = editImageFile.name.split(".").pop();
+    const path = `${user.id}/connections/${connection.id}.${ext}`;
+    const { error } = await supabase.storage
+      .from("profile-pictures")
+      .upload(path, editImageFile, { upsert: true });
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("profile-pictures")
+      .getPublicUrl(path);
+    return publicUrl;
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editRelationship.trim()) {
+      toast({ title: "Missing information", description: "Relationship is required.", variant: "destructive" });
+      return;
+    }
+    if (!connection.person_id && !editName.trim()) {
+      toast({ title: "Missing information", description: "Name is required.", variant: "destructive" });
+      return;
+    }
+
+    setSavingEdit(true);
+    try {
+      let imageUrl: string | null = null;
+      if (editImageFile) {
+        setUploadingImage(true);
+        imageUrl = await uploadImage();
+        setUploadingImage(false);
+      }
+
+      const updatePayload: Record<string, unknown> = {
+        relationship_type: editRelationship.trim(),
+        connection_type: editConnectionType,
+      };
+      if (!connection.person_id) {
+        updatePayload.related_person_name = editName.trim();
+      }
+      if (imageUrl) {
+        updatePayload.image_url = imageUrl;
+      }
+
+      const { error } = await supabase
+        .from("connections")
+        .update(updatePayload)
+        .eq("id", connection.id);
+      if (error) throw error;
+
+      toast({ title: "Connection updated", description: "Your changes were saved." });
+      setShowEditModal(false);
+      onUpdate();
+    } catch (error: any) {
+      toast({ title: "Error updating connection", description: error.message, variant: "destructive" });
+    } finally {
+      setSavingEdit(false);
+      setUploadingImage(false);
+    }
+  };
+
+  const currentAvatarForEdit = editImagePreview || avatarUrl;
+
   return (
     <Sheet open={!!connection} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="w-full sm:max-w-md">
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Connection Details</SheetTitle>
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
-          <div className="flex flex-col items-center gap-4">
+          {/* Avatar & Name */}
+          <div className="flex flex-col items-center gap-3">
             <div className="relative">
               <Avatar className="h-24 w-24">
                 <AvatarImage src={avatarUrl} />
-                <AvatarFallback className="text-2xl">
-                  {displayName[0] || "?"}
-                </AvatarFallback>
+                <AvatarFallback className="text-2xl">{displayName[0] || "?"}</AvatarFallback>
               </Avatar>
               {isDeceased && (
                 <div className="absolute -top-2 -right-2 text-3xl">🕯️</div>
               )}
             </div>
-
-            <div className="text-center">
-              <h3 className="font-serif text-2xl font-bold">
-                {displayName}
-              </h3>
-              {connection.profile?.country && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  {connection.profile.country}
-                </p>
-              )}
-            </div>
-
-            <Badge variant="secondary" className="text-sm">
-              {connection.relationship_type}
-            </Badge>
-
-            <Badge
-              variant={connection.connection_type === "family" ? "default" : "outline"}
-            >
-              {connection.connection_type === "family" ? "🌳 Family" : "🌐 Friendship"}
-            </Badge>
-
-            {isDeceased && (
-              <Badge variant="secondary" className="bg-muted">
-                In Memoriam
-              </Badge>
-            )}
-
-            {!isRegisteredUser && (
-              <Badge variant="outline" className="text-xs">
-                Not registered on ReflectLife
-              </Badge>
+            <h3 className="font-serif text-2xl font-bold text-center">{displayName}</h3>
+            {connection.profile?.country && (
+              <p className="text-sm text-muted-foreground">{connection.profile.country}</p>
             )}
           </div>
 
+          {/* Badges */}
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Badge variant="secondary" className="text-sm">{connection.relationship_type}</Badge>
+            <Badge variant={connection.connection_type === "family" ? "default" : "outline"}>
+              {connection.connection_type === "family" ? "🌳 Family" : "🌐 Friendship"}
+            </Badge>
+            {isDeceased && <Badge variant="secondary" className="bg-muted">In Memoriam</Badge>}
+            {!isRegisteredUser && <Badge variant="outline" className="text-xs">Not on ReflectLife</Badge>}
+          </div>
+
+          <Separator />
+
+          {/* Details Section */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Details</h4>
+
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="space-y-1">
+                <p className="text-muted-foreground flex items-center gap-1"><StickyNote className="h-3 w-3" /> Relationship</p>
+                <p className="font-medium">{connection.relationship_type}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-muted-foreground">Type</p>
+                <p className="font-medium capitalize">{connection.connection_type}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-muted-foreground flex items-center gap-1"><CalendarDays className="h-3 w-3" /> Added</p>
+                <p className="font-medium">{connection.created_at ? format(new Date(connection.created_at), "dd MMM yyyy") : "Unknown"}</p>
+              </div>
+              {connection.shared_memory_id && (
+                <div className="space-y-1">
+                  <p className="text-muted-foreground">Shared Memory</p>
+                  <Button variant="link" className="p-0 h-auto text-sm" onClick={() => navigate(`/post/${connection.shared_memory_id}`)}>
+                    View Memory
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Actions */}
           <div className="space-y-2">
-            <Button
-              className="w-full justify-between"
-              variant="outline"
-              onClick={() => setShowEditModal(true)}
-            >
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Actions</h4>
+
+            <Button className="w-full justify-between" variant="outline" onClick={() => setShowEditModal(true)}>
               Edit Connection
               <Pencil className="h-4 w-4" />
             </Button>
 
-            <Button
-              className="w-full justify-between"
-              variant="outline"
-              onClick={() => setShowAddChildModal(true)}
-            >
+            <Button className="w-full justify-between" variant="outline" onClick={() => setShowAddChildModal(true)}>
               Add Connection to This Person
               <UserPlus className="h-4 w-4" />
             </Button>
 
             {isRegisteredUser && (
               <>
-                <Button
-                  className="w-full justify-between"
-                  variant="outline"
-                  onClick={handleViewProfile}
-                >
+                <Button className="w-full justify-between" variant="outline" onClick={() => navigate(`/profile/${connection.person_id}`)}>
                   View Profile
                   <ExternalLink className="h-4 w-4" />
                 </Button>
-
-                <Button
-                  className="w-full justify-between"
-                  variant="outline"
-                  onClick={handleViewTimeline}
-                >
+                <Button className="w-full justify-between" variant="outline" onClick={() => navigate(isDeceased ? `/memorial/${connection.person_id}` : `/timeline/${connection.person_id}`)}>
                   {isDeceased ? "View Memorial" : "View Timeline"}
                   <ExternalLink className="h-4 w-4" />
                 </Button>
@@ -272,8 +275,7 @@ const ConnectionDetailPanel = ({
                 <AlertDialogHeader>
                   <AlertDialogTitle>Remove Connection</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to remove {displayName} from your{" "}
-                    {connection.connection_type} tree? This action cannot be undone.
+                    Are you sure you want to remove {displayName} from your {connection.connection_type} tree? This cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -283,22 +285,10 @@ const ConnectionDetailPanel = ({
               </AlertDialogContent>
             </AlertDialog>
           </div>
-
-          {connection.shared_memory_id && connection.connection_type === "friendship" && (
-            <div className="pt-4 border-t">
-              <p className="text-sm text-muted-foreground mb-2">Shared Memory</p>
-              <Button
-                className="w-full"
-                variant="outline"
-                onClick={() => navigate(`/post/${connection.shared_memory_id}`)}
-              >
-                View Shared Memory
-              </Button>
-            </div>
-          )}
         </div>
       </SheetContent>
 
+      {/* Add Child Modal */}
       <AddChildConnectionModal
         open={showAddChildModal}
         onOpenChange={setShowAddChildModal}
@@ -307,44 +297,57 @@ const ConnectionDetailPanel = ({
         onUpdate={onUpdate}
       />
 
+      {/* Edit Dialog with Photo Upload */}
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Edit Connection</DialogTitle>
-            <DialogDescription>
-              Update this person in your tree.
-            </DialogDescription>
+            <DialogDescription>Update this person's details and photo.</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
+            {/* Photo Upload */}
+            <div className="flex flex-col items-center gap-3">
+              <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={currentAvatarForEdit} />
+                  <AvatarFallback className="text-xl">{displayName[0] || "?"}</AvatarFallback>
+                </Avatar>
+                <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Camera className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageSelect}
+              />
+              <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()}>
+                {editImageFile ? "Change Photo" : "Upload Photo"}
+              </Button>
+            </div>
+
+            {/* Name (non-registered only) */}
             {!connection.person_id && (
               <div className="space-y-2">
                 <Label htmlFor="edit-name">Name</Label>
-                <Input
-                  id="edit-name"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  placeholder="Enter name"
-                />
+                <Input id="edit-name" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Enter name" />
               </div>
             )}
 
+            {/* Relationship */}
             <div className="space-y-2">
               <Label htmlFor="edit-relationship">Relationship</Label>
-              <Input
-                id="edit-relationship"
-                value={editRelationship}
-                onChange={(e) => setEditRelationship(e.target.value)}
-                placeholder="e.g. Friend, Sister"
-              />
+              <Input id="edit-relationship" value={editRelationship} onChange={(e) => setEditRelationship(e.target.value)} placeholder="e.g. Friend, Sister" />
             </div>
 
+            {/* Connection Type */}
             <div className="space-y-2">
               <Label>Connection Type</Label>
               <Select value={editConnectionType} onValueChange={(v: "family" | "friendship") => setEditConnectionType(v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="family">🌳 Family</SelectItem>
                   <SelectItem value="friendship">🌐 Friendship</SelectItem>
@@ -354,11 +357,9 @@ const ConnectionDetailPanel = ({
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditModal(false)}>
-              Cancel
-            </Button>
+            <Button variant="outline" onClick={() => setShowEditModal(false)}>Cancel</Button>
             <Button onClick={handleSaveEdit} disabled={savingEdit}>
-              {savingEdit ? "Saving..." : "Save changes"}
+              {uploadingImage ? "Uploading..." : savingEdit ? "Saving..." : "Save changes"}
             </Button>
           </DialogFooter>
         </DialogContent>
