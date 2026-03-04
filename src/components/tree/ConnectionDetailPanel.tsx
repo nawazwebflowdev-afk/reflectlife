@@ -40,6 +40,37 @@ interface ConnectionDetailPanelProps {
   onUpdate: () => void;
 }
 
+const familyRelationships = [
+  "Mother",
+  "Father",
+  "Sister",
+  "Brother",
+  "Spouse",
+  "Daughter",
+  "Son",
+  "Grandmother",
+  "Grandfather",
+  "Granddaughter",
+  "Grandson",
+  "Cousin",
+  "Aunt",
+  "Uncle",
+  "Niece",
+  "Nephew",
+  "Other Relative",
+];
+
+const friendshipRelationships = [
+  "Friend",
+  "Best Friend",
+  "Mentor",
+  "Classmate",
+  "Colleague",
+  "Partner",
+  "Acquaintance",
+  "Other",
+];
+
 const ConnectionDetailPanel = ({
   connection,
   onClose,
@@ -340,7 +371,35 @@ const ConnectionDetailPanel = ({
             {/* Relationship */}
             <div className="space-y-2">
               <Label htmlFor="edit-relationship">Relationship</Label>
-              <Input id="edit-relationship" value={editRelationship} onChange={(e) => setEditRelationship(e.target.value)} placeholder="e.g. Friend, Sister" />
+              <Select
+                value={editRelationship}
+                onValueChange={(value) => {
+                  setEditRelationship(value);
+                  if (familyRelationships.includes(value)) {
+                    setEditConnectionType("family");
+                  } else if (friendshipRelationships.includes(value)) {
+                    setEditConnectionType("friendship");
+                  }
+                }}
+              >
+                <SelectTrigger id="edit-relationship">
+                  <SelectValue placeholder="Select relationship..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__family_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60">
+                    Family
+                  </SelectItem>
+                  {familyRelationships.map((rel) => (
+                    <SelectItem key={rel} value={rel}>{rel}</SelectItem>
+                  ))}
+                  <SelectItem value="__friendship_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60 mt-2">
+                    Friendship
+                  </SelectItem>
+                  {friendshipRelationships.map((rel) => (
+                    <SelectItem key={rel} value={rel}>{rel}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Connection Type */}
