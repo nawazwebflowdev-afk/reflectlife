@@ -49,11 +49,23 @@ const Memorials = () => {
   const fetchMemorials = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      
+      // Only fetch public memorials + user's own
+      let query = supabase
         .from('memorials')
         .select('*')
         .order('created_at', { ascending: false });
 
+      if (currentUser) {
+        // Show public memorials OR user's own (regardless of privacy)
+        query = query.or(`and(is_public.eq.true,privacy_level.eq.public),user_id.eq.${currentUser.id}`);
+      } else {
+        // Anonymous: only public
+        query = query.eq('is_public', true).eq('privacy_level', 'public');
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       setMemorials(data || []);
     } catch (error: any) {
