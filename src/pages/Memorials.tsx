@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Users, Plus, Loader2 } from "lucide-react";
+import { Search, Users, Plus, Loader2, Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import CreateMemorialModal from "@/components/CreateMemorialModal";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import timelineBg from "@/assets/timeline-bg.jpg";
 import { format } from "date-fns";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Memorial {
   id: string;
@@ -21,6 +22,8 @@ interface Memorial {
   preview_image_url: string | null;
   bio: string | null;
   user_id: string;
+  is_public: boolean | null;
+  privacy_level: string | null;
 }
 
 const Memorials = () => {
@@ -70,6 +73,27 @@ const Memorials = () => {
       navigate('/login');
     } else {
       setIsCreateModalOpen(true);
+    }
+  };
+
+  const toggleVisibility = async (e: React.MouseEvent, memorial: Memorial) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const newIsPublic = !memorial.is_public;
+    const newPrivacy = newIsPublic ? 'public' : 'private';
+    try {
+      const { error } = await supabase
+        .from('memorials')
+        .update({ is_public: newIsPublic, privacy_level: newPrivacy })
+        .eq('id', memorial.id);
+      if (error) throw error;
+      setMemorials(prev => prev.map(m => m.id === memorial.id ? { ...m, is_public: newIsPublic, privacy_level: newPrivacy } : m));
+      toast({
+        title: newIsPublic ? "Memorial is now public" : "Memorial is now private",
+        description: newIsPublic ? "This memorial will appear on the homepage." : "This memorial is hidden from public view.",
+      });
+    } catch (error: any) {
+      toast({ title: "Error updating visibility", description: error.message, variant: "destructive" });
     }
   };
 
@@ -144,9 +168,30 @@ const Memorials = () => {
             {filteredMemorials.map((memorial, index) => (
               <Link key={memorial.id} to={`/memorial/${memorial.id}`}>
                 <Card 
-                  className="overflow-hidden hover:shadow-elegant-lg transition-smooth group animate-fade-up"
+                  className="overflow-hidden hover:shadow-elegant-lg transition-smooth group animate-fade-up relative"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
+                  {user && user.id === memorial.user_id && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={(e) => toggleVisibility(e, memorial)}
+                            className="absolute top-3 right-3 z-10 p-2 rounded-full bg-background/80 backdrop-blur-sm shadow-md hover:bg-background transition-smooth"
+                          >
+                            {memorial.is_public ? (
+                              <Eye className="h-4 w-4 text-primary" />
+                            ) : (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {memorial.is_public ? "Public — visible on homepage" : "Private — hidden from public"}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                   <div className="aspect-square overflow-hidden bg-muted">
                     <img
                       src={memorial.preview_image_url || portraitPlaceholder}
