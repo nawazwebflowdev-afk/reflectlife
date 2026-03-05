@@ -6,7 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, X, Loader2 } from "lucide-react";
+import { Upload, X, Loader2, Eye, EyeOff } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 
 interface CreateMemorialModalProps {
@@ -18,6 +19,7 @@ interface CreateMemorialModalProps {
 const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMemorialModalProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isPublic, setIsPublic] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     bio: "",
@@ -128,6 +130,8 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
           date_of_death: formData.dateOfDeath || null,
           location: formData.location || null,
           preview_image_url: uploadedImageUrls[0],
+          is_public: isPublic,
+          privacy_level: isPublic ? 'public' : 'private',
         })
         .select()
         .single();
@@ -153,14 +157,8 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
       });
 
       // Reset form
-      setFormData({
-        name: "",
-        bio: "",
-        tributes: "",
-        dateOfBirth: "",
-        dateOfDeath: "",
-        location: "",
-      });
+      setFormData({ name: "", bio: "", tributes: "", dateOfBirth: "", dateOfDeath: "", location: "" });
+      setIsPublic(true);
       setImages([]);
       setImagePreviews([]);
       
@@ -297,6 +295,22 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               placeholder="City, Country"
             />
+          </div>
+
+          {/* Visibility Toggle */}
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div className="flex items-center gap-3">
+              {isPublic ? <Eye className="h-5 w-5 text-primary" /> : <EyeOff className="h-5 w-5 text-muted-foreground" />}
+              <div>
+                <Label htmlFor="visibility" className="text-sm font-medium cursor-pointer">
+                  {isPublic ? "Public Memorial" : "Private Memorial"}
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {isPublic ? "Visible on the Memorial Wall and homepage" : "Only visible to you"}
+                </p>
+              </div>
+            </div>
+            <Switch id="visibility" checked={isPublic} onCheckedChange={setIsPublic} />
           </div>
 
           {/* Actions */}
