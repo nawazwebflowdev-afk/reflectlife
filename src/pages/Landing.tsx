@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Heart, Share2, Clock, Shield, MessageCircle, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 
 const Landing = () => {
+  const location = useLocation();
   const [user, setUser] = useState<any>(null);
   const [timelinePosts, setTimelinePosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
@@ -22,7 +23,7 @@ const Landing = () => {
   useEffect(() => {
     checkUser();
     fetchPublicMemorials();
-  }, []);
+  }, [location.key]);
 
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
