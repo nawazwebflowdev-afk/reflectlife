@@ -8,6 +8,7 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   ConnectionMode,
+  ReactFlowInstance,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,6 +63,7 @@ const Tree = () => {
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
 
   useEffect(() => {
     fetchCurrentUser();
@@ -72,6 +74,19 @@ const Tree = () => {
   useEffect(() => {
     buildGraph();
   }, [connections, mode, currentUser]);
+
+  useEffect(() => {
+    if (!reactFlowInstance || nodes.length === 0) return;
+
+    // Re-fit whenever graph data changes so newly added connections are always visible
+    requestAnimationFrame(() => {
+      reactFlowInstance.fitView({
+        padding: 0.25,
+        duration: 500,
+        includeHiddenNodes: false,
+      });
+    });
+  }, [reactFlowInstance, nodes, edges]);
 
   const fetchCurrentUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -619,6 +634,7 @@ const Tree = () => {
               onNodeDragStop={onNodeDragStop}
               connectionMode={ConnectionMode.Loose}
               fitView
+              onInit={setReactFlowInstance}
               attributionPosition="bottom-left"
             >
               <Controls showInteractive={false} />
