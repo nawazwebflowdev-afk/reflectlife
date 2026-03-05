@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { X, Upload, Loader2 } from "lucide-react";
+import { X, Upload, Loader2, Eye, EyeOff } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,6 +30,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [isPublic, setIsPublic] = useState(true);
 
   useEffect(() => {
     if (memorial && open) {
@@ -40,6 +42,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
         date_of_death: memorial.date_of_death || "",
       });
       setImagePreview(memorial.preview_image_url || "");
+      setIsPublic(memorial.is_public ?? true);
     }
   }, [memorial, open]);
 
@@ -101,6 +104,8 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
           date_of_birth: formData.date_of_birth || null,
           date_of_death: formData.date_of_death || null,
           preview_image_url: previewImageUrl,
+          is_public: isPublic,
+          privacy_level: isPublic ? 'public' : 'private',
           updated_at: new Date().toISOString(),
         })
         .eq('id', memorial.id);
@@ -246,6 +251,22 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
                     )}
                   </label>
                 </div>
+              </div>
+
+              {/* Visibility Toggle */}
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div className="flex items-center gap-3">
+                  {isPublic ? <Eye className="h-5 w-5 text-primary" /> : <EyeOff className="h-5 w-5 text-muted-foreground" />}
+                  <div>
+                    <Label htmlFor="edit-visibility" className="text-sm font-medium cursor-pointer">
+                      {isPublic ? "Public Memorial" : "Private Memorial"}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {isPublic ? "Visible on the Memorial Wall and homepage" : "Only visible to you"}
+                    </p>
+                  </div>
+                </div>
+                <Switch id="edit-visibility" checked={isPublic} onCheckedChange={setIsPublic} />
               </div>
 
               {/* Actions */}
