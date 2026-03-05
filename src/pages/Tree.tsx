@@ -289,12 +289,13 @@ const Tree = () => {
 
     const collectTree = (conn: Connection, level: number, xOffset: number): { nodes: Node[]; maxX: number } => {
       const children = childrenMap[conn.id] || [];
-      const useSaved = conn.x_pos && conn.y_pos && conn.x_pos !== 0 && conn.y_pos !== 0;
+      const useSaved = conn.x_pos != null && conn.y_pos != null && conn.x_pos !== 0 && conn.y_pos !== 0;
       const resultNodes: Node[] = [];
       let currentMaxX = xOffset;
 
-      if (children.length > 0 && !useSaved) {
-        let childX = xOffset;
+      // Always recurse into children, regardless of whether parent has saved coords
+      if (children.length > 0) {
+        let childX = useSaved ? (conn.x_pos! - ((children.length - 1) * 90)) : xOffset;
         children.forEach(child => {
           const res = collectTree(child, level + 1, childX);
           resultNodes.push(...res.nodes);
