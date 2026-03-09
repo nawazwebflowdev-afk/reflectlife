@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
         break;
       }
       case "magiclink": {
-        subject = "Sign in to ReflectLife";
+        subject = "Sign in to Reflectlife";
         html = await renderAsync(MagicLinkEmail({ siteName, siteUrl, confirmationUrl, recipient }));
         break;
       }
