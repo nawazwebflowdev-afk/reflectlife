@@ -165,7 +165,6 @@ const Auth = () => {
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // Validate all fields
     if (!firstName || !lastName || !email || !password || !phoneNumber || !country) {
       toast({
         title: "Error",
@@ -184,7 +183,6 @@ const Auth = () => {
       return;
     }
 
-    // Check password strength
     if (passwordStrength.score < 3) {
       toast({
         title: "Weak Password",
@@ -197,32 +195,17 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      // Execute reCAPTCHA
-      const token = await new Promise<string>((resolve, reject) => {
-        if (typeof window !== 'undefined' && (window as any).grecaptcha) {
-          (window as any).grecaptcha.ready(() => {
-            (window as any).grecaptcha
-              .execute('6LfYourSiteKey', { action: 'signup' })
-              .then(resolve)
-              .catch(reject);
-          });
-        } else {
-          reject(new Error('reCAPTCHA not loaded'));
-        }
-      });
+      const fullName = `${firstName} ${lastName}`.trim();
 
-      setRecaptchaToken(token);
-
-      // Call secure signup edge function
       const { data, error } = await supabase.functions.invoke('secure-signup', {
         body: {
           email,
           password,
+          fullName,
           firstName,
           lastName,
           phoneNumber,
           country,
-          recaptchaToken: token,
           passwordScore: passwordStrength.score,
         }
       });
