@@ -119,7 +119,7 @@ async function sendVerificationEmail(
   // Render the branded email template
   const html = await renderAsync(
     SignupEmail({
-      siteName: 'ReflectLife',
+      siteName: 'Reflectlife',
       siteUrl: 'https://reflectlife.net',
       confirmationUrl,
       recipient: recipientEmail,
