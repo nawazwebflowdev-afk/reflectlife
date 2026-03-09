@@ -180,10 +180,9 @@ serve(async (req) => {
       );
     }
 
-    // Create Supabase clients
+    // Create Supabase admin client
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
 
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
       auth: {
@@ -192,25 +191,15 @@ serve(async (req) => {
       }
     });
 
-    const supabasePublic = createClient(supabaseUrl, anonKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-
     const normalizedFullName = (fullName || `${firstName || ''} ${lastName || ''}` || '').trim();
     const resolvedFirstName = firstName || normalizedFullName.split(' ')[0] || '';
     const resolvedLastName = lastName || normalizedFullName.split(' ').slice(1).join(' ') || '';
 
-    const origin = req.headers.get('origin') || 'https://reflectlife.lovable.app';
-    const emailRedirectTo = `${origin}/verify`;
-
-    // Create user with admin client (email_confirm: false keeps verification required)
+    // Create user with immediate confirmation to avoid email-rate-limit signup blocks
     const { data: userData, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
-      email_confirm: false,
+      email_confirm: true,
       user_metadata: {
         first_name: resolvedFirstName,
         last_name: resolvedLastName,
@@ -223,23 +212,55 @@ serve(async (req) => {
     if (createError) {
       console.error('User creation error:', createError);
 
-      // Existing account: try to resend verification email and return non-fatal response
-      if (createError.code === 'email_exists' || createError.message?.includes('already registered')) {
-        const { error: resendExistingError } = await supabasePublic.auth.resend({
-          type: 'signup',
-          email,
-          options: {
-            emailRedirectTo,
-          },
-        });
+      const isExistingAccountError =
+        createError.code === 'email_exists' ||
+        createError.message?.includes('already registered') ||
+        createError.code === 'unexpected_failure';
 
-        if (resendExistingError) {
-          console.error('Resend error for existing user:', resendExistingError);
+      // Existing account: auto-confirm if needed, then allow immediate sign-in
+      if (isExistingAccountError) {
+        let existingUser: { id: string; email_confirmed_at?: string | null; user_metadata?: Record<string, unknown> } | null = null;
 
-          if (resendExistingError.code === 'over_email_send_rate_limit' || resendExistingError.message?.includes('rate limit')) {
+        for (let page = 1; page <= 10; page++) {
+          const { data: usersPage, error: listError } = await supabaseAdmin.auth.admin.listUsers({
+            page,
+            perPage: 1000,
+          });
+
+          if (listError) {
+            console.error('List users error:', listError);
+            break;
+          }
+
+          existingUser = usersPage.users.find((u) => (u.email || '').toLowerCase() === (email || '').toLowerCase()) || null;
+          if (existingUser || usersPage.users.length === 0) break;
+        }
+
+        if (!existingUser) {
+          return new Response(
+            JSON.stringify({ error: 'Account already exists. Please sign in instead.' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        if (!existingUser.email_confirmed_at) {
+          const { error: confirmError } = await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
+            email_confirm: true,
+            user_metadata: {
+              ...(existingUser.user_metadata || {}),
+              first_name: resolvedFirstName,
+              last_name: resolvedLastName,
+              full_name: normalizedFullName || `${resolvedFirstName} ${resolvedLastName}`.trim(),
+              phone_number: phoneNumber,
+              country: country,
+            },
+          });
+
+          if (confirmError) {
+            console.error('Auto-confirm existing user error:', confirmError);
             return new Response(
-              JSON.stringify({ error: 'Email rate limit exceeded. Please wait 30–60 minutes before requesting another verification email.' }),
-              { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+              JSON.stringify({ error: 'Account exists but could not be activated right now. Please try again.' }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
             );
           }
         }
@@ -247,8 +268,9 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({
             success: true,
-            requiresVerification: true,
-            message: 'Account already exists but is not verified. We sent a new verification email.',
+            requiresVerification: false,
+            message: 'Account already exists and is ready. Please sign in.',
+            userId: existingUser.id,
           }),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
@@ -260,32 +282,13 @@ serve(async (req) => {
       );
     }
 
-    // Always send verification email after signup creation
-    const { error: resendError } = await supabasePublic.auth.resend({
-      type: 'signup',
-      email,
-      options: {
-        emailRedirectTo,
-      },
-    });
-
-    if (resendError) {
-      console.error('Verification resend error:', resendError);
-      return new Response(
-        JSON.stringify({
-          error: 'Account created but verification email could not be sent. Please try again in a minute.',
-        }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     console.log(`User created successfully: ${email}`);
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        requiresVerification: true,
-        message: 'Account created successfully! Please check your email to confirm your account.',
+        requiresVerification: false,
+        message: 'Account created successfully!',
         userId: userData.user.id 
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

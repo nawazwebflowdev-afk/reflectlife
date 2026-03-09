@@ -122,29 +122,21 @@ const SignupForm = () => {
 
     if (normalized.includes("rate limit") || normalized.includes("429") || normalized.includes("over_email_send_rate_limit")) {
       return {
-        title: "Email rate limit exceeded",
-        description: "Please wait 30–60 minutes before trying again, or try from a different network.",
-        requiresVerification: false,
+        title: "Too many attempts",
+        description: "Please try again in a few minutes.",
       };
     }
 
-    if (
-      normalized.includes("email not confirmed") ||
-      normalized.includes("email_not_confirmed") ||
-      normalized.includes("already exists") ||
-      normalized.includes("already registered")
-    ) {
+    if (normalized.includes("already exists") || normalized.includes("already registered")) {
       return {
-        title: "Check your email",
-        description: "Your account is pending verification. Please check your inbox and confirm your email.",
-        requiresVerification: true,
+        title: "Account already exists",
+        description: "Please sign in with your existing account.",
       };
     }
 
     return {
       title: "Sign up failed",
       description: raw || "An unexpected error occurred. Please try again.",
-      requiresVerification: false,
     };
   };
 
@@ -223,80 +215,33 @@ const SignupForm = () => {
 
       if (error) {
         const errorMessage = await extractFunctionErrorMessage(error);
-        const details = getSignupErrorDetails(errorMessage);
-
-        if (details.requiresVerification) {
-          await supabase.auth.resend({
-            type: "signup",
-            email,
-            options: {
-              emailRedirectTo: `${window.location.origin}/verify`,
-            },
-          }).catch(() => undefined);
-
-          toast({
-            title: details.title,
-            description: details.description,
-          });
-          navigate("/verify", { state: { email } });
-          return;
-        }
-
         throw new Error(errorMessage || (error as any)?.message || "Signup failed");
       }
 
       if (data?.error) {
-        const details = getSignupErrorDetails(data.error);
-
-        if (details.requiresVerification) {
-          await supabase.auth.resend({
-            type: "signup",
-            email,
-            options: {
-              emailRedirectTo: `${window.location.origin}/verify`,
-            },
-          }).catch(() => undefined);
-
-          toast({
-            title: details.title,
-            description: details.description,
-          });
-          navigate("/verify", { state: { email } });
-          return;
-        }
-
         throw new Error(typeof data.error === "string" ? data.error : "Signup failed");
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        throw signInError;
       }
 
       toast({
         title: "Account created!",
-        description: "Please check your email to verify your account.",
+        description: "Welcome to Reflectlife.",
       });
 
-      navigate("/verify", { state: { email } });
+      navigate("/dashboard");
 
     } catch (error: any) {
       console.error('Signup error:', error);
       const resolvedMessage = await extractFunctionErrorMessage(error);
       const details = getSignupErrorDetails(resolvedMessage);
-
-      if (details.requiresVerification) {
-        await supabase.auth.resend({
-          type: "signup",
-          email,
-          options: {
-            emailRedirectTo: `${window.location.origin}/verify`,
-          },
-        }).catch(() => undefined);
-
-        toast({
-          title: details.title,
-          description: details.description,
-        });
-        navigate("/verify", { state: { email } });
-        return;
-      }
-
       setSignupError(details.description);
       toast({
         title: details.title,
