@@ -94,7 +94,7 @@ const Navigation = () => {
     { name: "My Tree", path: "/tree", authRequired: true },
     { name: "My Diary", path: "/diary", authRequired: true },
     { name: "Memorial Wall", path: "/memorials" },
-    { name: "Become a Creator", path: "/become-creator", authRequired: true },
+    // { name: "Become a Creator", path: "/become-creator", authRequired: true },
     { name: "Dashboard", path: "/dashboard", authRequired: true },
   ];
 
