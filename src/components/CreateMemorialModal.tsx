@@ -31,6 +31,33 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
+  // Auto-detect location when modal opens
+  useEffect(() => {
+    if (open && !formData.location && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const { latitude, longitude } = position.coords;
+            const res = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=en`
+            );
+            const data = await res.json();
+            const addr = data.address;
+            const city = addr.city || addr.town || addr.village || addr.municipality || "";
+            const country = addr.country || "";
+            if (city || country) {
+              setFormData(prev => ({ ...prev, location: [city, country].filter(Boolean).join(", ") }));
+            }
+          } catch (e) {
+            // Silently fail
+          }
+        },
+        () => {},
+        { timeout: 5000 }
+      );
+    }
+  }, [open]);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     
