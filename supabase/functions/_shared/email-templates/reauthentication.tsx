@@ -37,7 +37,7 @@ export default function ReauthenticationEmail({
           </Section>
           <Hr style={hr} />
           <Text style={footer}>
-            © {new Date().getFullYear()} ReflectLife — Honouring life, preserving memories.
+            © {new Date().getFullYear()} Reflectlife — Honouring life, preserving memories.
           </Text>
         </Container>
       </Body>

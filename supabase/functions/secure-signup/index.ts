@@ -134,9 +134,9 @@ async function sendVerificationEmail(
       Authorization: `Bearer ${resendApiKey}`,
     },
     body: JSON.stringify({
-      from: 'ReflectLife <noreply@reflectlife.net>',
+      from: 'Reflectlife <noreply@reflectlife.net>',
       to: [recipientEmail],
-      subject: 'Welcome to ReflectLife — Confirm your email',
+      subject: 'Welcome to Reflectlife — Confirm your email',
       html,
     }),
   });

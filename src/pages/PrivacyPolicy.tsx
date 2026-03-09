@@ -151,7 +151,7 @@ const PrivacyPolicy = () => {
               <p>You can manage your cookie preferences through your browser settings.</p>
               <Separator className="my-4" />
               <p>
-                ReflectLife verwendet Cookies, um Ihr Nutzungserlebnis zu verbessern, den Datenverkehr zu
+                Reflectlife verwendet Cookies, um Ihr Nutzungserlebnis zu verbessern, den Datenverkehr zu
                 analysieren und Inhalte zu personalisieren.
               </p>
               <p>Sie können Ihre Cookie-Einstellungen über Ihren Browser anpassen.</p>
