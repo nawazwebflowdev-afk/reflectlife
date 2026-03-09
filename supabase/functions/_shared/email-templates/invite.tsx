@@ -26,7 +26,7 @@ export default function InviteEmail({
           <Section style={content}>
             <Text style={heading}>You've been invited</Text>
             <Text style={paragraph}>
-              Someone special has invited you to join ReflectLife — a place to honour and preserve cherished memories together.
+              Someone special has invited you to join Reflectlife — a place to honour and preserve cherished memories together.
             </Text>
             <Section style={buttonContainer}>
               <Button style={button} href={confirmationUrl}>
