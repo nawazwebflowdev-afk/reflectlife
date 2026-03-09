@@ -268,6 +268,27 @@ const SignupForm = () => {
         throw new Error(typeof data.error === "string" ? data.error : "Signup failed");
       }
 
+      toast({
+        title: "Account created!",
+        description: "Please check your email to verify your account.",
+      });
+
+      navigate("/verify", { state: { email } });
+
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      const details = getSignupErrorDetails(error);
+      setSignupError(details.description);
+      toast({
+        title: details.title,
+        description: details.description,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 gradient-subtle">
       <div className="w-full max-w-2xl space-y-6">
