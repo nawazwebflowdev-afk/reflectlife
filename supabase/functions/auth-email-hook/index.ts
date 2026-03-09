@@ -1,4 +1,4 @@
-import { renderAsync } from "npm:@react-email/components@0.0.22";
+import { renderAsync } from "https://esm.sh/@react-email/components@0.0.22";
 
 import SignupEmail from "../_shared/email-templates/signup.tsx";
 import RecoveryEmail from "../_shared/email-templates/recovery.tsx";

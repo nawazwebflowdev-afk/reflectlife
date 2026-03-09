@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.76.1";
-import { renderAsync } from "npm:@react-email/components@0.0.22";
+import { renderAsync } from "https://esm.sh/@react-email/components@0.0.22";
 import SignupEmail from "../_shared/email-templates/signup.tsx";
 
 const corsHeaders = {
