@@ -37,7 +37,7 @@ export default function SignupEmail({
               </Button>
             </Section>
             <Text style={smallText}>
-              If you didn't create an account on ReflectLife, you can safely ignore this email.
+              If you didn't create an account on Reflectlife, you can safely ignore this email.
             </Text>
           </Section>
           <Hr style={hr} />
