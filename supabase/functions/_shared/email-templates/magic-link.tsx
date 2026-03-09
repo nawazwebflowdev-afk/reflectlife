@@ -10,7 +10,7 @@ interface MagicLinkEmailProps {
 }
 
 export default function MagicLinkEmail({
-  siteName = 'ReflectLife',
+  siteName = 'Reflectlife',
   siteUrl = 'https://reflectlife.net',
   confirmationUrl = '',
   recipient = '',
