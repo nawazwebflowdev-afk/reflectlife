@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
         break;
       }
       case "invite": {
-        subject = "You've been invited to ReflectLife";
+        subject = "You've been invited to Reflectlife";
         html = await renderAsync(InviteEmail({ siteName, siteUrl, confirmationUrl, recipient }));
         break;
       }
