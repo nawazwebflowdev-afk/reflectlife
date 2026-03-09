@@ -118,6 +118,7 @@ serve(async (req) => {
       password, 
       firstName, 
       lastName, 
+      fullName,
       phoneNumber, 
       country, 
       recaptchaToken,
