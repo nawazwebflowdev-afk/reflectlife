@@ -11,7 +11,7 @@ interface EmailChangeProps {
 }
 
 export default function EmailChangeEmail({
-  siteName = 'ReflectLife',
+  siteName = 'Reflectlife',
   siteUrl = 'https://reflectlife.net',
   confirmationUrl = '',
   recipient = '',
