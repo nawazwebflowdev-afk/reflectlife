@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
         break;
       }
       case "email_change": {
-        subject = "Confirm your email change — ReflectLife";
+        subject = "Confirm your email change — Reflectlife";
         html = await renderAsync(EmailChangeEmail({ siteName, siteUrl, confirmationUrl, recipient, newEmail }));
         break;
       }
