@@ -141,13 +141,15 @@ serve(async (req) => {
 
     console.log(`Signup attempt from IP: ${ip}, remaining attempts: ${rateLimitResult.remaining}`);
 
-    // Verify reCAPTCHA
-    const recaptchaValid = await verifyRecaptcha(recaptchaToken);
-    if (!recaptchaValid) {
-      return new Response(
-        JSON.stringify({ error: 'reCAPTCHA verification failed. Please try again.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Verify reCAPTCHA when token is provided (kept optional for robust fallback paths)
+    if (recaptchaToken) {
+      const recaptchaValid = await verifyRecaptcha(recaptchaToken);
+      if (!recaptchaValid) {
+        return new Response(
+          JSON.stringify({ error: 'reCAPTCHA verification failed. Please try again.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     // Validate password strength (client should have checked with zxcvbn)
