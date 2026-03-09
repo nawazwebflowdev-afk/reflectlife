@@ -62,17 +62,7 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Load reCAPTCHA script
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://www.google.com/recaptcha/api.js?render=6LfYourSiteKey'; // User needs to add their site key
-    script.async = true;
-    document.body.appendChild(script);
-    
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
+  // reCAPTCHA placeholder removed — not currently configured
 
   // Password strength checker
   const checkPasswordStrength = useCallback((pwd: string) => {
