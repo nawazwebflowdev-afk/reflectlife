@@ -235,6 +235,13 @@ serve(async (req) => {
 
         if (resendExistingError) {
           console.error('Resend error for existing user:', resendExistingError);
+
+          if (resendExistingError.code === 'over_email_send_rate_limit' || resendExistingError.message?.includes('rate limit')) {
+            return new Response(
+              JSON.stringify({ error: 'Email rate limit exceeded. Please wait 30–60 minutes before requesting another verification email.' }),
+              { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
         }
 
         return new Response(
