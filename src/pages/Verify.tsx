@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { CheckCircle2, Loader2, Mail, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,11 @@ const Verify = () => {
   const [isResending, setIsResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  // Get email from route state (passed from signup page)
+  const emailFromState = (location.state as { email?: string })?.email || "";
 
   // Cooldown timer
   useEffect(() => {
@@ -29,8 +33,13 @@ const Verify = () => {
 
     setIsResending(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const email = session?.user?.email;
+      // Try to get email from route state first, then from session
+      let email = emailFromState;
+
+      if (!email) {
+        const { data: { session } } = await supabase.auth.getSession();
+        email = session?.user?.email || "";
+      }
 
       if (!email) {
         toast({
@@ -42,12 +51,14 @@ const Verify = () => {
         return;
       }
 
-      const { error } = await supabase.auth.resend({
-        type: "signup",
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/verify`,
-        },
+      // Use the secure-signup edge function to resend (bypasses Supabase rate limits)
+      const { data, error } = await supabase.functions.invoke('secure-signup', {
+        body: {
+          email,
+          password: '__resend_only__',
+          passwordScore: 4,
+          fullName: 'Resend',
+        }
       });
 
       if (error) throw error;
@@ -65,19 +76,20 @@ const Verify = () => {
       toast({
         title: isRateLimited ? "Email rate limit exceeded" : "Failed to resend",
         description: isRateLimited
-          ? "Please wait 30–60 minutes, then try resending again."
+          ? "Please wait a few minutes, then try resending again."
           : (raw || "Something went wrong. Please try again later."),
         variant: "destructive",
       });
     } finally {
       setIsResending(false);
     }
-  }, [cooldown, isResending, navigate, toast]);
+  }, [cooldown, isResending, emailFromState, navigate, toast]);
 
   useEffect(() => {
+    // After 3 seconds, stop showing "verifying" spinner since user needs to check email
     const timeout = setTimeout(() => {
       setIsVerifying(false);
-    }, 10000);
+    }, 3000);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth event:', event, 'Session:', session);
@@ -96,9 +108,8 @@ const Verify = () => {
             id: user.id,
             email: user.email,
             full_name: user.user_metadata?.full_name || '',
-            phone_number: user.user_metadata?.phone_number || '',
+            phone: user.user_metadata?.phone_number || '',
             country: user.user_metadata?.country || '',
-            created_at: new Date().toISOString(),
           }, {
             onConflict: 'id'
           });
@@ -129,13 +140,7 @@ const Verify = () => {
         }
       } else if (event === 'SIGNED_OUT') {
         clearTimeout(timeout);
-        toast({
-          title: "Verification failed",
-          description: "Unable to verify your email. Please try signing up again.",
-          variant: "destructive",
-        });
         setIsVerifying(false);
-        navigate("/login");
       }
     });
 
@@ -154,16 +159,18 @@ const Verify = () => {
               {isVerifying ? (
                 <Loader2 className="h-8 w-8 text-primary animate-spin" />
               ) : (
-                <CheckCircle2 className="h-8 w-8 text-primary" />
+                <Mail className="h-8 w-8 text-primary" />
               )}
             </div>
             <CardTitle className="font-serif text-2xl text-card-foreground">
-              {isVerifying ? "Verifying your email..." : "Check your inbox"}
+              {isVerifying ? "Setting things up..." : "Check your inbox"}
             </CardTitle>
             <CardDescription>
               {isVerifying
-                ? "Please wait while we verify your email address"
-                : "Click the verification link we sent to confirm your email"}
+                ? "Please wait a moment"
+                : emailFromState
+                  ? `We sent a verification link to ${emailFromState}`
+                  : "Click the verification link we sent to confirm your email"}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-center">
@@ -174,29 +181,42 @@ const Verify = () => {
             </p>
 
             {!isVerifying && (
-              <Button
-                onClick={handleResend}
-                disabled={isResending || cooldown > 0}
-                variant="outline"
-                className="w-full"
-              >
-                {isResending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : cooldown > 0 ? (
-                  <>
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Resend in {cooldown}s
-                  </>
-                ) : (
-                  <>
-                    <Mail className="mr-2 h-4 w-4" />
-                    Resend verification email
-                  </>
-                )}
-              </Button>
+              <>
+                <Button
+                  onClick={handleResend}
+                  disabled={isResending || cooldown > 0}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {isResending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : cooldown > 0 ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Resend in {cooldown}s
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="mr-2 h-4 w-4" />
+                      Resend verification email
+                    </>
+                  )}
+                </Button>
+
+                <div className="text-sm text-muted-foreground">
+                  Already verified?{" "}
+                  <button
+                    type="button"
+                    onClick={() => navigate("/login")}
+                    className="text-primary underline underline-offset-4 hover:text-primary/80"
+                  >
+                    Sign in
+                  </button>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
