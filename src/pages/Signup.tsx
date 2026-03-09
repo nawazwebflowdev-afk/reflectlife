@@ -277,7 +277,26 @@ const SignupForm = () => {
 
     } catch (error: any) {
       console.error('Signup error:', error);
-      const details = getSignupErrorDetails(error);
+      const resolvedMessage = await extractFunctionErrorMessage(error);
+      const details = getSignupErrorDetails(resolvedMessage);
+
+      if (details.requiresVerification) {
+        await supabase.auth.resend({
+          type: "signup",
+          email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/verify`,
+          },
+        }).catch(() => undefined);
+
+        toast({
+          title: details.title,
+          description: details.description,
+        });
+        navigate("/verify", { state: { email } });
+        return;
+      }
+
       setSignupError(details.description);
       toast({
         title: details.title,
