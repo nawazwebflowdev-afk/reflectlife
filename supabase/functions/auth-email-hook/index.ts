@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
     token_hash_new,
   } = emailData;
 
-  const siteName = "ReflectLife";
+  const siteName = "Reflectlife";
   const siteUrl = site_url || "https://reflectlife.net";
 
   // Build confirmation URL using token_hash
