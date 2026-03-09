@@ -224,7 +224,7 @@ serve(async (req) => {
       console.error('User creation error:', createError);
 
       // Existing account: try to resend verification email and return non-fatal response
-      if (createError.message.includes('already registered')) {
+      if (createError.code === 'email_exists' || createError.message?.includes('already registered')) {
         const { error: resendExistingError } = await supabasePublic.auth.resend({
           type: 'signup',
           email,
