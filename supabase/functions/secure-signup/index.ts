@@ -196,11 +196,11 @@ serve(async (req) => {
     const resolvedFirstName = firstName || normalizedFullName.split(' ')[0] || '';
     const resolvedLastName = lastName || normalizedFullName.split(' ').slice(1).join(' ') || '';
 
-    // Create user with admin client
+    // Create user with admin client (email_confirm: false so verification email is sent)
     const { data: userData, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
-      email_confirm: true, // Avoid blocked signup when auth email sending is rate-limited
+      email_confirm: false,
       user_metadata: {
         first_name: resolvedFirstName,
         last_name: resolvedLastName,
