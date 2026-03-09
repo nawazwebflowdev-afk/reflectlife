@@ -17,7 +17,7 @@ const PrivacyPolicy = () => {
             </h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                Welcome to ReflectLife (www.reflectlife.net), an online remembrance platform operated by Sypera
+                Welcome to Reflectlife (www.reflectlife.net), an online remembrance platform operated by Sypera
                 UG (Rablstr. 12/629, 81669 Munich, Germany).
               </p>
               <p>
