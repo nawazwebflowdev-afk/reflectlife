@@ -24,7 +24,7 @@ export default function MagicLinkEmail({
             <Text style={logoText}>🌸 Reflectlife</Text>
           </Section>
           <Section style={content}>
-            <Text style={heading}>Sign in to ReflectLife</Text>
+            <Text style={heading}>Sign in to Reflectlife</Text>
             <Text style={paragraph}>
               Click the button below to securely sign in to your account. This link will expire shortly.
             </Text>
