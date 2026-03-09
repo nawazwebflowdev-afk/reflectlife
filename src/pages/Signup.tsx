@@ -122,29 +122,21 @@ const SignupForm = () => {
 
     if (normalized.includes("rate limit") || normalized.includes("429") || normalized.includes("over_email_send_rate_limit")) {
       return {
-        title: "Email rate limit exceeded",
-        description: "Please wait 30–60 minutes before trying again, or try from a different network.",
-        requiresVerification: false,
+        title: "Too many attempts",
+        description: "Please try again in a few minutes.",
       };
     }
 
-    if (
-      normalized.includes("email not confirmed") ||
-      normalized.includes("email_not_confirmed") ||
-      normalized.includes("already exists") ||
-      normalized.includes("already registered")
-    ) {
+    if (normalized.includes("already exists") || normalized.includes("already registered")) {
       return {
-        title: "Check your email",
-        description: "Your account is pending verification. Please check your inbox and confirm your email.",
-        requiresVerification: true,
+        title: "Account already exists",
+        description: "Please sign in with your existing account.",
       };
     }
 
     return {
       title: "Sign up failed",
       description: raw || "An unexpected error occurred. Please try again.",
-      requiresVerification: false,
     };
   };
 
