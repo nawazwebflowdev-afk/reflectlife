@@ -10,7 +10,7 @@ interface RecoveryEmailProps {
 }
 
 export default function RecoveryEmail({
-  siteName = 'ReflectLife',
+  siteName = 'Reflectlife',
   siteUrl = 'https://reflectlife.net',
   confirmationUrl = '',
   recipient = '',
