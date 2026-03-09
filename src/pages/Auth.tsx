@@ -159,6 +159,13 @@ const Auth = () => {
       };
     }
 
+    if (normalized.includes("email not confirmed") || normalized.includes("email_not_confirmed")) {
+      return {
+        title: "Check your email",
+        description: "Your account exists but email verification is pending. Open your inbox and confirm your email.",
+      };
+    }
+
     return {
       title: "Sign up failed",
       description: raw || "An unexpected error occurred. Please try again.",
