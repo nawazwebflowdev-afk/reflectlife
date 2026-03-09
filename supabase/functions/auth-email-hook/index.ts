@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
         break;
       }
       case "recovery": {
-        subject = "Reset your ReflectLife password";
+        subject = "Reset your Reflectlife password";
         html = await renderAsync(RecoveryEmail({ siteName, siteUrl, confirmationUrl, recipient }));
         break;
       }
