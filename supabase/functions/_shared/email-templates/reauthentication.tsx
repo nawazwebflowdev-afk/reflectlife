@@ -10,7 +10,7 @@ interface ReauthenticationEmailProps {
 }
 
 export default function ReauthenticationEmail({
-  siteName = 'ReflectLife',
+  siteName = 'Reflectlife',
   siteUrl = 'https://reflectlife.net',
   token = '',
   recipient = '',
