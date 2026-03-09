@@ -174,107 +174,12 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Timeline Section - For Signed-In Users Only */}
-      {user && (
+      {/* Shared Memories Section - Hidden for now, will be replaced with prayers/poesie */}
+      {/* {user && (
         <section className="py-20 bg-background border-y">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-                Shared Memories
-              </h2>
-              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                Recent moments and memories shared by our community
-              </p>
-            </div>
-
-            <div className="max-w-3xl mx-auto space-y-6">
-              {loadingPosts ? (
-                <Card>
-                  <CardContent className="p-12 text-center">
-                    <p className="text-muted-foreground">Loading memories...</p>
-                  </CardContent>
-                </Card>
-              ) : timelinePosts.length > 0 ? (
-                timelinePosts.map((post) => (
-                  <Card key={post.id} className="shadow-elegant hover:shadow-elegant-lg transition-smooth cursor-pointer" onClick={() => setSelectedPost(post)}>
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4 mb-4">
-                        <Avatar className="h-12 w-12">
-                          <AvatarImage src={post.profiles?.avatar_url} />
-                          <AvatarFallback>{getUserInitials(post.profiles)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-grow">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold">
-                              {post.profiles?.full_name || post.profiles?.username || "Anonymous"}
-                            </span>
-                            <span className="text-sm text-muted-foreground">•</span>
-                            <span className="text-sm text-muted-foreground">
-                              {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-                            </span>
-                          </div>
-                          {post.location && (
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                              <MapPin className="h-3 w-3" />
-                              <span>{post.location}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {post.caption && (
-                        <p className="text-foreground mb-4 leading-relaxed">{post.caption}</p>
-                      )}
-
-                      {post.media_url && (
-                        <div className="rounded-lg overflow-hidden mb-4">
-                          <img
-                            src={post.media_url}
-                            alt="Memory"
-                            className="w-full h-auto max-h-96 object-cover"
-                          />
-                        </div>
-                      )}
-
-                      <div className="flex items-center gap-6 text-muted-foreground">
-                        <button className="flex items-center gap-2 hover:text-primary transition-smooth">
-                          <Heart className="h-5 w-5" />
-                          <span className="text-sm">{post.likes_count || 0}</span>
-                        </button>
-                        <button className="flex items-center gap-2 hover:text-primary transition-smooth">
-                          <MessageCircle className="h-5 w-5" />
-                          <span className="text-sm">{post.comments_count || 0}</span>
-                        </button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <Card>
-                  <CardContent className="p-12 text-center">
-                    <p className="text-muted-foreground mb-4">
-                      No memories shared yet. Be the first to share a memory!
-                    </p>
-                    <Link to="/timeline">
-                      <Button>Share a Memory</Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              )}
-
-              {timelinePosts.length > 0 && (
-                <div className="text-center pt-4">
-                  <Link to="/timeline">
-                    <Button variant="outline" size="lg">
-                      View All Memories
-                    </Button>
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
+          ...
         </section>
-      )}
+      )} */}
 
       {/* Sign In Prompt - For Non-Signed-In Users */}
       {!user && (
