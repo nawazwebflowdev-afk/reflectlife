@@ -1,6 +1,6 @@
-/// <reference types="npm:@types/react@18.3.1" />
-import * as React from 'npm:react@18.3.1';
-import { Html, Head, Body, Container, Section, Text, Button, Hr } from 'npm:@react-email/components@0.0.22';
+/// <reference types="https://esm.sh/@types/react@18.3.1" />
+import * as React from 'https://esm.sh/react@18.3.1';
+import { Html, Head, Body, Container, Section, Text, Button, Hr } from 'https://esm.sh/@react-email/components@0.0.22';
 
 interface RecoveryEmailProps {
   siteName?: string;
