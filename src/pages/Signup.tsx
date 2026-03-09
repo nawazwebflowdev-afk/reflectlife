@@ -222,33 +222,51 @@ const SignupForm = () => {
       });
 
       if (error) {
-        throw error;
+        const errorMessage = await extractFunctionErrorMessage(error);
+        const details = getSignupErrorDetails(errorMessage);
+
+        if (details.requiresVerification) {
+          await supabase.auth.resend({
+            type: "signup",
+            email,
+            options: {
+              emailRedirectTo: `${window.location.origin}/verify`,
+            },
+          }).catch(() => undefined);
+
+          toast({
+            title: details.title,
+            description: details.description,
+          });
+          navigate("/verify", { state: { email } });
+          return;
+        }
+
+        throw new Error(errorMessage || (error as any)?.message || "Signup failed");
       }
 
       if (data?.error) {
-        throw new Error(data.error);
+        const details = getSignupErrorDetails(data.error);
+
+        if (details.requiresVerification) {
+          await supabase.auth.resend({
+            type: "signup",
+            email,
+            options: {
+              emailRedirectTo: `${window.location.origin}/verify`,
+            },
+          }).catch(() => undefined);
+
+          toast({
+            title: details.title,
+            description: details.description,
+          });
+          navigate("/verify", { state: { email } });
+          return;
+        }
+
+        throw new Error(typeof data.error === "string" ? data.error : "Signup failed");
       }
-
-      toast({
-        title: "Account created!",
-        description: "Please check your email to verify your account.",
-      });
-
-      navigate("/verify", { state: { email } });
-
-    } catch (error: any) {
-      console.error('Signup error:', error);
-      const details = getSignupErrorDetails(error);
-      setSignupError(details.description);
-      toast({
-        title: details.title,
-        description: details.description,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 gradient-subtle">
