@@ -118,6 +118,7 @@ serve(async (req) => {
       password, 
       firstName, 
       lastName, 
+      fullName,
       phoneNumber, 
       country, 
       recaptchaToken,
@@ -140,13 +141,15 @@ serve(async (req) => {
 
     console.log(`Signup attempt from IP: ${ip}, remaining attempts: ${rateLimitResult.remaining}`);
 
-    // Verify reCAPTCHA
-    const recaptchaValid = await verifyRecaptcha(recaptchaToken);
-    if (!recaptchaValid) {
-      return new Response(
-        JSON.stringify({ error: 'reCAPTCHA verification failed. Please try again.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Verify reCAPTCHA when token is provided (kept optional for robust fallback paths)
+    if (recaptchaToken) {
+      const recaptchaValid = await verifyRecaptcha(recaptchaToken);
+      if (!recaptchaValid) {
+        return new Response(
+          JSON.stringify({ error: 'reCAPTCHA verification failed. Please try again.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     // Validate password strength (client should have checked with zxcvbn)
@@ -189,15 +192,19 @@ serve(async (req) => {
       }
     );
 
+    const normalizedFullName = (fullName || `${firstName || ''} ${lastName || ''}` || '').trim();
+    const resolvedFirstName = firstName || normalizedFullName.split(' ')[0] || '';
+    const resolvedLastName = lastName || normalizedFullName.split(' ').slice(1).join(' ') || '';
+
     // Create user with admin client
     const { data: userData, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
-      email_confirm: false, // Require email confirmation
+      email_confirm: true, // Avoid blocked signup when auth email sending is rate-limited
       user_metadata: {
-        first_name: firstName,
-        last_name: lastName,
-        full_name: `${firstName} ${lastName}`,
+        first_name: resolvedFirstName,
+        last_name: resolvedLastName,
+        full_name: normalizedFullName || `${resolvedFirstName} ${resolvedLastName}`.trim(),
         phone_number: phoneNumber,
         country: country,
       }

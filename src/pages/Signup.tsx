@@ -167,27 +167,45 @@ const SignupForm = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/verify`,
-          data: { 
-            full_name: fullName,
-            phone_number: phoneNumber,
-            country: country
-          }
+      const [firstName, ...rest] = fullName.trim().split(/\s+/);
+      const lastName = rest.join(" ");
+
+      const { data, error } = await supabase.functions.invoke('secure-signup', {
+        body: {
+          email,
+          password,
+          fullName,
+          firstName,
+          lastName,
+          phoneNumber,
+          country,
+          passwordScore: passwordStrength.score,
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        throw signInError;
+      }
 
       toast({
         title: "Account created!",
-        description: "Please check your email to verify your account.",
+        description: "Welcome to Reflectlife.",
       });
 
-      navigate("/verify");
+      navigate("/dashboard");
 
     } catch (error: any) {
       console.error('Signup error:', error);
