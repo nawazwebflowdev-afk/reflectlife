@@ -21,7 +21,7 @@ export default function MagicLinkEmail({
       <Body style={main}>
         <Container style={container}>
           <Section style={logoSection}>
-            <Text style={logoText}>🌸 ReflectLife</Text>
+            <Text style={logoText}>🌸 Reflectlife</Text>
           </Section>
           <Section style={content}>
             <Text style={heading}>Sign in to ReflectLife</Text>
