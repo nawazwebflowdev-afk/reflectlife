@@ -24,7 +24,7 @@ export default function SignupEmail({
             <Text style={logoText}>🌸 Reflectlife</Text>
           </Section>
           <Section style={content}>
-            <Text style={heading}>Welcome to ReflectLife</Text>
+            <Text style={heading}>Welcome to Reflectlife</Text>
             <Text style={paragraph}>
               Thank you for joining our community. We're honoured to help you preserve and celebrate the memories that matter most.
             </Text>
