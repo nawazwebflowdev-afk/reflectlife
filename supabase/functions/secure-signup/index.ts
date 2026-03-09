@@ -212,22 +212,29 @@ serve(async (req) => {
     if (createError) {
       console.error('User creation error:', createError);
 
-      // Existing account: if unverified, auto-confirm it so user can sign in immediately
-      if (createError.code === 'email_exists' || createError.message?.includes('already registered')) {
-        const { data: usersPage, error: listError } = await supabaseAdmin.auth.admin.listUsers({
-          page: 1,
-          perPage: 1000,
-        });
+      const isExistingAccountError =
+        createError.code === 'email_exists' ||
+        createError.message?.includes('already registered') ||
+        createError.code === 'unexpected_failure';
 
-        if (listError) {
-          console.error('List users error:', listError);
-          return new Response(
-            JSON.stringify({ error: 'Account already exists. Please sign in instead.' }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
+      // Existing account: auto-confirm if needed, then allow immediate sign-in
+      if (isExistingAccountError) {
+        let existingUser: { id: string; email_confirmed_at?: string | null; user_metadata?: Record<string, unknown> } | null = null;
+
+        for (let page = 1; page <= 10; page++) {
+          const { data: usersPage, error: listError } = await supabaseAdmin.auth.admin.listUsers({
+            page,
+            perPage: 1000,
+          });
+
+          if (listError) {
+            console.error('List users error:', listError);
+            break;
+          }
+
+          existingUser = usersPage.users.find((u) => (u.email || '').toLowerCase() === (email || '').toLowerCase()) || null;
+          if (existingUser || usersPage.users.length === 0) break;
         }
-
-        const existingUser = usersPage.users.find((u) => (u.email || '').toLowerCase() === (email || '').toLowerCase());
 
         if (!existingUser) {
           return new Response(
@@ -240,7 +247,7 @@ serve(async (req) => {
           const { error: confirmError } = await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
             email_confirm: true,
             user_metadata: {
-              ...existingUser.user_metadata,
+              ...(existingUser.user_metadata || {}),
               first_name: resolvedFirstName,
               last_name: resolvedLastName,
               full_name: normalizedFullName || `${resolvedFirstName} ${resolvedLastName}`.trim(),
