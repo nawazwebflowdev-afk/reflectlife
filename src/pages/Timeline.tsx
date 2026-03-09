@@ -48,6 +48,33 @@ const Timeline = () => {
   const [selectedPostForShare, setSelectedPostForShare] = useState<Post | null>(null);
   const { toast } = useToast();
 
+  // Auto-detect location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const { latitude, longitude } = position.coords;
+            const res = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=en`
+            );
+            const data = await res.json();
+            const addr = data.address;
+            const city = addr.city || addr.town || addr.village || addr.municipality || "";
+            const country = addr.country || "";
+            if (city || country) {
+              setLocation([city, country].filter(Boolean).join(", "));
+            }
+          } catch (e) {
+            // Silently fail - location is optional
+          }
+        },
+        () => {}, // User denied - silently fail
+        { timeout: 5000 }
+      );
+    }
+  }, []);
+
   useEffect(() => {
     // Get current user
     supabase.auth.getSession().then(({ data: { session } }) => {
