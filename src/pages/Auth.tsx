@@ -258,27 +258,12 @@ const Auth = () => {
       }
 
       toast({
-        title: "Account created! 🎉",
-        description: "Welcome to Reflectlife! You're now signed in.",
+        title: "Account created!",
+        description: "Please check your email to verify your account.",
       });
 
-      // Sign in the user automatically
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        toast({
-          title: "Sign in required",
-          description: "Please check your email to verify your account, then sign in.",
-        });
-        setShowSignUp(false);
-        return;
-      }
-
-      // Redirect to dashboard
-      navigate("/dashboard");
+      setShowSignUp(false);
+      navigate("/verify", { state: { email } });
 
     } catch (error: any) {
       console.error('Signup error:', error);
