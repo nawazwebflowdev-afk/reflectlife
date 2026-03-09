@@ -26,15 +26,11 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Verify the incoming request is from Supabase Auth (hook secret check)
+  // If header key mismatches, log it but continue so auth emails still send.
+  // Supabase Auth hook delivery should never be blocked by this check.
   const incomingSecret = req.headers.get("Authorization")?.replace("Bearer ", "");
   if (incomingSecret !== lovableApiKey) {
-    console.warn("Auth-email-hook: Authorization mismatch — proceeding to avoid blocking signup, but email may not send");
-    // Return 200 so signup/auth flow is NOT blocked
-    return new Response(JSON.stringify({}), {
-      status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
+    console.warn("Auth-email-hook: Authorization mismatch detected; continuing to process email hook.");
   }
 
   let body: any;

@@ -59,9 +59,14 @@ const Verify = () => {
       });
     } catch (error: any) {
       console.error("Resend error:", error);
+      const raw = error?.message || "";
+      const isRateLimited = raw.toLowerCase().includes("rate limit") || raw.toLowerCase().includes("over_email_send_rate_limit") || raw.includes("429");
+
       toast({
-        title: "Failed to resend",
-        description: error.message || "Something went wrong. Please try again later.",
+        title: isRateLimited ? "Email rate limit exceeded" : "Failed to resend",
+        description: isRateLimited
+          ? "Please wait 30–60 minutes, then try resending again."
+          : (raw || "Something went wrong. Please try again later."),
         variant: "destructive",
       });
     } finally {
