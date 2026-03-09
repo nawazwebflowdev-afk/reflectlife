@@ -10,7 +10,7 @@ interface InviteEmailProps {
 }
 
 export default function InviteEmail({
-  siteName = 'ReflectLife',
+  siteName = 'Reflectlife',
   siteUrl = 'https://reflectlife.net',
   confirmationUrl = '',
   recipient = '',
