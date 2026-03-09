@@ -222,21 +222,12 @@ const SignupForm = () => {
         throw new Error(typeof data.error === "string" ? data.error : "Signup failed");
       }
 
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        throw signInError;
-      }
-
       toast({
         title: "Account created!",
-        description: "Welcome to Reflectlife.",
+        description: "Please check your email to verify your account.",
       });
 
-      navigate("/dashboard");
+      navigate("/verify", { state: { email } });
 
     } catch (error: any) {
       console.error('Signup error:', error);
