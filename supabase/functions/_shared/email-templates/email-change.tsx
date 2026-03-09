@@ -23,7 +23,7 @@ export default function EmailChangeEmail({
       <Body style={main}>
         <Container style={container}>
           <Section style={logoSection}>
-            <Text style={logoText}>🌸 ReflectLife</Text>
+            <Text style={logoText}>🌸 Reflectlife</Text>
           </Section>
           <Section style={content}>
             <Text style={heading}>Confirm email change</Text>
