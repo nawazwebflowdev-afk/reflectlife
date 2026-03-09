@@ -27,7 +27,7 @@ const PrivacyPolicy = () => {
               </p>
               <Separator className="my-4" />
               <p>
-                Willkommen bei ReflectLife (www.reflectlife.net), einer Online-Gedenkplattform, betrieben von
+                Willkommen bei Reflectlife (www.reflectlife.net), einer Online-Gedenkplattform, betrieben von
                 Sypera UG (Rablstr. 12/629, 81669 München, Deutschland).
               </p>
               <p>
