@@ -124,13 +124,51 @@ const SignupForm = () => {
       return {
         title: "Email rate limit exceeded",
         description: "Please wait 30–60 minutes before trying again, or try from a different network.",
+        requiresVerification: false,
+      };
+    }
+
+    if (
+      normalized.includes("email not confirmed") ||
+      normalized.includes("email_not_confirmed") ||
+      normalized.includes("already exists") ||
+      normalized.includes("already registered")
+    ) {
+      return {
+        title: "Check your email",
+        description: "Your account is pending verification. Please check your inbox and confirm your email.",
+        requiresVerification: true,
       };
     }
 
     return {
       title: "Sign up failed",
       description: raw || "An unexpected error occurred. Please try again.",
+      requiresVerification: false,
     };
+  };
+
+  const extractFunctionErrorMessage = async (error: unknown): Promise<string> => {
+    const fallback = (error as any)?.message || "";
+    const context = (error as any)?.context;
+
+    if (!context) return fallback;
+
+    try {
+      const cloned = typeof context.clone === "function" ? context.clone() : context;
+      const parsed = await cloned.json();
+      if (parsed?.error) return String(parsed.error);
+      if (parsed?.message) return String(parsed.message);
+    } catch {
+      try {
+        const text = await context.text();
+        if (text) return text;
+      } catch {
+        // ignore and return fallback
+      }
+    }
+
+    return fallback;
   };
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
