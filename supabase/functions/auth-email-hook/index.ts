@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
         break;
       }
       case "reauthentication": {
-        subject = "Your ReflectLife verification code";
+        subject = "Your Reflectlife verification code";
         html = await renderAsync(ReauthenticationEmail({ siteName, siteUrl, token, recipient }));
         break;
       }
