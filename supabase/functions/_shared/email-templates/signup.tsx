@@ -10,7 +10,7 @@ interface SignupEmailProps {
 }
 
 export default function SignupEmail({
-  siteName = 'ReflectLife',
+  siteName = 'Reflectlife',
   siteUrl = 'https://reflectlife.net',
   confirmationUrl = '',
   recipient = '',
