@@ -180,23 +180,33 @@ serve(async (req) => {
       );
     }
 
-    // Create Supabase admin client
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
+    // Create Supabase clients
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
       }
-    );
+    });
+
+    const supabasePublic = createClient(supabaseUrl, anonKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
 
     const normalizedFullName = (fullName || `${firstName || ''} ${lastName || ''}` || '').trim();
     const resolvedFirstName = firstName || normalizedFullName.split(' ')[0] || '';
     const resolvedLastName = lastName || normalizedFullName.split(' ').slice(1).join(' ') || '';
 
-    // Create user with admin client (email_confirm: false so verification email is sent)
+    const origin = req.headers.get('origin') || 'https://reflectlife.lovable.app';
+    const emailRedirectTo = `${origin}/verify`;
+
+    // Create user with admin client (email_confirm: false keeps verification required)
     const { data: userData, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
@@ -212,18 +222,53 @@ serve(async (req) => {
 
     if (createError) {
       console.error('User creation error:', createError);
-      
-      // Provide helpful error messages
-      if (createError.message.includes('already registered')) {
+
+      // Existing account: try to resend verification email and return non-fatal response
+      if (createError.code === 'email_exists' || createError.message?.includes('already registered')) {
+        const { error: resendExistingError } = await supabasePublic.auth.resend({
+          type: 'signup',
+          email,
+          options: {
+            emailRedirectTo,
+          },
+        });
+
+        if (resendExistingError) {
+          console.error('Resend error for existing user:', resendExistingError);
+        }
+
         return new Response(
-          JSON.stringify({ error: 'An account with this email already exists. Please sign in instead.' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({
+            success: true,
+            requiresVerification: true,
+            message: 'Account already exists but is not verified. We sent a new verification email.',
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      
+
       return new Response(
         JSON.stringify({ error: 'Account creation failed. Please try again.' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Always send verification email after signup creation
+    const { error: resendError } = await supabasePublic.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo,
+      },
+    });
+
+    if (resendError) {
+      console.error('Verification resend error:', resendError);
+      return new Response(
+        JSON.stringify({
+          error: 'Account created but verification email could not be sent. Please try again in a minute.',
+        }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -231,7 +276,8 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ 
-        success: true, 
+        success: true,
+        requiresVerification: true,
         message: 'Account created successfully! Please check your email to confirm your account.',
         userId: userData.user.id 
       }),
