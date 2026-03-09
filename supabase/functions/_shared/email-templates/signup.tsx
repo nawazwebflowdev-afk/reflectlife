@@ -10,7 +10,7 @@ interface SignupEmailProps {
 }
 
 export default function SignupEmail({
-  siteName = 'ReflectLife',
+  siteName = 'Reflectlife',
   siteUrl = 'https://reflectlife.net',
   confirmationUrl = '',
   recipient = '',
@@ -21,10 +21,10 @@ export default function SignupEmail({
       <Body style={main}>
         <Container style={container}>
           <Section style={logoSection}>
-            <Text style={logoText}>🌸 ReflectLife</Text>
+            <Text style={logoText}>🌸 Reflectlife</Text>
           </Section>
           <Section style={content}>
-            <Text style={heading}>Welcome to ReflectLife</Text>
+            <Text style={heading}>Welcome to Reflectlife</Text>
             <Text style={paragraph}>
               Thank you for joining our community. We're honoured to help you preserve and celebrate the memories that matter most.
             </Text>
@@ -37,12 +37,12 @@ export default function SignupEmail({
               </Button>
             </Section>
             <Text style={smallText}>
-              If you didn't create an account on ReflectLife, you can safely ignore this email.
+              If you didn't create an account on Reflectlife, you can safely ignore this email.
             </Text>
           </Section>
           <Hr style={hr} />
           <Text style={footer}>
-            © {new Date().getFullYear()} ReflectLife — Honouring life, preserving memories.
+            © {new Date().getFullYear()} Reflectlife — Honouring life, preserving memories.
           </Text>
         </Container>
       </Body>

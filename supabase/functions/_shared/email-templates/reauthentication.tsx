@@ -10,7 +10,7 @@ interface ReauthenticationEmailProps {
 }
 
 export default function ReauthenticationEmail({
-  siteName = 'ReflectLife',
+  siteName = 'Reflectlife',
   siteUrl = 'https://reflectlife.net',
   token = '',
   recipient = '',
@@ -21,7 +21,7 @@ export default function ReauthenticationEmail({
       <Body style={main}>
         <Container style={container}>
           <Section style={logoSection}>
-            <Text style={logoText}>🌸 ReflectLife</Text>
+            <Text style={logoText}>🌸 Reflectlife</Text>
           </Section>
           <Section style={content}>
             <Text style={heading}>Verification code</Text>
@@ -37,7 +37,7 @@ export default function ReauthenticationEmail({
           </Section>
           <Hr style={hr} />
           <Text style={footer}>
-            © {new Date().getFullYear()} ReflectLife — Honouring life, preserving memories.
+            © {new Date().getFullYear()} Reflectlife — Honouring life, preserving memories.
           </Text>
         </Container>
       </Body>

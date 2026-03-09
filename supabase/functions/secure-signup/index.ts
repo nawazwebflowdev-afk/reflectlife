@@ -119,7 +119,7 @@ async function sendVerificationEmail(
   // Render the branded email template
   const html = await renderAsync(
     SignupEmail({
-      siteName: 'ReflectLife',
+      siteName: 'Reflectlife',
       siteUrl: 'https://reflectlife.net',
       confirmationUrl,
       recipient: recipientEmail,
@@ -134,9 +134,9 @@ async function sendVerificationEmail(
       Authorization: `Bearer ${resendApiKey}`,
     },
     body: JSON.stringify({
-      from: 'ReflectLife <noreply@reflectlife.net>',
+      from: 'Reflectlife <noreply@reflectlife.net>',
       to: [recipientEmail],
-      subject: 'Welcome to ReflectLife — Confirm your email',
+      subject: 'Welcome to Reflectlife — Confirm your email',
       html,
     }),
   });

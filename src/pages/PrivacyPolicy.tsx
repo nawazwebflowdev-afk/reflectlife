@@ -17,7 +17,7 @@ const PrivacyPolicy = () => {
             </h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                Welcome to ReflectLife (www.reflectlife.net), an online remembrance platform operated by Sypera
+                Welcome to Reflectlife (www.reflectlife.net), an online remembrance platform operated by Sypera
                 UG (Rablstr. 12/629, 81669 Munich, Germany).
               </p>
               <p>
@@ -27,7 +27,7 @@ const PrivacyPolicy = () => {
               </p>
               <Separator className="my-4" />
               <p>
-                Willkommen bei ReflectLife (www.reflectlife.net), einer Online-Gedenkplattform, betrieben von
+                Willkommen bei Reflectlife (www.reflectlife.net), einer Online-Gedenkplattform, betrieben von
                 Sypera UG (Rablstr. 12/629, 81669 München, Deutschland).
               </p>
               <p>
@@ -145,13 +145,13 @@ const PrivacyPolicy = () => {
             </h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                ReflectLife uses cookies to improve your browsing experience, analyze traffic, and personalize
+                Reflectlife uses cookies to improve your browsing experience, analyze traffic, and personalize
                 content.
               </p>
               <p>You can manage your cookie preferences through your browser settings.</p>
               <Separator className="my-4" />
               <p>
-                ReflectLife verwendet Cookies, um Ihr Nutzungserlebnis zu verbessern, den Datenverkehr zu
+                Reflectlife verwendet Cookies, um Ihr Nutzungserlebnis zu verbessern, den Datenverkehr zu
                 analysieren und Inhalte zu personalisieren.
               </p>
               <p>Sie können Ihre Cookie-Einstellungen über Ihren Browser anpassen.</p>

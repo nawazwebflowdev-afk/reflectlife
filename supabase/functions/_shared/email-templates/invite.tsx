@@ -10,7 +10,7 @@ interface InviteEmailProps {
 }
 
 export default function InviteEmail({
-  siteName = 'ReflectLife',
+  siteName = 'Reflectlife',
   siteUrl = 'https://reflectlife.net',
   confirmationUrl = '',
   recipient = '',
@@ -21,12 +21,12 @@ export default function InviteEmail({
       <Body style={main}>
         <Container style={container}>
           <Section style={logoSection}>
-            <Text style={logoText}>🌸 ReflectLife</Text>
+            <Text style={logoText}>🌸 Reflectlife</Text>
           </Section>
           <Section style={content}>
             <Text style={heading}>You've been invited</Text>
             <Text style={paragraph}>
-              Someone special has invited you to join ReflectLife — a place to honour and preserve cherished memories together.
+              Someone special has invited you to join Reflectlife — a place to honour and preserve cherished memories together.
             </Text>
             <Section style={buttonContainer}>
               <Button style={button} href={confirmationUrl}>
@@ -39,7 +39,7 @@ export default function InviteEmail({
           </Section>
           <Hr style={hr} />
           <Text style={footer}>
-            © {new Date().getFullYear()} ReflectLife — Honouring life, preserving memories.
+            © {new Date().getFullYear()} Reflectlife — Honouring life, preserving memories.
           </Text>
         </Container>
       </Body>

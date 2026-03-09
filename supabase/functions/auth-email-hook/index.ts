@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
     token_hash_new,
   } = emailData;
 
-  const siteName = "ReflectLife";
+  const siteName = "Reflectlife";
   const siteUrl = site_url || "https://reflectlife.net";
 
   // Build confirmation URL using token_hash
@@ -110,32 +110,32 @@ Deno.serve(async (req) => {
   try {
     switch (email_action_type) {
       case "signup": {
-        subject = "Welcome to ReflectLife — Confirm your email";
+        subject = "Welcome to Reflectlife — Confirm your email";
         html = await renderAsync(SignupEmail({ siteName, siteUrl, confirmationUrl, recipient }));
         break;
       }
       case "recovery": {
-        subject = "Reset your ReflectLife password";
+        subject = "Reset your Reflectlife password";
         html = await renderAsync(RecoveryEmail({ siteName, siteUrl, confirmationUrl, recipient }));
         break;
       }
       case "invite": {
-        subject = "You've been invited to ReflectLife";
+        subject = "You've been invited to Reflectlife";
         html = await renderAsync(InviteEmail({ siteName, siteUrl, confirmationUrl, recipient }));
         break;
       }
       case "magiclink": {
-        subject = "Sign in to ReflectLife";
+        subject = "Sign in to Reflectlife";
         html = await renderAsync(MagicLinkEmail({ siteName, siteUrl, confirmationUrl, recipient }));
         break;
       }
       case "email_change": {
-        subject = "Confirm your email change — ReflectLife";
+        subject = "Confirm your email change — Reflectlife";
         html = await renderAsync(EmailChangeEmail({ siteName, siteUrl, confirmationUrl, recipient, newEmail }));
         break;
       }
       case "reauthentication": {
-        subject = "Your ReflectLife verification code";
+        subject = "Your Reflectlife verification code";
         html = await renderAsync(ReauthenticationEmail({ siteName, siteUrl, token, recipient }));
         break;
       }
@@ -174,7 +174,7 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${resendApiKey}`,
       },
       body: JSON.stringify({
-        from: "ReflectLife <noreply@reflectlife.net>",
+        from: "Reflectlife <noreply@reflectlife.net>",
         to: [recipient],
         subject,
         html,
