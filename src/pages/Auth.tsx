@@ -35,7 +35,7 @@ const Auth = () => {
     feedback: string;
     color: string;
   }>({ score: 0, feedback: "", color: "bg-gray-200" });
-  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  
   
   const navigate = useNavigate();
   const { toast } = useToast();
