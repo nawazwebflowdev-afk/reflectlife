@@ -145,7 +145,7 @@ const PrivacyPolicy = () => {
             </h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                ReflectLife uses cookies to improve your browsing experience, analyze traffic, and personalize
+                Reflectlife uses cookies to improve your browsing experience, analyze traffic, and personalize
                 content.
               </p>
               <p>You can manage your cookie preferences through your browser settings.</p>
