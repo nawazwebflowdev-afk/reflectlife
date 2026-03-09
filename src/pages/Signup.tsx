@@ -124,13 +124,51 @@ const SignupForm = () => {
       return {
         title: "Email rate limit exceeded",
         description: "Please wait 30–60 minutes before trying again, or try from a different network.",
+        requiresVerification: false,
+      };
+    }
+
+    if (
+      normalized.includes("email not confirmed") ||
+      normalized.includes("email_not_confirmed") ||
+      normalized.includes("already exists") ||
+      normalized.includes("already registered")
+    ) {
+      return {
+        title: "Check your email",
+        description: "Your account is pending verification. Please check your inbox and confirm your email.",
+        requiresVerification: true,
       };
     }
 
     return {
       title: "Sign up failed",
       description: raw || "An unexpected error occurred. Please try again.",
+      requiresVerification: false,
     };
+  };
+
+  const extractFunctionErrorMessage = async (error: unknown): Promise<string> => {
+    const fallback = (error as any)?.message || "";
+    const context = (error as any)?.context;
+
+    if (!context) return fallback;
+
+    try {
+      const cloned = typeof context.clone === "function" ? context.clone() : context;
+      const parsed = await cloned.json();
+      if (parsed?.error) return String(parsed.error);
+      if (parsed?.message) return String(parsed.message);
+    } catch {
+      try {
+        const text = await context.text();
+        if (text) return text;
+      } catch {
+        // ignore and return fallback
+      }
+    }
+
+    return fallback;
   };
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -184,11 +222,50 @@ const SignupForm = () => {
       });
 
       if (error) {
-        throw error;
+        const errorMessage = await extractFunctionErrorMessage(error);
+        const details = getSignupErrorDetails(errorMessage);
+
+        if (details.requiresVerification) {
+          await supabase.auth.resend({
+            type: "signup",
+            email,
+            options: {
+              emailRedirectTo: `${window.location.origin}/verify`,
+            },
+          }).catch(() => undefined);
+
+          toast({
+            title: details.title,
+            description: details.description,
+          });
+          navigate("/verify", { state: { email } });
+          return;
+        }
+
+        throw new Error(errorMessage || (error as any)?.message || "Signup failed");
       }
 
       if (data?.error) {
-        throw new Error(data.error);
+        const details = getSignupErrorDetails(data.error);
+
+        if (details.requiresVerification) {
+          await supabase.auth.resend({
+            type: "signup",
+            email,
+            options: {
+              emailRedirectTo: `${window.location.origin}/verify`,
+            },
+          }).catch(() => undefined);
+
+          toast({
+            title: details.title,
+            description: details.description,
+          });
+          navigate("/verify", { state: { email } });
+          return;
+        }
+
+        throw new Error(typeof data.error === "string" ? data.error : "Signup failed");
       }
 
       toast({
@@ -200,7 +277,26 @@ const SignupForm = () => {
 
     } catch (error: any) {
       console.error('Signup error:', error);
-      const details = getSignupErrorDetails(error);
+      const resolvedMessage = await extractFunctionErrorMessage(error);
+      const details = getSignupErrorDetails(resolvedMessage);
+
+      if (details.requiresVerification) {
+        await supabase.auth.resend({
+          type: "signup",
+          email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/verify`,
+          },
+        }).catch(() => undefined);
+
+        toast({
+          title: details.title,
+          description: details.description,
+        });
+        navigate("/verify", { state: { email } });
+        return;
+      }
+
       setSignupError(details.description);
       toast({
         title: details.title,
