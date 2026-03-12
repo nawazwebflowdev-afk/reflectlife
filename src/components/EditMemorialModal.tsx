@@ -77,9 +77,13 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
 
       // Upload new image if selected
       if (imageFile) {
+        const { data: { session } } = await supabase.auth.getSession();
+        const userId = session?.user?.id;
+        if (!userId) throw new Error("Not authenticated");
+        
         const fileExt = imageFile.name.split('.').pop();
         const fileName = `${memorial.id}-${Date.now()}.${fileExt}`;
-        const filePath = `memorial-images/${fileName}`;
+        const filePath = `${userId}/memorial-images/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('memorial_uploads')
