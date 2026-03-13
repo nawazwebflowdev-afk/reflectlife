@@ -73,17 +73,18 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
     setLoading(true);
 
     try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        throw new Error("Your session expired. Please log in again and retry.");
+      }
+
       let previewImageUrl = memorial.preview_image_url;
 
       // Upload new image if selected
       if (imageFile) {
-        const { data: { session } } = await supabase.auth.getSession();
-        const userId = session?.user?.id;
-        if (!userId) throw new Error("Not authenticated");
-        
-        const fileExt = imageFile.name.split('.').pop();
+        const fileExt = imageFile.name.split('.').pop() || "jpg";
         const fileName = `${memorial.id}-${Date.now()}.${fileExt}`;
-        const filePath = `${userId}/memorial-images/${fileName}`;
+        const filePath = `${user.id}/memorial-images/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('memorial_uploads')
@@ -99,7 +100,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
       }
 
       // Update memorial
-      const { error: updateError } = await supabase
+      const { data: updatedMemorial, error: updateError } = await supabase
         .from('memorials')
         .update({
           name: formData.name,
@@ -112,9 +113,15 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
           privacy_level: isPublic ? 'public' : 'private',
           updated_at: new Date().toISOString(),
         })
-        .eq('id', memorial.id);
+        .eq('id', memorial.id)
+        .eq('user_id', user.id)
+        .select('id')
+        .maybeSingle();
 
       if (updateError) throw updateError;
+      if (!updatedMemorial) {
+        throw new Error("You don't have permission to edit this memorial.");
+      }
 
       toast({
         title: "Success",
