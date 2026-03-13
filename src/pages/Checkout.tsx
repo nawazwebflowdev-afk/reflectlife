@@ -240,14 +240,6 @@ const Checkout = () => {
                   </div>
                 ) : (
                   <>
-                    <div className="bg-accent/50 border border-border rounded-md p-4 space-y-2">
-                      <p className="text-sm font-semibold">Test Mode - Use Test Card:</p>
-                      <div className="space-y-1 text-xs text-muted-foreground">
-                        <p>Card: <code className="bg-muted px-2 py-1 rounded">4242 4242 4242 4242</code></p>
-                        <p>Expiry: Any future date</p>
-                        <p>CVC: Any 3 digits</p>
-                      </div>
-                    </div>
 
                     <Button 
                       className="w-full shadow-elegant" 
