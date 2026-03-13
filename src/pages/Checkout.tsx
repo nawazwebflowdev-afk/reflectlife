@@ -154,7 +154,7 @@ const Checkout = () => {
             Complete Your Purchase
           </h1>
           <p className="text-muted-foreground">
-            Secure checkout powered by Stripe (Test Mode)
+            Secure checkout powered by Stripe
           </p>
         </div>
 
