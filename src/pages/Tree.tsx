@@ -539,9 +539,10 @@ const Tree = () => {
                             const displayName = conn.person_id
                               ? (conn.profile?.full_name || "Unknown")
                               : (conn.related_person_name || "Unknown");
-                            const avatarUrl = conn.person_id
-                              ? conn.profile?.avatar_url
-                              : conn.image_url;
+                            const avatarUrl =
+                              conn.image_url ||
+                              (conn.person_id ? conn.profile?.avatar_url : null) ||
+                              null;
                             return (
                               <button
                                 key={conn.id}
