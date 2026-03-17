@@ -50,22 +50,34 @@ Deno.serve(async (req) => {
         return new Response('Template not found', { status: 404 });
       }
 
-      // Insert purchase record
-      const { error: purchaseError } = await supabase
+      // Idempotency check: Stripe may retry the same event
+      const { data: existingPurchases, error: existingPurchaseError } = await supabase
         .from('template_purchases')
-        .insert({
-          buyer_id,
-          template_id,
-          creator_id: creator_id || null,
-          amount: template.price,
-          payment_status: 'completed',
-          stripe_payment_intent_id: session.payment_intent as string,
-          currency: 'EUR',
-        });
+        .select('id')
+        .eq('stripe_session_id', session.id)
+        .limit(1);
 
-      if (purchaseError) {
-        console.error('Error creating purchase record:', purchaseError);
-        return new Response('Error creating purchase record', { status: 500 });
+      if (existingPurchaseError) {
+        console.error('Error checking existing purchase:', existingPurchaseError);
+        return new Response('Error checking purchase', { status: 500 });
+      }
+
+      if (!existingPurchases || existingPurchases.length === 0) {
+        // Insert purchase record (must match table schema)
+        const { error: purchaseError } = await supabase
+          .from('template_purchases')
+          .insert({
+            buyer_id,
+            template_id,
+            amount: template.price,
+            payment_status: 'success',
+            stripe_session_id: session.id,
+          });
+
+        if (purchaseError) {
+          console.error('Error creating purchase record:', purchaseError);
+          return new Response('Error creating purchase record', { status: 500 });
+        }
       }
 
       // Update buyer's profile with selected template
