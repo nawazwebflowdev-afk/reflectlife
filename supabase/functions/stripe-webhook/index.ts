@@ -51,18 +51,18 @@ Deno.serve(async (req) => {
       }
 
       // Idempotency check: Stripe may retry the same event
-      const { data: existingPurchase, error: existingPurchaseError } = await supabase
+      const { data: existingPurchases, error: existingPurchaseError } = await supabase
         .from('template_purchases')
         .select('id')
         .eq('stripe_session_id', session.id)
-        .maybeSingle();
+        .limit(1);
 
       if (existingPurchaseError) {
         console.error('Error checking existing purchase:', existingPurchaseError);
         return new Response('Error checking purchase', { status: 500 });
       }
 
-      if (!existingPurchase) {
+      if (!existingPurchases || existingPurchases.length === 0) {
         // Insert purchase record (must match table schema)
         const { error: purchaseError } = await supabase
           .from('template_purchases')
