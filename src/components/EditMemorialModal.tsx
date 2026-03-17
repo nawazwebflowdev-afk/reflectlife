@@ -60,7 +60,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim()) {
       toast({
         title: "Error",
@@ -73,40 +73,47 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
     setLoading(true);
 
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
         throw new Error("Your session expired. Please log in again and retry.");
       }
 
-      if (memorial?.user_id && memorial.user_id !== user.id) {
+      const user = session.user;
+
+      const { data: ownedMemorial, error: ownershipError } = await supabase
+        .from("memorials")
+        .select("id, user_id, preview_image_url")
+        .eq("id", memorial.id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (ownershipError) throw ownershipError;
+      if (!ownedMemorial) {
         throw new Error("You don't have permission to edit this memorial.");
       }
 
-      let previewImageUrl = memorial.preview_image_url;
+      let previewImageUrl = ownedMemorial.preview_image_url || memorial.preview_image_url;
 
-      // Upload new image if selected
       if (imageFile) {
-        const fileExt = imageFile.name.split('.').pop() || "jpg";
-        const filePath = `${user.id}/${Date.now()}-${crypto.randomUUID()}.${fileExt}`;
+        const fileExt = imageFile.name.split(".").pop() || "jpg";
+        const filePath = `${user.id}/memorials/${memorial.id}/${Date.now()}-${crypto.randomUUID()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
-          .from('memorial_uploads')
+          .from("memorial_uploads")
           .upload(filePath, imageFile, { upsert: false });
 
         if (uploadError) throw uploadError;
 
         const { data: { publicUrl } } = supabase.storage
-          .from('memorial_uploads')
+          .from("memorial_uploads")
           .getPublicUrl(filePath);
 
         previewImageUrl = publicUrl;
       }
 
-      // Update memorial
       const { data: updatedMemorial, error: updateError } = await supabase
-        .from('memorials')
+        .from("memorials")
         .update({
-          user_id: user.id,
           name: formData.name,
           bio: formData.bio,
           location: formData.location,
@@ -114,12 +121,12 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
           date_of_death: formData.date_of_death || null,
           preview_image_url: previewImageUrl,
           is_public: isPublic,
-          privacy_level: isPublic ? 'public' : 'private',
+          privacy_level: isPublic ? "public" : "private",
           updated_at: new Date().toISOString(),
         })
-        .eq('id', memorial.id)
-        .eq('user_id', user.id)
-        .select('id')
+        .eq("id", memorial.id)
+        .eq("user_id", user.id)
+        .select("id")
         .maybeSingle();
 
       if (updateError) throw updateError;
