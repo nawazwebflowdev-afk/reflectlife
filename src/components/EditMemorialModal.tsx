@@ -78,17 +78,20 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
         throw new Error("Your session expired. Please log in again and retry.");
       }
 
+      if (memorial?.user_id && memorial.user_id !== user.id) {
+        throw new Error("You don't have permission to edit this memorial.");
+      }
+
       let previewImageUrl = memorial.preview_image_url;
 
       // Upload new image if selected
       if (imageFile) {
         const fileExt = imageFile.name.split('.').pop() || "jpg";
-        const fileName = `${memorial.id}-${Date.now()}.${fileExt}`;
-        const filePath = `${user.id}/memorial-images/${fileName}`;
+        const filePath = `${user.id}/${Date.now()}-${crypto.randomUUID()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from('memorial_uploads')
-          .upload(filePath, imageFile);
+          .upload(filePath, imageFile, { upsert: false });
 
         if (uploadError) throw uploadError;
 
@@ -103,6 +106,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
       const { data: updatedMemorial, error: updateError } = await supabase
         .from('memorials')
         .update({
+          user_id: user.id,
           name: formData.name,
           bio: formData.bio,
           location: formData.location,
