@@ -201,7 +201,7 @@ const ConnectionDetailPanel = ({
       let imageUrl: string | null = null;
       if (editImageFile) {
         setUploadingImage(true);
-        imageUrl = await uploadImage();
+        imageUrl = await uploadImage(user.id, connection.image_url);
         setUploadingImage(false);
       }
 
