@@ -322,13 +322,20 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
               isPublic={memorial?.is_public ?? true}
               privacyLevel={memorial?.privacy_level || "public"}
               onPrivacyChange={async (newIsPublic, newPrivacyLevel) => {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                  toast({ title: "Error", description: "Please log in again.", variant: "destructive" });
+                  return;
+                }
+
                 const { error } = await supabase
                   .from("memorials")
                   .update({
                     is_public: newIsPublic,
                     privacy_level: newPrivacyLevel as any,
                   })
-                  .eq("id", memorial.id);
+                  .eq("id", memorial.id)
+                  .eq("user_id", user.id);
 
                 if (error) {
                   toast({ title: "Error", description: "Failed to update privacy", variant: "destructive" });
