@@ -136,19 +136,24 @@ const ConnectionDetailPanel = ({
 
   const uploadImage = async (): Promise<string | null> => {
     if (!editImageFile) return null;
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
 
-    const ext = editImageFile.name.split(".").pop();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error("Your session expired. Please log in again.");
+    }
+
+    const ext = editImageFile.name.split(".").pop() || "jpg";
     const path = `${user.id}/connections/${connection.id}.${ext}`;
     const { error } = await supabase.storage
       .from("profile-pictures")
       .upload(path, editImageFile, { upsert: true });
+
     if (error) throw error;
 
     const { data: { publicUrl } } = supabase.storage
       .from("profile-pictures")
       .getPublicUrl(path);
+
     return publicUrl;
   };
 
@@ -157,6 +162,7 @@ const ConnectionDetailPanel = ({
       toast({ title: "Missing information", description: "Relationship is required.", variant: "destructive" });
       return;
     }
+
     if (!connection.person_id && !editName.trim()) {
       toast({ title: "Missing information", description: "Name is required.", variant: "destructive" });
       return;
@@ -164,6 +170,15 @@ const ConnectionDetailPanel = ({
 
     setSavingEdit(true);
     try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        throw new Error("Your session expired. Please log in again.");
+      }
+
+      if (connection.owner_id && connection.owner_id !== user.id) {
+        throw new Error("You don't have permission to edit this connection.");
+      }
+
       let imageUrl: string | null = null;
       if (editImageFile) {
         setUploadingImage(true);
@@ -172,21 +187,31 @@ const ConnectionDetailPanel = ({
       }
 
       const updatePayload: Record<string, unknown> = {
+        owner_id: user.id,
         relationship_type: editRelationship.trim(),
         connection_type: editConnectionType,
       };
+
       if (!connection.person_id) {
         updatePayload.related_person_name = editName.trim();
       }
+
       if (imageUrl) {
         updatePayload.image_url = imageUrl;
       }
 
-      const { error } = await supabase
+      const { data: updatedConnection, error } = await supabase
         .from("connections")
         .update(updatePayload)
-        .eq("id", connection.id);
+        .eq("id", connection.id)
+        .eq("owner_id", user.id)
+        .select("id")
+        .maybeSingle();
+
       if (error) throw error;
+      if (!updatedConnection) {
+        throw new Error("You don't have permission to edit this connection.");
+      }
 
       toast({ title: "Connection updated", description: "Your changes were saved." });
       setShowEditModal(false);
