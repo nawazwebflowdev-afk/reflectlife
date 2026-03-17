@@ -189,8 +189,9 @@ const ConnectionDetailPanel = ({
 
     setSavingEdit(true);
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
+      const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
+      const user = refreshed.session?.user;
+      if (refreshError || !user) {
         throw new Error("Your session expired. Please log in again.");
       }
 
