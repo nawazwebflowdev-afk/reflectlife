@@ -141,9 +141,14 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
       onOpenChange(false);
     } catch (error: any) {
       console.error("Error updating memorial:", error);
+      const rawMessage = error?.message || "Failed to update memorial";
+      const friendlyMessage = rawMessage.toLowerCase().includes("row-level security")
+        ? "You are no longer authenticated for upload. Please log in again and retry."
+        : rawMessage;
+
       toast({
         title: "Error",
-        description: error.message || "Failed to update memorial",
+        description: friendlyMessage,
         variant: "destructive",
       });
     } finally {
