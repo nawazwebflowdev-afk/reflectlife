@@ -73,12 +73,10 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
     setLoading(true);
 
     try {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !session?.user) {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
         throw new Error("Your session expired. Please log in again and retry.");
       }
-
-      const user = session.user;
 
       const { data: ownedMemorial, error: ownershipError } = await supabase
         .from("memorials")
@@ -143,9 +141,14 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
       onOpenChange(false);
     } catch (error: any) {
       console.error("Error updating memorial:", error);
+      const rawMessage = error?.message || "Failed to update memorial";
+      const friendlyMessage = rawMessage.toLowerCase().includes("row-level security")
+        ? "You are no longer authenticated for upload. Please log in again and retry."
+        : rawMessage;
+
       toast({
         title: "Error",
-        description: error.message || "Failed to update memorial",
+        description: friendlyMessage,
         variant: "destructive",
       });
     } finally {

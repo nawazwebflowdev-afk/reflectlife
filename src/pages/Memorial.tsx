@@ -207,19 +207,33 @@ const Memorial = () => {
   };
 
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !e.target.files[0] || !currentUserId || !memorial) return;
+    if (!e.target.files || !e.target.files[0] || !memorial) return;
+
     const file = e.target.files[0];
     setGalleryUploading(true);
+
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${currentUserId}/${memorial.id}/${Date.now()}.${fileExt}`;
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        throw new Error("Your session expired. Please log in again and retry.");
+      }
+
+      if (memorial.user_id !== user.id) {
+        throw new Error("You don't have permission to upload media to this memorial.");
+      }
+
+      const fileExt = file.name.split(".").pop() || "jpg";
+      const fileName = `${user.id}/memorials/${memorial.id}/${Date.now()}-${crypto.randomUUID()}.${fileExt}`;
+
       const { error: uploadError } = await supabase.storage
         .from("memorial_uploads")
-        .upload(fileName, file);
+        .upload(fileName, file, { upsert: false });
       if (uploadError) throw uploadError;
+
       const { data: { publicUrl } } = supabase.storage
         .from("memorial_uploads")
         .getPublicUrl(fileName);
+
       const mediaType = file.type.startsWith("video") ? "video" : "image";
       const { error } = await supabase
         .from("memorial_media")
@@ -229,10 +243,16 @@ const Memorial = () => {
           media_type: mediaType,
         });
       if (error) throw error;
+
       toast({ title: "Uploaded!", description: "Media added to gallery." });
       fetchGalleryMedia();
     } catch (error: any) {
-      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+      const rawMessage = error?.message || "Upload failed";
+      const friendlyMessage = rawMessage.toLowerCase().includes("row-level security")
+        ? "You are no longer authenticated for upload. Please log in again and retry."
+        : rawMessage;
+
+      toast({ title: "Upload failed", description: friendlyMessage, variant: "destructive" });
     } finally {
       setGalleryUploading(false);
       e.target.value = "";
