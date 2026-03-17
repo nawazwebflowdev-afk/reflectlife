@@ -73,8 +73,10 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
     setLoading(true);
 
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
+      const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
+      const user = refreshed.session?.user ?? null;
+
+      if (refreshError || !user) {
         throw new Error("Your session expired. Please log in again and retry.");
       }
 
@@ -112,6 +114,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
       const { data: updatedMemorial, error: updateError } = await supabase
         .from("memorials")
         .update({
+          user_id: user.id,
           name: formData.name,
           bio: formData.bio,
           location: formData.location,
