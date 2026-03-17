@@ -247,9 +247,10 @@ const Tree = () => {
       const displayName = conn.person_id 
         ? (conn.profile?.full_name || "Unknown")
         : (conn.related_person_name || "Unknown");
-      const avatarUrl = conn.person_id 
-        ? (conn.profile?.avatar_url || "/placeholder.svg")
-        : (conn.image_url || "/placeholder.svg");
+      const avatarUrl =
+        conn.image_url ||
+        (conn.person_id ? conn.profile?.avatar_url : null) ||
+        "/placeholder.svg";
       const isDeceased = conn.person_id && conn.profile?.is_deceased;
       return {
         id: conn.id,

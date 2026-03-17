@@ -101,12 +101,24 @@ const ConnectionDetailPanel = ({
 
   if (!connection) return null;
 
+  const storageBucket = "profile-pictures";
+
+  const extractStoragePathFromPublicUrl = (url: string | null | undefined) => {
+    if (!url) return null;
+    const marker = `/storage/v1/object/public/${storageBucket}/`;
+    const markerIndex = url.indexOf(marker);
+    if (markerIndex === -1) return null;
+
+    return decodeURIComponent(url.slice(markerIndex + marker.length).split("?")[0]);
+  };
+
   const displayName = connection.person_id
     ? (connection.profile?.full_name || "Unknown")
     : (connection.related_person_name || "Unknown");
-  const avatarUrl = connection.person_id
-    ? (connection.profile?.avatar_url || "/placeholder.svg")
-    : (connection.image_url || "/placeholder.svg");
+  const avatarUrl =
+    connection.image_url ||
+    (connection.person_id ? connection.profile?.avatar_url : null) ||
+    "/placeholder.svg";
   const isRegisteredUser = !!connection.person_id;
   const isDeceased = connection.person_id && connection.profile?.is_deceased;
 
@@ -134,27 +146,34 @@ const ConnectionDetailPanel = ({
     reader.readAsDataURL(file);
   };
 
-  const uploadImage = async (): Promise<string | null> => {
+  const uploadImage = async (ownerId: string, currentImageUrl?: string | null): Promise<string | null> => {
     if (!editImageFile) return null;
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      throw new Error("Your session expired. Please log in again.");
+    const ext = editImageFile.name.split(".").pop() || "jpg";
+    const path = `${ownerId}/connections/${connection.id}/avatar.${ext}`;
+    const previousPath = extractStoragePathFromPublicUrl(currentImageUrl);
+
+    if (previousPath && previousPath.startsWith(`${ownerId}/connections/`) && previousPath !== path) {
+      const { error: removeError } = await supabase.storage
+        .from(storageBucket)
+        .remove([previousPath]);
+
+      if (removeError) {
+        console.warn("Failed to remove previous connection image:", removeError.message);
+      }
     }
 
-    const ext = editImageFile.name.split(".").pop() || "jpg";
-    const path = `${user.id}/connections/${connection.id}.${ext}`;
     const { error } = await supabase.storage
-      .from("profile-pictures")
+      .from(storageBucket)
       .upload(path, editImageFile, { upsert: true });
 
     if (error) throw error;
 
     const { data: { publicUrl } } = supabase.storage
-      .from("profile-pictures")
+      .from(storageBucket)
       .getPublicUrl(path);
 
-    return publicUrl;
+    return `${publicUrl}?v=${Date.now()}`;
   };
 
   const handleSaveEdit = async () => {
