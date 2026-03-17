@@ -114,6 +114,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
       const { data: updatedMemorial, error: updateError } = await supabase
         .from("memorials")
         .update({
+          user_id: user.id,
           name: formData.name,
           bio: formData.bio,
           location: formData.location,
