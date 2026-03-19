@@ -188,6 +188,8 @@ const Tree = () => {
       (conn) => conn.connection_type === mode
     );
 
+    console.log("buildGraph:", { mode, totalConnections: connections.length, filteredCount: filteredConnections.length, types: [...new Set(connections.map(c => c.connection_type))] });
+
     if (filteredConnections.length === 0) {
       setNodes([]);
       setEdges([]);
