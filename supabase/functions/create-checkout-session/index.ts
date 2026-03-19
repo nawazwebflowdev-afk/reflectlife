@@ -1,9 +1,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.76.1';
-import Stripe from 'https://esm.sh/stripe@14.21.0';
+import Stripe from 'https://esm.sh/stripe@18.5.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 Deno.serve(async (req) => {
@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const stripe = new Stripe(stripeSecretKey, {
-      apiVersion: '2023-10-16',
+      apiVersion: '2025-08-27.basil',
     });
 
     const { buyer_id, template_id } = await req.json();
@@ -99,9 +99,17 @@ Deno.serve(async (req) => {
     const platformFeePercent = parseFloat(Deno.env.get('PLATFORM_FEE_PERCENT') || '10');
     const platformFeeAmount = Math.round(template.price * 100 * (platformFeePercent / 100));
 
+    // Check if a Stripe customer already exists
+    const customers = await stripe.customers.list({ email: profile.email, limit: 1 });
+    let customerId: string | undefined;
+    if (customers.data.length > 0) {
+      customerId = customers.data[0].id;
+    }
+
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
-      customer_email: profile.email,
+      customer: customerId,
+      customer_email: customerId ? undefined : profile.email,
       line_items: [
         {
           price_data: {
