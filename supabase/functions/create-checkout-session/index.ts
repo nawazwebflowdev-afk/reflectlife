@@ -106,6 +106,25 @@ Deno.serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
+    const appUrl = req.headers.get('origin') || Deno.env.get('SITE_URL') || 'https://reflectlife.lovable.app';
+
+    const normalizeStripeImageUrl = (rawUrl: unknown): string | null => {
+      if (typeof rawUrl !== 'string' || !rawUrl.trim()) return null;
+
+      try {
+        const url = new URL(rawUrl, appUrl);
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+        return url.href;
+      } catch {
+        return null;
+      }
+    };
+
+    const previewImageUrl = normalizeStripeImageUrl(template.preview_url);
+    if (template.preview_url && !previewImageUrl) {
+      console.warn('Invalid template preview_url for Stripe image, skipping image:', template.preview_url);
+    }
+
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -117,7 +136,7 @@ Deno.serve(async (req) => {
             product_data: {
               name: template.name,
               description: `Memorial template from ${template.country}`,
-              images: template.preview_url ? [template.preview_url] : [],
+              ...(previewImageUrl ? { images: [previewImageUrl] } : {}),
             },
             unit_amount: Math.round(template.price * 100),
           },
@@ -125,8 +144,8 @@ Deno.serve(async (req) => {
         },
       ],
       mode: 'payment',
-      success_url: `${req.headers.get('origin')}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get('origin')}/cancel`,
+      success_url: `${appUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/cancel`,
       metadata: {
         buyer_id,
         template_id,
