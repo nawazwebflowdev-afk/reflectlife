@@ -109,6 +109,7 @@ const Checkout = () => {
     setProcessing(true);
 
     try {
+      console.log('Invoking create-checkout-session with:', { buyer_id: userId, template_id: template.id });
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
         body: { 
           buyer_id: userId, 
@@ -116,12 +117,14 @@ const Checkout = () => {
         }
       });
 
+      console.log('Checkout response:', { data, error });
+
       if (error) throw error;
 
       if (data?.url) {
         window.location.href = data.url;
       } else {
-        throw new Error("No checkout URL received");
+        throw new Error("No checkout URL received. Response: " + JSON.stringify(data));
       }
     } catch (error) {
       console.error("Checkout error:", error);
