@@ -34,10 +34,13 @@ const Checkout = () => {
   }, [templateId]);
 
   const checkAuthAndFetchTemplate = async () => {
-    // Check authentication
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session?.user) {
+    // Check authentication with server validation
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to purchase templates",
@@ -47,7 +50,7 @@ const Checkout = () => {
       return;
     }
 
-    setUserId(session.user.id);
+    setUserId(user.id);
 
     if (!templateId) {
       toast({
@@ -90,7 +93,7 @@ const Checkout = () => {
     const { data: purchaseData } = await supabase
       .from("template_purchases")
       .select("id")
-      .eq("buyer_id", session.user.id)
+      .eq("buyer_id", user.id)
       .eq("template_id", templateId)
       .eq("payment_status", "success")
       .single();
@@ -109,17 +112,41 @@ const Checkout = () => {
     setProcessing(true);
 
     try {
-      console.log('Invoking create-checkout-session with:', { buyer_id: userId, template_id: template.id });
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        throw new Error("Your session expired. Please sign in again.");
+      }
+
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: { 
           buyer_id: userId, 
           template_id: template.id 
         }
       });
 
-      console.log('Checkout response:', { data, error });
+      if (error) {
+        let detailedMessage = error.message;
+        const response = (error as { context?: Response }).context;
 
-      if (error) throw error;
+        if (response instanceof Response) {
+          const payload = await response.json().catch(() => null);
+          if (payload?.error && typeof payload.error === "string") {
+            detailedMessage = payload.error;
+          }
+        }
+
+        throw new Error(detailedMessage);
+      }
+
+      if (data?.error && typeof data.error === "string") {
+        throw new Error(data.error);
+      }
 
       if (data?.url) {
         window.location.href = data.url;
@@ -130,7 +157,7 @@ const Checkout = () => {
       console.error("Checkout error:", error);
       toast({
         title: "Checkout Failed",
-        description: "Unable to start checkout. Please try again.",
+        description: error instanceof Error ? error.message : "Unable to start checkout. Please try again.",
         variant: "destructive",
       });
       setProcessing(false);
