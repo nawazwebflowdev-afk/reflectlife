@@ -120,32 +120,29 @@ const Checkout = () => {
         throw new Error("Your session expired. Please sign in again.");
       }
 
-      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+      // Call the edge function directly via fetch for full control over error handling
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+      console.log('[Checkout] Calling edge function...');
+      const response = await fetch(`${supabaseUrl}/functions/v1/create-checkout-session`, {
+        method: 'POST',
         headers: {
-          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': anonKey,
         },
-        body: { 
-          buyer_id: userId, 
-          template_id: template.id 
-        }
+        body: JSON.stringify({
+          buyer_id: userId,
+          template_id: template.id,
+        }),
       });
 
-      if (error) {
-        let detailedMessage = error.message;
-        const response = (error as { context?: Response }).context;
+      const data = await response.json();
+      console.log('[Checkout] Response:', response.status, data);
 
-        if (response instanceof Response) {
-          const payload = await response.json().catch(() => null);
-          if (payload?.error && typeof payload.error === "string") {
-            detailedMessage = payload.error;
-          }
-        }
-
-        throw new Error(detailedMessage);
-      }
-
-      if (data?.error && typeof data.error === "string") {
-        throw new Error(data.error);
+      if (!response.ok) {
+        throw new Error(data?.error || `Server error (${response.status})`);
       }
 
       if (data?.url) {
