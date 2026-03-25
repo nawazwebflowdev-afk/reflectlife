@@ -16,6 +16,17 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')!;
 
+    // Log key prefix for debugging (never log full key)
+    console.log('Stripe key prefix:', stripeSecretKey?.substring(0, 7), 'length:', stripeSecretKey?.length);
+
+    if (!stripeSecretKey || (!stripeSecretKey.startsWith('sk_live_') && !stripeSecretKey.startsWith('sk_test_'))) {
+      console.error('Invalid STRIPE_SECRET_KEY format. Must start with sk_live_ or sk_test_');
+      return new Response(
+        JSON.stringify({ error: 'Payment system misconfigured. Please contact support.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Authenticate the caller
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
@@ -163,7 +174,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Error creating checkout session:', error);
     return new Response(
-      JSON.stringify({ error: 'Payment processing failed. Please try again later.' }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Payment processing failed. Please try again later.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
