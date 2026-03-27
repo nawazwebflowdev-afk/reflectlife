@@ -103,6 +103,18 @@ const Dashboard = () => {
         }
       }
 
+      // Fetch active template name
+      if (data?.template_id) {
+        const { data: templateData } = await supabase
+          .from("site_templates")
+          .select("name")
+          .eq("id", data.template_id)
+          .single();
+        if (templateData) {
+          setActiveTemplateName(templateData.name);
+        }
+      }
+
       // Fetch stats
       await fetchStats(userId);
     } catch (error) {
