@@ -22,6 +22,7 @@ interface Profile {
   bio: string | null;
   country: string | null;
   color_theme: string | null;
+  template_id: string | null;
 }
 
 interface Stats {
@@ -45,6 +46,7 @@ const Dashboard = () => {
   const [isCreator, setIsCreator] = useState(false);
   const [creatorProfile, setCreatorProfile] = useState<CreatorProfile | null>(null);
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [activeTemplateName, setActiveTemplateName] = useState<string | null>(null);
   const [stats, setStats] = useState<Stats>({
     totalMemories: 0,
     templatesPurchased: 0,
@@ -98,6 +100,18 @@ const Dashboard = () => {
         setCreatorProfile(creatorData);
         if (creatorData.approved) {
           setIsCreator(true);
+        }
+      }
+
+      // Fetch active template name
+      if (data?.template_id) {
+        const { data: templateData } = await supabase
+          .from("site_templates")
+          .select("name")
+          .eq("id", data.template_id)
+          .single();
+        if (templateData) {
+          setActiveTemplateName(templateData.name);
         }
       }
 
@@ -224,6 +238,11 @@ const Dashboard = () => {
                 </h1>
                 {profile?.country && (
                   <p className="text-muted-foreground mb-2">📍 {profile.country}</p>
+                )}
+                {activeTemplateName && (
+                  <p className="text-sm text-muted-foreground mb-2">
+                    🎨 Active Template: <span className="font-medium text-foreground">{activeTemplateName}</span>
+                  </p>
                 )}
                 {!profile?.first_name && !profile?.last_name && (
                   <p className="text-sm text-muted-foreground bg-muted/50 inline-block px-3 py-1 rounded-full">
