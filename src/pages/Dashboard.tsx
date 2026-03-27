@@ -239,6 +239,11 @@ const Dashboard = () => {
                 {profile?.country && (
                   <p className="text-muted-foreground mb-2">📍 {profile.country}</p>
                 )}
+                {activeTemplateName && (
+                  <p className="text-sm text-muted-foreground mb-2">
+                    🎨 Active Template: <span className="font-medium text-foreground">{activeTemplateName}</span>
+                  </p>
+                )}
                 {!profile?.first_name && !profile?.last_name && (
                   <p className="text-sm text-muted-foreground bg-muted/50 inline-block px-3 py-1 rounded-full">
                     Complete your profile to personalize your experience
