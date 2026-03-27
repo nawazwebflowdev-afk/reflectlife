@@ -46,6 +46,7 @@ const Dashboard = () => {
   const [isCreator, setIsCreator] = useState(false);
   const [creatorProfile, setCreatorProfile] = useState<CreatorProfile | null>(null);
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [activeTemplateName, setActiveTemplateName] = useState<string | null>(null);
   const [stats, setStats] = useState<Stats>({
     totalMemories: 0,
     templatesPurchased: 0,
