@@ -29,6 +29,7 @@ const Templates = () => {
   const [loading, setLoading] = useState(true);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [purchasedTemplateIds, setPurchasedTemplateIds] = useState<Set<string>>(new Set());
   const [filterType, setFilterType] = useState<"all" | "free" | "paid">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
@@ -43,7 +44,10 @@ const Templates = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
       setUserId(session.user.id);
-      fetchUserTemplate(session.user.id);
+      await Promise.all([
+        fetchUserTemplate(session.user.id),
+        fetchPurchasedTemplates(session.user.id),
+      ]);
     }
   };
 
@@ -56,6 +60,18 @@ const Templates = () => {
     
     if (data?.template_id) {
       setSelectedTemplateId(data.template_id);
+    }
+  };
+
+  const fetchPurchasedTemplates = async (uid: string) => {
+    const { data } = await supabase
+      .from("template_purchases")
+      .select("template_id")
+      .eq("buyer_id", uid)
+      .eq("payment_status", "success");
+    
+    if (data) {
+      setPurchasedTemplateIds(new Set(data.map(p => p.template_id)));
     }
   };
 
@@ -95,6 +111,10 @@ const Templates = () => {
     setLoading(false);
   };
 
+  const isOwned = (templateId: string, isFree: boolean) => {
+    return isFree || purchasedTemplateIds.has(templateId);
+  };
+
   const handleSelectTemplate = async (templateId: string, isFree: boolean) => {
     if (!userId) {
       toast({
@@ -106,13 +126,13 @@ const Templates = () => {
       return;
     }
 
-    if (!isFree) {
-      // Redirect to checkout page
+    // If paid and not purchased, go to checkout
+    if (!isFree && !purchasedTemplateIds.has(templateId)) {
       navigate(`/checkout/${templateId}`);
       return;
     }
 
-    // For free templates, apply directly
+    // Apply template (free or already purchased)
     const { error } = await supabase
       .from("profiles")
       .update({ template_id: templateId })
