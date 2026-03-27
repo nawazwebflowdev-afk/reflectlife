@@ -321,6 +321,8 @@ const Templates = () => {
                           <div className="flex items-center justify-between">
                             {template.is_free ? (
                               <Badge variant="secondary">Free</Badge>
+                            ) : purchasedTemplateIds.has(template.id) ? (
+                              <Badge variant="default">Owned</Badge>
                             ) : (
                               <Badge variant="outline">€{template.price}</Badge>
                             )}
@@ -332,9 +334,9 @@ const Templates = () => {
                             >
                               {selectedTemplateId === template.id
                                 ? "Selected"
-                                : template.is_free
+                                : isOwned(template.id, template.is_free)
                                 ? "Use Template"
-                                : "Buy Template"}
+                                : `Buy €${template.price}`}
                             </Button>
                           </div>
                         </CardContent>
