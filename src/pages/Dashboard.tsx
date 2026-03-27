@@ -22,6 +22,7 @@ interface Profile {
   bio: string | null;
   country: string | null;
   color_theme: string | null;
+  template_id: string | null;
 }
 
 interface Stats {
