@@ -25,6 +25,8 @@ const Success = () => {
       if (!sessionId) return;
 
       try {
+        await supabase.auth.refreshSession();
+
         const {
           data: { session },
         } = await supabase.auth.getSession();
