@@ -13,21 +13,17 @@ Deno.serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')!;
 
-    // Log key prefix for debugging (never log full key)
-    console.log('Stripe key prefix:', stripeSecretKey?.substring(0, 7), 'length:', stripeSecretKey?.length);
-
     if (!stripeSecretKey || (!stripeSecretKey.startsWith('sk_live_') && !stripeSecretKey.startsWith('sk_test_'))) {
-      console.error('Invalid STRIPE_SECRET_KEY format. Must start with sk_live_ or sk_test_');
       return new Response(
         JSON.stringify({ error: 'Payment system misconfigured. Please contact support.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Authenticate the caller
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -36,47 +32,41 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabaseAuth = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
 
     const { data: { user }, error: userError } = await supabaseAuth.auth.getUser();
     if (userError || !user) {
-      console.error('Auth error:', userError);
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const userId = user.id;
-
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const stripe = new Stripe(stripeSecretKey, {
       apiVersion: '2025-08-27.basil',
     });
 
-    const { buyer_id, template_id } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const buyerId = body?.buyer_id;
+    const templateId = body?.template_id;
 
-    // Verify buyer_id matches authenticated user
-    if (buyer_id !== userId) {
+    if (!buyerId || !templateId || buyerId !== user.id) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    console.log('Creating checkout session for buyer:', buyer_id, 'template:', template_id);
-
-    // Fetch template details
     const { data: template, error: templateError } = await supabase
       .from('site_templates')
-      .select('*')
-      .eq('id', template_id)
+      .select('id, name, country, preview_url, price, is_free, creator_id')
+      .eq('id', templateId)
       .single();
 
     if (templateError || !template) {
-      console.error('Template not found:', templateError);
       return new Response(
         JSON.stringify({ error: 'Template not found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -84,38 +74,25 @@ Deno.serve(async (req) => {
     }
 
     if (template.is_free) {
-      console.log('Template is free, no checkout needed');
       return new Response(
         JSON.stringify({ error: 'This template is free' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Fetch buyer profile for email
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('id', buyer_id)
-      .single();
-
-    if (profileError || !profile) {
-      console.error('Buyer profile not found:', profileError);
+    const customerEmail = user.email;
+    if (!customerEmail) {
       return new Response(
-        JSON.stringify({ error: 'User profile not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'No email is available for this account.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Calculate platform fee
     const platformFeePercent = parseFloat(Deno.env.get('PLATFORM_FEE_PERCENT') || '10');
-    const platformFeeAmount = Math.round(template.price * 100 * (platformFeePercent / 100));
+    const platformFeeAmount = Math.round(Number(template.price) * 100 * (platformFeePercent / 100));
 
-    // Check if a Stripe customer already exists
-    const customers = await stripe.customers.list({ email: profile.email, limit: 1 });
-    let customerId: string | undefined;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-    }
+    const customers = await stripe.customers.list({ email: customerEmail, limit: 1 });
+    const customerId = customers.data[0]?.id;
 
     const appUrl = req.headers.get('origin') || Deno.env.get('SITE_URL') || 'https://reflectlife.lovable.app';
 
@@ -132,14 +109,10 @@ Deno.serve(async (req) => {
     };
 
     const previewImageUrl = normalizeStripeImageUrl(template.preview_url);
-    if (template.preview_url && !previewImageUrl) {
-      console.warn('Invalid template preview_url for Stripe image, skipping image:', template.preview_url);
-    }
 
-    // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      customer_email: customerId ? undefined : profile.email,
+      customer_email: customerId ? undefined : customerEmail,
       line_items: [
         {
           price_data: {
@@ -149,7 +122,7 @@ Deno.serve(async (req) => {
               description: `Memorial template from ${template.country}`,
               ...(previewImageUrl ? { images: [previewImageUrl] } : {}),
             },
-            unit_amount: Math.round(template.price * 100),
+            unit_amount: Math.round(Number(template.price) * 100),
           },
           quantity: 1,
         },
@@ -158,14 +131,12 @@ Deno.serve(async (req) => {
       success_url: `${appUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/cancel`,
       metadata: {
-        buyer_id,
-        template_id,
+        buyer_id: buyerId,
+        template_id: template.id,
         platform_fee: platformFeeAmount.toString(),
         creator_id: template.creator_id || '',
       },
     });
-
-    console.log('Checkout session created:', session.id);
 
     return new Response(
       JSON.stringify({ url: session.url }),
