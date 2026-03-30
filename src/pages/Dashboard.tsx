@@ -54,18 +54,26 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    // Check authentication and fetch profile
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
+    const initializeDashboard = async () => {
+      await supabase.auth.refreshSession();
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
         navigate("/login");
         return;
       }
-      setUser(session.user);
-      fetchProfile(session.user.id);
-    });
+
+      setUser(user);
+      fetchProfile(user.id);
+    };
+
+    void initializeDashboard();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (_event, session) => {
         if (!session) {
           navigate("/login");
         } else {

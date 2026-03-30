@@ -41,12 +41,17 @@ const Templates = () => {
   }, []);
 
   const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      setUserId(session.user.id);
+    await supabase.auth.refreshSession();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      setUserId(user.id);
       await Promise.all([
-        fetchUserTemplate(session.user.id),
-        fetchPurchasedTemplates(session.user.id),
+        fetchUserTemplate(user.id),
+        fetchPurchasedTemplates(user.id),
       ]);
     }
   };
@@ -60,6 +65,8 @@ const Templates = () => {
     
     if (data?.template_id) {
       setSelectedTemplateId(data.template_id);
+    } else {
+      setSelectedTemplateId(null);
     }
   };
 
@@ -72,6 +79,8 @@ const Templates = () => {
     
     if (data) {
       setPurchasedTemplateIds(new Set(data.map(p => p.template_id)));
+    } else {
+      setPurchasedTemplateIds(new Set());
     }
   };
 
@@ -116,7 +125,13 @@ const Templates = () => {
   };
 
   const handleSelectTemplate = async (templateId: string, isFree: boolean) => {
-    if (!userId) {
+    await supabase.auth.refreshSession();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
       toast({
         title: "Sign in required",
         description: "Please sign in to select a template",
@@ -125,6 +140,8 @@ const Templates = () => {
       navigate("/login");
       return;
     }
+
+    setUserId(user.id);
 
     // If paid and not purchased, go to checkout
     if (!isFree && !purchasedTemplateIds.has(templateId)) {
@@ -136,7 +153,7 @@ const Templates = () => {
     const { error } = await supabase
       .from("profiles")
       .update({ template_id: templateId })
-      .eq("id", userId);
+      .eq("id", user.id);
 
     if (error) {
       toast({
@@ -146,6 +163,10 @@ const Templates = () => {
       });
     } else {
       setSelectedTemplateId(templateId);
+      await Promise.all([
+        fetchUserTemplate(user.id),
+        fetchPurchasedTemplates(user.id),
+      ]);
       toast({
         title: "Template Applied!",
         description: "Your template has been applied to your memorials",
