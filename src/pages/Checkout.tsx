@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  supabase,
+  SUPABASE_PUBLISHABLE_KEY,
+  SUPABASE_URL,
+} from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,17 +34,38 @@ const Checkout = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    checkAuthAndFetchTemplate();
+    void checkAuthAndFetchTemplate();
   }, [templateId]);
 
-  const checkAuthAndFetchTemplate = async () => {
-    // Check authentication with server validation
+  const getAuthenticatedUser = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      return null;
+    }
+
+    await supabase.auth.refreshSession();
+
     const {
       data: { user },
-      error: authError,
+      error,
     } = await supabase.auth.getUser();
 
-    if (authError || !user) {
+    if (error || !user) {
+      return null;
+    }
+
+    return user;
+  };
+
+  const checkAuthAndFetchTemplate = async () => {
+    setLoading(true);
+
+    const user = await getAuthenticatedUser();
+
+    if (!user) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to purchase templates",
@@ -62,7 +87,6 @@ const Checkout = () => {
       return;
     }
 
-    // Fetch template details
     const { data: templateData, error: templateError } = await supabase
       .from("site_templates")
       .select("*")
@@ -79,7 +103,6 @@ const Checkout = () => {
       return;
     }
 
-    // Check if template is free
     if (templateData.is_free) {
       toast({
         title: "Free Template",
@@ -89,21 +112,56 @@ const Checkout = () => {
       return;
     }
 
-    // Check if user already owns this template
     const { data: purchaseData } = await supabase
       .from("template_purchases")
       .select("id")
       .eq("buyer_id", user.id)
       .eq("template_id", templateId)
       .eq("payment_status", "success")
-      .single();
+      .maybeSingle();
 
-    if (purchaseData) {
-      setAlreadyOwned(true);
-    }
-
+    setAlreadyOwned(Boolean(purchaseData));
     setTemplate(templateData);
     setLoading(false);
+  };
+
+  const applyOwnedTemplate = async () => {
+    if (!template) return;
+
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      toast({
+        title: "Session expired",
+        description: "Please sign in again to use your template.",
+        variant: "destructive",
+      });
+      navigate("/login");
+      return;
+    }
+
+    setProcessing(true);
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ template_id: template.id })
+      .eq("id", user.id);
+
+    setProcessing(false);
+
+    if (error) {
+      toast({
+        title: "Could not apply template",
+        description: "Please try again from the Templates page.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Template applied",
+      description: "Your purchased template is now active on your profile.",
+    });
+    navigate("/dashboard");
   };
 
   const handlePayment = async () => {
@@ -112,34 +170,26 @@ const Checkout = () => {
     setProcessing(true);
 
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const user = await getAuthenticatedUser();
 
-      if (!session?.access_token) {
+      if (!user) {
         throw new Error("Your session expired. Please sign in again.");
       }
 
-      // Call the edge function directly via fetch for full control over error handling
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-      console.log('[Checkout] Calling edge function...');
-      const response = await fetch(`${supabaseUrl}/functions/v1/create-checkout-session`, {
-        method: 'POST',
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-          'apikey': anonKey,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token ?? ""}`,
+          apikey: SUPABASE_PUBLISHABLE_KEY,
         },
         body: JSON.stringify({
-          buyer_id: userId,
+          buyer_id: user.id,
           template_id: template.id,
         }),
       });
 
       const data = await response.json();
-      console.log('[Checkout] Response:', response.status, data);
 
       if (!response.ok) {
         throw new Error(data?.error || `Server error (${response.status})`);
@@ -147,14 +197,18 @@ const Checkout = () => {
 
       if (data?.url) {
         window.location.href = data.url;
-      } else {
-        throw new Error("No checkout URL received. Response: " + JSON.stringify(data));
+        return;
       }
+
+      throw new Error("No checkout URL received. Response: " + JSON.stringify(data));
     } catch (error) {
       console.error("Checkout error:", error);
       toast({
         title: "Checkout Failed",
-        description: error instanceof Error ? error.message : "Unable to start checkout. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Unable to start checkout. Please try again.",
         variant: "destructive",
       });
       setProcessing(false);
@@ -180,13 +234,10 @@ const Checkout = () => {
           <h1 className="font-serif text-3xl md:text-4xl font-bold mb-2">
             Complete Your Purchase
           </h1>
-          <p className="text-muted-foreground">
-            Secure checkout powered by Stripe
-          </p>
+          <p className="text-muted-foreground">Secure checkout powered by Stripe</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Template Preview */}
           <Card className="overflow-hidden shadow-elegant animate-fade-in">
             <div className="aspect-[3/4] overflow-hidden">
               <img
@@ -209,7 +260,6 @@ const Checkout = () => {
             </CardContent>
           </Card>
 
-          {/* Payment Details */}
           <div className="space-y-6">
             <Card className="shadow-elegant animate-fade-in" style={{ animationDelay: "100ms" }}>
               <CardHeader>
@@ -257,19 +307,29 @@ const Checkout = () => {
                     <Badge variant="secondary" className="w-full justify-center py-2">
                       You already own this template
                     </Badge>
-                    <Button 
-                      className="w-full" 
+                    <Button className="w-full" onClick={applyOwnedTemplate} disabled={processing}>
+                      {processing ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Applying Template...
+                        </>
+                      ) : (
+                        "Use This Template"
+                      )}
+                    </Button>
+                    <Button
+                      className="w-full"
                       variant="outline"
-                      onClick={() => navigate("/dashboard")}
+                      onClick={() => navigate("/templates")}
+                      disabled={processing}
                     >
-                      Go to Dashboard
+                      Back to Templates
                     </Button>
                   </div>
                 ) : (
                   <>
-
-                    <Button 
-                      className="w-full shadow-elegant" 
+                    <Button
+                      className="w-full shadow-elegant"
                       size="lg"
                       onClick={handlePayment}
                       disabled={processing}
@@ -287,8 +347,8 @@ const Checkout = () => {
                       )}
                     </Button>
 
-                    <Button 
-                      className="w-full" 
+                    <Button
+                      className="w-full"
                       variant="ghost"
                       onClick={() => navigate("/templates")}
                       disabled={processing}
