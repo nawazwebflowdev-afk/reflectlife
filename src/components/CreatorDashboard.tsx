@@ -193,6 +193,12 @@ const CreatorDashboard = () => {
     setPrice("");
     setIsFree(true);
     setPreviewFile(null);
+    setFontHeading("");
+    setFontFamily("");
+    setLayoutStyle("classic");
+    setPalettePrimary("315 18% 32%");
+    setPaletteSecondary("43 45% 58%");
+    setPaletteAccent("105 10% 45%");
   };
 
   const handleDelete = async (templateId: string) => {
