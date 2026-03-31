@@ -153,12 +153,13 @@ const TimelineView = () => {
           )}
         </div>
         <div className="absolute top-6 right-6">
-          <Link to="/templates">
-            <Button variant="outline" className="gap-2 bg-background/80 backdrop-blur-sm">
-              <Palette className="h-4 w-4" />
-              Change Template
-            </Button>
-          </Link>
+          {canEdit && (
+            <PageTemplateSelector
+              pageType="timeline"
+              currentTemplateId={timelineTemplateId}
+              onTemplateChange={setTimelineTemplateId}
+            />
+          )}
         </div>
         <div className="text-center text-white z-10">
           <h1 className="font-serif text-5xl font-bold mb-4">{timeline.title}</h1>
