@@ -407,6 +407,8 @@ const Templates = () => {
                               </Badge>
                             )}
                           </div>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            {template.description}
                           </p>
                           <div className="flex items-center justify-between">
                             {template.is_free ? (
