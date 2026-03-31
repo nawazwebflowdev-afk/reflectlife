@@ -477,7 +477,9 @@ const Tree = () => {
     <div 
       className="h-screen flex flex-col"
       style={{
-        backgroundImage: backgroundUrl ? `linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), url(${backgroundUrl})` : undefined,
+        backgroundImage: backgroundUrl 
+          ? `linear-gradient(rgba(255,255,255,0.82), rgba(255,255,255,0.82)), url(${backgroundUrl})` 
+          : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',
