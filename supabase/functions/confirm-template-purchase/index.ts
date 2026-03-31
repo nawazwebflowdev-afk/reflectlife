@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
 
     const { data: template, error: templateError } = await supabaseAdmin
       .from('site_templates')
-      .select('id, name, price')
+      .select('id, name, price, creator_id')
       .eq('id', templateId)
       .single();
 
