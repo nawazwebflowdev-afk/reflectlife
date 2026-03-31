@@ -120,13 +120,13 @@ const Templates = () => {
       .order("created_at", { ascending: false });
 
     if (creatorData && !creatorError) {
-      const templatesWithCreators = creatorData.map((template: any) => ({
+      const templatesWithCreators = (creatorData as any[]).map((template) => ({
         ...template,
         creator_name: template.profiles?.full_name || 
                      `${template.profiles?.first_name || ""} ${template.profiles?.last_name || ""}`.trim() ||
                      "Anonymous Creator"
       }));
-      setCreatorTemplates(templatesWithCreators);
+      setCreatorTemplates(templatesWithCreators as Template[]);
     }
 
     setLoading(false);
