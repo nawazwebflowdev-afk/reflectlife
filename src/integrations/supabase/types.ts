@@ -686,37 +686,49 @@ export type Database = {
       }
       site_templates: {
         Row: {
+          color_palette: Json | null
           country: string
           created_at: string
           creator_id: string | null
           description: string | null
+          font_family: string | null
+          font_heading: string | null
           id: string
           is_creator_template: boolean | null
           is_free: boolean | null
+          layout_style: string | null
           name: string
           preview_url: string | null
           price: number | null
         }
         Insert: {
+          color_palette?: Json | null
           country: string
           created_at?: string
           creator_id?: string | null
           description?: string | null
+          font_family?: string | null
+          font_heading?: string | null
           id?: string
           is_creator_template?: boolean | null
           is_free?: boolean | null
+          layout_style?: string | null
           name: string
           preview_url?: string | null
           price?: number | null
         }
         Update: {
+          color_palette?: Json | null
           country?: string
           created_at?: string
           creator_id?: string | null
           description?: string | null
+          font_family?: string | null
+          font_heading?: string | null
           id?: string
           is_creator_template?: boolean | null
           is_free?: boolean | null
+          layout_style?: string | null
           name?: string
           preview_url?: string | null
           price?: number | null
