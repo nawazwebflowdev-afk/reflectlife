@@ -195,15 +195,42 @@ const Dashboard = () => {
 
   const fetchPurchasedTemplates = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      // Fetch paid purchased templates
+      const { data: purchases, error: purchaseError } = await supabase
         .from("template_purchases")
-        .select("template_id, created_at, site_templates(id, name, country, preview_url, price)")
+        .select("template_id, created_at")
         .eq("buyer_id", userId)
         .eq("payment_status", "success")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      setPurchasedTemplates(data || []);
+      if (purchaseError) throw purchaseError;
+
+      const purchasedIds = (purchases || []).map(p => p.template_id);
+      
+      // Also include the user's active template_id
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("template_id")
+        .eq("id", userId)
+        .maybeSingle();
+      
+      if (profileData?.template_id && !purchasedIds.includes(profileData.template_id)) {
+        purchasedIds.push(profileData.template_id);
+      }
+
+      if (purchasedIds.length === 0) {
+        setPurchasedTemplates([]);
+        return;
+      }
+
+      // Fetch template details
+      const { data: templateDetails, error: templateError } = await supabase
+        .from("site_templates")
+        .select("id, name, country, preview_url, price, is_free")
+        .in("id", purchasedIds);
+
+      if (templateError) throw templateError;
+      setPurchasedTemplates(templateDetails || []);
     } catch (error) {
       console.error("Error fetching purchased templates:", error);
     }
