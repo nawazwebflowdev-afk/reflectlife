@@ -609,6 +609,7 @@ export type Database = {
           is_deceased: boolean | null
           is_premium: boolean | null
           last_name: string | null
+          memorial_template_id: string | null
           phone: string | null
           template_id: string | null
           timeline_template_id: string | null
@@ -631,6 +632,7 @@ export type Database = {
           is_deceased?: boolean | null
           is_premium?: boolean | null
           last_name?: string | null
+          memorial_template_id?: string | null
           phone?: string | null
           template_id?: string | null
           timeline_template_id?: string | null
@@ -653,6 +655,7 @@ export type Database = {
           is_deceased?: boolean | null
           is_premium?: boolean | null
           last_name?: string | null
+          memorial_template_id?: string | null
           phone?: string | null
           template_id?: string | null
           timeline_template_id?: string | null
@@ -661,6 +664,13 @@ export type Database = {
           username?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_memorial_template_id_fkey"
+            columns: ["memorial_template_id"]
+            isOneToOne: false
+            referencedRelation: "site_templates"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_template_id_fkey"
             columns: ["template_id"]
