@@ -16,6 +16,7 @@ interface TemplateTheme {
   fontFamily: string | null;
   fontHeading: string | null;
   layoutStyle: string;
+  accentColor: string;
   isLoading: boolean;
 }
 
