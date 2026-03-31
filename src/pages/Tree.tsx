@@ -60,7 +60,7 @@ const Tree = () => {
   const [treeTemplateId, setTreeTemplateId] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const templateTheme = useTemplateTheme(treeTemplateId);
+  const templateTheme = useTemplateTheme(treeTemplateId, { fallbackToProfile: false });
   const backgroundUrl = templateTheme.backgroundUrl;
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);

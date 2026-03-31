@@ -42,8 +42,16 @@ const loadGoogleFont = (font: string) => {
   document.head.appendChild(link);
 };
 
-export const useTemplateTheme = (templateIdOverride?: string | null) => {
+interface UseTemplateThemeOptions {
+  fallbackToProfile?: boolean;
+}
+
+export const useTemplateTheme = (
+  templateIdOverride?: string | null,
+  options?: UseTemplateThemeOptions,
+) => {
   const [theme, setTheme] = useState<TemplateTheme>(DEFAULT_THEME);
+  const fallbackToProfile = options?.fallbackToProfile ?? true;
 
   const applyThemeToDOM = useCallback((t: TemplateTheme) => {
     const root = document.documentElement;
@@ -88,7 +96,7 @@ export const useTemplateTheme = (templateIdOverride?: string | null) => {
     try {
       let templateId = templateIdOverride;
 
-      if (!templateId) {
+      if (!templateId && fallbackToProfile) {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.user) {
           setTheme({ ...DEFAULT_THEME, isLoading: false });

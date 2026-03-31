@@ -114,13 +114,14 @@ const PageTemplateSelector = ({
   };
 
   const pageLabel = pageType === "memorial" ? "Memorial Wall" : pageType === "tree" ? "Connection Tree" : "Timeline";
+  const triggerLabel = pageType === "tree" ? "Tree Template" : pageType === "timeline" ? "Timeline Template" : "Memorial Template";
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={triggerVariant} className="gap-2" size={compact ? "sm" : "default"}>
+        <Button type="button" variant={triggerVariant} className="gap-2 shrink-0" size={compact ? "sm" : "default"}>
           <Palette className="h-4 w-4" />
-          {!compact && <span className="hidden sm:inline">Change Background</span>}
+          {!compact && <span className="hidden sm:inline">{triggerLabel}</span>}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
