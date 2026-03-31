@@ -16,12 +16,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, Settings, Palette } from "lucide-react";
+import { Plus, Loader2, Settings } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import AddConnectionModal from "@/components/tree/AddConnectionModal";
 import ConnectionDetailPanel from "@/components/tree/ConnectionDetailPanel";
 import EmptyTreeState from "@/components/tree/EmptyTreeState";
 import { InviteAccessPanel } from "@/components/InviteAccessPanel";
+import PageTemplateSelector from "@/components/PageTemplateSelector";
 
 type ConnectionType = "family" | "friendship";
 
@@ -56,9 +57,10 @@ const Tree = () => {
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [userTree, setUserTree] = useState<any>(null);
+  const [treeTemplateId, setTreeTemplateId] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const templateTheme = useTemplateTheme();
+  const templateTheme = useTemplateTheme(treeTemplateId);
   const backgroundUrl = templateTheme.backgroundUrl;
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -97,9 +99,13 @@ const Tree = () => {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("id, full_name, avatar_url")
+      .select("id, full_name, avatar_url, tree_template_id")
       .eq("id", user.id)
       .maybeSingle();
+
+    if (profile?.tree_template_id) {
+      setTreeTemplateId(profile.tree_template_id);
+    }
 
     // Fallback to auth user data if profile row is missing
     setCurrentUser({
@@ -514,10 +520,11 @@ const Tree = () => {
                 <span className="sm:hidden">Add</span>
               </Button>
 
-              <Button variant="outline" onClick={() => navigate("/templates")} className="gap-2">
-                <Palette className="h-4 w-4" />
-                <span className="hidden sm:inline">Templates</span>
-              </Button>
+              <PageTemplateSelector
+                pageType="tree"
+                currentTemplateId={treeTemplateId}
+                onTemplateChange={setTreeTemplateId}
+              />
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="outline" className="gap-2">

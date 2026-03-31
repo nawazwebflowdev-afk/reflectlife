@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import CreateMemorialModal from "@/components/CreateMemorialModal";
+import PageTemplateSelector from "@/components/PageTemplateSelector";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import timelineBg from "@/assets/timeline-bg.jpg";
 import { format } from "date-fns";
@@ -29,7 +30,8 @@ interface Memorial {
 const Memorials = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const templateTheme = useTemplateTheme();
+  const [memorialTemplateId, setMemorialTemplateId] = useState<string | null>(null);
+  const templateTheme = useTemplateTheme(memorialTemplateId);
   const [searchQuery, setSearchQuery] = useState("");
   const [memorials, setMemorials] = useState<Memorial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,6 +46,16 @@ const Memorials = () => {
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setUser(user);
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("memorial_template_id")
+        .eq("id", user.id)
+        .single();
+      if (profile?.memorial_template_id) {
+        setMemorialTemplateId(profile.memorial_template_id);
+      }
+    }
   };
 
   const fetchMemorials = async () => {
@@ -123,7 +135,17 @@ const Memorials = () => {
   const backgroundImage = templateTheme.backgroundUrl || timelineBg;
 
   return (
-    <div className="min-h-screen">
+    <div
+      className="min-h-screen"
+      style={{
+        backgroundImage: templateTheme.backgroundUrl
+          ? `linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), url(${templateTheme.backgroundUrl})`
+          : undefined,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+      }}
+    >
       {/* Hero Header with Template Background */}
       <section 
         className="relative h-[400px] flex items-center transition-smooth"
@@ -157,15 +179,25 @@ const Memorials = () => {
             </div>
           </div>
 
-          {/* Create Memorial Button */}
-          <Button 
-            onClick={handleCreateClick}
-            size="lg"
-            className="gap-2 shadow-lg"
-          >
-            <Plus className="h-5 w-5" />
-            Create a Memorial
-          </Button>
+          {/* Action Buttons */}
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <Button 
+              onClick={handleCreateClick}
+              size="lg"
+              className="gap-2 shadow-lg"
+            >
+              <Plus className="h-5 w-5" />
+              Create a Memorial
+            </Button>
+            {user && (
+              <PageTemplateSelector
+                pageType="memorial"
+                currentTemplateId={memorialTemplateId}
+                onTemplateChange={setMemorialTemplateId}
+                triggerVariant="outline"
+              />
+            )}
+          </div>
         </div>
       </section>
 

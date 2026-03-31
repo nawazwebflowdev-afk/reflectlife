@@ -7,7 +7,8 @@ import { AddMemoryModal } from "@/components/AddMemoryModal";
 import { useToast } from "@/hooks/use-toast";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import { format } from "date-fns";
-import { ArrowLeft, Calendar, FileText, Image as ImageIcon, Plus, Video, Palette } from "lucide-react";
+import { ArrowLeft, Calendar, FileText, Image as ImageIcon, Plus, Video } from "lucide-react";
+import PageTemplateSelector from "@/components/PageTemplateSelector";
 
 interface Timeline {
   id: string;
@@ -30,7 +31,8 @@ const TimelineView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const templateTheme = useTemplateTheme();
+  const [timelineTemplateId, setTimelineTemplateId] = useState<string | null>(null);
+  const templateTheme = useTemplateTheme(timelineTemplateId);
   const [timeline, setTimeline] = useState<Timeline | null>(null);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,6 +48,14 @@ const TimelineView = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
       setUserId(session.user.id);
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("timeline_template_id")
+        .eq("id", session.user.id)
+        .single();
+      if (profile?.timeline_template_id) {
+        setTimelineTemplateId(profile.timeline_template_id);
+      }
     }
   };
 
@@ -110,6 +120,12 @@ const TimelineView = () => {
       className="min-h-screen transition-smooth"
       style={{
         '--template-accent': templateTheme.accentColor,
+        backgroundImage: templateTheme.backgroundUrl
+          ? `linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), url(${templateTheme.backgroundUrl})`
+          : undefined,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
       } as React.CSSProperties}
     >
       {/* Hero Section */}
@@ -137,12 +153,13 @@ const TimelineView = () => {
           )}
         </div>
         <div className="absolute top-6 right-6">
-          <Link to="/templates">
-            <Button variant="outline" className="gap-2 bg-background/80 backdrop-blur-sm">
-              <Palette className="h-4 w-4" />
-              Change Template
-            </Button>
-          </Link>
+          {canEdit && (
+            <PageTemplateSelector
+              pageType="timeline"
+              currentTemplateId={timelineTemplateId}
+              onTemplateChange={setTimelineTemplateId}
+            />
+          )}
         </div>
         <div className="text-center text-white z-10">
           <h1 className="font-serif text-5xl font-bold mb-4">{timeline.title}</h1>
