@@ -29,7 +29,8 @@ interface Memorial {
 const Memorials = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const templateTheme = useTemplateTheme();
+  const [memorialTemplateId, setMemorialTemplateId] = useState<string | null>(null);
+  const templateTheme = useTemplateTheme(memorialTemplateId);
   const [searchQuery, setSearchQuery] = useState("");
   const [memorials, setMemorials] = useState<Memorial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
