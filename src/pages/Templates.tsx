@@ -251,6 +251,7 @@ const Templates = () => {
                     <SelectItem value="all">All Templates</SelectItem>
                     <SelectItem value="free">Free Only</SelectItem>
                     <SelectItem value="paid">Paid Only</SelectItem>
+                    <SelectItem value="owned">My Templates</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
