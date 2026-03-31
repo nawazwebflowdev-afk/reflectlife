@@ -1,96 +1,157 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+
+interface ColorPalette {
+  primary: string;
+  secondary: string;
+  accent: string;
+  background: string;
+  foreground: string;
+}
 
 interface TemplateTheme {
   backgroundUrl: string | null;
   templateName: string | null;
+  colorPalette: ColorPalette | null;
+  fontFamily: string | null;
+  fontHeading: string | null;
+  layoutStyle: string;
   accentColor: string;
   isLoading: boolean;
 }
 
-export const useTemplateTheme = () => {
-  const [theme, setTheme] = useState<TemplateTheme>({
-    backgroundUrl: null,
-    templateName: null,
-    accentColor: "hsl(var(--primary))",
-    isLoading: true,
-  });
+const DEFAULT_THEME: TemplateTheme = {
+  backgroundUrl: null,
+  templateName: null,
+  colorPalette: null,
+  fontFamily: null,
+  fontHeading: null,
+  layoutStyle: "classic",
+  accentColor: "hsl(var(--primary))",
+  isLoading: true,
+};
+
+// Google Fonts loader — injects a <link> once per font
+const loadedFonts = new Set<string>();
+const loadGoogleFont = (font: string) => {
+  if (!font || loadedFonts.has(font)) return;
+  loadedFonts.add(font);
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font)}:wght@400;600;700&display=swap`;
+  document.head.appendChild(link);
+};
+
+export const useTemplateTheme = (templateIdOverride?: string | null) => {
+  const [theme, setTheme] = useState<TemplateTheme>(DEFAULT_THEME);
+
+  const applyThemeToDOM = useCallback((t: TemplateTheme) => {
+    const root = document.documentElement;
+
+    if (t.colorPalette) {
+      root.style.setProperty("--template-primary", t.colorPalette.primary);
+      root.style.setProperty("--template-secondary", t.colorPalette.secondary);
+      root.style.setProperty("--template-accent", t.colorPalette.accent);
+      root.style.setProperty("--template-background", t.colorPalette.background);
+      root.style.setProperty("--template-foreground", t.colorPalette.foreground);
+    } else {
+      root.style.removeProperty("--template-primary");
+      root.style.removeProperty("--template-secondary");
+      root.style.removeProperty("--template-accent");
+      root.style.removeProperty("--template-background");
+      root.style.removeProperty("--template-foreground");
+    }
+
+    if (t.fontFamily) {
+      loadGoogleFont(t.fontFamily);
+      root.style.setProperty("--template-font-body", `"${t.fontFamily}", serif`);
+    } else {
+      root.style.removeProperty("--template-font-body");
+    }
+
+    if (t.fontHeading) {
+      loadGoogleFont(t.fontHeading);
+      root.style.setProperty("--template-font-heading", `"${t.fontHeading}", serif`);
+    } else {
+      root.style.removeProperty("--template-font-heading");
+    }
+
+    root.setAttribute("data-template-layout", t.layoutStyle);
+  }, []);
 
   useEffect(() => {
     fetchTemplateTheme();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [templateIdOverride]);
 
   const fetchTemplateTheme = async () => {
     try {
-      // Get current user
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        setTheme(prev => ({ ...prev, isLoading: false }));
+      let templateId = templateIdOverride;
+
+      if (!templateId) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) {
+          setTheme({ ...DEFAULT_THEME, isLoading: false });
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("template_id")
+          .eq("id", session.user.id)
+          .single();
+
+        templateId = profile?.template_id ?? null;
+      }
+
+      if (!templateId) {
+        setTheme({ ...DEFAULT_THEME, isLoading: false });
         return;
       }
 
-      // Fetch user's profile
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("template_id")
-        .eq("id", session.user.id)
-        .single();
-
-      if (!profile?.template_id) {
-        setTheme(prev => ({ ...prev, isLoading: false }));
-        return;
-      }
-
-      // Fetch template details
       const { data: template } = await supabase
         .from("site_templates")
-        .select("name, preview_url")
-        .eq("id", profile.template_id)
+        .select("name, preview_url, color_palette, font_family, font_heading, layout_style")
+        .eq("id", templateId)
         .single();
 
       if (template) {
-        // Generate accent color from template name (simplified approach)
-        const accentColor = generateAccentFromName(template.name);
-        
-        setTheme({
+        const palette = (template as any).color_palette as ColorPalette | null;
+        const newTheme: TemplateTheme = {
           backgroundUrl: template.preview_url,
           templateName: template.name,
-          accentColor,
+          colorPalette: palette && typeof palette === "object" && palette.primary ? palette : null,
+          fontFamily: (template as any).font_family || null,
+          fontHeading: (template as any).font_heading || null,
+          layoutStyle: (template as any).layout_style || "classic",
+          accentColor: palette?.primary ? `hsl(${palette.primary})` : "hsl(var(--primary))",
           isLoading: false,
-        });
+        };
+        setTheme(newTheme);
+        applyThemeToDOM(newTheme);
       } else {
-        setTheme(prev => ({ ...prev, isLoading: false }));
+        setTheme({ ...DEFAULT_THEME, isLoading: false });
       }
     } catch (error) {
       console.error("Error fetching template theme:", error);
-      setTheme(prev => ({ ...prev, isLoading: false }));
+      setTheme({ ...DEFAULT_THEME, isLoading: false });
     }
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      const root = document.documentElement;
+      root.style.removeProperty("--template-primary");
+      root.style.removeProperty("--template-secondary");
+      root.style.removeProperty("--template-accent");
+      root.style.removeProperty("--template-background");
+      root.style.removeProperty("--template-foreground");
+      root.style.removeProperty("--template-font-body");
+      root.style.removeProperty("--template-font-heading");
+      root.removeAttribute("data-template-layout");
+    };
+  }, []);
 
   return theme;
-};
-
-// Generate a soft accent color based on template name
-const generateAccentFromName = (name: string): string => {
-  const colors = {
-    "England": "hsl(220, 70%, 50%)", // Blue
-    "Mexico": "hsl(340, 75%, 55%)", // Pink/Magenta
-    "India": "hsl(30, 80%, 50%)", // Orange
-    "Australia": "hsl(180, 60%, 45%)", // Teal
-    "Israel": "hsl(200, 70%, 50%)", // Sky Blue
-    "Morocco": "hsl(260, 70%, 55%)", // Purple
-    "Tanzania": "hsl(350, 70%, 50%)", // Red
-    "Thailand": "hsl(45, 80%, 55%)", // Gold
-    "Ukraine": "hsl(210, 80%, 60%)", // Bright Blue
-    "USA": "hsl(220, 80%, 55%)", // Patriotic Blue
-  };
-
-  // Find matching color or return default
-  for (const [country, color] of Object.entries(colors)) {
-    if (name.includes(country)) {
-      return color;
-    }
-  }
-
-  return "hsl(var(--primary))";
 };

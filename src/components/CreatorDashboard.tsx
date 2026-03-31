@@ -45,6 +45,12 @@ const CreatorDashboard = () => {
   const [price, setPrice] = useState("");
   const [isFree, setIsFree] = useState(true);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [fontHeading, setFontHeading] = useState("");
+  const [fontFamily, setFontFamily] = useState("");
+  const [layoutStyle, setLayoutStyle] = useState("classic");
+  const [palettePrimary, setPalettePrimary] = useState("315 18% 32%");
+  const [paletteSecondary, setPaletteSecondary] = useState("43 45% 58%");
+  const [paletteAccent, setPaletteAccent] = useState("105 10% 45%");
   
   const { toast } = useToast();
 
@@ -149,7 +155,17 @@ const CreatorDashboard = () => {
         preview_url: previewUrl,
         creator_id: user.id,
         is_creator_template: true,
-      });
+        font_heading: fontHeading || null,
+        font_family: fontFamily || null,
+        layout_style: layoutStyle,
+        color_palette: {
+          primary: palettePrimary,
+          secondary: paletteSecondary,
+          accent: paletteAccent,
+          background: "42 35% 96%",
+          foreground: "280 20% 25%",
+        },
+      } as any);
 
     setUploading(false);
 
@@ -177,6 +193,12 @@ const CreatorDashboard = () => {
     setPrice("");
     setIsFree(true);
     setPreviewFile(null);
+    setFontHeading("");
+    setFontFamily("");
+    setLayoutStyle("classic");
+    setPalettePrimary("315 18% 32%");
+    setPaletteSecondary("43 45% 58%");
+    setPaletteAccent("105 10% 45%");
   };
 
   const handleDelete = async (templateId: string) => {
@@ -294,6 +316,58 @@ const CreatorDashboard = () => {
                   accept="image/*"
                   onChange={handleFileChange}
                 />
+              </div>
+
+              <div className="border rounded-lg p-4 space-y-4">
+                <h4 className="font-semibold text-sm">Theme Settings</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label>Primary Color (HSL)</Label>
+                    <div className="flex gap-2 items-center">
+                      <Input value={palettePrimary} onChange={(e) => setPalettePrimary(e.target.value)} placeholder="315 18% 32%" />
+                      <div className="w-8 h-8 rounded-full border flex-shrink-0" style={{ backgroundColor: `hsl(${palettePrimary})` }} />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Secondary Color (HSL)</Label>
+                    <div className="flex gap-2 items-center">
+                      <Input value={paletteSecondary} onChange={(e) => setPaletteSecondary(e.target.value)} placeholder="43 45% 58%" />
+                      <div className="w-8 h-8 rounded-full border flex-shrink-0" style={{ backgroundColor: `hsl(${paletteSecondary})` }} />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Accent Color (HSL)</Label>
+                    <div className="flex gap-2 items-center">
+                      <Input value={paletteAccent} onChange={(e) => setPaletteAccent(e.target.value)} placeholder="105 10% 45%" />
+                      <div className="w-8 h-8 rounded-full border flex-shrink-0" style={{ backgroundColor: `hsl(${paletteAccent})` }} />
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label>Heading Font</Label>
+                    <Input value={fontHeading} onChange={(e) => setFontHeading(e.target.value)} placeholder="Playfair Display" />
+                  </div>
+                  <div>
+                    <Label>Body Font</Label>
+                    <Input value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} placeholder="Lora" />
+                  </div>
+                  <div>
+                    <Label>Layout Style</Label>
+                    <Select value={layoutStyle} onValueChange={setLayoutStyle}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="classic">Classic</SelectItem>
+                        <SelectItem value="elegant">Elegant</SelectItem>
+                        <SelectItem value="ornate">Ornate</SelectItem>
+                        <SelectItem value="minimal">Minimal</SelectItem>
+                        <SelectItem value="modern">Modern</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
 
               <div className="flex items-center gap-2">

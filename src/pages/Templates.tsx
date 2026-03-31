@@ -6,9 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Check, Search } from "lucide-react";
+import { Loader2, Check, Search, Type, Layout } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getCountryFlag } from "@/lib/countryFlags";
+
+interface ColorPalette {
+  primary?: string;
+  secondary?: string;
+  accent?: string;
+  background?: string;
+  foreground?: string;
+}
 
 interface Template {
   id: string;
@@ -21,6 +29,10 @@ interface Template {
   is_creator_template: boolean;
   creator_id: string | null;
   creator_name?: string;
+  color_palette: ColorPalette | null;
+  font_family: string | null;
+  font_heading: string | null;
+  layout_style: string | null;
 }
 
 const Templates = () => {
@@ -94,7 +106,7 @@ const Templates = () => {
       .order("created_at", { ascending: false });
 
     if (data && !error) {
-      setTemplates(data);
+      setTemplates(data as any as Template[]);
     }
 
     // Fetch creator templates with creator information
@@ -108,13 +120,13 @@ const Templates = () => {
       .order("created_at", { ascending: false });
 
     if (creatorData && !creatorError) {
-      const templatesWithCreators = creatorData.map((template: any) => ({
+      const templatesWithCreators = (creatorData as any[]).map((template) => ({
         ...template,
         creator_name: template.profiles?.full_name || 
                      `${template.profiles?.first_name || ""} ${template.profiles?.last_name || ""}`.trim() ||
                      "Anonymous Creator"
       }));
-      setCreatorTemplates(templatesWithCreators);
+      setCreatorTemplates(templatesWithCreators as Template[]);
     }
 
     setLoading(false);
@@ -265,6 +277,36 @@ const Templates = () => {
                           <span className="text-2xl">{getCountryFlag(template.country)}</span>
                           <h3 className="font-serif text-lg font-semibold">{template.name}</h3>
                         </div>
+                        {/* Theme preview: color swatches */}
+                        {template.color_palette && typeof template.color_palette === 'object' && template.color_palette.primary && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex gap-1">
+                              {['primary', 'secondary', 'accent', 'background', 'foreground'].map((key) => (
+                                <div
+                                  key={key}
+                                  className="w-5 h-5 rounded-full border border-border"
+                                  style={{ backgroundColor: `hsl(${(template.color_palette as any)?.[key] || '0 0% 50%'})` }}
+                                  title={key}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {/* Font & layout badges */}
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {template.font_heading && (
+                            <Badge variant="outline" className="text-xs gap-1">
+                              <Type className="h-3 w-3" />
+                              {template.font_heading}
+                            </Badge>
+                          )}
+                          {template.layout_style && template.layout_style !== 'classic' && (
+                            <Badge variant="outline" className="text-xs gap-1">
+                              <Layout className="h-3 w-3" />
+                              {template.layout_style}
+                            </Badge>
+                          )}
+                        </div>
                         <p className="text-sm text-muted-foreground mb-3">
                           {template.description}
                         </p>
@@ -336,6 +378,35 @@ const Templates = () => {
                           <p className="text-xs text-muted-foreground mb-2">
                             By @{template.creator_name}
                           </p>
+                          {/* Theme preview: color swatches */}
+                          {template.color_palette && typeof template.color_palette === 'object' && template.color_palette.primary && (
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="flex gap-1">
+                                {['primary', 'secondary', 'accent', 'background', 'foreground'].map((key) => (
+                                  <div
+                                    key={key}
+                                    className="w-5 h-5 rounded-full border border-border"
+                                    style={{ backgroundColor: `hsl(${(template.color_palette as any)?.[key] || '0 0% 50%'})` }}
+                                    title={key}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {template.font_heading && (
+                              <Badge variant="outline" className="text-xs gap-1">
+                                <Type className="h-3 w-3" />
+                                {template.font_heading}
+                              </Badge>
+                            )}
+                            {template.layout_style && template.layout_style !== 'classic' && (
+                              <Badge variant="outline" className="text-xs gap-1">
+                                <Layout className="h-3 w-3" />
+                                {template.layout_style}
+                              </Badge>
+                            )}
+                          </div>
                           <p className="text-sm text-muted-foreground mb-3">
                             {template.description}
                           </p>
