@@ -27,6 +27,7 @@ const DEFAULT_THEME: TemplateTheme = {
   fontFamily: null,
   fontHeading: null,
   layoutStyle: "classic",
+  accentColor: "hsl(var(--primary))",
   isLoading: true,
 };
 
