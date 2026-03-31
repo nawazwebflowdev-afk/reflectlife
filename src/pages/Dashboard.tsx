@@ -135,9 +135,9 @@ const Dashboard = () => {
 
   const fetchStats = async (userId: string) => {
     try {
-      // Total memories posted
+      // Total memorials created
       const { count: memoriesCount } = await supabase
-        .from("memorial_posts")
+        .from("memorials")
         .select("*", { count: "exact", head: true })
         .eq("user_id", userId);
 
@@ -328,7 +328,7 @@ const Dashboard = () => {
           <Card className="hover:shadow-elegant transition-smooth">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardDescription>Total Memories Posted</CardDescription>
+                <CardDescription>Total Memorials Created</CardDescription>
                 <Heart className="h-5 w-5 text-primary" />
               </div>
               <CardTitle className="text-4xl font-serif bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
