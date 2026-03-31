@@ -21,8 +21,8 @@ const Success = () => {
     let isMounted = true;
     let timer: ReturnType<typeof setTimeout> | undefined;
 
-    const confirmPurchase = async () => {
-      if (!sessionId) return;
+    const confirmPurchase = async (attempt = 1): Promise<boolean> => {
+      if (!sessionId) return false;
 
       try {
         await supabase.auth.refreshSession();
@@ -35,28 +35,59 @@ const Success = () => {
           throw new Error("Please sign in again to confirm your purchase.");
         }
 
-        const { data, error } = await supabase.functions.invoke(
-          "confirm-template-purchase",
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL || "https://osmyfzkcydvtwgnbjplx.supabase.co"}/functions/v1/confirm-template-purchase`,
           {
-            body: { session_id: sessionId },
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zbXlmemtjeWR2dHdnbmJqcGx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMzk1MTYsImV4cCI6MjA4NzYxNTUxNn0.BMC8xuq-LmxNtkzEiSaADM58MutcbXNBU3WibIwWmLw",
+            },
+            body: JSON.stringify({ session_id: sessionId }),
           }
         );
 
-        if (error) {
-          throw new Error(error.message || "Failed to confirm purchase");
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data?.error || `Server error (${response.status})`);
         }
 
         if (!data?.success) {
           throw new Error(data?.error || "Failed to unlock your template");
         }
 
+        return true;
+      } catch (error) {
+        console.error(`Purchase confirmation attempt ${attempt} failed:`, error);
+
+        // Retry up to 3 times with increasing delay
+        if (attempt < 3) {
+          await new Promise((r) => setTimeout(r, attempt * 2000));
+          return confirmPurchase(attempt + 1);
+        }
+
+        throw error;
+      }
+    };
+
+    const run = async () => {
+      try {
+        const confirmed = await confirmPurchase();
         if (!isMounted) return;
 
-        setStatus("success");
-        toast({
-          title: "Purchase confirmed",
-          description: "Your bought template is now active on your profile.",
-        });
+        if (confirmed) {
+          // Force refresh session to pick up any profile changes
+          await supabase.auth.refreshSession();
+          setStatus("success");
+          toast({
+            title: "Purchase confirmed",
+            description: "Your bought template is now active on your profile.",
+          });
+        } else {
+          setStatus("success");
+        }
       } catch (error) {
         if (!isMounted) return;
 
@@ -72,10 +103,8 @@ const Success = () => {
           variant: "destructive",
         });
       }
-    };
 
-    const run = async () => {
-      await confirmPurchase();
+      // Only redirect AFTER confirmation completes (success or failure)
       if (isMounted) {
         timer = setTimeout(() => {
           navigate("/templates");
