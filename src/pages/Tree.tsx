@@ -16,12 +16,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, Settings, Palette } from "lucide-react";
+import { Plus, Loader2, Settings } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import AddConnectionModal from "@/components/tree/AddConnectionModal";
 import ConnectionDetailPanel from "@/components/tree/ConnectionDetailPanel";
 import EmptyTreeState from "@/components/tree/EmptyTreeState";
 import { InviteAccessPanel } from "@/components/InviteAccessPanel";
+import PageTemplateSelector from "@/components/PageTemplateSelector";
 
 type ConnectionType = "family" | "friendship";
 
