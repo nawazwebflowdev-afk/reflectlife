@@ -124,6 +124,7 @@ export const useTemplateTheme = (templateIdOverride?: string | null) => {
           fontFamily: (template as any).font_family || null,
           fontHeading: (template as any).font_heading || null,
           layoutStyle: (template as any).layout_style || "classic",
+          accentColor: palette?.primary ? `hsl(${palette.primary})` : "hsl(var(--primary))",
           isLoading: false,
         };
         setTheme(newTheme);
