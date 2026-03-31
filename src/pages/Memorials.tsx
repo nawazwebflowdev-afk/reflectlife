@@ -179,15 +179,25 @@ const Memorials = () => {
             </div>
           </div>
 
-          {/* Create Memorial Button */}
-          <Button 
-            onClick={handleCreateClick}
-            size="lg"
-            className="gap-2 shadow-lg"
-          >
-            <Plus className="h-5 w-5" />
-            Create a Memorial
-          </Button>
+          {/* Action Buttons */}
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            <Button 
+              onClick={handleCreateClick}
+              size="lg"
+              className="gap-2 shadow-lg"
+            >
+              <Plus className="h-5 w-5" />
+              Create a Memorial
+            </Button>
+            {user && (
+              <PageTemplateSelector
+                pageType="memorial"
+                currentTemplateId={memorialTemplateId}
+                onTemplateChange={setMemorialTemplateId}
+                triggerVariant="outline"
+              />
+            )}
+          </div>
         </div>
       </section>
 
