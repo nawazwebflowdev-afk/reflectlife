@@ -32,7 +32,7 @@ const TimelineView = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [timelineTemplateId, setTimelineTemplateId] = useState<string | null>(null);
-  const templateTheme = useTemplateTheme(timelineTemplateId);
+  const templateTheme = useTemplateTheme(timelineTemplateId, { fallbackToProfile: false });
   const [timeline, setTimeline] = useState<Timeline | null>(null);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
