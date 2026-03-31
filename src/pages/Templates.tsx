@@ -199,6 +199,8 @@ const Templates = () => {
     // Filter by type
     if (filterType === "free" && !template.is_free) return false;
     if (filterType === "paid" && template.is_free) return false;
+    if (filterType === "owned" && !template.is_free && !purchasedTemplateIds.has(template.id)) return false;
+    if (filterType === "owned" && template.is_free) return true; // free templates are always "owned"
 
     // Filter by search query
     if (searchQuery) {
