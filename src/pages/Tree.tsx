@@ -98,9 +98,13 @@ const Tree = () => {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("id, full_name, avatar_url")
+      .select("id, full_name, avatar_url, tree_template_id")
       .eq("id", user.id)
       .maybeSingle();
+
+    if (profile?.tree_template_id) {
+      setTreeTemplateId(profile.tree_template_id);
+    }
 
     // Fallback to auth user data if profile row is missing
     setCurrentUser({
