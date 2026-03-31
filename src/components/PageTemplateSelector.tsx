@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Palette, Check, Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Template {
   id: string;
@@ -14,6 +15,7 @@ interface Template {
 }
 
 type PageType = "memorial" | "tree" | "timeline";
+type FilterType = "all" | "my";
 
 const PROFILE_FIELD_MAP: Record<PageType, string> = {
   memorial: "memorial_template_id",
@@ -36,31 +38,42 @@ const PageTemplateSelector = ({
   triggerVariant = "outline",
   compact = false,
 }: PageTemplateSelectorProps) => {
-  const [templates, setTemplates] = useState<Template[]>([]);
+  const [allTemplates, setAllTemplates] = useState<Template[]>([]);
+  const [purchasedIds, setPurchasedIds] = useState<Set<string>>(new Set());
+  const [filter, setFilter] = useState<FilterType>("all");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (open) fetchOwnedTemplates();
+    if (open) fetchData();
   }, [open]);
 
-  const fetchOwnedTemplates = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const { data } = await supabase
-        .from("site_templates")
-        .select("id, name, preview_url, country")
-        .order("name");
+      const { data: { user } } = await supabase.auth.getUser();
 
-      setTemplates(data || []);
+      const [templatesRes, purchasesRes] = await Promise.all([
+        supabase.from("site_templates").select("id, name, preview_url, country").order("name"),
+        user
+          ? supabase.from("template_purchases").select("template_id").eq("buyer_id", user.id).eq("payment_status", "success")
+          : Promise.resolve({ data: [] }),
+      ]);
+
+      setAllTemplates(templatesRes.data || []);
+      setPurchasedIds(new Set((purchasesRes.data || []).map((p: any) => p.template_id)));
     } catch (err: any) {
       console.error("Error fetching templates:", err);
     } finally {
       setLoading(false);
     }
   };
+
+  const displayedTemplates = filter === "my"
+    ? allTemplates.filter((t) => purchasedIds.has(t.id))
+    : allTemplates;
 
   const handleSelect = async (templateId: string | null) => {
     setSaving(true);
@@ -101,13 +114,30 @@ const PageTemplateSelector = ({
         <DialogHeader>
           <DialogTitle>Choose a Template for {pageLabel}</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-muted-foreground mb-4">
-          Select a template to use as the full-page background for your {pageLabel}. This is independent of other pages.
-        </p>
+
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-muted-foreground">
+            Select a template for your {pageLabel} background.
+          </p>
+          <Select value={filter} onValueChange={(v) => setFilter(v as FilterType)}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Templates</SelectItem>
+              <SelectItem value="my">My Templates</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {loading ? (
           <div className="flex justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : displayedTemplates.length === 0 && filter === "my" ? (
+          <div className="text-center py-12 text-muted-foreground">
+            <p className="mb-2">You haven't purchased any templates yet.</p>
+            <p className="text-sm">Browse <button onClick={() => setFilter("all")} className="text-primary underline">All Templates</button> or visit the <a href="/templates" className="text-primary underline">marketplace</a>.</p>
           </div>
         ) : (
           <ScrollArea className="max-h-[60vh]">
@@ -130,7 +160,7 @@ const PageTemplateSelector = ({
                 )}
               </button>
 
-              {templates.map((template) => (
+              {displayedTemplates.map((template) => (
                 <button
                   key={template.id}
                   onClick={() => handleSelect(template.id)}
