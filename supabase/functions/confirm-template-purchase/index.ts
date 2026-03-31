@@ -11,6 +11,8 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  console.log('confirm-template-purchase: invoked');
+
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
@@ -52,7 +54,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    const payload = await req.json().catch(() => ({}));
+    const rawBody = await req.text();
+    console.log('confirm-template-purchase: raw body length', rawBody.length);
+    const payload = JSON.parse(rawBody || '{}');
     const sessionId = payload?.session_id;
 
     if (!sessionId || typeof sessionId !== 'string') {
@@ -134,6 +138,8 @@ Deno.serve(async (req) => {
       });
     }
 
+    console.log('confirm-template-purchase: existing purchase', existingPurchase ? existingPurchase.id : 'none');
+
     if (!existingPurchase) {
       const { error: insertError } = await supabaseAdmin.from('template_purchases').insert({
         buyer_id: buyerId,
@@ -163,6 +169,8 @@ Deno.serve(async (req) => {
       }
     }
 
+    console.log('confirm-template-purchase: updating profile template_id for buyer', buyerId);
+
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .update({ template_id: templateId })
@@ -174,6 +182,8 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    console.log('confirm-template-purchase: success for template', templateId);
 
     return new Response(
       JSON.stringify({
