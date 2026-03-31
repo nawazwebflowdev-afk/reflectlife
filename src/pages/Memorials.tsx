@@ -135,7 +135,17 @@ const Memorials = () => {
   const backgroundImage = templateTheme.backgroundUrl || timelineBg;
 
   return (
-    <div className="min-h-screen">
+    <div
+      className="min-h-screen"
+      style={{
+        backgroundImage: templateTheme.backgroundUrl
+          ? `linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), url(${templateTheme.backgroundUrl})`
+          : undefined,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+      }}
+    >
       {/* Hero Header with Template Background */}
       <section 
         className="relative h-[400px] flex items-center transition-smooth"
