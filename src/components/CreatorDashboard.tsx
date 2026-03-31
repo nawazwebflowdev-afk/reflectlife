@@ -155,7 +155,17 @@ const CreatorDashboard = () => {
         preview_url: previewUrl,
         creator_id: user.id,
         is_creator_template: true,
-      });
+        font_heading: fontHeading || null,
+        font_family: fontFamily || null,
+        layout_style: layoutStyle,
+        color_palette: {
+          primary: palettePrimary,
+          secondary: paletteSecondary,
+          accent: paletteAccent,
+          background: "42 35% 96%",
+          foreground: "280 20% 25%",
+        },
+      } as any);
 
     setUploading(false);
 
