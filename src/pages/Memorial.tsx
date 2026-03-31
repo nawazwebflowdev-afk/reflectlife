@@ -295,7 +295,7 @@ const Memorial = () => {
       className="min-h-screen transition-smooth"
       style={{
         '--template-accent': templateTheme.accentColor,
-        backgroundImage: `linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), url(${backgroundImage})`,
+        backgroundImage: `linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), url(${backgroundImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',

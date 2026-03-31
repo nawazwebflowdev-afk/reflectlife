@@ -477,7 +477,9 @@ const Tree = () => {
     <div 
       className="h-screen flex flex-col"
       style={{
-        backgroundImage: backgroundUrl ? `linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)), url(${backgroundUrl})` : undefined,
+        backgroundImage: backgroundUrl 
+          ? `linear-gradient(rgba(255,255,255,0.82), rgba(255,255,255,0.82)), url(${backgroundUrl})` 
+          : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',
@@ -619,24 +621,7 @@ const Tree = () => {
           <EmptyTreeState mode={mode} onAddConnection={() => setShowAddModal(true)} />
         ) : (
           <div className="w-full h-full relative overflow-hidden">
-            {/* Background layer with template image or gradient */}
-            <div 
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage: backgroundUrl 
-                  ? `url(${backgroundUrl})`
-                  : mode === "family"
-                  ? "linear-gradient(to bottom right, hsl(var(--muted) / 0.3), hsl(var(--background)))"
-                  : "linear-gradient(to bottom right, hsl(var(--accent) / 0.2), hsl(var(--background)))",
-                filter: backgroundUrl ? "blur(8px)" : "none",
-                transform: backgroundUrl ? "scale(1.1)" : "none",
-              }}
-            />
-            {/* Overlay for better contrast */}
-            <div className="absolute inset-0 bg-background/40 backdrop-blur-[2px]" />
-            
             {/* Tree content */}
-            <div className="relative w-full h-full">
             <ReactFlow
               nodes={nodes}
               edges={edges}
@@ -648,11 +633,11 @@ const Tree = () => {
               fitView
               onInit={setReactFlowInstance}
               attributionPosition="bottom-left"
+              style={{ background: 'transparent' }}
             >
               <Controls showInteractive={false} />
               <Background gap={16} size={1} />
             </ReactFlow>
-            </div>
           </div>
         )}
       </div>
