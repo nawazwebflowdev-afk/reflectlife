@@ -43,19 +43,45 @@ const PageTemplateSelector = ({
   const { toast } = useToast();
 
   useEffect(() => {
-    if (open) fetchTemplates();
+    if (open) fetchOwnedTemplates();
   }, [open]);
 
-  const fetchTemplates = async () => {
+  const fetchOwnedTemplates = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      // Fetch free templates
+      const { data: freeTemplates } = await supabase
         .from("site_templates")
         .select("id, name, preview_url, country")
+        .eq("is_free", true)
         .order("name");
 
-      if (error) throw error;
-      setTemplates(data || []);
+      // Fetch purchased template IDs
+      const { data: purchases } = await supabase
+        .from("template_purchases")
+        .select("template_id")
+        .eq("buyer_id", user.id)
+        .eq("payment_status", "success");
+
+      const purchasedIds = (purchases || []).map(p => p.template_id);
+
+      let paidTemplates: Template[] = [];
+      if (purchasedIds.length > 0) {
+        const { data } = await supabase
+          .from("site_templates")
+          .select("id, name, preview_url, country")
+          .in("id", purchasedIds)
+          .order("name");
+        paidTemplates = data || [];
+      }
+
+      // Combine and deduplicate
+      const allTemplates = [...(freeTemplates || []), ...paidTemplates];
+      const uniqueMap = new Map(allTemplates.map(t => [t.id, t]));
+      setTemplates(Array.from(uniqueMap.values()));
     } catch (err: any) {
       console.error("Error fetching templates:", err);
     } finally {
