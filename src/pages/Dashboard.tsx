@@ -249,8 +249,11 @@ const Dashboard = () => {
                   <p className="text-muted-foreground mb-2">📍 {profile.country}</p>
                 )}
                 {activeTemplateName && (
-                  <p className="text-sm text-muted-foreground mb-2">
-                    🎨 Active Template: <span className="font-medium text-foreground">{activeTemplateName}</span>
+                  <p 
+                    className="text-sm text-muted-foreground mb-2 cursor-pointer hover:text-primary transition-colors"
+                    onClick={() => navigate("/templates?filter=owned")}
+                  >
+                    🎨 Active Template: <span className="font-medium text-foreground underline">{activeTemplateName}</span>
                   </p>
                 )}
                 {!profile?.first_name && !profile?.last_name && (

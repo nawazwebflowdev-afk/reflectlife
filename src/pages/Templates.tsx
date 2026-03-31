@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,10 +42,18 @@ const Templates = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [purchasedTemplateIds, setPurchasedTemplateIds] = useState<Set<string>>(new Set());
-  const [filterType, setFilterType] = useState<"all" | "free" | "paid">("all");
+  const [filterType, setFilterType] = useState<"all" | "free" | "paid" | "owned">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const filter = searchParams.get("filter");
+    if (filter === "owned") {
+      setFilterType("owned");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchTemplates();
@@ -191,6 +199,8 @@ const Templates = () => {
     // Filter by type
     if (filterType === "free" && !template.is_free) return false;
     if (filterType === "paid" && template.is_free) return false;
+    if (filterType === "owned" && !template.is_free && !purchasedTemplateIds.has(template.id)) return false;
+    if (filterType === "owned" && template.is_free) return true; // free templates are always "owned"
 
     // Filter by search query
     if (searchQuery) {
@@ -241,6 +251,7 @@ const Templates = () => {
                     <SelectItem value="all">All Templates</SelectItem>
                     <SelectItem value="free">Free Only</SelectItem>
                     <SelectItem value="paid">Paid Only</SelectItem>
+                    <SelectItem value="owned">My Templates</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
