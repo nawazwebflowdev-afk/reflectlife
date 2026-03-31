@@ -520,10 +520,11 @@ const Tree = () => {
                 <span className="sm:hidden">Add</span>
               </Button>
 
-              <Button variant="outline" onClick={() => navigate("/templates")} className="gap-2">
-                <Palette className="h-4 w-4" />
-                <span className="hidden sm:inline">Templates</span>
-              </Button>
+              <PageTemplateSelector
+                pageType="tree"
+                currentTemplateId={treeTemplateId}
+                onTemplateChange={setTreeTemplateId}
+              />
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="outline" className="gap-2">
