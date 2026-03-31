@@ -205,18 +205,7 @@ const Dashboard = () => {
 
       if (purchaseError) throw purchaseError;
 
-      const purchasedIds = (purchases || []).map(p => p.template_id);
-      
-      // Also include the user's active template_id
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("template_id")
-        .eq("id", userId)
-        .maybeSingle();
-      
-      if (profileData?.template_id && !purchasedIds.includes(profileData.template_id)) {
-        purchasedIds.push(profileData.template_id);
-      }
+      const purchasedIds = [...new Set((purchases || []).map(p => p.template_id))];
 
       if (purchasedIds.length === 0) {
         setPurchasedTemplates([]);
