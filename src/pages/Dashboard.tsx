@@ -135,9 +135,9 @@ const Dashboard = () => {
 
   const fetchStats = async (userId: string) => {
     try {
-      // Total memories posted
+      // Total memorials created
       const { count: memoriesCount } = await supabase
-        .from("memorial_posts")
+        .from("memorials")
         .select("*", { count: "exact", head: true })
         .eq("user_id", userId);
 
