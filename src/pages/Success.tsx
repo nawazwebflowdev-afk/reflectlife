@@ -25,7 +25,11 @@ const Success = () => {
       if (!sessionId) return false;
 
       try {
-        await supabase.auth.refreshSession();
+        // Always refresh session before confirming
+        const { error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError) {
+          console.warn('Session refresh warning:', refreshError.message);
+        }
 
         const {
           data: { session },
@@ -35,20 +39,31 @@ const Success = () => {
           throw new Error("Please sign in again to confirm your purchase.");
         }
 
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://osmyfzkcydvtwgnbjplx.supabase.co";
+        const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zbXlmemtjeWR2dHdnbmJqcGx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMzk1MTYsImV4cCI6MjA4NzYxNTUxNn0.BMC8xuq-LmxNtkzEiSaADM58MutcbXNBU3WibIwWmLw";
+
+        console.log(`Purchase confirmation attempt ${attempt}...`);
+
         const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL || "https://osmyfzkcydvtwgnbjplx.supabase.co"}/functions/v1/confirm-template-purchase`,
+          `${supabaseUrl}/functions/v1/confirm-template-purchase`,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${session.access_token}`,
-              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zbXlmemtjeWR2dHdnbmJqcGx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMzk1MTYsImV4cCI6MjA4NzYxNTUxNn0.BMC8xuq-LmxNtkzEiSaADM58MutcbXNBU3WibIwWmLw",
+              apikey: apiKey,
             },
             body: JSON.stringify({ session_id: sessionId }),
           }
         );
 
-        const data = await response.json();
+        const text = await response.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          throw new Error(`Invalid response from server: ${text.substring(0, 200)}`);
+        }
 
         if (!response.ok) {
           throw new Error(data?.error || `Server error (${response.status})`);
@@ -58,13 +73,16 @@ const Success = () => {
           throw new Error(data?.error || "Failed to unlock your template");
         }
 
+        console.log('Purchase confirmed successfully:', data);
         return true;
       } catch (error) {
         console.error(`Purchase confirmation attempt ${attempt} failed:`, error);
 
-        // Retry up to 3 times with increasing delay
-        if (attempt < 3) {
-          await new Promise((r) => setTimeout(r, attempt * 2000));
+        // Retry up to 5 times with increasing delay
+        if (attempt < 5) {
+          const delay = Math.min(attempt * 2000, 8000);
+          console.log(`Retrying in ${delay}ms...`);
+          await new Promise((r) => setTimeout(r, delay));
           return confirmPurchase(attempt + 1);
         }
 

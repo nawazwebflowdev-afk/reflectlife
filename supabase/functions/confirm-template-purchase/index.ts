@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
 
     const { data: template, error: templateError } = await supabaseAdmin
       .from('site_templates')
-      .select('id, name, price')
+      .select('id, name, price, creator_id')
       .eq('id', templateId)
       .single();
 
@@ -181,6 +181,30 @@ Deno.serve(async (req) => {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Handle creator earnings if applicable
+    const platformFee = metadata.platform_fee;
+    if (template.creator_id && platformFee) {
+      const creatorAmount = template.price - parseFloat(platformFee) / 100;
+      
+      const { data: creatorProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('earnings_balance')
+        .eq('id', template.creator_id)
+        .single();
+
+      if (creatorProfile) {
+        const currentBalance = creatorProfile.earnings_balance || 0;
+        const newBalance = Number(currentBalance) + creatorAmount;
+
+        await supabaseAdmin
+          .from('profiles')
+          .update({ earnings_balance: newBalance })
+          .eq('id', template.creator_id);
+
+        console.log('confirm-template-purchase: creator earnings updated', { creator_id: template.creator_id, newBalance });
+      }
     }
 
     console.log('confirm-template-purchase: success for template', templateId);
