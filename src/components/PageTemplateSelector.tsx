@@ -52,14 +52,7 @@ const PageTemplateSelector = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Fetch free templates
-      const { data: freeTemplates } = await supabase
-        .from("site_templates")
-        .select("id, name, preview_url, country")
-        .eq("is_free", true)
-        .order("name");
-
-      // Fetch purchased template IDs
+      // Fetch only purchased template IDs
       const { data: purchases } = await supabase
         .from("template_purchases")
         .select("template_id")
@@ -68,20 +61,17 @@ const PageTemplateSelector = ({
 
       const purchasedIds = (purchases || []).map(p => p.template_id);
 
-      let paidTemplates: Template[] = [];
+      let purchasedTemplates: Template[] = [];
       if (purchasedIds.length > 0) {
         const { data } = await supabase
           .from("site_templates")
           .select("id, name, preview_url, country")
           .in("id", purchasedIds)
           .order("name");
-        paidTemplates = data || [];
+        purchasedTemplates = data || [];
       }
 
-      // Combine and deduplicate
-      const allTemplates = [...(freeTemplates || []), ...paidTemplates];
-      const uniqueMap = new Map(allTemplates.map(t => [t.id, t]));
-      setTemplates(Array.from(uniqueMap.values()));
+      setTemplates(purchasedTemplates);
     } catch (err: any) {
       console.error("Error fetching templates:", err);
     } finally {
