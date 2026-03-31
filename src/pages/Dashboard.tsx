@@ -365,7 +365,7 @@ const Dashboard = () => {
                   <span>My Timeline</span>
                 </Button>
               </Link>
-              <Link to="/templates">
+              <Link to="/templates?filter=owned">
                 <Button variant="outline" className="w-full gap-2 h-auto py-4 hover:shadow-elegant transition-smooth">
                   <Image className="h-5 w-5" />
                   <span>My Templates</span>
