@@ -120,6 +120,12 @@ const TimelineView = () => {
       className="min-h-screen transition-smooth"
       style={{
         '--template-accent': templateTheme.accentColor,
+        backgroundImage: templateTheme.backgroundUrl
+          ? `linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), url(${templateTheme.backgroundUrl})`
+          : undefined,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
       } as React.CSSProperties}
     >
       {/* Hero Section */}
