@@ -97,10 +97,18 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    font-family: var(--template-font-body, theme('fontFamily.sans'));
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif;
+    font-family: var(--template-font-heading, theme('fontFamily.serif'));
+  }
+
+  /* Template-driven color overrides when a template is active */
+  [style*="--template-primary"] {
+    --primary: var(--template-primary);
+    --secondary: var(--template-secondary);
+    --accent: var(--template-accent);
   }
 }
 
