@@ -45,6 +45,12 @@ const CreatorDashboard = () => {
   const [price, setPrice] = useState("");
   const [isFree, setIsFree] = useState(true);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [fontHeading, setFontHeading] = useState("");
+  const [fontFamily, setFontFamily] = useState("");
+  const [layoutStyle, setLayoutStyle] = useState("classic");
+  const [palettePrimary, setPalettePrimary] = useState("315 18% 32%");
+  const [paletteSecondary, setPaletteSecondary] = useState("43 45% 58%");
+  const [paletteAccent, setPaletteAccent] = useState("105 10% 45%");
   
   const { toast } = useToast();
 
