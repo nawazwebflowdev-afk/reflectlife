@@ -183,12 +183,30 @@ const Dashboard = () => {
   };
 
   const [memorials, setMemorials] = useState<any[]>([]);
+  const [purchasedTemplates, setPurchasedTemplates] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
       fetchUserMemorials(user.id);
+      fetchPurchasedTemplates(user.id);
     }
   }, [user]);
+
+  const fetchPurchasedTemplates = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("template_purchases")
+        .select("template_id, created_at, site_templates(id, name, country, preview_url, price)")
+        .eq("buyer_id", userId)
+        .eq("payment_status", "success")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setPurchasedTemplates(data || []);
+    } catch (error) {
+      console.error("Error fetching purchased templates:", error);
+    }
+  };
 
   const fetchUserMemorials = async (userId: string) => {
     try {
