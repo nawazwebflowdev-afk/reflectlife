@@ -45,6 +45,16 @@ const Memorials = () => {
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setUser(user);
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("memorial_template_id")
+        .eq("id", user.id)
+        .single();
+      if (profile?.memorial_template_id) {
+        setMemorialTemplateId(profile.memorial_template_id);
+      }
+    }
   };
 
   const fetchMemorials = async () => {
