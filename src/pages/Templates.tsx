@@ -48,8 +48,8 @@ const Templates = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    checkAuth();
     fetchTemplates();
+    checkAuth();
   }, []);
 
   const checkAuth = async () => {

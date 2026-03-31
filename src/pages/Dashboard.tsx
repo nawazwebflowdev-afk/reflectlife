@@ -140,11 +140,12 @@ const Dashboard = () => {
         .select("*", { count: "exact", head: true })
         .eq("user_id", userId);
 
-      // Templates purchased
+      // Templates purchased (only successful purchases)
       const { count: templatesCount } = await supabase
         .from("template_purchases")
         .select("*", { count: "exact", head: true })
-        .eq("buyer_id", userId);
+        .eq("buyer_id", userId)
+        .eq("payment_status", "success");
 
       // Likes received on user's posts
       const { data: userPosts } = await supabase
