@@ -49,29 +49,12 @@ const PageTemplateSelector = ({
   const fetchOwnedTemplates = async () => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      const { data } = await supabase
+        .from("site_templates")
+        .select("id, name, preview_url, country")
+        .order("name");
 
-      // Fetch only purchased template IDs
-      const { data: purchases } = await supabase
-        .from("template_purchases")
-        .select("template_id")
-        .eq("buyer_id", user.id)
-        .eq("payment_status", "success");
-
-      const purchasedIds = (purchases || []).map(p => p.template_id);
-
-      let purchasedTemplates: Template[] = [];
-      if (purchasedIds.length > 0) {
-        const { data } = await supabase
-          .from("site_templates")
-          .select("id, name, preview_url, country")
-          .in("id", purchasedIds)
-          .order("name");
-        purchasedTemplates = data || [];
-      }
-
-      setTemplates(purchasedTemplates);
+      setTemplates(data || []);
     } catch (err: any) {
       console.error("Error fetching templates:", err);
     } finally {
