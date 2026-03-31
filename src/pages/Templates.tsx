@@ -106,7 +106,7 @@ const Templates = () => {
       .order("created_at", { ascending: false });
 
     if (data && !error) {
-      setTemplates(data);
+      setTemplates(data as any as Template[]);
     }
 
     // Fetch creator templates with creator information
