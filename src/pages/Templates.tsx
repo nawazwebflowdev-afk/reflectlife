@@ -42,10 +42,18 @@ const Templates = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [purchasedTemplateIds, setPurchasedTemplateIds] = useState<Set<string>>(new Set());
-  const [filterType, setFilterType] = useState<"all" | "free" | "paid">("all");
+  const [filterType, setFilterType] = useState<"all" | "free" | "paid" | "owned">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const filter = searchParams.get("filter");
+    if (filter === "owned") {
+      setFilterType("owned");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchTemplates();
