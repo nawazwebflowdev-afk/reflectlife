@@ -56,9 +56,10 @@ const Tree = () => {
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [userTree, setUserTree] = useState<any>(null);
+  const [treeTemplateId, setTreeTemplateId] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const templateTheme = useTemplateTheme();
+  const templateTheme = useTemplateTheme(treeTemplateId);
   const backgroundUrl = templateTheme.backgroundUrl;
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
