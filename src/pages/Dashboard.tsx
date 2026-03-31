@@ -425,13 +425,11 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {purchasedTemplates.map((purchase) => {
-                  const template = purchase.site_templates as any;
-                  if (!template) return null;
+                {purchasedTemplates.map((template) => {
                   const isActive = profile?.template_id === template.id;
                   return (
                     <Card
-                      key={purchase.template_id}
+                      key={template.id}
                       className={`overflow-hidden cursor-pointer hover:shadow-elegant transition-smooth hover:-translate-y-1 ${isActive ? 'ring-2 ring-primary' : ''}`}
                       onClick={() => navigate("/templates?filter=owned")}
                     >
