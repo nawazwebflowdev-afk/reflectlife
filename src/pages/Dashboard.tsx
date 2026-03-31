@@ -381,6 +381,54 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
+        {/* Purchased Templates Section */}
+        {purchasedTemplates.length > 0 && (
+          <Card className="mb-8 animate-fade-up">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="font-serif">My Purchased Templates</CardTitle>
+                  <CardDescription>Templates you've purchased from the marketplace</CardDescription>
+                </div>
+                <Link to="/templates?filter=owned">
+                  <Button variant="outline" size="sm">View All</Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {purchasedTemplates.map((purchase) => {
+                  const template = purchase.site_templates as any;
+                  if (!template) return null;
+                  const isActive = profile?.template_id === template.id;
+                  return (
+                    <Card
+                      key={purchase.template_id}
+                      className={`overflow-hidden cursor-pointer hover:shadow-elegant transition-smooth hover:-translate-y-1 ${isActive ? 'ring-2 ring-primary' : ''}`}
+                      onClick={() => navigate("/templates?filter=owned")}
+                    >
+                      <div className="aspect-[3/4] overflow-hidden">
+                        <img
+                          src={template.preview_url || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
+                          alt={template.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <CardContent className="p-3">
+                        <h4 className="font-serif font-semibold text-sm truncate">{template.name}</h4>
+                        <p className="text-xs text-muted-foreground">{template.country}</p>
+                        {isActive && (
+                          <Badge className="mt-1 text-xs">Active</Badge>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Main Content Tabs */}
         {isCreator ? (
           <Tabs defaultValue="memorials" className="space-y-6">
