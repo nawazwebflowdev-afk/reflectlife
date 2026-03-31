@@ -378,8 +378,35 @@ const Templates = () => {
                           <p className="text-xs text-muted-foreground mb-2">
                             By @{template.creator_name}
                           </p>
-                          <p className="text-sm text-muted-foreground mb-3">
-                            {template.description}
+                          {/* Theme preview: color swatches */}
+                          {template.color_palette && typeof template.color_palette === 'object' && template.color_palette.primary && (
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="flex gap-1">
+                                {['primary', 'secondary', 'accent', 'background', 'foreground'].map((key) => (
+                                  <div
+                                    key={key}
+                                    className="w-5 h-5 rounded-full border border-border"
+                                    style={{ backgroundColor: `hsl(${(template.color_palette as any)?.[key] || '0 0% 50%'})` }}
+                                    title={key}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {template.font_heading && (
+                              <Badge variant="outline" className="text-xs gap-1">
+                                <Type className="h-3 w-3" />
+                                {template.font_heading}
+                              </Badge>
+                            )}
+                            {template.layout_style && template.layout_style !== 'classic' && (
+                              <Badge variant="outline" className="text-xs gap-1">
+                                <Layout className="h-3 w-3" />
+                                {template.layout_style}
+                              </Badge>
+                            )}
+                          </div>
                           </p>
                           <div className="flex items-center justify-between">
                             {template.is_free ? (
