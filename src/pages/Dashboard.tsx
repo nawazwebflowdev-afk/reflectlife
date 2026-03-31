@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Plus, Calendar, Eye, Settings, Image, LogOut, Clock, Edit, Heart, FileText, ShoppingBag, Sparkles } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -183,12 +184,30 @@ const Dashboard = () => {
   };
 
   const [memorials, setMemorials] = useState<any[]>([]);
+  const [purchasedTemplates, setPurchasedTemplates] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
       fetchUserMemorials(user.id);
+      fetchPurchasedTemplates(user.id);
     }
   }, [user]);
+
+  const fetchPurchasedTemplates = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("template_purchases")
+        .select("template_id, created_at, site_templates(id, name, country, preview_url, price)")
+        .eq("buyer_id", userId)
+        .eq("payment_status", "success")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setPurchasedTemplates(data || []);
+    } catch (error) {
+      console.error("Error fetching purchased templates:", error);
+    }
+  };
 
   const fetchUserMemorials = async (userId: string) => {
     try {
@@ -347,7 +366,7 @@ const Dashboard = () => {
                   <span>My Timeline</span>
                 </Button>
               </Link>
-              <Link to="/templates">
+              <Link to="/templates?filter=owned">
                 <Button variant="outline" className="w-full gap-2 h-auto py-4 hover:shadow-elegant transition-smooth">
                   <Image className="h-5 w-5" />
                   <span>My Templates</span>
@@ -362,6 +381,54 @@ const Dashboard = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Purchased Templates Section */}
+        {purchasedTemplates.length > 0 && (
+          <Card className="mb-8 animate-fade-up">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="font-serif">My Purchased Templates</CardTitle>
+                  <CardDescription>Templates you've purchased from the marketplace</CardDescription>
+                </div>
+                <Link to="/templates?filter=owned">
+                  <Button variant="outline" size="sm">View All</Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {purchasedTemplates.map((purchase) => {
+                  const template = purchase.site_templates as any;
+                  if (!template) return null;
+                  const isActive = profile?.template_id === template.id;
+                  return (
+                    <Card
+                      key={purchase.template_id}
+                      className={`overflow-hidden cursor-pointer hover:shadow-elegant transition-smooth hover:-translate-y-1 ${isActive ? 'ring-2 ring-primary' : ''}`}
+                      onClick={() => navigate("/templates?filter=owned")}
+                    >
+                      <div className="aspect-[3/4] overflow-hidden">
+                        <img
+                          src={template.preview_url || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
+                          alt={template.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <CardContent className="p-3">
+                        <h4 className="font-serif font-semibold text-sm truncate">{template.name}</h4>
+                        <p className="text-xs text-muted-foreground">{template.country}</p>
+                        {isActive && (
+                          <Badge className="mt-1 text-xs">Active</Badge>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Main Content Tabs */}
         {isCreator ? (
