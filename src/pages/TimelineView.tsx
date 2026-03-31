@@ -31,7 +31,8 @@ const TimelineView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const templateTheme = useTemplateTheme();
+  const [timelineTemplateId, setTimelineTemplateId] = useState<string | null>(null);
+  const templateTheme = useTemplateTheme(timelineTemplateId);
   const [timeline, setTimeline] = useState<Timeline | null>(null);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,6 +48,14 @@ const TimelineView = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
       setUserId(session.user.id);
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("timeline_template_id")
+        .eq("id", session.user.id)
+        .single();
+      if (profile?.timeline_template_id) {
+        setTimelineTemplateId(profile.timeline_template_id);
+      }
     }
   };
 
