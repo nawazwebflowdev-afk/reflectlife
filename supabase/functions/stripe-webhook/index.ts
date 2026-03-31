@@ -27,13 +27,24 @@ Deno.serve(async (req) => {
       const session = event.data.object as Stripe.Checkout.Session;
       
       console.log('Processing checkout session:', session.id);
-      console.log('Metadata:', session.metadata);
+      console.log('Payment status:', session.payment_status);
+      console.log('Metadata:', JSON.stringify(session.metadata));
+
+      // Only process if payment is actually completed
+      if (session.payment_status !== 'paid') {
+        console.log('Payment not yet paid, skipping. Status:', session.payment_status);
+        return new Response(JSON.stringify({ received: true, skipped: 'not_paid' }), {
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
 
       const { buyer_id, template_id, creator_id, platform_fee } = session.metadata || {};
 
       if (!buyer_id || !template_id) {
         console.error('Missing required metadata:', { buyer_id, template_id });
-        return new Response('Missing required metadata', { status: 400 });
+        return new Response(JSON.stringify({ received: true, error: 'missing_metadata' }), {
+          headers: { 'Content-Type': 'application/json' },
+        });
       }
 
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -47,22 +58,25 @@ Deno.serve(async (req) => {
 
       if (templateError || !template) {
         console.error('Template not found:', templateError);
-        return new Response('Template not found', { status: 404 });
+        return new Response(JSON.stringify({ received: true, error: 'template_not_found' }), {
+          headers: { 'Content-Type': 'application/json' },
+        });
       }
 
       // Idempotency check: Stripe may retry the same event
       const { data: existingPurchases, error: existingPurchaseError } = await supabase
         .from('template_purchases')
-        .select('id')
+        .select('id, payment_status')
         .eq('stripe_session_id', session.id)
         .limit(1);
 
       if (existingPurchaseError) {
         console.error('Error checking existing purchase:', existingPurchaseError);
-        return new Response('Error checking purchase', { status: 500 });
       }
 
-      if (!existingPurchases || existingPurchases.length === 0) {
+      const existingPurchase = existingPurchases?.[0];
+
+      if (!existingPurchase) {
         // Insert purchase record
         const { error: purchaseError } = await supabase
           .from('template_purchases')
@@ -76,8 +90,23 @@ Deno.serve(async (req) => {
 
         if (purchaseError) {
           console.error('Error creating purchase record:', purchaseError);
-          return new Response('Error creating purchase record', { status: 500 });
+        } else {
+          console.log('Purchase record created successfully');
         }
+      } else if (existingPurchase.payment_status !== 'success') {
+        // Update existing record to success
+        const { error: updateError } = await supabase
+          .from('template_purchases')
+          .update({ payment_status: 'success' })
+          .eq('id', existingPurchase.id);
+
+        if (updateError) {
+          console.error('Error updating purchase status:', updateError);
+        } else {
+          console.log('Existing purchase updated to success');
+        }
+      } else {
+        console.log('Purchase already recorded as success, skipping');
       }
 
       // Update buyer's profile with selected template
@@ -88,6 +117,8 @@ Deno.serve(async (req) => {
 
       if (profileError) {
         console.error('Error updating profile:', profileError);
+      } else {
+        console.log('Profile template_id updated for buyer:', buyer_id);
       }
 
       // If there's a creator, update their balance
@@ -110,10 +141,12 @@ Deno.serve(async (req) => {
 
         if (balanceError) {
           console.error('Error updating creator balance:', balanceError);
+        } else {
+          console.log('Creator balance updated:', { creator_id, newBalance });
         }
       }
 
-      console.log('Purchase completed successfully');
+      console.log('Webhook processing completed successfully for session:', session.id);
     }
 
     return new Response(JSON.stringify({ received: true }), {
