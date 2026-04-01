@@ -40,6 +40,8 @@ Deno.serve(async (req) => {
 
       const { buyer_id, template_id, creator_id, platform_fee } = session.metadata || {};
 
+      console.log('stripe-webhook: metadata extracted', { buyer_id, template_id, creator_id, session_id: session.id });
+
       if (!buyer_id || !template_id) {
         console.error('Missing required metadata:', { buyer_id, template_id });
         return new Response(JSON.stringify({ received: true, error: 'missing_metadata' }), {
@@ -52,16 +54,18 @@ Deno.serve(async (req) => {
       // Fetch template to get price
       const { data: template, error: templateError } = await supabase
         .from('site_templates')
-        .select('price')
+        .select('price, name, country')
         .eq('id', template_id)
         .single();
 
       if (templateError || !template) {
-        console.error('Template not found:', templateError);
+        console.error('Template not found for id:', template_id, templateError);
         return new Response(JSON.stringify({ received: true, error: 'template_not_found' }), {
           headers: { 'Content-Type': 'application/json' },
         });
       }
+
+      console.log('stripe-webhook: processing purchase for', template.name, '(' + template.country + ')', 'buyer:', buyer_id);
 
       // Idempotency check: Stripe may retry the same event
       const { data: existingPurchases, error: existingPurchaseError } = await supabase

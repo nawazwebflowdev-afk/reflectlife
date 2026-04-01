@@ -96,6 +96,13 @@ Deno.serve(async (req) => {
     const buyerId = metadata.buyer_id;
     const templateId = metadata.template_id;
 
+    console.log('confirm-template-purchase: stripe session metadata', {
+      session_id: session.id,
+      buyer_id: buyerId,
+      template_id: templateId,
+      payment_status: session.payment_status,
+    });
+
     if (!buyerId || !templateId) {
       return new Response(JSON.stringify({ error: 'Missing checkout metadata' }), {
         status: 400,
@@ -114,7 +121,7 @@ Deno.serve(async (req) => {
 
     const { data: template, error: templateError } = await supabaseAdmin
       .from('site_templates')
-      .select('id, name, price, creator_id')
+      .select('id, name, price, creator_id, country')
       .eq('id', templateId)
       .single();
 
@@ -138,9 +145,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log('confirm-template-purchase: existing purchase', existingPurchase ? existingPurchase.id : 'none');
+    console.log('confirm-template-purchase: existing purchase', existingPurchase ? existingPurchase.id : 'none', 'for template:', template.name, '(' + template.country + ')');
 
     if (!existingPurchase) {
+      console.log('confirm-template-purchase: inserting new purchase', { buyerId, templateId, templateName: template.name });
       const { error: insertError } = await supabaseAdmin.from('template_purchases').insert({
         buyer_id: buyerId,
         template_id: templateId,
