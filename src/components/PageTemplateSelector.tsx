@@ -58,7 +58,7 @@ const PageTemplateSelector = ({
       const { data: { user } } = await supabase.auth.getUser();
 
       const [templatesRes, purchasesRes] = await Promise.all([
-        supabase.from("site_templates").select("id, name, preview_url, country").order("name"),
+        supabase.from("site_templates").select("id, name, preview_url, country, is_free, price").order("name"),
         user
           ? supabase.from("template_purchases").select("template_id").eq("buyer_id", user.id).eq("payment_status", "success")
           : Promise.resolve({ data: [] }),
