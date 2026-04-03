@@ -78,6 +78,19 @@ const PageTemplateSelector = ({
     : allTemplates;
 
   const handleSelect = async (templateId: string | null) => {
+    // Validate ownership for paid templates
+    if (templateId) {
+      const template = allTemplates.find((t) => t.id === templateId);
+      if (template && !template.is_free && !purchasedIds.has(templateId)) {
+        toast({
+          title: "Purchase required",
+          description: `You need to purchase "${template.name}" before using it. Visit the marketplace.`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
