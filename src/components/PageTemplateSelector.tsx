@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Palette, Check, Loader2 } from "lucide-react";
+import { Palette, Check, Loader2, Lock } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -12,6 +12,8 @@ interface Template {
   name: string;
   preview_url: string | null;
   country: string;
+  is_free: boolean | null;
+  price: number | null;
 }
 
 type PageType = "memorial" | "tree" | "timeline";
@@ -56,7 +58,7 @@ const PageTemplateSelector = ({
       const { data: { user } } = await supabase.auth.getUser();
 
       const [templatesRes, purchasesRes] = await Promise.all([
-        supabase.from("site_templates").select("id, name, preview_url, country").order("name"),
+        supabase.from("site_templates").select("id, name, preview_url, country, is_free, price").order("name"),
         user
           ? supabase.from("template_purchases").select("template_id").eq("buyer_id", user.id).eq("payment_status", "success")
           : Promise.resolve({ data: [] }),
@@ -76,6 +78,19 @@ const PageTemplateSelector = ({
     : allTemplates;
 
   const handleSelect = async (templateId: string | null) => {
+    // Validate ownership for paid templates
+    if (templateId) {
+      const template = allTemplates.find((t) => t.id === templateId);
+      if (template && !template.is_free && !purchasedIds.has(templateId)) {
+        toast({
+          title: "Purchase required",
+          description: `You need to purchase "${template.name}" before using it. Visit the marketplace.`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -160,38 +175,52 @@ const PageTemplateSelector = ({
                 )}
               </button>
 
-              {displayedTemplates.map((template) => (
-                <button
-                  key={template.id}
-                  onClick={() => handleSelect(template.id)}
-                  disabled={saving}
-                  className={`relative rounded-lg border-2 overflow-hidden transition-all hover:shadow-md ${
-                    currentTemplateId === template.id ? "border-primary ring-2 ring-primary/30" : "border-border"
-                  }`}
-                >
-                  <div className="aspect-video bg-muted">
-                    {template.preview_url ? (
-                      <img
-                        src={template.preview_url}
-                        alt={template.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
-                        <Palette className="h-6 w-6 text-muted-foreground" />
+              {displayedTemplates.map((template) => {
+                const isPaid = !template.is_free && (template.price ?? 0) > 0;
+                const isOwned = purchasedIds.has(template.id);
+                const isLocked = isPaid && !isOwned;
+
+                return (
+                  <button
+                    key={template.id}
+                    onClick={() => handleSelect(template.id)}
+                    disabled={saving}
+                    className={`relative rounded-lg border-2 overflow-hidden transition-all hover:shadow-md ${
+                      currentTemplateId === template.id ? "border-primary ring-2 ring-primary/30" : "border-border"
+                    } ${isLocked ? "opacity-75" : ""}`}
+                  >
+                    <div className="aspect-video bg-muted">
+                      {template.preview_url ? (
+                        <img
+                          src={template.preview_url}
+                          alt={template.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
+                          <Palette className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                      )}
+                      {isLocked && (
+                        <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                          <Lock className="h-5 w-5 text-white drop-shadow" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-2 bg-card flex items-center justify-between">
+                      <p className="text-xs font-medium truncate">{template.name}</p>
+                      {isLocked && (
+                        <span className="text-[10px] font-semibold text-amber-600">€{template.price}</span>
+                      )}
+                    </div>
+                    {currentTemplateId === template.id && (
+                      <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
+                        <Check className="h-3 w-3" />
                       </div>
                     )}
-                  </div>
-                  <div className="p-2 bg-card">
-                    <p className="text-xs font-medium truncate">{template.name}</p>
-                  </div>
-                  {currentTemplateId === template.id && (
-                    <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
-                      <Check className="h-3 w-3" />
-                    </div>
-                  )}
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           </ScrollArea>
         )}
