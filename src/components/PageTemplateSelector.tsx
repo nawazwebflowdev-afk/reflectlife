@@ -12,6 +12,8 @@ interface Template {
   name: string;
   preview_url: string | null;
   country: string;
+  is_free: boolean | null;
+  price: number | null;
 }
 
 type PageType = "memorial" | "tree" | "timeline";
