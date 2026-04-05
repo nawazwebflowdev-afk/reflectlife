@@ -1044,6 +1044,7 @@ export type Database = {
         Args: { _owner_id: string; _permission: string; _user_id: string }
         Returns: boolean
       }
+      is_invitee: { Args: { _invitation_email: string }; Returns: boolean }
       is_memorial_owner: {
         Args: { _memorial_id: string; _user_id: string }
         Returns: boolean
