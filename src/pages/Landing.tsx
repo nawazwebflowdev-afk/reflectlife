@@ -1,19 +1,19 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Heart, Share2, Clock, Shield, MessageCircle, MapPin } from "lucide-react";
+import { Heart, Share2, Clock, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AvatarDisplay } from "@/components/EmojiAvatarSelector";
 import heroBanner from "@/assets/hero-banner.png";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import FeaturedTemplates from "@/components/FeaturedTemplates";
 import PostDetailModal from "@/components/PostDetailModal";
 import { supabase } from "@/integrations/supabase/client";
-import { formatDistanceToNow } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 const Landing = () => {
   const location = useLocation();
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [timelinePosts, setTimelinePosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
@@ -28,9 +28,7 @@ const Landing = () => {
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     setUser(user);
-    if (user) {
-      fetchTimelinePosts();
-    }
+    if (user) fetchTimelinePosts();
   };
 
   const fetchPublicMemorials = async () => {
@@ -53,17 +51,9 @@ const Landing = () => {
     try {
       const { data, error } = await supabase
         .from('memorial_posts')
-        .select(`
-          *,
-          profiles:user_id (
-            username,
-            full_name,
-            avatar_url
-          )
-        `)
+        .select(`*, profiles:user_id (username, full_name, avatar_url)`)
         .order('created_at', { ascending: false })
         .limit(10);
-
       if (error) throw error;
       setTimelinePosts(data || []);
     } catch (error) {
@@ -73,75 +63,17 @@ const Landing = () => {
     }
   };
 
-  const getUserInitials = (profile: any) => {
-    if (!profile) return "?";
-    const name = profile.full_name || profile.username || "";
-    return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
-  };
-
   const features = [
-    {
-      icon: Heart,
-      title: "Create a Memorial",
-      description: "Build a personal page with photos, stories, and videos.",
-    },
-    {
-      icon: Share2,
-      title: "Celebrate a Journey",
-      description: "Share life's special moments with family and friends.",
-    },
-    {
-      icon: Clock,
-      title: "Keep Their Legacy Alive",
-      description: "Honor and remember, anywhere and anytime.",
-    },
+    { icon: Heart, titleKey: "features.createMemorial", descKey: "features.createMemorialDesc", isCreate: true },
+    { icon: Share2, titleKey: "features.celebrateJourney", descKey: "features.celebrateJourneyDesc" },
+    { icon: Clock, titleKey: "features.keepLegacy", descKey: "features.keepLegacyDesc" },
   ];
 
   const testimonials = [
-    {
-      quote: "Reflectlife gave us a beautiful way to celebrate my mother's life. It's comforting to have all our memories in one place.",
-      name: "Sarah M.",
-      avatarIndex: 0,
-    },
-    {
-      quote: "A truly special space where our family can come together and share stories about Dad. It means everything to us.",
-      name: "Michael T.",
-      avatarIndex: 5,
-    },
-    {
-      quote: "Creating a memorial was so easy, and it's become a place of peace for us all. Thank you for this gift.",
-      name: "Linda K.",
-      avatarIndex: 12,
-    },
-    {
-      quote: "Reflectlife helped us keep grandma's memory alive in such a meaningful way. We visit it often.",
-      name: "James R.",
-      avatarIndex: 18,
-    },
-  ];
-
-  const sampleMemorials = [
-    {
-      id: "m-001",
-      name: "Ada Johnson",
-      years: "1948 - 2024",
-      image: portraitPlaceholder,
-      tributeCount: 24,
-    },
-    {
-      id: "m-002",
-      name: "Robert Chen",
-      years: "1952 - 2025",
-      image: portraitPlaceholder,
-      tributeCount: 18,
-    },
-    {
-      id: "m-003",
-      name: "Maria Rodriguez",
-      years: "1965 - 2024",
-      image: portraitPlaceholder,
-      tributeCount: 32,
-    },
+    { quoteKey: "testimonials.sarah", name: "Sarah M.", avatarIndex: 0 },
+    { quoteKey: "testimonials.michael", name: "Michael T.", avatarIndex: 5 },
+    { quoteKey: "testimonials.linda", name: "Linda K.", avatarIndex: 12 },
+    { quoteKey: "testimonials.james", name: "James R.", avatarIndex: 18 },
   ];
 
   return (
@@ -149,77 +81,48 @@ const Landing = () => {
       {/* Hero Banner */}
       <section className="relative w-full">
         <div className="relative w-full h-[500px] md:h-[600px] overflow-hidden">
-          <img
-            src={heroBanner}
-            alt="Reflectlife floral memorial banner"
-            className="w-full h-full object-cover"
-          />
-          {/* Overlay gradient for text legibility */}
+          <img src={heroBanner} alt="Reflectlife floral memorial banner" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40" />
-          
-          {/* Centered text overlay */}
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
             <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 md:mb-6 drop-shadow-lg animate-fade-in">
-              Remember your loved ones
+              {t("landing.heroTitle")}
             </h1>
             <p className="text-lg md:text-xl lg:text-2xl text-white/95 mb-8 md:mb-10 max-w-2xl drop-shadow-md animate-fade-in" style={{ animationDelay: '200ms' }}>
-              Begin a journey of remembrance — for the ones who will always be part of you
+              {t("landing.heroSubtitle")}
             </p>
             <Link to={user ? "/memorials" : "/signup"}>
               <Button size="lg" className="px-8 md:px-12 py-6 text-base md:text-lg shadow-elegant-lg animate-fade-in" style={{ animationDelay: '400ms' }}>
-                Start remembering today
+                {t("landing.heroCta")}
               </Button>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Shared Memories Section - Hidden for now, will be replaced with prayers/poesie */}
-      {/* {user && (
-        <section className="py-20 bg-background border-y">
-          ...
-        </section>
-      )} */}
-
-      {/* Sign In Prompt - For Non-Signed-In Users */}
+      {/* Sign In Prompt */}
       {!user && (
         <section className="py-20 bg-gradient-subtle border-y">
           <div className="container mx-auto px-4">
             <Card className="max-w-2xl mx-auto text-center shadow-elegant">
               <CardContent className="p-12">
                 <Heart className="h-16 w-16 mx-auto mb-6 text-primary opacity-80" />
-                <h2 className="font-serif text-3xl font-bold mb-4">
-                  Join Our Community
-                </h2>
-                <p className="text-muted-foreground text-lg mb-6 leading-relaxed">
-                  Sign in to see shared memories, create memorials, and connect with others remembering their loved ones.
-                </p>
+                <h2 className="font-serif text-3xl font-bold mb-4">{t("landing.joinTitle")}</h2>
+                <p className="text-muted-foreground text-lg mb-6 leading-relaxed">{t("landing.joinDesc")}</p>
                 <div className="flex gap-4 justify-center">
-                  <Link to="/login">
-                    <Button size="lg" variant="outline">
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link to="/signup">
-                    <Button size="lg">
-                      Sign Up
-                    </Button>
-                  </Link>
+                  <Link to="/login"><Button size="lg" variant="outline">{t("nav.signIn")}</Button></Link>
+                  <Link to="/signup"><Button size="lg">{t("landing.signUp")}</Button></Link>
                 </div>
               </CardContent>
             </Card>
           </div>
         </section>
       )}
+
       {/* Memorial Wall CTA */}
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-            Visit the Memorial Wall
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
-            Explore memorials created by our community and honour those who are remembered.
-          </p>
+          <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">{t("landing.memorialWallTitle")}</h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-8 leading-relaxed">{t("landing.memorialWallDesc")}</p>
 
           {publicMemorials.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto mb-10">
@@ -230,11 +133,7 @@ const Landing = () => {
                   <Link key={memorial.id} to={`/memorial/${memorial.id}`}>
                     <Card className="overflow-hidden hover:shadow-elegant-lg transition-smooth group">
                       <div className="aspect-square overflow-hidden bg-muted">
-                        <img
-                          src={memorial.preview_image_url || portraitPlaceholder}
-                          alt={memorial.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
-                        />
+                        <img src={memorial.preview_image_url || portraitPlaceholder} alt={memorial.name} className="w-full h-full object-cover group-hover:scale-105 transition-smooth" />
                       </div>
                       <CardContent className="p-4">
                         <h3 className="font-serif text-lg font-semibold mb-1">{memorial.name}</h3>
@@ -250,81 +149,57 @@ const Landing = () => {
           <Link to="/memorials">
             <Button size="lg" className="px-10 py-6 text-base md:text-lg shadow-elegant-lg gap-2">
               <Heart className="h-5 w-5" />
-              Memorial Wall
+              {t("landing.memorialWallBtn")}
             </Button>
           </Link>
         </div>
       </section>
 
-      {/* About / How It Works Section */}
+      {/* About / How It Works */}
       <section className="py-20 bg-gradient-subtle">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 animate-fade-in">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-6">
-              Keeping memories alive, together
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
-              Reflectlife is a warm space to preserve and share stories of your loved ones — a place where memories, moments, and legacies live on forever.
-            </p>
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-6">{t("landing.howItWorksTitle")}</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">{t("landing.howItWorksDesc")}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {features.map((feature, index) => {
-              const isCreateMemorial = feature.title === "Create a Memorial";
-              return (
-                <Card 
-                  key={index} 
-                  className="border-2 hover:shadow-elegant transition-smooth hover:-translate-y-1 bg-card animate-fade-in cursor-pointer"
-                  style={{ animationDelay: `${index * 150}ms` }}
-                  onClick={() => {
-                    if (isCreateMemorial) {
-                      window.location.href = user ? "/memorials" : "/signup";
-                    }
-                  }}
-                >
-                  <CardContent className="p-8 text-center">
-                    <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
-                      <feature.icon className="h-8 w-8 text-primary" />
-                    </div>
-                    <h3 className="font-serif text-xl font-semibold mb-3">
-                      {feature.title}
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {features.map((feature, index) => (
+              <Card
+                key={index}
+                className="border-2 hover:shadow-elegant transition-smooth hover:-translate-y-1 bg-card animate-fade-in cursor-pointer"
+                style={{ animationDelay: `${index * 150}ms` }}
+                onClick={() => {
+                  if (feature.isCreate) window.location.href = user ? "/memorials" : "/signup";
+                }}
+              >
+                <CardContent className="p-8 text-center">
+                  <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+                    <feature.icon className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="font-serif text-xl font-semibold mb-3">{t(feature.titleKey)}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{t(feature.descKey)}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Testimonials */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-              What families say about Reflectlife
-            </h2>
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">{t("landing.testimonialsTitle")}</h2>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
             {testimonials.map((testimonial, index) => (
-              <Card 
-                key={index} 
-                className="bg-card/50 border-2 hover:shadow-elegant transition-smooth animate-fade-in"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
+              <Card key={index} className="bg-card/50 border-2 hover:shadow-elegant transition-smooth animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
                 <CardContent className="p-8">
                   <div className="flex flex-col items-center text-center">
                     <AvatarDisplay avatarIndex={testimonial.avatarIndex} size="lg" className="mb-4" />
-                    <p className="text-muted-foreground italic mb-4 leading-relaxed">
-                      "{testimonial.quote}"
-                    </p>
-                    <p className="font-serif font-semibold text-foreground">
-                      — {testimonial.name}
-                    </p>
+                    <p className="text-muted-foreground italic mb-4 leading-relaxed">"{t(testimonial.quoteKey)}"</p>
+                    <p className="font-serif font-semibold text-foreground">— {testimonial.name}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -333,37 +208,26 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Featured Templates Section */}
+      {/* Featured Templates */}
       <section className="py-20 bg-gradient-subtle">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-              Featured Templates
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
-              Choose from our collection of beautifully designed memorial templates
-            </p>
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">{t("landing.featuredTemplatesTitle")}</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">{t("landing.featuredTemplatesDesc")}</p>
           </div>
-
           <FeaturedTemplates />
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA */}
       <section className="py-20 gradient-hero">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center text-primary-foreground">
             <Shield className="h-16 w-16 mx-auto mb-6 opacity-90" />
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-              Start Preserving Memories Today
-            </h2>
-            <p className="text-lg mb-8 opacity-90">
-              Create a lasting tribute that honors their story, celebrates their life, and keeps their memory alive forever.
-            </p>
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">{t("landing.ctaTitle")}</h2>
+            <p className="text-lg mb-8 opacity-90">{t("landing.ctaDesc")}</p>
             <Link to={user ? "/memorials" : "/signup"}>
-              <Button size="lg" variant="secondary" className="px-12 shadow-elegant-lg">
-                Create a Memorial
-              </Button>
+              <Button size="lg" variant="secondary" className="px-12 shadow-elegant-lg">{t("landing.ctaBtn")}</Button>
             </Link>
           </div>
         </div>
