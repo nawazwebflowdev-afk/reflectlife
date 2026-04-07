@@ -611,6 +611,7 @@ export type Database = {
           last_name: string | null
           memorial_template_id: string | null
           phone: string | null
+          preferred_language: string
           template_id: string | null
           timeline_template_id: string | null
           tree_template_id: string | null
@@ -634,6 +635,7 @@ export type Database = {
           last_name?: string | null
           memorial_template_id?: string | null
           phone?: string | null
+          preferred_language?: string
           template_id?: string | null
           timeline_template_id?: string | null
           tree_template_id?: string | null
@@ -657,6 +659,7 @@ export type Database = {
           last_name?: string | null
           memorial_template_id?: string | null
           phone?: string | null
+          preferred_language?: string
           template_id?: string | null
           timeline_template_id?: string | null
           tree_template_id?: string | null
