@@ -31,13 +31,15 @@ const Footer = () => {
               <li><Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("nav.home")}</Link></li>
               <li><Link to="/memorials" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("nav.memorialWall")}</Link></li>
               <li><Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("nav.dashboard")}</Link></li>
+              <li><Link to="/about" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.about")}</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-serif font-semibold text-foreground mb-4">{t("footer.support")}</h3>
             <ul className="space-y-2">
-              <li><Link to="/settings" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("nav.settings")}</Link></li>
+              <li><Link to="/cookie-policy" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.cookiePolicy")}</Link></li>
+              <li><Link to="/qa" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.qa")}</Link></li>
               <li><Link to="/help" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.helpCentre")}</Link></li>
               <li><Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.privacyPolicy")}</Link></li>
             </ul>
