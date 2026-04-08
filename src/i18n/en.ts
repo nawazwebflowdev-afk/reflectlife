@@ -17,7 +17,7 @@ const en = {
   // Landing page
   landing: {
     heroTitle: "Remember your loved ones",
-    heroSubtitle: "Begin a journey of remembrance — for the ones who will always be part of you",
+    heroSubtitle: "Light a candle of remembrance — for the ones who will always be part of you",
     heroCta: "Start remembering today",
     joinTitle: "Join Our Community",
     joinDesc: "Sign in to see shared memories, create memorials, and connect with others remembering their loved ones.",
