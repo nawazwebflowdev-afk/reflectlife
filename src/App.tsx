@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
+import CookieConsent from "./components/CookieConsent";
 import Landing from "./pages/Landing";
 
 import Signup from "./pages/Signup";
