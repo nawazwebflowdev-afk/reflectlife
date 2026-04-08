@@ -96,6 +96,25 @@ const en = {
     uk: "Українська",
     switchLabel: "Language",
   },
+
+  // Cookie Consent
+  cookies: {
+    title: "Your Privacy Matters",
+    description: "We use cookies to provide a safe and meaningful experience. With your permission, we also use them to improve and personalize your journey. You're always in control.",
+    acceptAll: "Accept All",
+    essentialOnly: "Only Essential",
+    customize: "Customize",
+    preferencesTitle: "Privacy Preferences",
+    essential: "Essential",
+    essentialDesc: "Required for the site to function properly.",
+    analytics: "Analytics",
+    analyticsDesc: "Help us understand how you use Reflectlife.",
+    personalization: "Personalization",
+    personalizationDesc: "Remember your preferences and tailor your experience.",
+    savePreferences: "Save Preferences",
+    privacyPolicy: "Privacy Policy",
+    cookiePolicy: "Cookie Policy",
+  },
 };
 
 export default en;

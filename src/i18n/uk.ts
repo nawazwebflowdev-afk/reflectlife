@@ -96,6 +96,25 @@ const uk = {
     uk: "Українська",
     switchLabel: "Мова",
   },
+
+  // Cookie Consent
+  cookies: {
+    title: "Ваша конфіденційність важлива",
+    description: "Ми використовуємо файли cookie для забезпечення безпечного та змістовного досвіду. З вашого дозволу ми також використовуємо їх для покращення та персоналізації вашої подорожі. Ви завжди контролюєте.",
+    acceptAll: "Прийняти все",
+    essentialOnly: "Лише необхідні",
+    customize: "Налаштувати",
+    preferencesTitle: "Налаштування конфіденційності",
+    essential: "Необхідні",
+    essentialDesc: "Потрібні для правильної роботи сайту.",
+    analytics: "Аналітика",
+    analyticsDesc: "Допомагають нам зрозуміти, як ви використовуєте Reflectlife.",
+    personalization: "Персоналізація",
+    personalizationDesc: "Запам'ятовують ваші вподобання та налаштовують досвід.",
+    savePreferences: "Зберегти налаштування",
+    privacyPolicy: "Політика конфіденційності",
+    cookiePolicy: "Політика cookie",
+  },
 };
 
 export default uk;
