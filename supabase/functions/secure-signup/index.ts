@@ -159,7 +159,7 @@ serve(async (req) => {
   try {
     const {
       email, password, firstName, lastName, fullName,
-      phoneNumber, country, recaptchaToken, passwordScore,
+      phoneNumber, country, recaptchaToken,
     } = await req.json();
 
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
@@ -183,12 +183,6 @@ serve(async (req) => {
       }
     }
 
-    if (!passwordScore || passwordScore < 3) {
-      return new Response(
-        JSON.stringify({ error: 'Password is too weak. Please choose a stronger password.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
 
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.valid) {

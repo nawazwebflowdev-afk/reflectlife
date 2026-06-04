@@ -26,11 +26,14 @@ Deno.serve(async (req) => {
     });
   }
 
-  // If header key mismatches, log it but continue so auth emails still send.
-  // Supabase Auth hook delivery should never be blocked by this check.
+  // Require valid Authorization header — reject any caller without the hook secret.
   const incomingSecret = req.headers.get("Authorization")?.replace("Bearer ", "");
   if (incomingSecret !== lovableApiKey) {
-    console.warn("Auth-email-hook: Authorization mismatch detected; continuing to process email hook.");
+    console.error("Auth-email-hook: Unauthorized request rejected.");
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 
   let body: any;

@@ -56,7 +56,7 @@ const Verify = () => {
         body: {
           email,
           password: '__resend_only__',
-          passwordScore: 4,
+          
           fullName: 'Resend',
         }
       });

@@ -209,7 +209,7 @@ const SignupForm = () => {
           lastName,
           phoneNumber,
           country,
-          passwordScore: passwordStrength.score,
+          
         }
       });
 
