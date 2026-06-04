@@ -158,7 +158,8 @@ Deno.serve(async (req) => {
       });
 
       if (insertError) {
-        return new Response(JSON.stringify({ error: `Failed to save purchase: ${insertError.message}` }), {
+        console.error('confirm-template-purchase: insert failed', insertError);
+        return new Response(JSON.stringify({ error: 'Failed to process your purchase. Please contact support.' }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -170,7 +171,8 @@ Deno.serve(async (req) => {
         .eq('id', existingPurchase.id);
 
       if (updatePurchaseError) {
-        return new Response(JSON.stringify({ error: `Failed to update purchase: ${updatePurchaseError.message}` }), {
+        console.error('confirm-template-purchase: update failed', updatePurchaseError);
+        return new Response(JSON.stringify({ error: 'Failed to process your purchase. Please contact support.' }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -185,7 +187,8 @@ Deno.serve(async (req) => {
       .eq('id', buyerId);
 
     if (profileError) {
-      return new Response(JSON.stringify({ error: `Failed to update profile template: ${profileError.message}` }), {
+      console.error('confirm-template-purchase: profile update failed', profileError);
+      return new Response(JSON.stringify({ error: 'Failed to process your purchase. Please contact support.' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
