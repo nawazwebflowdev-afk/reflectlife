@@ -41,7 +41,7 @@ const PageTemplateSelector = ({
   compact = false,
 }: PageTemplateSelectorProps) => {
   const [allTemplates, setAllTemplates] = useState<Template[]>([]);
-  const [purchasedIds, setPurchasedIds] = useState<Set<string>>(new Set());
+  const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [filter, setFilter] = useState<FilterType>("all");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -55,17 +55,23 @@ const PageTemplateSelector = ({
   const fetchData = async () => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       const [templatesRes, purchasesRes] = await Promise.all([
         supabase.from("site_templates").select("id, name, preview_url, country, is_free, price").order("name"),
         user
-          ? supabase.from("template_purchases").select("template_id").eq("buyer_id", user.id).eq("payment_status", "success")
+          ? supabase
+              .from("template_purchases")
+              .select("template_id")
+              .eq("buyer_id", user.id)
+              .eq("payment_status", "success")
           : Promise.resolve({ data: [] }),
       ]);
 
       setAllTemplates(templatesRes.data || []);
-      setPurchasedIds(new Set((purchasesRes.data || []).map((p: any) => p.template_id)));
+      setPurchasedIds((purchasesRes.data || []).map((p: any) => p.template_id));
     } catch (err: any) {
       console.error("Error fetching templates:", err);
     } finally {
@@ -73,18 +79,18 @@ const PageTemplateSelector = ({
     }
   };
 
-  const displayedTemplates = filter === "my"
-    ? allTemplates.filter((t) => purchasedIds.has(t.id))
-    : allTemplates;
+  const displayedTemplates = filter === "my" ? allTemplates.filter((t) => purchasedIds.includes(t.id)) : allTemplates;
 
   const handleSelect = async (templateId: string | null) => {
-    // Validate ownership for paid templates
+    // 1. Validation Logic
     if (templateId) {
       const template = allTemplates.find((t) => t.id === templateId);
-      if (template && !template.is_free && !purchasedIds.has(templateId)) {
+      const isPaid = template && !template.is_free && (template.price ?? 0) > 0;
+
+      if (isPaid && !purchasedIds.includes(templateId)) {
         toast({
           title: "Purchase required",
-          description: `You need to purchase "${template.name}" before using it. Visit the marketplace.`,
+          description: `You need to purchase "${template?.name}" before using it.`,
           variant: "destructive",
         });
         return;
@@ -93,19 +99,26 @@ const PageTemplateSelector = ({
 
     setSaving(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // 2. Database Update
       const field = PROFILE_FIELD_MAP[pageType];
       const { error } = await supabase
         .from("profiles")
-        .update({ [field]: templateId } as any)
+        .update({ [field]: templateId })
         .eq("id", user.id);
 
       if (error) throw error;
 
+      // 3. UI Sync
       onTemplateChange(templateId);
-      toast({ title: "Template updated", description: `Your ${pageType} page background has been changed.` });
+      toast({
+        title: templateId ? "Design applied" : "Canvas cleared",
+        description: `Successfully updated to ${templateId ? "selected template" : "default blank view"}.`,
+      });
       setOpen(false);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -115,7 +128,8 @@ const PageTemplateSelector = ({
   };
 
   const pageLabel = pageType === "memorial" ? "Memorial Wall" : pageType === "tree" ? "Connection Tree" : "Timeline";
-  const triggerLabel = pageType === "tree" ? "Tree Template" : pageType === "timeline" ? "Timeline Template" : "Memorial Template";
+  const triggerLabel =
+    pageType === "tree" ? "Tree Design" : pageType === "timeline" ? "Timeline Design" : "Memorial Design";
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -127,20 +141,18 @@ const PageTemplateSelector = ({
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Choose a Template for {pageLabel}</DialogTitle>
+          <DialogTitle>Choose a Design for {pageLabel}</DialogTitle>
         </DialogHeader>
 
         <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-muted-foreground">
-            Select a template for your {pageLabel} background.
-          </p>
+          <p className="text-sm text-muted-foreground">Select a background for your {pageLabel}.</p>
           <Select value={filter} onValueChange={(v) => setFilter(v as FilterType)}>
             <SelectTrigger className="w-[160px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Templates</SelectItem>
-              <SelectItem value="my">My Templates</SelectItem>
+              <SelectItem value="all">All Designs</SelectItem>
+              <SelectItem value="my">My Purchased</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -149,24 +161,16 @@ const PageTemplateSelector = ({
           <div className="flex justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
-        ) : displayedTemplates.length === 0 && filter === "my" ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <p className="mb-2">You haven't purchased any templates yet.</p>
-            <p className="text-sm">Browse <button onClick={() => setFilter("all")} className="text-primary underline">All Templates</button> or visit the <a href="/templates" className="text-primary underline">marketplace</a>.</p>
-          </div>
         ) : (
           <ScrollArea className="max-h-[60vh]">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-1">
-              {/* None / Default option */}
               <button
                 onClick={() => handleSelect(null)}
                 disabled={saving}
-                className={`relative rounded-lg border-2 overflow-hidden transition-all hover:shadow-md ${
-                  !currentTemplateId ? "border-primary ring-2 ring-primary/30" : "border-border"
-                }`}
+                className={`relative rounded-lg border-2 overflow-hidden transition-all hover:shadow-md ${!currentTemplateId ? "border-primary ring-2 ring-primary/30" : "border-border"}`}
               >
                 <div className="aspect-video bg-gradient-to-br from-muted to-background flex items-center justify-center">
-                  <span className="text-sm font-medium text-muted-foreground">Default</span>
+                  <span className="text-sm font-medium text-muted-foreground">Blank</span>
                 </div>
                 {!currentTemplateId && (
                   <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
@@ -177,7 +181,7 @@ const PageTemplateSelector = ({
 
               {displayedTemplates.map((template) => {
                 const isPaid = !template.is_free && (template.price ?? 0) > 0;
-                const isOwned = purchasedIds.has(template.id);
+                const isOwned = purchasedIds.includes(template.id);
                 const isLocked = isPaid && !isOwned;
 
                 return (
@@ -185,17 +189,11 @@ const PageTemplateSelector = ({
                     key={template.id}
                     onClick={() => handleSelect(template.id)}
                     disabled={saving}
-                    className={`relative rounded-lg border-2 overflow-hidden transition-all hover:shadow-md ${
-                      currentTemplateId === template.id ? "border-primary ring-2 ring-primary/30" : "border-border"
-                    } ${isLocked ? "opacity-75" : ""}`}
+                    className={`relative rounded-lg border-2 overflow-hidden transition-all hover:shadow-md ${currentTemplateId === template.id ? "border-primary ring-2 ring-primary/30" : "border-border"} ${isLocked ? "opacity-75" : ""}`}
                   >
                     <div className="aspect-video bg-muted">
                       {template.preview_url ? (
-                        <img
-                          src={template.preview_url}
-                          alt={template.name}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={template.preview_url} alt={template.name} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
                           <Palette className="h-6 w-6 text-muted-foreground" />
@@ -209,9 +207,7 @@ const PageTemplateSelector = ({
                     </div>
                     <div className="p-2 bg-card flex items-center justify-between">
                       <p className="text-xs font-medium truncate">{template.name}</p>
-                      {isLocked && (
-                        <span className="text-[10px] font-semibold text-amber-600">€{template.price}</span>
-                      )}
+                      {isLocked && <span className="text-[10px] font-semibold text-amber-600">€{template.price}</span>}
                     </div>
                     {currentTemplateId === template.id && (
                       <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
