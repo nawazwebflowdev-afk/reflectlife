@@ -66,12 +66,32 @@ const Landing = () => {
     }
   };
 
-  // SYLVIA'S REQUEST: Updated Features Grid (4 items)
+  // NATURAL LANGUAGE FEATURE CARDS
   const features = [
-    { icon: Heart, titleKey: "features.createMemorial", descKey: "features.createMemorialDesc", path: "/memorials" },
-    { icon: Flame, titleKey: "features.litCandle", descKey: "features.litCandleDesc", path: "/candle" },
-    { icon: Clock, titleKey: "features.timeline", descKey: "features.timelineDesc", path: "/timeline" },
-    { icon: BookOpen, titleKey: "features.diary", descKey: "features.diaryDesc", path: "/diary" },
+    {
+      icon: Heart,
+      title: "Create a Memorial",
+      desc: "Design a private space to honor and preserve their unique story forever.",
+      path: "/memorials",
+    },
+    {
+      icon: Flame,
+      title: "Light a Candle",
+      desc: "A warm, enduring symbol of remembrance to keep their memory glowing.",
+      path: "/candle",
+    },
+    {
+      icon: Clock,
+      title: "Celebrate a Journey",
+      desc: "Walk through the milestones, moments, and memories that defined them.",
+      path: "/timeline",
+    },
+    {
+      icon: BookOpen,
+      title: "Private Diary",
+      desc: "A secure, personal place to write down your thoughts and feelings.",
+      path: "/diary",
+    },
   ];
 
   const testimonials = [
@@ -98,7 +118,6 @@ const Landing = () => {
             >
               {t("landing.heroSubtitle")}
             </p>
-            {/* SYLVIA'S REQUEST: Button Text Changed */}
             <Button
               size="lg"
               onClick={() => navigate(user ? "/memorials" : "/signup")}
@@ -181,7 +200,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* About / How It Works - UPDATED GRID */}
+      {/* Features Section - UPDATED TO 4-COLUMNS NATURAL TEXT */}
       <section className="py-20 bg-gradient-subtle">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 animate-fade-in">
@@ -203,8 +222,8 @@ const Landing = () => {
                   <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
                     <feature.icon className="h-8 w-8 text-primary" />
                   </div>
-                  <h3 className="font-serif text-xl font-semibold mb-3">{t(feature.titleKey)}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{t(feature.descKey)}</p>
+                  <h3 className="font-serif text-xl font-semibold mb-3">{feature.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed text-sm">{feature.desc}</p>
                 </CardContent>
               </Card>
             ))}
