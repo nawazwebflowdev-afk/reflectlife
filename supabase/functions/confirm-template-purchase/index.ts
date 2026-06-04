@@ -235,7 +235,7 @@ Deno.serve(async (req) => {
     console.error('confirm-template-purchase error:', error);
     return new Response(
       JSON.stringify({
-        error: error instanceof Error ? error.message : 'Failed to confirm purchase',
+        error: 'Failed to confirm purchase. Please contact support.',
       }),
       {
         status: 500,
