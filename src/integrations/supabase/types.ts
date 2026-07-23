@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      candle_contributions: {
+        Row: {
+          amount: number
+          anonymous: boolean
+          contributor_name: string | null
+          created_at: string
+          id: string
+          memorial_candle_id: string
+          memorial_id: string
+          message: string | null
+          plan: string
+          stripe_session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number
+          anonymous?: boolean
+          contributor_name?: string | null
+          created_at?: string
+          id?: string
+          memorial_candle_id: string
+          memorial_id: string
+          message?: string | null
+          plan: string
+          stripe_session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          anonymous?: boolean
+          contributor_name?: string | null
+          created_at?: string
+          id?: string
+          memorial_candle_id?: string
+          memorial_id?: string
+          message?: string | null
+          plan?: string
+          stripe_session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candle_contributions_memorial_candle_id_fkey"
+            columns: ["memorial_candle_id"]
+            isOneToOne: false
+            referencedRelation: "memorial_candles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candle_contributions_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       connections: {
         Row: {
           connection_type: string
@@ -197,30 +254,39 @@ export type Database = {
       memorial_candles: {
         Row: {
           created_at: string
+          current_plan: string | null
+          expires_at: string | null
           id: string
           memorial_id: string
-          session_id: string | null
-          user_id: string | null
+          started_at: string | null
+          status: string
+          updated_at: string
         }
         Insert: {
           created_at?: string
+          current_plan?: string | null
+          expires_at?: string | null
           id?: string
           memorial_id: string
-          session_id?: string | null
-          user_id?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
         }
         Update: {
           created_at?: string
+          current_plan?: string | null
+          expires_at?: string | null
           id?: string
           memorial_id?: string
-          session_id?: string | null
-          user_id?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
         }
         Relationships: [
           {
             foreignKeyName: "memorial_candles_memorial_id_fkey"
             columns: ["memorial_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "memorials"
             referencedColumns: ["id"]
           },
@@ -1032,6 +1098,36 @@ export type Database = {
       }
     }
     Functions: {
+      apply_candle_contribution: {
+        Args: {
+          _amount: number
+          _anonymous: boolean
+          _contributor_name: string
+          _duration_seconds: number
+          _memorial_id: string
+          _message: string
+          _plan: string
+          _stripe_session_id: string
+          _user_id: string
+        }
+        Returns: {
+          created_at: string
+          current_plan: string | null
+          expires_at: string | null
+          id: string
+          memorial_id: string
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "memorial_candles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      expire_stale_candles: { Args: never; Returns: undefined }
       has_memorial_access: {
         Args: { _memorial_id: string; _user_id: string }
         Returns: boolean
