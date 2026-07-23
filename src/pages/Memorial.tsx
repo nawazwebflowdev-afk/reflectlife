@@ -11,6 +11,7 @@ import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import timelineBg from "@/assets/timeline-bg.jpg";
 import EditMemorialModal from "@/components/EditMemorialModal";
 import { AddMemoryModal } from "@/components/AddMemoryModal";
+import { CandleSection } from "@/components/candle/CandleSection";
 
 const Memorial = () => {
   const { id } = useParams();
@@ -405,6 +406,8 @@ const Memorial = () => {
             </CardContent>
           </Card>
         )}
+
+        {memorial?.id && <CandleSection memorialId={memorial.id} />}
 
         {/* Tabs */}
         <Tabs defaultValue="timeline" className="w-full">

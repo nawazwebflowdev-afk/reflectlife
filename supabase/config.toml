@@ -26,3 +26,12 @@ verify_jwt = false
 
 [functions.confirm-template-purchase]
 verify_jwt = false
+
+[functions.create-candle-checkout]
+verify_jwt = false
+
+[functions.confirm-candle-payment]
+verify_jwt = false
+
+[functions.light-free-candle]
+verify_jwt = false

@@ -38,6 +38,37 @@ Deno.serve(async (req) => {
         });
       }
 
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+      // Candle purchases branch
+      if (session.metadata?.kind === 'candle') {
+        const md = session.metadata;
+        const durationSeconds = parseInt(md.duration_seconds || '0', 10);
+        const amount = parseFloat(md.amount || '0');
+        if (!md.memorial_id || !md.plan || !durationSeconds) {
+          console.error('Invalid candle metadata', md);
+          return new Response(JSON.stringify({ received: true, error: 'invalid_candle_metadata' }), {
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        const { error: candleErr } = await supabase.rpc('apply_candle_contribution', {
+          _memorial_id: md.memorial_id,
+          _plan: md.plan,
+          _duration_seconds: durationSeconds,
+          _amount: amount,
+          _contributor_name: md.contributor_name || null,
+          _anonymous: md.anonymous === 'true',
+          _message: md.message || null,
+          _user_id: md.user_id || null,
+          _stripe_session_id: session.id,
+        });
+        if (candleErr) console.error('Candle activation error:', candleErr);
+        else console.log('Candle activated/extended for memorial', md.memorial_id);
+        return new Response(JSON.stringify({ received: true }), {
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
       const { buyer_id, template_id, creator_id, platform_fee } = session.metadata || {};
 
       console.log('stripe-webhook: metadata extracted', { buyer_id, template_id, creator_id, session_id: session.id });
@@ -48,8 +79,6 @@ Deno.serve(async (req) => {
           headers: { 'Content-Type': 'application/json' },
         });
       }
-
-      const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
       // Fetch template to get price
       const { data: template, error: templateError } = await supabase

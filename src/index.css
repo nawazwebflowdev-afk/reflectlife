@@ -145,3 +145,84 @@ All colors MUST be HSL.
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* Candle flame — pure CSS, GPU-accelerated */
+.candle-flame-root {
+  position: relative;
+  width: 32px;
+  height: 56px;
+  transform-origin: 50% 100%;
+}
+.candle-flame-outer,
+.candle-flame-inner {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  border-radius: 50% 50% 20% 20% / 60% 60% 40% 40%;
+  will-change: transform, opacity, filter;
+}
+.candle-flame-outer {
+  width: 26px;
+  height: 52px;
+  background: radial-gradient(ellipse at 50% 90%, hsl(35 100% 65%) 0%, hsl(20 100% 55%) 55%, hsl(15 90% 45% / 0) 100%);
+  filter: blur(2px);
+  box-shadow:
+    0 0 24px 8px hsl(30 100% 60% / 0.55),
+    0 0 60px 20px hsl(25 100% 55% / 0.35);
+  animation: candle-sway 3.2s ease-in-out infinite;
+}
+.candle-flame-inner {
+  width: 12px;
+  height: 30px;
+  background: radial-gradient(ellipse at 50% 80%, hsl(55 100% 88%) 0%, hsl(45 100% 70%) 60%, hsl(30 100% 60% / 0) 100%);
+  bottom: 4px;
+  animation: candle-flicker 0.18s ease-in-out infinite alternate,
+             candle-sway 2.7s ease-in-out infinite;
+}
+.candle-halo {
+  background: radial-gradient(circle at 50% 20%, hsl(30 100% 60% / 0.35) 0%, hsl(30 100% 60% / 0) 60%);
+  animation: candle-halo 4s ease-in-out infinite;
+  pointer-events: none;
+}
+.candle-ember {
+  position: absolute;
+  left: 50%;
+  bottom: 40px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: hsl(35 100% 70%);
+  box-shadow: 0 0 6px hsl(35 100% 70%);
+  opacity: 0;
+  animation: candle-ember-rise 4s ease-in infinite;
+}
+.candle-ember-1 { animation-delay: 0s; }
+.candle-ember-2 { animation-delay: 1.3s; left: 45%; }
+.candle-ember-3 { animation-delay: 2.6s; left: 55%; }
+
+@keyframes candle-flicker {
+  0%   { transform: translateX(-50%) scaleY(1)    scaleX(1); opacity: 0.95; }
+  100% { transform: translateX(-50%) scaleY(1.06) scaleX(0.96); opacity: 1; }
+}
+@keyframes candle-sway {
+  0%, 100% { transform: translateX(-50%) rotate(-1.5deg); }
+  50%      { transform: translateX(-50%) rotate(1.5deg); }
+}
+@keyframes candle-halo {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.04); }
+}
+@keyframes candle-ember-rise {
+  0%   { transform: translate(-50%, 0) scale(1); opacity: 0; }
+  15%  { opacity: 1; }
+  100% { transform: translate(-50%, -80px) scale(0.4); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .candle-flame-outer,
+  .candle-flame-inner,
+  .candle-halo,
+  .candle-ember { animation: none !important; }
+  .candle-ember { display: none; }
+}
