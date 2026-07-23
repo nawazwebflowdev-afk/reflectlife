@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/cn';
 import { Loader2, Flame, Sparkles } from 'lucide-react';
 import type { CandlePlanKey } from './candlePlans';
 import { CANDLE_PLAN_META } from './candlePlans';

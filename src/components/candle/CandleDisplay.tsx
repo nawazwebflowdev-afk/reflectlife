@@ -1,6 +1,6 @@
 import candleAsset from '@/assets/candle.png.asset.json';
 import { CandleFlame } from './CandleFlame';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/cn';
 
 interface Props {
   lit: boolean;
