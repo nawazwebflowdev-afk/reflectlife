@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Loader2, Settings } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import PrintButton from "@/components/PrintButton";
+import ShareMemorial from "@/components/ShareMemorial";
 import AddConnectionModal from "@/components/tree/AddConnectionModal";
 import ConnectionDetailPanel from "@/components/tree/ConnectionDetailPanel";
 import EmptyTreeState from "@/components/tree/EmptyTreeState";
@@ -655,6 +656,15 @@ const Tree = () => {
         onClose={() => setSelectedConnection(null)}
         onUpdate={fetchConnections}
       />
+
+      <div className="max-w-4xl mx-auto px-4">
+        <ShareMemorial
+          name="My Family Tree"
+          title="Share My Tree"
+          description="Invite family and friends to explore your family tree."
+          shareText="Explore my family tree on Reflectlife"
+        />
+      </div>
 
       <PrintButton />
     </div>

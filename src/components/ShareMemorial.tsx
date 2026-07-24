@@ -1,8 +1,11 @@
-import { Facebook, Twitter, Link2 } from "lucide-react";
+import { Facebook, Link2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface ShareMemorialProps {
   name: string;
+  title?: string;
+  description?: string;
+  shareText?: string;
 }
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -11,10 +14,21 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export const ShareMemorial = ({ name }: ShareMemorialProps) => {
-  const memorialUrl = typeof window !== "undefined" ? window.location.href : "";
-  const encodedUrl = encodeURIComponent(memorialUrl);
-  const encodedText = encodeURIComponent(`Remembering ${name}`);
+const XIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
+export const ShareMemorial = ({
+  name,
+  title = "Share this Memorial",
+  description = "Help family and friends remember and celebrate this loved one's life.",
+  shareText,
+}: ShareMemorialProps) => {
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const encodedUrl = encodeURIComponent(shareUrl);
+  const encodedText = encodeURIComponent(shareText ?? `Remembering ${name}`);
 
   const shareLinks = [
     {
@@ -26,8 +40,8 @@ export const ShareMemorial = ({ name }: ShareMemorialProps) => {
     {
       label: "Share on X",
       href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`,
-      icon: Twitter,
-      hoverColor: "hover:bg-foreground hover:text-background hover:border-foreground",
+      icon: XIcon,
+      hoverColor: "hover:bg-black hover:text-white hover:border-black",
     },
     {
       label: "Share on WhatsApp",
@@ -39,8 +53,8 @@ export const ShareMemorial = ({ name }: ShareMemorialProps) => {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(memorialUrl);
-      toast.success("Memorial link copied successfully.");
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Link copied successfully.");
     } catch {
       toast.error("Could not copy link. Please try again.");
     }
@@ -50,10 +64,10 @@ export const ShareMemorial = ({ name }: ShareMemorialProps) => {
     <section className="my-10 py-8 px-6 rounded-2xl bg-card/80 backdrop-blur-sm shadow-elegant border border-border">
       <div className="text-center max-w-xl mx-auto">
         <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-2">
-          Share this Memorial
+          {title}
         </h2>
         <p className="text-muted-foreground mb-6">
-          Help family and friends remember and celebrate this loved one's life.
+          {description}
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-4">
@@ -74,8 +88,8 @@ export const ShareMemorial = ({ name }: ShareMemorialProps) => {
           <button
             type="button"
             onClick={handleCopy}
-            aria-label="Copy Memorial Link"
-            title="Copy Memorial Link"
+            aria-label="Copy Link"
+            title="Copy Link"
             className="group flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition-all duration-200 hover:scale-110 hover:shadow-md hover:bg-primary hover:text-primary-foreground hover:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <Link2 className="h-5 w-5" />
