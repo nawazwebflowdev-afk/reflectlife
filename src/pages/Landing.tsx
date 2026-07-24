@@ -7,6 +7,7 @@ import { AvatarDisplay } from "@/components/EmojiAvatarSelector";
 import heroBanner from "@/assets/hero-banner.png";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import FeaturedTemplates from "@/components/FeaturedTemplates";
+import LatestPrayers from "@/components/LatestPrayers";
 import PostDetailModal from "@/components/PostDetailModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
