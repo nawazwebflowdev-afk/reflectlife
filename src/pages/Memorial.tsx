@@ -412,6 +412,15 @@ const Memorial = () => {
 
         {memorial?.id && <CandleSection memorialId={memorial.id} />}
 
+        {memorial?.id && memorial?.name && (
+          <RemembranceSection
+            memorialId={memorial.id}
+            memorialName={memorial.name}
+            isOwner={!!isCreator}
+            hasAccess={false}
+          />
+        )}
+
         {memorial?.name && <ShareMemorial name={memorial.name} />}
 
 
