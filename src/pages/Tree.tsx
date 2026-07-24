@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Loader2, Settings } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import PrintButton from "@/components/PrintButton";
+import ShareMemorial from "@/components/ShareMemorial";
 import AddConnectionModal from "@/components/tree/AddConnectionModal";
 import ConnectionDetailPanel from "@/components/tree/ConnectionDetailPanel";
 import EmptyTreeState from "@/components/tree/EmptyTreeState";
