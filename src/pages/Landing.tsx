@@ -258,32 +258,16 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Latest Prayers */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16 animate-fade-in">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">{t("landing.testimonialsTitle")}</h2>
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">{t("landing.latestPrayersTitle")}</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
+              {t("landing.latestPrayersDesc")}
+            </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-            {testimonials.map((testimonial, index) => (
-              <Card
-                key={index}
-                className="border-2 hover:shadow-elegant transition-smooth hover:-translate-y-1 bg-card animate-fade-in"
-                style={{ animationDelay: `${index * 150}ms` }}
-              >
-                <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 mx-auto mb-6 rounded-full overflow-hidden bg-muted">
-                    <AvatarDisplay avatarIndex={testimonial.avatarIndex} size="lg" />
-                  </div>
-                  <p className="text-muted-foreground leading-relaxed italic mb-6">
-                    &ldquo;{t(testimonial.quoteKey)}&rdquo;
-                  </p>
-                  <p className="font-semibold">{testimonial.name}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <LatestPrayers />
         </div>
       </section>
 
