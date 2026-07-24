@@ -61,6 +61,18 @@ export const ShareMemorial = ({
       icon: WhatsAppIcon,
       hoverColor: "hover:bg-[#25D366] hover:text-white hover:border-[#25D366]",
     },
+    {
+      label: "Share on Telegram",
+      href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`,
+      icon: TelegramIcon,
+      hoverColor: "hover:bg-[#26A5E4] hover:text-white hover:border-[#26A5E4]",
+    },
+    {
+      label: "Share on Viber",
+      href: `viber://forward?text=${encodedText}%20${encodedUrl}`,
+      icon: ViberIcon,
+      hoverColor: "hover:bg-[#7360F2] hover:text-white hover:border-[#7360F2]",
+    },
   ];
 
   const handleCopy = async () => {
