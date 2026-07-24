@@ -1,112 +1,80 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
+import { Flame, Heart } from "lucide-react";
 
-interface Prayer {
-  id: string;
-  tribute_text: string;
-  created_at: string;
-  memorial_id: string;
-  memorial_name: string;
+interface FeaturedPrayer {
+  id: number;
+  title: string;
+  author: string;
+  text: string;
 }
 
-const formatWhen = (iso: string) => {
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 7) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString();
-};
+const FEATURED_PRAYERS: FeaturedPrayer[] = [
+  {
+    id: 1,
+    title: "Prayer for Eternal Rest",
+    author: "Andriy Shevchenko",
+    text: "Eternal rest grant unto them, O Lord, and let perpetual light shine upon them. May they rest in peace, and may Your everlasting love surround them forever. Amen.",
+  },
+  {
+    id: 2,
+    title: "Eternal Memory",
+    author: "Olena Melnyk",
+    text: "May their memory be eternal. May their kindness never be forgotten. May their love continue to live in the hearts of those they touched. Though they have departed this world, their spirit remains with us always. Eternal memory.",
+  },
+  {
+    id: 3,
+    title: "Prayer for Peace",
+    author: "Oleksandr Kovalenko",
+    text: "Lord, receive this precious soul into Your heavenly kingdom. Grant them peace beyond all understanding. Comfort those who mourn, strengthen those who grieve, and remind us that love never ends. Amen.",
+  },
+  {
+    id: 4,
+    title: "The Shepherd's Prayer",
+    author: "Kateryna Bondarenko",
+    text: "The Lord is my Shepherd; I shall not want. He leads me beside still waters and restores my soul. Even though I walk through the valley of the shadow of death, I will fear no evil, for You are with me. Your love comforts me today and always.",
+  },
+];
 
 export const LatestPrayers = () => {
-  const { t } = useTranslation();
-  const [prayers, setPrayers] = useState<Prayer[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
-      const { data } = await supabase
-        .from("memorial_tributes")
-        .select("id, tribute_text, created_at, memorial_id, memorials!inner(name, is_public, privacy_level)")
-        .eq("memorials.is_public", true)
-        .eq("memorials.privacy_level", "public")
-        .order("created_at", { ascending: false })
-        .limit(6);
-
-      const rows: Prayer[] = (data ?? []).map((r: any) => ({
-        id: r.id,
-        tribute_text: r.tribute_text,
-        created_at: r.created_at,
-        memorial_id: r.memorial_id,
-        memorial_name: r.memorials?.name ?? "",
-      }));
-      setPrayers(rows);
-      setLoading(false);
-    };
-    load();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-        {[0, 1, 2, 3].map((i) => (
-          <Card key={i} className="bg-card/50 border-2 animate-pulse">
-            <CardContent className="p-8 h-40" />
+  return (
+    <div className="max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {FEATURED_PRAYERS.map((prayer, index) => (
+          <Card
+            key={prayer.id}
+            className="bg-card/60 border-2 hover:shadow-elegant transition-smooth animate-fade-in flex flex-col"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            <CardContent className="p-6 flex flex-col h-full">
+              <Heart className="w-6 h-6 mb-3 text-primary" />
+              <h3 className="font-serif text-lg font-semibold text-foreground mb-3 leading-snug">
+                {prayer.title}
+              </h3>
+              <p className="text-sm text-muted-foreground italic leading-relaxed mb-5">
+                "{prayer.text}"
+              </p>
+              <div className="mt-auto pt-4 border-t border-border/60">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground mb-3">
+                  — {prayer.author}
+                </p>
+                <Button
+                  asChild
+                  size="sm"
+                  variant="secondary"
+                  className="w-full rounded-full"
+                >
+                  <Link to={`/memorial-wall?prayer=${prayer.id}`}>
+                    <Flame className="w-4 h-4 mr-2" />
+                    Light a Candle with this Prayer
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
           </Card>
         ))}
       </div>
-    );
-  }
-
-  if (prayers.length === 0) {
-    return (
-      <div className="max-w-2xl mx-auto text-center">
-        <Card className="bg-card/50 border-2">
-          <CardContent className="p-10">
-            <Heart className="w-8 h-8 mx-auto mb-4 text-primary" />
-            <p className="text-muted-foreground italic leading-relaxed">
-              {t("landing.prayersEmpty", "No prayers have been shared yet. Be the first to leave a tribute on a memorial page.")}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-      {prayers.map((prayer, index) => (
-        <Card
-          key={prayer.id}
-          className="bg-card/50 border-2 hover:shadow-elegant transition-smooth animate-fade-in"
-          style={{ animationDelay: `${index * 100}ms` }}
-        >
-          <CardContent className="p-8">
-            <div className="flex flex-col h-full">
-              <Heart className="w-6 h-6 mb-3 text-primary" />
-              <p className="text-muted-foreground italic mb-4 leading-relaxed line-clamp-5">
-                "{prayer.tribute_text}"
-              </p>
-              <div className="mt-auto flex items-center justify-between text-sm">
-                <Link
-                  to={`/memorial/${prayer.memorial_id}`}
-                  className="font-serif font-semibold text-foreground hover:text-primary transition-colors"
-                >
-                  {t("landing.prayersFor", "For")} {prayer.memorial_name}
-                </Link>
-                <span className="text-muted-foreground">{formatWhen(prayer.created_at)}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
     </div>
   );
 };
