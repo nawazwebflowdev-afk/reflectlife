@@ -31,6 +31,7 @@ const en = {
     latestPrayersDesc: "Recent tributes and prayers shared by our community across public memorials.",
     prayersEmpty: "No prayers have been shared yet. Be the first to leave a tribute on a memorial page.",
     prayersFor: "For",
+    testimonialsTitle: "What families say about Reflectlife",
     featuredTemplatesTitle: "Featured Templates",
     featuredTemplatesDesc: "Choose from our collection of beautifully designed memorial templates",
     ctaTitle: "Start Preserving Memories Today",
@@ -50,10 +51,10 @@ const en = {
 
   // Testimonials
   testimonials: {
-    sarah: "Reflectlife gave us a beautiful way to celebrate my mother's life. It's comforting to have all our memories in one place.",
-    michael: "A truly special space where our family can come together and share stories about Dad. It means everything to us.",
-    linda: "Creating a memorial was so easy, and it's become a place of peace for us all. Thank you for this gift.",
-    james: "Reflectlife helped us keep grandma's memory alive in such a meaningful way. We visit it often.",
+    sarah: "Reflectlife gave our family a beautiful place to celebrate Mum's life. Being able to share photos, memories, and stories has brought us comfort every day.",
+    michael: "When friends and family are spread across the world, Reflectlife keeps us connected. It's become a place where we remember Dad together and celebrate the life he lived.",
+    linda: "Creating a memorial took only a few minutes, but the memories we've shared there will last forever. It has become a place our whole family visits with love.",
+    james: "Reflectlife has given us somewhere peaceful to honour Grandma's memory. Lighting a candle, reading messages, and sharing stories helps us feel close to her every day.",
   },
 
   // Footer
