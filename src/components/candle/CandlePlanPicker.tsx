@@ -4,10 +4,16 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/utils/cn';
 import { Loader2, Flame, Sparkles } from 'lucide-react';
 import type { CandlePlanKey } from './candlePlans';
 import { CANDLE_PLAN_META } from './candlePlans';
+import { PRAYERS } from './prayers';
+
+type DedicationMode = 'none' | 'preset' | 'custom';
+
 
 interface Props {
   mode: 'light' | 'extend';
