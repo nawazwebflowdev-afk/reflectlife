@@ -411,6 +411,9 @@ const Memorial = () => {
 
         {memorial?.id && <CandleSection memorialId={memorial.id} />}
 
+        {memorial?.name && <ShareMemorial name={memorial.name} />}
+
+
         {/* Tabs */}
         <Tabs defaultValue="timeline" className="w-full">
           <TabsList className="mb-6">
