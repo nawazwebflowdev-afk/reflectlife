@@ -12,6 +12,7 @@ import timelineBg from "@/assets/timeline-bg.jpg";
 import EditMemorialModal from "@/components/EditMemorialModal";
 import { AddMemoryModal } from "@/components/AddMemoryModal";
 import { CandleSection } from "@/components/candle/CandleSection";
+import ShareMemorial from "@/components/ShareMemorial";
 import PrintButton from "@/components/PrintButton";
 
 const Memorial = () => {
@@ -409,6 +410,9 @@ const Memorial = () => {
         )}
 
         {memorial?.id && <CandleSection memorialId={memorial.id} />}
+
+        {memorial?.name && <ShareMemorial name={memorial.name} />}
+
 
         {/* Tabs */}
         <Tabs defaultValue="timeline" className="w-full">
