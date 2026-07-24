@@ -655,6 +655,8 @@ const Tree = () => {
         onClose={() => setSelectedConnection(null)}
         onUpdate={fetchConnections}
       />
+
+      <PrintButton />
     </div>
   );
 };
