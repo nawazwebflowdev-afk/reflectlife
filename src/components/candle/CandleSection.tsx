@@ -6,7 +6,7 @@ import { DedicationList } from './DedicationList';
 import { useCountdown } from '@/hooks/useCountdown';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Users, Clock } from 'lucide-react';
+import { Users, Clock, Sparkles } from 'lucide-react';
 import type { CandlePlanKey } from './candlePlans';
 
 interface Candle {
