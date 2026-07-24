@@ -176,7 +176,13 @@ export function CandleSection({ memorialId }: Props) {
         )}
 
         {isLit && !showExtendForm ? (
-          <Button size="lg" variant="secondary" onClick={() => setShowExtendForm(true)}>
+          <Button
+            size="lg"
+            style={{ backgroundColor: '#4A324A' }}
+            className="rounded-full px-8 py-6 font-semibold text-white hover:brightness-110 hover:scale-[1.02] hover:shadow-[0_4px_16px_rgba(74,50,74,0.35)] transition-all"
+            onClick={() => setShowExtendForm(true)}
+          >
+            <Sparkles className="w-4 h-4 mr-2" style={{ color: '#FFE9A8' }} />
             Extend the Candle
           </Button>
         ) : (
