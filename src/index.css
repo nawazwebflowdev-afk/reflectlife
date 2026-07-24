@@ -226,3 +226,7 @@ All colors MUST be HSL.
   .candle-ember { animation: none !important; }
   .candle-ember { display: none; }
 }
+
+@media print {
+  .print-hide { display: none !important; }
+}
