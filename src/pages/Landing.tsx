@@ -232,18 +232,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Latest Prayers */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">{t("landing.latestPrayersTitle")}</h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
-              {t("landing.latestPrayersDesc")}
-            </p>
-          </div>
-          <LatestPrayers />
-        </div>
-      </section>
 
       {/* Featured Templates */}
       <section className="py-20 bg-gradient-subtle">
