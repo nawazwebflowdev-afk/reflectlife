@@ -31,7 +31,18 @@ export function CandlePlanPicker({ mode, defaultName = '', submitting, onSubmit 
   const [plan, setPlan] = useState<CandlePlanKey>('free');
   const [name, setName] = useState(defaultName);
   const [anonymous, setAnonymous] = useState(false);
-  const [message, setMessage] = useState('');
+  const [dedicationMode, setDedicationMode] = useState<DedicationMode>('none');
+  const [presetId, setPresetId] = useState<number>(1);
+  const [customMessage, setCustomMessage] = useState('');
+
+  const selectedPreset = PRAYERS.find((p) => p.id === presetId) ?? PRAYERS[0];
+  const finalMessage =
+    dedicationMode === 'preset'
+      ? selectedPreset.text
+      : dedicationMode === 'custom'
+      ? customMessage.trim()
+      : '';
+
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
