@@ -682,6 +682,7 @@ const Memorial = () => {
           onMemoryAdded={fetchTimelineData}
         />
       )}
+      <PrintButton />
     </div>
   );
 };
