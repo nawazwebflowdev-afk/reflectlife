@@ -78,6 +78,10 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
   }, []);
 
   useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+  }, []);
+
+  useEffect(() => {
     let mounted = true;
     (async () => {
       const { data } = await supabase
