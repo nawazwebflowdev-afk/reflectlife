@@ -38,21 +38,26 @@ export function CandlePlanPicker({ mode, defaultName = '', submitting, onSubmit 
               type="button"
               key={key}
               onClick={() => setPlan(key)}
+              style={{ backgroundColor: '#4A324A' }}
               className={cn(
-                'group relative rounded-2xl border p-5 text-left transition-all',
+                'group relative rounded-3xl p-5 text-left transition-all text-white',
+                'hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(74,50,74,0.35)]',
                 selected
-                  ? 'border-primary bg-primary/5 shadow-elegant'
-                  : 'border-border bg-card hover:border-primary/50'
+                  ? 'ring-2 ring-offset-2 ring-offset-background ring-[#8FC49A] shadow-elegant'
+                  : 'ring-1 ring-white/10'
               )}
             >
               {meta.badge && (
-                <span className="absolute -top-2 right-3 rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground shadow-sm">
+                <span
+                  className="absolute -top-2 right-3 rounded-full px-2 py-0.5 text-[0.7rem] font-bold uppercase tracking-wide shadow-sm"
+                  style={{ backgroundColor: '#8FC49A', color: '#1E3A29' }}
+                >
                   {meta.badge}
                 </span>
               )}
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">{meta.title}</div>
-              <div className="mt-1 text-2xl font-serif text-foreground">{meta.price}</div>
-              <div className="mt-1 text-sm text-muted-foreground">{meta.duration}</div>
+              <div className="text-xs uppercase tracking-wide text-white/70">{meta.title}</div>
+              <div className="mt-1 text-2xl font-serif text-white">{meta.price}</div>
+              <div className="mt-1 text-sm text-white/75">{meta.duration}</div>
             </button>
           );
         })}
