@@ -31,6 +31,7 @@ const en = {
     latestPrayersDesc: "Recent tributes and prayers shared by our community across public memorials.",
     prayersEmpty: "No prayers have been shared yet. Be the first to leave a tribute on a memorial page.",
     prayersFor: "For",
+    testimonialsTitle: "What families say about Reflectlife",
     featuredTemplatesTitle: "Featured Templates",
     featuredTemplatesDesc: "Choose from our collection of beautifully designed memorial templates",
     ctaTitle: "Start Preserving Memories Today",
