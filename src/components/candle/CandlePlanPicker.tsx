@@ -176,7 +176,7 @@ export function CandlePlanPicker({ mode, defaultName = '', submitting, onSubmit 
             plan,
             contributor_name: anonymous ? null : name.trim() || null,
             anonymous,
-            message: message.trim() || null,
+            message: finalMessage || null,
           })
         }
       >
