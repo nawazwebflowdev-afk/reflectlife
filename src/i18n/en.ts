@@ -60,8 +60,8 @@ const en = {
   // Footer
   footer: {
     tagline: "A timeless space to celebrate, remember, and share the stories of those who live on in our hearts.",
-    madeWith: "Made with",
-    forRemembrance: "for remembrance",
+    madeWith: "Made with ❤️ for a life we never forget and to heal our souls",
+    forRemembrance: "for a life we never forget and to heal our souls",
     quickLinks: "Quick Links",
     support: "Support",
     helpCentre: "Help Centre",
@@ -69,7 +69,7 @@ const en = {
     cookiePolicy: "Cookie Policy",
     qa: "Q&A",
     about: "About",
-    allRights: "All rights reserved.",
+    allRights: "© 2026 Sypera. All rights reserved",
   },
 
   // Auth
