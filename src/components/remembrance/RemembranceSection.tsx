@@ -116,11 +116,11 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
   const nowStr = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(now);
 
   const handleSave = async () => {
-    if (!user) { toast.error("Please sign in"); return; }
+    if (!userId) { toast.error("Please sign in"); return; }
     if (!canEdit) { toast.error("Only the memorial owner or collaborators can set the schedule"); return; }
     const payload = {
       memorial_id: memorialId,
-      created_by: user.id,
+      created_by: userId,
       time_local: timeLocal,
       time_utc: localToUtcTime(timeLocal),
       timezone: tz,
