@@ -105,7 +105,8 @@ export function CandlePlanPicker({ mode, defaultName = '', submitting, onSubmit 
 
       <Button
         size="lg"
-        className="w-full text-base"
+        style={{ backgroundColor: '#4A324A' }}
+        className="w-full text-base rounded-full py-6 font-semibold text-white hover:brightness-110 hover:scale-[1.02] hover:shadow-[0_4px_16px_rgba(74,50,74,0.35)] transition-all"
         disabled={submitting}
         onClick={() =>
           onSubmit({
@@ -119,11 +120,11 @@ export function CandlePlanPicker({ mode, defaultName = '', submitting, onSubmit 
         {submitting ? (
           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
         ) : mode === 'light' ? (
-          <Flame className="w-4 h-4 mr-2" />
+          <Flame className="w-4 h-4 mr-2" style={{ color: '#FFE9A8' }} />
         ) : (
-          <Sparkles className="w-4 h-4 mr-2" />
+          <Sparkles className="w-4 h-4 mr-2" style={{ color: '#FFE9A8' }} />
         )}
-        {mode === 'light' ? 'Light This Candle' : 'Extend the Candle'}
+        {mode === 'light' ? 'Light a Candle' : 'Extend the Candle'}
         {plan !== 'free' && ` — ${CANDLE_PLAN_META[plan].price}`}
       </Button>
       <p className="text-xs text-center text-muted-foreground">
