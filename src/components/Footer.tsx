@@ -1,10 +1,8 @@
 import { Link } from "react-router-dom";
-import { Heart } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import reflectlifeLogo from "@/assets/reflectlife-logo.png";
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
   const { t } = useTranslation();
 
   return (
