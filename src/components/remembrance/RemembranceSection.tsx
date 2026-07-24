@@ -56,7 +56,7 @@ function utcTimeToLocalDisplay(utc: string, tz: string): string {
 }
 
 export default function RemembranceSection({ memorialId, memorialName, isOwner, hasAccess }: Props) {
-  const { user } = useAuth();
+  const [userId, setUserId] = useState<string | null>(null);
   const [schedule, setSchedule] = useState<Schedule | null>(null);
   const [now, setNow] = useState(new Date());
   const [open, setOpen] = useState(false);
