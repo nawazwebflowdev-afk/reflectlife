@@ -12,6 +12,7 @@ import timelineBg from "@/assets/timeline-bg.jpg";
 import EditMemorialModal from "@/components/EditMemorialModal";
 import { AddMemoryModal } from "@/components/AddMemoryModal";
 import { CandleSection } from "@/components/candle/CandleSection";
+import ShareMemorial from "@/components/ShareMemorial";
 import PrintButton from "@/components/PrintButton";
 
 const Memorial = () => {
