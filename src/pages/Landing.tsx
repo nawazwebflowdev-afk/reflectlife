@@ -7,6 +7,7 @@ import { AvatarDisplay } from "@/components/EmojiAvatarSelector";
 import heroBanner from "@/assets/hero-banner.png";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import FeaturedTemplates from "@/components/FeaturedTemplates";
+import LatestPrayers from "@/components/LatestPrayers";
 import PostDetailModal from "@/components/PostDetailModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
@@ -231,29 +232,16 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Latest Prayers */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">{t("landing.testimonialsTitle")}</h2>
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">{t("landing.latestPrayersTitle")}</h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
+              {t("landing.latestPrayersDesc")}
+            </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-            {testimonials.map((testimonial, index) => (
-              <Card
-                key={index}
-                className="bg-card/50 border-2 hover:shadow-elegant transition-smooth animate-fade-in"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <CardContent className="p-8">
-                  <div className="flex flex-col items-center text-center">
-                    <AvatarDisplay avatarIndex={testimonial.avatarIndex} size="lg" className="mb-4" />
-                    <p className="text-muted-foreground italic mb-4 leading-relaxed">"{t(testimonial.quoteKey)}"</p>
-                    <p className="font-serif font-semibold text-foreground">— {testimonial.name}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <LatestPrayers />
         </div>
       </section>
 
