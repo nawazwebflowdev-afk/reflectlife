@@ -18,10 +18,8 @@ const Footer = () => {
             <p className="text-muted-foreground text-sm max-w-md mb-4">
               {t("footer.tagline")}
             </p>
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <span>{t("footer.madeWith")}</span>
-              <Heart className="h-4 w-4 text-destructive fill-destructive" />
-              <span>{t("footer.forRemembrance")}</span>
+            <div className="text-sm text-muted-foreground">
+              Made with ❤️ for a life we never forget and to heal our souls
             </div>
           </div>
 
@@ -48,7 +46,7 @@ const Footer = () => {
 
         <div className="border-t border-border mt-8 pt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} Reflectlife. {t("footer.allRights")}
+            © 2026 Sypera. All rights reserved
           </p>
         </div>
       </div>
