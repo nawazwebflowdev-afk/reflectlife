@@ -657,6 +657,15 @@ const Tree = () => {
         onUpdate={fetchConnections}
       />
 
+      <div className="max-w-4xl mx-auto px-4">
+        <ShareMemorial
+          name="My Family Tree"
+          title="Share My Tree"
+          description="Invite family and friends to explore your family tree."
+          shareText="Explore my family tree on Reflectlife"
+        />
+      </div>
+
       <PrintButton />
     </div>
   );
