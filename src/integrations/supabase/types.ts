@@ -501,6 +501,65 @@ export type Database = {
           },
         ]
       }
+      memorial_remembrances: {
+        Row: {
+          anchor_date: string
+          created_at: string
+          created_by: string
+          end_date: string | null
+          frequency: string
+          has_end_date: boolean
+          id: string
+          memorial_id: string
+          reminder_enabled: boolean
+          reminder_timing: string
+          time_local: string
+          time_utc: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          anchor_date: string
+          created_at?: string
+          created_by: string
+          end_date?: string | null
+          frequency: string
+          has_end_date?: boolean
+          id?: string
+          memorial_id: string
+          reminder_enabled?: boolean
+          reminder_timing?: string
+          time_local: string
+          time_utc: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          anchor_date?: string
+          created_at?: string
+          created_by?: string
+          end_date?: string | null
+          frequency?: string
+          has_end_date?: boolean
+          id?: string
+          memorial_id?: string
+          reminder_enabled?: boolean
+          reminder_timing?: string
+          time_local?: string
+          time_utc?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_remembrances_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: true
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memorial_timelines: {
         Row: {
           background_url: string | null
@@ -759,6 +818,38 @@ export type Database = {
             columns: ["tree_template_id"]
             isOneToOne: false
             referencedRelation: "site_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      remembrance_notifications: {
+        Row: {
+          event_at: string
+          id: string
+          recipients_count: number
+          remembrance_id: string
+          sent_at: string
+        }
+        Insert: {
+          event_at: string
+          id?: string
+          recipients_count?: number
+          remembrance_id: string
+          sent_at?: string
+        }
+        Update: {
+          event_at?: string
+          id?: string
+          recipients_count?: number
+          remembrance_id?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remembrance_notifications_remembrance_id_fkey"
+            columns: ["remembrance_id"]
+            isOneToOne: false
+            referencedRelation: "memorial_remembrances"
             referencedColumns: ["id"]
           },
         ]
