@@ -12,6 +12,7 @@ import timelineBg from "@/assets/timeline-bg.jpg";
 import EditMemorialModal from "@/components/EditMemorialModal";
 import { AddMemoryModal } from "@/components/AddMemoryModal";
 import { CandleSection } from "@/components/candle/CandleSection";
+import PrintButton from "@/components/PrintButton";
 
 const Memorial = () => {
   const { id } = useParams();
@@ -681,6 +682,7 @@ const Memorial = () => {
           onMemoryAdded={fetchTimelineData}
         />
       )}
+      <PrintButton />
     </div>
   );
 };

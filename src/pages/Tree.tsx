@@ -18,6 +18,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import { Plus, Loader2, Settings } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import PrintButton from "@/components/PrintButton";
 import AddConnectionModal from "@/components/tree/AddConnectionModal";
 import ConnectionDetailPanel from "@/components/tree/ConnectionDetailPanel";
 import EmptyTreeState from "@/components/tree/EmptyTreeState";
@@ -654,6 +655,8 @@ const Tree = () => {
         onClose={() => setSelectedConnection(null)}
         onUpdate={fetchConnections}
       />
+
+      <PrintButton />
     </div>
   );
 };
