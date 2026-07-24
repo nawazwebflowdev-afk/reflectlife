@@ -13,6 +13,7 @@ import EditMemorialModal from "@/components/EditMemorialModal";
 import { AddMemoryModal } from "@/components/AddMemoryModal";
 import { CandleSection } from "@/components/candle/CandleSection";
 import ShareMemorial from "@/components/ShareMemorial";
+import RemembranceSection from "@/components/remembrance/RemembranceSection";
 import PrintButton from "@/components/PrintButton";
 
 const Memorial = () => {
@@ -410,6 +411,15 @@ const Memorial = () => {
         )}
 
         {memorial?.id && <CandleSection memorialId={memorial.id} />}
+
+        {memorial?.id && memorial?.name && (
+          <RemembranceSection
+            memorialId={memorial.id}
+            memorialName={memorial.name}
+            isOwner={!!isCreator}
+            hasAccess={false}
+          />
+        )}
 
         {memorial?.name && <ShareMemorial name={memorial.name} />}
 
