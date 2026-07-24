@@ -104,20 +104,66 @@ export function CandlePlanPicker({ mode, defaultName = '', submitting, onSubmit 
             </label>
           </div>
         </div>
-        <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">
-            Dedication (optional, max 100 characters)
+        <div className="space-y-3">
+          <label className="text-xs font-medium text-muted-foreground block">
+            Dedication (optional)
           </label>
-          <Textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value.slice(0, 100))}
-            placeholder="Forever in our hearts…"
-            rows={2}
-          />
-          <div className="text-xs text-muted-foreground text-right mt-1">
-            {message.length}/100
-          </div>
+          <RadioGroup
+            value={dedicationMode}
+            onValueChange={(v) => setDedicationMode(v as DedicationMode)}
+            className="grid gap-2 sm:grid-cols-3"
+          >
+            {(['none', 'preset', 'custom'] as DedicationMode[]).map((m) => (
+              <label
+                key={m}
+                className={cn(
+                  'flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer transition-colors',
+                  dedicationMode === m ? 'border-primary bg-primary/5' : 'border-border'
+                )}
+              >
+                <RadioGroupItem value={m} />
+                <span className="capitalize">
+                  {m === 'none' ? 'No dedication' : m === 'preset' ? 'Prayer or poem' : 'Custom message'}
+                </span>
+              </label>
+            ))}
+          </RadioGroup>
+
+          {dedicationMode === 'preset' && (
+            <div className="space-y-2">
+              <Select value={String(presetId)} onValueChange={(v) => setPresetId(Number(v))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a prayer or poem" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRAYERS.map((p) => (
+                    <SelectItem key={p.id} value={String(p.id)}>
+                      {p.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="rounded-lg bg-muted/50 px-3 py-2 text-sm italic text-foreground/80">
+                "{selectedPreset.text}"
+              </p>
+            </div>
+          )}
+
+          {dedicationMode === 'custom' && (
+            <div>
+              <Textarea
+                value={customMessage}
+                onChange={(e) => setCustomMessage(e.target.value.slice(0, 100))}
+                placeholder="Forever in our hearts…"
+                rows={2}
+              />
+              <div className="text-xs text-muted-foreground text-right mt-1">
+                {customMessage.length}/100
+              </div>
+            </div>
+          )}
         </div>
+
       </Card>
 
       <Button
