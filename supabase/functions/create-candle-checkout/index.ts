@@ -46,6 +46,8 @@ Deno.serve(async (req) => {
       }
     }
 
+    if (!userId) return json({ error: 'Please sign in to light a candle.' }, 401);
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const { data: memorial, error: memErr } = await supabase
       .from('memorials')

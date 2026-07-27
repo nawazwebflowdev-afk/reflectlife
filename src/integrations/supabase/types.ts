@@ -253,40 +253,64 @@ export type Database = {
       }
       memorial_candles: {
         Row: {
+          anonymous: boolean
+          contributor_name: string | null
           created_at: string
           current_plan: string | null
           expires_at: string | null
           id: string
           memorial_id: string
+          message: string | null
+          plan: string | null
+          renewal_email_sent: boolean
+          renewal_email_sent_at: string | null
           started_at: string | null
           status: string
+          stripe_session_id: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
+          anonymous?: boolean
+          contributor_name?: string | null
           created_at?: string
           current_plan?: string | null
           expires_at?: string | null
           id?: string
           memorial_id: string
+          message?: string | null
+          plan?: string | null
+          renewal_email_sent?: boolean
+          renewal_email_sent_at?: string | null
           started_at?: string | null
           status?: string
+          stripe_session_id?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
+          anonymous?: boolean
+          contributor_name?: string | null
           created_at?: string
           current_plan?: string | null
           expires_at?: string | null
           id?: string
           memorial_id?: string
+          message?: string | null
+          plan?: string | null
+          renewal_email_sent?: boolean
+          renewal_email_sent_at?: string | null
           started_at?: string | null
           status?: string
+          stripe_session_id?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "memorial_candles_memorial_id_fkey"
             columns: ["memorial_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "memorials"
             referencedColumns: ["id"]
           },
@@ -1202,14 +1226,22 @@ export type Database = {
           _user_id: string
         }
         Returns: {
+          anonymous: boolean
+          contributor_name: string | null
           created_at: string
           current_plan: string | null
           expires_at: string | null
           id: string
           memorial_id: string
+          message: string | null
+          plan: string | null
+          renewal_email_sent: boolean
+          renewal_email_sent_at: string | null
           started_at: string | null
           status: string
+          stripe_session_id: string | null
           updated_at: string
+          user_id: string | null
         }
         SetofOptions: {
           from: "*"
@@ -1242,6 +1274,43 @@ export type Database = {
       is_tree_owner: {
         Args: { _tree_id: string; _user_id: string }
         Returns: boolean
+      }
+      light_user_candle: {
+        Args: {
+          _amount: number
+          _anonymous: boolean
+          _contributor_name: string
+          _duration_seconds: number
+          _memorial_id: string
+          _message: string
+          _plan: string
+          _stripe_session_id: string
+          _user_id: string
+        }
+        Returns: {
+          anonymous: boolean
+          contributor_name: string | null
+          created_at: string
+          current_plan: string | null
+          expires_at: string | null
+          id: string
+          memorial_id: string
+          message: string | null
+          plan: string | null
+          renewal_email_sent: boolean
+          renewal_email_sent_at: string | null
+          started_at: string | null
+          status: string
+          stripe_session_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "memorial_candles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       request_payout: {
         Args: { p_amount: number; p_payout_method: Json }

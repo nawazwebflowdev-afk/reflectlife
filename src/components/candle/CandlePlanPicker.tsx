@@ -17,6 +17,7 @@ type DedicationMode = 'none' | 'preset' | 'custom';
 
 interface Props {
   mode: 'light' | 'extend';
+  initialPlan?: CandlePlanKey;
   defaultName?: string;
   submitting: boolean;
   onSubmit: (input: {
@@ -27,8 +28,8 @@ interface Props {
   }) => void;
 }
 
-export function CandlePlanPicker({ mode, defaultName = '', submitting, onSubmit }: Props) {
-  const [plan, setPlan] = useState<CandlePlanKey>('free');
+export function CandlePlanPicker({ mode, initialPlan = 'free', defaultName = '', submitting, onSubmit }: Props) {
+  const [plan, setPlan] = useState<CandlePlanKey>(initialPlan);
   const [name, setName] = useState(defaultName);
   const [anonymous, setAnonymous] = useState(false);
   const [dedicationMode, setDedicationMode] = useState<DedicationMode>('none');

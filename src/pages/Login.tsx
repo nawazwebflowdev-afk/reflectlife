@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,16 +14,20 @@ const Login = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
+
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const { toast } = useToast();
+
+  const redirectParam = params.get("redirect");
+  const destination = redirectParam && redirectParam.startsWith("/") ? redirectParam : "/dashboard";
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
         if (session) {
-          navigate("/dashboard");
+          navigate(destination);
         }
       }
     );
@@ -31,12 +35,13 @@ const Login = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
-        navigate("/dashboard");
+        navigate(destination);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, destination]);
+
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -91,7 +96,7 @@ const Login = () => {
         title: "Welcome back! 🌸",
         description: "You've successfully signed in.",
       });
-      navigate("/dashboard");
+      navigate(destination);
 
     } catch (error: any) {
       toast({

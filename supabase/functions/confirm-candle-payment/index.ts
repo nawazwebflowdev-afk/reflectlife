@@ -30,16 +30,18 @@ Deno.serve(async (req) => {
     const planDef = CANDLE_PLANS[plan];
     if (!planDef) return json({ error: 'Invalid plan' }, 400);
 
+    if (!md.user_id) return json({ error: 'Missing candle owner' }, 400);
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { data, error } = await supabase.rpc('apply_candle_contribution', {
+    const { data, error } = await supabase.rpc('light_user_candle', {
       _memorial_id: md.memorial_id,
+      _user_id: md.user_id,
       _plan: plan,
       _duration_seconds: planDef.duration_seconds,
       _amount: planDef.amount,
       _contributor_name: sanitizeName(md.contributor_name),
       _anonymous: md.anonymous === 'true',
       _message: sanitizeMessage(md.message),
-      _user_id: md.user_id || null,
       _stripe_session_id: session.id,
     });
     if (error) {
