@@ -35,6 +35,7 @@ import CookiePolicy from "./pages/CookiePolicy";
 import QA from "./pages/QA";
 import About from "./pages/About";
 import CandleSuccess from "./pages/CandleSuccess";
+import OAuthConsent from "./pages/OAuthConsent";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +77,7 @@ const App = () => (
                 <Route path="/qa" element={<QA />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/candle-success" element={<CandleSuccess />} />
+                <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
