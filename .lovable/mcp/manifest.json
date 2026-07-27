@@ -1,0 +1,209 @@
+{
+  "version": 1,
+  "sdk_version": "0.24.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://osmyfzkcydvtwgnbjplx.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "reflectlife-mcp",
+      "version": "0.1.0",
+      "title": "Reflectlife"
+    },
+    "tools": [
+      {
+        "name": "list_memorials",
+        "title": "List my memorials",
+        "description": "List memorial pages created by the signed-in Reflectlife user.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "description": "Maximum number of memorials to return (default 20)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_memorial",
+        "title": "Get memorial details",
+        "description": "Fetch a single memorial the caller may view, including its recent tributes.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "memorial_id": {
+              "type": "string",
+              "description": "UUID of the memorial."
+            }
+          },
+          "required": [
+            "memorial_id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_memorial",
+        "title": "Create a memorial",
+        "description": "Create a new memorial page owned by the signed-in Reflectlife user.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Full name of the person being remembered."
+            },
+            "bio": {
+              "type": "string",
+              "description": "Short biography or remembrance text."
+            },
+            "date_of_birth": {
+              "type": "string",
+              "description": "Date of birth as YYYY-MM-DD."
+            },
+            "date_of_death": {
+              "type": "string",
+              "description": "Date of passing as YYYY-MM-DD."
+            },
+            "location": {
+              "type": "string",
+              "description": "Place associated with the person."
+            },
+            "is_public": {
+              "type": "boolean",
+              "description": "Whether the memorial is publicly visible (default false)."
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_diary_entries",
+        "title": "List my diary entries",
+        "description": "List the signed-in user's private reflection diary entries, newest first.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "description": "Maximum number of entries to return (default 20)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_diary_entry",
+        "title": "Create a diary entry",
+        "description": "Write a new reflection diary entry for the signed-in Reflectlife user.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "Title of the entry."
+            },
+            "content": {
+              "type": "string",
+              "description": "Body text of the entry."
+            },
+            "entry_date": {
+              "type": "string",
+              "description": "Entry date as YYYY-MM-DD (defaults to today)."
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Optional tags for the entry."
+            },
+            "is_private": {
+              "type": "boolean",
+              "description": "Keep the entry private (default true)."
+            }
+          },
+          "required": [
+            "title"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "add_tribute",
+        "title": "Leave a tribute",
+        "description": "Leave a tribute or condolence message on a memorial the caller can access.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "memorial_id": {
+              "type": "string",
+              "description": "UUID of the memorial."
+            },
+            "tribute_text": {
+              "type": "string",
+              "description": "The tribute message."
+            }
+          },
+          "required": [
+            "memorial_id",
+            "tribute_text"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
