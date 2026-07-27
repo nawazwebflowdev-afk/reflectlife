@@ -51,15 +51,21 @@ Deno.serve(async (req) => {
             headers: { 'Content-Type': 'application/json' },
           });
         }
-        const { error: candleErr } = await supabase.rpc('apply_candle_contribution', {
+        if (!md.user_id) {
+          console.error('Candle purchase without user_id', md);
+          return new Response(JSON.stringify({ received: true, error: 'missing_user' }), {
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        const { error: candleErr } = await supabase.rpc('light_user_candle', {
           _memorial_id: md.memorial_id,
+          _user_id: md.user_id,
           _plan: md.plan,
           _duration_seconds: durationSeconds,
           _amount: amount,
           _contributor_name: md.contributor_name || null,
           _anonymous: md.anonymous === 'true',
           _message: md.message || null,
-          _user_id: md.user_id || null,
           _stripe_session_id: session.id,
         });
         if (candleErr) console.error('Candle activation error:', candleErr);

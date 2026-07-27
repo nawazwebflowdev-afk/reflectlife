@@ -49,6 +49,7 @@ Deno.serve(async (req) => {
       const { data } = await supabaseAuth.auth.getUser();
       if (data?.user) userId = data.user.id;
     }
+    if (!userId) return json({ error: 'Please sign in to light a candle.' }, 401);
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const { data: memorial } = await supabase
@@ -59,15 +60,15 @@ Deno.serve(async (req) => {
     if (!memorial) return json({ error: 'Memorial not found' }, 404);
 
     const planDef = CANDLE_PLANS.free;
-    const { data, error } = await supabase.rpc('apply_candle_contribution', {
+    const { data, error } = await supabase.rpc('light_user_candle', {
       _memorial_id: memorial_id,
+      _user_id: userId,
       _plan: 'free',
       _duration_seconds: planDef.duration_seconds,
       _amount: 0,
       _contributor_name: contributor_name,
       _anonymous: anonymous,
       _message: message,
-      _user_id: userId,
       _stripe_session_id: null,
     });
     if (error) {
