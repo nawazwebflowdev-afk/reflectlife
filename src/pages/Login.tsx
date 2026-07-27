@@ -96,7 +96,7 @@ const Login = () => {
         title: "Welcome back! 🌸",
         description: "You've successfully signed in.",
       });
-      navigate("/dashboard");
+      navigate(destination);
 
     } catch (error: any) {
       toast({
