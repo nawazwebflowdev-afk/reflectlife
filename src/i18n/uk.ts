@@ -6,6 +6,7 @@ const uk = {
     timeline: "Стрічка",
     myTree: "Моє дерево",
     myDiary: "Мій щоденник",
+    remembrance: "Памʼять",
     memorialWall: "Стіна пам'яті",
     dashboard: "Панель",
     signIn: "Увійти",

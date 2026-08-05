@@ -6,6 +6,7 @@ const en = {
     timeline: "Timeline",
     myTree: "My Tree",
     myDiary: "My Diary",
+    remembrance: "Remembrance",
     memorialWall: "Memorial Wall",
     dashboard: "Dashboard",
     signIn: "Sign In",

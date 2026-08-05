@@ -702,6 +702,7 @@ export type Database = {
           id: string
           post_id: string | null
           read: boolean | null
+          remembrance_id: string | null
           type: string
           user_id: string
         }
@@ -712,6 +713,7 @@ export type Database = {
           id?: string
           post_id?: string | null
           read?: boolean | null
+          remembrance_id?: string | null
           type: string
           user_id: string
         }
@@ -722,6 +724,7 @@ export type Database = {
           id?: string
           post_id?: string | null
           read?: boolean | null
+          remembrance_id?: string | null
           type?: string
           user_id?: string
         }
@@ -738,6 +741,13 @@ export type Database = {
             columns: ["actor_id"]
             isOneToOne: false
             referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_remembrance_id_fkey"
+            columns: ["remembrance_id"]
+            isOneToOne: false
+            referencedRelation: "remembrances"
             referencedColumns: ["id"]
           },
         ]

@@ -36,6 +36,8 @@ import QA from "./pages/QA";
 import About from "./pages/About";
 import CandleSuccess from "./pages/CandleSuccess";
 import OAuthConsent from "./pages/OAuthConsent";
+import RemembrancePage from "./pages/Remembrance";
+import RemembranceDetail from "./pages/RemembranceDetail";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +70,8 @@ const App = () => (
                 <Route path="/admin/creator-requests" element={<AdminCreatorRequests />} />
                 <Route path="/tree" element={<Tree />} />
                 <Route path="/diary" element={<Diary />} />
+                <Route path="/remembrance" element={<RemembrancePage />} />
+                <Route path="/remembrance/:id" element={<RemembranceDetail />} />
                 <Route path="/help" element={<HelpCentre />} />
                 <Route path="/checkout/:templateId" element={<Checkout />} />
                 <Route path="/success" element={<Success />} />
