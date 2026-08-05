@@ -846,6 +846,57 @@ export type Database = {
           },
         ]
       }
+      remembrance_deliveries: {
+        Row: {
+          created_at: string
+          delivered_at: string | null
+          error: string | null
+          id: string
+          opened_at: string | null
+          recipient_id: string
+          remembrance_id: string
+          scheduled_for: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          delivered_at?: string | null
+          error?: string | null
+          id?: string
+          opened_at?: string | null
+          recipient_id: string
+          remembrance_id: string
+          scheduled_for: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          delivered_at?: string | null
+          error?: string | null
+          id?: string
+          opened_at?: string | null
+          recipient_id?: string
+          remembrance_id?: string
+          scheduled_for?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remembrance_deliveries_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "remembrance_recipients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remembrance_deliveries_remembrance_id_fkey"
+            columns: ["remembrance_id"]
+            isOneToOne: false
+            referencedRelation: "remembrances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       remembrance_notifications: {
         Row: {
           event_at: string
@@ -877,6 +928,226 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      remembrance_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          reaction: string
+          remembrance_id: string
+          response_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reaction: string
+          remembrance_id: string
+          response_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reaction?: string
+          remembrance_id?: string
+          response_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remembrance_reactions_remembrance_id_fkey"
+            columns: ["remembrance_id"]
+            isOneToOne: false
+            referencedRelation: "remembrances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remembrance_reactions_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "remembrance_responses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      remembrance_recipients: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          invited_email: string | null
+          invited_phone: string | null
+          remembrance_id: string
+          share_presence: boolean
+          status: string
+          timezone: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          invited_email?: string | null
+          invited_phone?: string | null
+          remembrance_id: string
+          share_presence?: boolean
+          status?: string
+          timezone?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          invited_email?: string | null
+          invited_phone?: string | null
+          remembrance_id?: string
+          share_presence?: boolean
+          status?: string
+          timezone?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remembrance_recipients_remembrance_id_fkey"
+            columns: ["remembrance_id"]
+            isOneToOne: false
+            referencedRelation: "remembrances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      remembrance_responses: {
+        Row: {
+          created_at: string
+          id: string
+          occurrence_date: string | null
+          remembrance_id: string
+          response_text: string | null
+          response_type: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          occurrence_date?: string | null
+          remembrance_id: string
+          response_text?: string | null
+          response_type?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          occurrence_date?: string | null
+          remembrance_id?: string
+          response_text?: string | null
+          response_type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remembrance_responses_remembrance_id_fkey"
+            columns: ["remembrance_id"]
+            isOneToOne: false
+            referencedRelation: "remembrances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      remembrance_subjects: {
+        Row: {
+          created_at: string
+          id: string
+          memorial_id: string | null
+          remembrance_id: string
+          subject_avatar_url: string | null
+          subject_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          memorial_id?: string | null
+          remembrance_id: string
+          subject_avatar_url?: string | null
+          subject_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          memorial_id?: string | null
+          remembrance_id?: string
+          subject_avatar_url?: string | null
+          subject_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remembrance_subjects_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remembrance_subjects_remembrance_id_fkey"
+            columns: ["remembrance_id"]
+            isOneToOne: false
+            referencedRelation: "remembrances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      remembrances: {
+        Row: {
+          created_at: string
+          creator_id: string
+          end_date: string | null
+          event_date: string
+          event_type: string
+          id: string
+          is_active: boolean
+          message: string | null
+          recurrence: string
+          recurrence_interval: number
+          recurrence_unit: string
+          time_local: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          end_date?: string | null
+          event_date: string
+          event_type?: string
+          id?: string
+          is_active?: boolean
+          message?: string | null
+          recurrence?: string
+          recurrence_interval?: number
+          recurrence_unit?: string
+          time_local?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          end_date?: string | null
+          event_date?: string
+          event_type?: string
+          id?: string
+          is_active?: boolean
+          message?: string | null
+          recurrence?: string
+          recurrence_interval?: number
+          recurrence_unit?: string
+          time_local?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       site_templates: {
         Row: {
@@ -1271,6 +1542,14 @@ export type Database = {
         Args: { _memorial_id: string; _user_id: string }
         Returns: boolean
       }
+      is_remembrance_creator: {
+        Args: { _remembrance_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_remembrance_participant: {
+        Args: { _remembrance_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_tree_owner: {
         Args: { _tree_id: string; _user_id: string }
         Returns: boolean
@@ -1312,9 +1591,26 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      lookup_contact_by_phone: {
+        Args: { _phone: string }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          user_id: string
+        }[]
+      }
       request_payout: {
         Args: { p_amount: number; p_payout_method: Json }
         Returns: string
+      }
+      search_my_contacts: {
+        Args: { _query: string }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          relation: string
+          user_id: string
+        }[]
       }
       user_has_tree_access: {
         Args: { _tree_id: string; _user_id: string }
