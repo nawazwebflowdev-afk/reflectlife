@@ -178,6 +178,19 @@ const Auth = () => {
       return;
     }
     
+
+    const e164 = toE164(phoneNumber, phoneCountry);
+    if (!e164) {
+      setPhoneError("Please enter a valid phone number for the selected country.");
+      toast({
+        title: "Invalid phone number",
+        description: "Please enter a valid phone number for the selected country.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setPhoneError(null);
+
     if (!termsAccepted) {
       toast({
         title: "Error",
@@ -208,7 +221,7 @@ const Auth = () => {
           fullName,
           firstName,
           lastName,
-          phoneNumber,
+          phoneNumber: e164,
           country,
           passwordScore: passwordStrength.score,
         }
