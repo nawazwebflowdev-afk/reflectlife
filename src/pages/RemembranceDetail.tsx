@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -100,11 +98,9 @@ export default function RemembranceDetail() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Navigation />
-        <div className="flex-1 flex justify-center items-center">
+          <div className="flex-1 flex justify-center items-center">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
-        <Footer />
       </div>
     );
   }
@@ -112,15 +108,13 @@ export default function RemembranceDetail() {
   if (!item) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Navigation />
-        <main className="flex-1 container mx-auto px-4 py-16 text-center">
+          <main className="flex-1 container mx-auto px-4 py-16 text-center">
           <h1 className="font-serif text-2xl mb-3">This remembrance isn't available</h1>
           <p className="text-muted-foreground mb-6">It may have been removed, or you may not be part of it.</p>
           <Button onClick={() => navigate("/remembrance")} className="rounded-full">
             Back to calendar
           </Button>
         </main>
-        <Footer />
       </div>
     );
   }
@@ -132,7 +126,6 @@ export default function RemembranceDetail() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Navigation />
       <main className="flex-1 container mx-auto px-4 py-8 max-w-3xl">
         <Button variant="ghost" className="mb-4 -ml-2" onClick={() => navigate("/remembrance")}>
           <ArrowLeft className="h-4 w-4 mr-2" /> Remembrance Calendar
@@ -286,7 +279,6 @@ export default function RemembranceDetail() {
           </CardContent>
         </Card>
       </main>
-      <Footer />
 
       {userId && (
         <RemembranceForm
