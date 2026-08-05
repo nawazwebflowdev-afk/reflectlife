@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { countries } from "@/data/countries";
+import PhoneNumberField, { detectDefaultCountry, toE164 } from "@/components/PhoneNumberField";
+import type { CountryCode } from "libphonenumber-js";
 
 // Error boundary to catch render crashes
 class SignupErrorBoundary extends Component<
@@ -76,6 +78,8 @@ const SignupForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneCountry, setPhoneCountry] = useState<CountryCode>(() => detectDefaultCountry());
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [country, setCountry] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState<{
@@ -176,6 +180,19 @@ const SignupForm = () => {
       return;
     }
     
+
+    const e164 = toE164(phoneNumber, phoneCountry);
+    if (!e164) {
+      setPhoneError("Please enter a valid phone number for the selected country.");
+      toast({
+        title: "Invalid phone number",
+        description: "Please enter a valid phone number for the selected country.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setPhoneError(null);
+
     if (!termsAccepted) {
       toast({
         title: "Error",
@@ -207,7 +224,7 @@ const SignupForm = () => {
           fullName,
           firstName,
           lastName,
-          phoneNumber,
+          phoneNumber: e164,
           country,
           
         }
@@ -361,22 +378,14 @@ const SignupForm = () => {
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="phoneNumber">Phone Number</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="phoneNumber"
-                    type="tel"
-                    placeholder="+1 (555) 123-4567"
-                    className="pl-10"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
+              <PhoneNumberField
+                country={phoneCountry}
+                onCountryChange={(c) => { setPhoneCountry(c); setPhoneError(null); }}
+                value={phoneNumber}
+                onValueChange={(v) => { setPhoneNumber(v); setPhoneError(null); }}
+                disabled={isLoading}
+                error={phoneError}
+              />
 
               <div className="space-y-2">
                 <Label htmlFor="country">Country</Label>
