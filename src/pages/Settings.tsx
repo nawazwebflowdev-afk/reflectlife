@@ -13,6 +13,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import DeleteAccountModal from "@/components/DeleteAccountModal";
 import { Textarea } from "@/components/ui/textarea";
+import PhoneNumberField, { detectDefaultCountry, toE164 } from "@/components/PhoneNumberField";
+import { parsePhoneNumberFromString, type CountryCode } from "libphonenumber-js";
 import {
   Select,
   SelectContent,
@@ -26,6 +28,9 @@ const Settings = () => {
   
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phoneCountry, setPhoneCountry] = useState<CountryCode>(detectDefaultCountry());
+  const [phone, setPhone] = useState("");
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [colorTheme, setColorTheme] = useState("light");
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -67,6 +72,11 @@ const Settings = () => {
       setFullName(data.full_name || "");
       setColorTheme(data.color_theme || "light");
       setAvatarUrl(data.avatar_url || null);
+      if (data.phone) {
+        const parsed = parsePhoneNumberFromString(data.phone);
+        if (parsed?.country) setPhoneCountry(parsed.country);
+        setPhone(parsed ? parsed.formatNational() : data.phone);
+      }
     }
 
     // Check if user is an approved creator
@@ -198,6 +208,17 @@ const Settings = () => {
 
   const handleSaveProfile = async () => {
     if (!userId) return;
+
+    const trimmedPhone = phone.trim();
+    let e164: string | null = null;
+    if (trimmedPhone) {
+      e164 = toE164(trimmedPhone, phoneCountry);
+      if (!e164) {
+        setPhoneError("Please enter a valid phone number");
+        return;
+      }
+    }
+    setPhoneError(null);
     setIsLoading(true);
 
     const { error } = await supabase
@@ -205,6 +226,7 @@ const Settings = () => {
       .update({
         full_name: fullName,
         color_theme: colorTheme,
+        phone: e164,
       })
       .eq("id", userId);
 
@@ -363,6 +385,18 @@ const Settings = () => {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                 />
+              </div>
+              <div className="space-y-2">
+                <PhoneNumberField
+                  id="settings-phone"
+                  label="Phone number"
+                  country={phoneCountry}
+                  onCountryChange={setPhoneCountry}
+                  value={phone}
+                  onValueChange={(v) => { setPhone(v); setPhoneError(null); }}
+                  error={phoneError}
+                />
+                <p className="text-xs text-muted-foreground">Optional. Used for remembrance reminders and account recovery.</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
