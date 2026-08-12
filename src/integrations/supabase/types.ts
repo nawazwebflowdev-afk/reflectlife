@@ -1110,51 +1110,66 @@ export type Database = {
       }
       remembrances: {
         Row: {
+          category: string | null
           created_at: string
           creator_id: string
+          description: string | null
           end_date: string | null
           event_date: string
           event_type: string
           id: string
+          image_url: string | null
           is_active: boolean
+          location: string | null
           message: string | null
           recurrence: string
           recurrence_interval: number
           recurrence_unit: string
           time_local: string
           timezone: string
+          title: string | null
           updated_at: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           creator_id: string
+          description?: string | null
           end_date?: string | null
           event_date: string
           event_type?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean
+          location?: string | null
           message?: string | null
           recurrence?: string
           recurrence_interval?: number
           recurrence_unit?: string
           time_local?: string
           timezone?: string
+          title?: string | null
           updated_at?: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           creator_id?: string
+          description?: string | null
           end_date?: string | null
           event_date?: string
           event_type?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean
+          location?: string | null
           message?: string | null
           recurrence?: string
           recurrence_interval?: number
           recurrence_unit?: string
           time_local?: string
           timezone?: string
+          title?: string | null
           updated_at?: string
         }
         Relationships: []
