@@ -530,6 +530,7 @@ export type Database = {
           anchor_date: string
           created_at: string
           created_by: string
+          custom_message: string | null
           end_date: string | null
           frequency: string
           has_end_date: boolean
@@ -546,6 +547,7 @@ export type Database = {
           anchor_date: string
           created_at?: string
           created_by: string
+          custom_message?: string | null
           end_date?: string | null
           frequency: string
           has_end_date?: boolean
@@ -562,6 +564,7 @@ export type Database = {
           anchor_date?: string
           created_at?: string
           created_by?: string
+          custom_message?: string | null
           end_date?: string | null
           frequency?: string
           has_end_date?: boolean
@@ -932,6 +935,54 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "remembrance_notifications_remembrance_id_fkey"
+            columns: ["remembrance_id"]
+            isOneToOne: false
+            referencedRelation: "memorial_remembrances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      remembrance_phone_recipients: {
+        Row: {
+          channel: string
+          created_at: string
+          created_by: string
+          display_name: string | null
+          id: string
+          memorial_id: string
+          phone: string
+          remembrance_id: string
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          created_by: string
+          display_name?: string | null
+          id?: string
+          memorial_id: string
+          phone: string
+          remembrance_id: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          created_by?: string
+          display_name?: string | null
+          id?: string
+          memorial_id?: string
+          phone?: string
+          remembrance_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remembrance_phone_recipients_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "remembrance_phone_recipients_remembrance_id_fkey"
             columns: ["remembrance_id"]
             isOneToOne: false
             referencedRelation: "memorial_remembrances"
