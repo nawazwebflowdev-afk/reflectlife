@@ -1,18 +1,26 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Clock, Bell, Share2, MessageCircle, Send, Phone } from "lucide-react";
+import { Clock, Bell, Share2, MessageCircle, Send, Phone, CalendarIcon, Users } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import PhoneRecipientPicker, { type PhoneRecipient } from "./PhoneRecipientPicker";
 
 type Frequency = "daily" | "weekly" | "monthly" | "yearly";
 type Timing = "2_minutes_before" | "1_day_before";
+
+const MESSAGE_MAX = 300;
 
 interface Schedule {
   id: string;
@@ -27,6 +35,7 @@ interface Schedule {
   end_date: string | null;
   reminder_enabled: boolean;
   reminder_timing: Timing;
+  custom_message: string | null;
 }
 
 interface Props {
@@ -37,7 +46,6 @@ interface Props {
 }
 
 function localToUtcTime(local: string): string {
-  // local "HH:MM" in user's timezone -> "HH:MM:00" in UTC
   const today = new Date();
   const [h, m] = local.split(":").map(Number);
   const d = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m);
@@ -55,20 +63,34 @@ function utcTimeToLocalDisplay(utc: string, tz: string): string {
   }).format(d);
 }
 
+function toDateKey(d: Date) {
+  return `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, "0")}-${`${d.getDate()}`.padStart(2, "0")}`;
+}
+
+function parseDateKey(key: string) {
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(y, (m || 1) - 1, d || 1);
+}
+
 export default function RemembranceSection({ memorialId, memorialName, isOwner, hasAccess }: Props) {
   const [userId, setUserId] = useState<string | null>(null);
   const [schedule, setSchedule] = useState<Schedule | null>(null);
+  const [recipients, setRecipients] = useState<PhoneRecipient[]>([]);
+  const [savedCount, setSavedCount] = useState(0);
   const [now, setNow] = useState(new Date());
   const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // Form
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const [date, setDate] = useState<Date>(new Date());
   const [timeLocal, setTimeLocal] = useState("09:00");
   const [frequency, setFrequency] = useState<Frequency>("daily");
   const [hasEnd, setHasEnd] = useState(false);
   const [endDate, setEndDate] = useState("");
   const [reminderEnabled, setReminderEnabled] = useState(true);
   const [reminderTiming, setReminderTiming] = useState<Timing>("2_minutes_before");
+  const [message, setMessage] = useState("");
 
   const canEdit = isOwner || hasAccess;
 
@@ -89,14 +111,25 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
         .select("*")
         .eq("memorial_id", memorialId)
         .maybeSingle();
-      if (mounted && data) {
-        setSchedule(data as Schedule);
-        setTimeLocal(data.time_local);
-        setFrequency(data.frequency as Frequency);
-        setHasEnd(data.has_end_date);
-        setEndDate(data.end_date ?? "");
-        setReminderEnabled(data.reminder_enabled);
-        setReminderTiming(data.reminder_timing as Timing);
+      if (!mounted || !data) return;
+      const s = data as Schedule;
+      setSchedule(s);
+      setTimeLocal(s.time_local);
+      setFrequency(s.frequency as Frequency);
+      setHasEnd(s.has_end_date);
+      setEndDate(s.end_date ?? "");
+      setReminderEnabled(s.reminder_enabled);
+      setReminderTiming(s.reminder_timing as Timing);
+      setMessage(s.custom_message ?? "");
+      if (s.anchor_date) setDate(parseDateKey(s.anchor_date));
+
+      const { data: rec } = await supabase
+        .from("remembrance_phone_recipients")
+        .select("phone,display_name,channel")
+        .eq("remembrance_id", s.id);
+      if (mounted && rec) {
+        setRecipients(rec as PhoneRecipient[]);
+        setSavedCount(rec.length);
       }
     })();
     const channel = supabase
@@ -115,28 +148,64 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
 
   const nowStr = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(now);
 
+  const scheduledSubtext = schedule
+    ? `Scheduled for ${format(parseDateKey(schedule.anchor_date), "MMM d")} at ${displayTime} · ${savedCount} recipient${savedCount === 1 ? "" : "s"}`
+    : "No remembrance scheduled yet";
+
   const handleSave = async () => {
     if (!userId) { toast.error("Please sign in"); return; }
     if (!canEdit) { toast.error("Only the memorial owner or collaborators can set the schedule"); return; }
-    const payload = {
-      memorial_id: memorialId,
-      created_by: userId,
-      time_local: timeLocal,
-      time_utc: localToUtcTime(timeLocal),
-      timezone: tz,
-      frequency,
-      anchor_date: new Date().toISOString().slice(0, 10),
-      has_end_date: hasEnd,
-      end_date: hasEnd && endDate ? endDate : null,
-      reminder_enabled: reminderEnabled,
-      reminder_timing: reminderTiming,
-    };
-    const { error } = schedule
-      ? await supabase.from("memorial_remembrances").update(payload).eq("id", schedule.id)
-      : await supabase.from("memorial_remembrances").insert(payload);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Time to Remember saved");
-    setOpen(false);
+    setSaving(true);
+    try {
+      const payload = {
+        memorial_id: memorialId,
+        created_by: userId,
+        time_local: timeLocal,
+        time_utc: localToUtcTime(timeLocal),
+        timezone: tz,
+        frequency,
+        anchor_date: toDateKey(date),
+        has_end_date: hasEnd,
+        end_date: hasEnd && endDate ? endDate : null,
+        reminder_enabled: reminderEnabled,
+        reminder_timing: reminderTiming,
+        custom_message: message.trim() ? message.trim().slice(0, MESSAGE_MAX) : null,
+      };
+
+      let scheduleId = schedule?.id ?? null;
+      if (scheduleId) {
+        const { error } = await supabase.from("memorial_remembrances").update(payload).eq("id", scheduleId);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase.from("memorial_remembrances").insert(payload).select("*").single();
+        if (error) throw error;
+        scheduleId = (data as Schedule).id;
+        setSchedule(data as Schedule);
+      }
+
+      // Replace the recipient list
+      await supabase.from("remembrance_phone_recipients").delete().eq("remembrance_id", scheduleId);
+      if (recipients.length > 0) {
+        const { error: recErr } = await supabase.from("remembrance_phone_recipients").insert(
+          recipients.map((r) => ({
+            remembrance_id: scheduleId!,
+            memorial_id: memorialId,
+            phone: r.phone,
+            display_name: r.display_name,
+            channel: r.channel,
+            created_by: userId,
+          }))
+        );
+        if (recErr) throw recErr;
+      }
+      setSavedCount(recipients.length);
+      toast.success("Time to Remember saved");
+      setOpen(false);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not save the schedule");
+    } finally {
+      setSaving(false);
+    }
   };
 
   // Share urls
@@ -169,13 +238,12 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
               <div className="font-mono text-4xl md:text-5xl font-light tracking-tight text-foreground tabular-nums">
                 {schedule ? displayTime : nowStr.slice(0, 5)}
               </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                {schedule ? (
-                  <>{schedule.frequency.charAt(0).toUpperCase() + schedule.frequency.slice(1)} · {schedule.timezone}</>
-                ) : (
-                  "No remembrance scheduled yet"
-                )}
-              </p>
+              <p className="text-sm text-muted-foreground mt-1">{scheduledSubtext}</p>
+              {schedule && (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {schedule.frequency.charAt(0).toUpperCase() + schedule.frequency.slice(1)} · {schedule.timezone}
+                </p>
+              )}
             </div>
           </div>
 
@@ -189,16 +257,45 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                     {schedule ? "Edit Time to Remember" : "Set Time to Remember"}
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md">
+                <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Set Time to Remember</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="tor-time">Time of day ({tz})</Label>
-                      <Input id="tor-time" type="time" value={timeLocal} onChange={(e) => setTimeLocal(e.target.value)} />
+                  <div className="space-y-5">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label>Date</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {date ? format(date, "PPP") : <span>Pick a date</span>}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={date}
+                              onSelect={(d) => d && setDate(d)}
+                              defaultMonth={date}
+                              fromYear={1900}
+                              toYear={new Date().getFullYear() + 10}
+                              initialFocus
+                              className={cn("p-3 pointer-events-auto")}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="tor-time">Time ({tz})</Label>
+                        <Input id="tor-time" type="time" value={timeLocal} onChange={(e) => setTimeLocal(e.target.value)} />
+                      </div>
                     </div>
-                    <div>
+
+                    <div className="space-y-2">
                       <Label>Frequency</Label>
                       <Select value={frequency} onValueChange={(v) => setFrequency(v as Frequency)}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
@@ -210,6 +307,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                         </SelectContent>
                       </Select>
                     </div>
+
                     <div className="flex items-center justify-between">
                       <Label htmlFor="tor-hasend">End on specific date</Label>
                       <Switch id="tor-hasend" checked={hasEnd} onCheckedChange={setHasEnd} />
@@ -217,6 +315,24 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                     {hasEnd && (
                       <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                     )}
+
+                    <div className="border-t pt-4 space-y-2">
+                      <Label htmlFor="tor-message">Your reminder message</Label>
+                      <Textarea
+                        id="tor-message"
+                        value={message}
+                        maxLength={MESSAGE_MAX}
+                        rows={3}
+                        placeholder={`A gentle reminder to pause and remember ${memorialName}.`}
+                        onChange={(e) => setMessage(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground text-right">{message.length}/{MESSAGE_MAX}</p>
+                    </div>
+
+                    <div className="border-t pt-4">
+                      <PhoneRecipientPicker value={recipients} onChange={setRecipients} />
+                    </div>
+
                     <div className="border-t pt-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <Label htmlFor="tor-remind">Send reminder email</Label>
@@ -233,18 +349,25 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                             </SelectContent>
                           </Select>
                           <p className="text-xs text-muted-foreground mt-2">
-                            Sent to the memorial owner and everyone with accepted access.
+                            Sent to the memorial owner, everyone with accepted access, and any phone recipients above.
                           </p>
                         </div>
                       )}
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                    <Button onClick={handleSave}>Save</Button>
+                    <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>Cancel</Button>
+                    <Button onClick={handleSave} disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
+            )}
+
+            {savedCount > 0 && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5 justify-end">
+                <Users className="w-3.5 h-3.5" />
+                {savedCount} recipient{savedCount === 1 ? "" : "s"} will be notified
+              </p>
             )}
 
             {/* Share row */}
