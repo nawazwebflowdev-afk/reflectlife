@@ -24,6 +24,13 @@ interface Schedule {
   reminder_timing: Timing;
   time_local: string;
   timezone: string;
+  custom_message: string | null;
+}
+
+interface PhoneRecipient {
+  phone: string;
+  display_name: string | null;
+  channel: string; // "sms" | "whatsapp"
 }
 
 function nextEventAt(s: Schedule, from: Date): Date | null {
@@ -72,7 +79,7 @@ function reminderOffsetMs(t: Timing): number {
   return t === "1_day_before" ? 86400000 : 2 * 60000;
 }
 
-async function sendEmail(to: string[], memorial: { name: string; id: string }, when: Date, tz: string) {
+async function sendEmail(to: string[], memorial: { name: string; id: string }, when: Date, tz: string, customMessage: string | null) {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
   if (!LOVABLE_API_KEY || !RESEND_API_KEY) throw new Error("Email credentials missing");
@@ -83,7 +90,7 @@ async function sendEmail(to: string[], memorial: { name: string; id: string }, w
   const html = `
     <div style="font-family:Georgia,serif;max-width:560px;margin:0 auto;padding:32px;background:#faf7f2;color:#3a2a3a;">
       <h1 style="color:#4A324A;margin:0 0 12px;">A moment to remember</h1>
-      <p style="font-size:16px;line-height:1.6;">This is a gentle reminder to pause and remember <strong>${memorial.name}</strong>.</p>
+      <p style="font-size:16px;line-height:1.6;">${customMessage ? escapeHtml(customMessage) : `This is a gentle reminder to pause and remember <strong>${memorial.name}</strong>.`}</p>
       <p style="font-size:15px;color:#6b5a6b;">Scheduled for <strong>${localTime}</strong>.</p>
       <p style="margin:24px 0;"><a href="${url}" style="background:#4A324A;color:#fff;padding:12px 24px;border-radius:999px;text-decoration:none;">Visit the memorial</a></p>
       <p style="font-size:12px;color:#9a8a9a;">Sent with love from Reflectlife.</p>
@@ -106,6 +113,61 @@ async function sendEmail(to: string[], memorial: { name: string; id: string }, w
     const body = await resp.text();
     console.error("Resend failed", resp.status, body);
   }
+}
+
+function escapeHtml(v: string): string {
+  return v.replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
+}
+
+// Sends SMS / WhatsApp reminders through the Twilio connector gateway.
+// Returns the number of messages accepted by Twilio.
+async function sendPhoneMessages(
+  recipients: PhoneRecipient[],
+  memorial: { name: string; id: string },
+  customMessage: string | null,
+): Promise<number> {
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  const TWILIO_API_KEY = Deno.env.get("TWILIO_API_KEY");
+  const TWILIO_SMS_FROM = Deno.env.get("TWILIO_SMS_FROM");
+  const TWILIO_WHATSAPP_FROM = Deno.env.get("TWILIO_WHATSAPP_FROM");
+  if (!LOVABLE_API_KEY || !TWILIO_API_KEY) {
+    console.error("Twilio is not connected - skipping SMS/WhatsApp reminders");
+    return 0;
+  }
+
+  const url = `https://reflectlife.net/memorial/${memorial.id}`;
+  const body = `${customMessage?.trim() || `A gentle reminder to pause and remember ${memorial.name}.`}\n${url}`;
+
+  let sent = 0;
+  for (const r of recipients) {
+    const isWhatsApp = r.channel === "whatsapp";
+    const from = isWhatsApp ? TWILIO_WHATSAPP_FROM : TWILIO_SMS_FROM;
+    if (!from) {
+      console.error(`Missing sender number for channel ${r.channel}`);
+      continue;
+    }
+    const params = new URLSearchParams({
+      To: isWhatsApp ? `whatsapp:${r.phone}` : r.phone,
+      From: isWhatsApp && !from.startsWith("whatsapp:") ? `whatsapp:${from}` : from,
+      Body: body.slice(0, 1500),
+    });
+    const resp = await fetch("https://connector-gateway.lovable.dev/twilio/Messages.json", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "X-Connection-Api-Key": TWILIO_API_KEY,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: params,
+    });
+    if (!resp.ok) {
+      console.error(`Twilio request failed [${resp.status}]: ${await resp.text()}`);
+      continue;
+    }
+    sent++;
+  }
+  return sent;
 }
 
 Deno.serve(async (req) => {
