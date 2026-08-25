@@ -158,16 +158,29 @@ Deno.serve(async (req) => {
         .select("id,email")
         .in("id", Array.from(userIds));
       const emails = (profiles ?? []).map((p: any) => p.email).filter((e: string | null) => !!e) as string[];
-      if (emails.length === 0) continue;
+      const { data: phoneRecipients } = await supabase
+        .from("remembrance_phone_recipients")
+        .select("phone,display_name,channel")
+        .eq("remembrance_id", s.id);
+      const phones = (phoneRecipients ?? []) as PhoneRecipient[];
 
-      await sendEmail(emails, { name: mem.name, id: mem.id }, evt, s.timezone);
+      if (emails.length === 0 && phones.length === 0) continue;
+
+      if (emails.length > 0) {
+        await sendEmail(emails, { name: mem.name, id: mem.id }, evt, s.timezone, s.custom_message ?? null);
+      }
+      let smsSent = 0;
+      if (phones.length > 0) {
+        smsSent = await sendPhoneMessages(phones, { name: mem.name, id: mem.id }, s.custom_message ?? null);
+      }
       await supabase.from("remembrance_notifications").insert({
         remembrance_id: s.id,
         event_at: evt.toISOString(),
-        recipients_count: emails.length,
+        recipients_count: emails.length + smsSent,
       });
       processed++;
     }
+
 
     return new Response(JSON.stringify({ ok: true, processed }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
