@@ -13,7 +13,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Clock, Bell, Share2, MessageCircle, Send, Phone, CalendarIcon, Users } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import { toast } from "sonner";
 import PhoneRecipientPicker, { type PhoneRecipient } from "./PhoneRecipientPicker";
 
