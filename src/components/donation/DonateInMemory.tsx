@@ -51,7 +51,13 @@ type Supporter = {
 
 type DonorType = "private" | "company";
 const FEE_RATES: Record<DonorType, number> = { private: 0.025, company: 0.03 };
-const PRESETS = [25, 50, 100, 250];
+const CURRENCIES = ["EUR", "USD"] as const;
+type CurrencyCode = (typeof CURRENCIES)[number];
+const SYMBOLS: Record<CurrencyCode, string> = { EUR: "\u20ac", USD: "$" };
+const PRESETS: Record<CurrencyCode, number[]> = {
+  EUR: [25, 50, 100, 250],
+  USD: [25, 50, 100, 250],
+};
 
 interface Props {
   memorialId: string;
@@ -84,6 +90,8 @@ export default function DonateInMemory({
   // Donation form
   const [donorType, setDonorType] = useState<DonorType>("private");
   const [selectedAmount, setSelectedAmount] = useState<number | null>(50);
+  const [donationCurrency, setDonationCurrency] = useState<CurrencyCode>("EUR");
+  const [recurring, setRecurring] = useState(false);
   const [customAmount, setCustomAmount] = useState<string>("");
   const [donorName, setDonorName] = useState("");
   const [donorEmail, setDonorEmail] = useState("");
@@ -99,6 +107,7 @@ export default function DonateInMemory({
   );
   const [charity, setCharity] = useState("");
   const [goal, setGoal] = useState("1000");
+  const [goalCurrency, setGoalCurrency] = useState<CurrencyCode>("EUR");
   const [story, setStory] = useState("");
   const [orgAccepted, setOrgAccepted] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -112,6 +121,8 @@ export default function DonateInMemory({
       .maybeSingle();
     setCampaign((c as Campaign) ?? null);
     if (c) {
+      const cc = String((c as Campaign).currency || "EUR").toUpperCase();
+      setDonationCurrency(cc === "USD" ? "USD" : "EUR");
       const [{ data: s }, { data: d }] = await Promise.all([
         supabase.rpc("get_campaign_public_summary", { _campaign_id: c.id }),
         supabase.rpc("get_campaign_public_donations", {
@@ -149,7 +160,8 @@ export default function DonateInMemory({
   const platformFeeRate = FEE_RATES[donorType];
   const platformFee = validAmount ? amount * platformFeeRate : 0;
   const netAmount = validAmount ? amount - platformFee : 0;
-  const currency = campaign?.currency ?? "EUR";
+  const currency = (campaign?.currency ?? "EUR").toUpperCase();
+  const symbol = SYMBOLS[donationCurrency];
   const pct = campaign
     ? Math.min(
         100,
@@ -175,7 +187,8 @@ export default function DonateInMemory({
             campaign_id: campaign.id,
             amount,
             donor_type: donorType,
-            recurring: false,
+            recurring,
+            currency: donationCurrency,
             is_anonymous: isAnonymous,
             notify_organizer: notify,
             donor_name: donorName,
@@ -208,7 +221,7 @@ export default function DonateInMemory({
       return;
     }
     if (!Number.isFinite(g) || g < 50) {
-      toast.error("Goal must be at least €50");
+      toast.error(`Goal must be at least ${SYMBOLS[goalCurrency]}50`);
       return;
     }
     if (!orgAccepted) {
@@ -223,6 +236,7 @@ export default function DonateInMemory({
       charity_organization_name: charity.trim().slice(0, 255) || null,
       story: story.trim().slice(0, 2000) || null,
       target_goal_amount: g,
+      currency: goalCurrency,
     });
     setCreating(false);
     if (error) {
@@ -315,17 +329,32 @@ export default function DonateInMemory({
                         htmlFor="goal"
                         className="text-slate-700 dark:text-slate-300"
                       >
-                        Goal amount (€) *
+                        Goal amount *
                       </Label>
-                      <Input
-                        id="goal"
-                        type="number"
-                        min={50}
-                        step={50}
-                        value={goal}
-                        onChange={(e) => setGoal(e.target.value)}
-                        className="mt-1"
-                      />
+                      <div className="mt-1 flex gap-2">
+                        <select
+                          aria-label="Campaign currency"
+                          value={goalCurrency}
+                          onChange={(e) =>
+                            setGoalCurrency(e.target.value as CurrencyCode)
+                          }
+                          className="rounded-md border border-input bg-background px-3 text-sm"
+                        >
+                          {CURRENCIES.map((c) => (
+                            <option key={c} value={c}>
+                              {SYMBOLS[c]} {c}
+                            </option>
+                          ))}
+                        </select>
+                        <Input
+                          id="goal"
+                          type="number"
+                          min={50}
+                          step={50}
+                          value={goal}
+                          onChange={(e) => setGoal(e.target.value)}
+                        />
+                      </div>
                     </div>
                     <div>
                       <Label
@@ -444,13 +473,78 @@ export default function DonateInMemory({
                       </div>
                     </div>
 
+                    {/* Currency + frequency */}
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                          Currency
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {CURRENCIES.map((c) => (
+                            <button
+                              key={c}
+                              type="button"
+                              onClick={() => setDonationCurrency(c)}
+                              className={cn(
+                                "py-2.5 rounded-xl border text-sm font-semibold transition",
+                                donationCurrency === c
+                                  ? "border-amber-600 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-500"
+                                  : "border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400"
+                              )}
+                            >
+                              {SYMBOLS[c]} {c}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                          Frequency
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setRecurring(false)}
+                            className={cn(
+                              "py-2.5 rounded-xl border text-sm font-semibold transition",
+                              !recurring
+                                ? "border-amber-600 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-500"
+                                : "border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400"
+                            )}
+                          >
+                            One-time
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!userId) {
+                                toast.error(
+                                  "Please sign in to give monthly."
+                                );
+                                return;
+                              }
+                              setRecurring(true);
+                            }}
+                            className={cn(
+                              "py-2.5 rounded-xl border text-sm font-semibold transition",
+                              recurring
+                                ? "border-amber-600 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-500"
+                                : "border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400"
+                            )}
+                          >
+                            Monthly
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Preset Amounts */}
                     <div>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                         Select Donation Amount
                       </label>
                       <div className="grid grid-cols-4 gap-2 mb-3">
-                        {PRESETS.map((val) => (
+                        {PRESETS[donationCurrency].map((val) => (
                           <button
                             key={val}
                             type="button"
@@ -465,14 +559,15 @@ export default function DonateInMemory({
                                 : "border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
                             )}
                           >
-                            €{val}
+                            {symbol}
+                            {val}
                           </button>
                         ))}
                       </div>
                       {/* Custom Amount Input */}
                       <div className="relative">
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                          €
+                          {symbol}
                         </span>
                         <input
                           type="number"
@@ -586,7 +681,7 @@ export default function DonateInMemory({
                       <div className="flex justify-between">
                         <span>Gross Donation:</span>
                         <span className="font-medium text-slate-700 dark:text-slate-200">
-                          {validAmount ? money(amount, currency) : "—"}
+                          {validAmount ? money(amount, donationCurrency) : "—"}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -595,7 +690,7 @@ export default function DonateInMemory({
                           {donorType === "company" ? "3.0%" : "2.5%"}):
                         </span>
                         <span>
-                          {validAmount ? `−${money(platformFee, currency)}` : "—"}
+                          {validAmount ? `−${money(platformFee, donationCurrency)}` : "—"}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -607,7 +702,7 @@ export default function DonateInMemory({
                       <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-800 font-semibold text-slate-800 dark:text-slate-100 text-sm">
                         <span>Net Amount to {campaign.beneficiary_name}:</span>
                         <span className="text-emerald-600 dark:text-emerald-400">
-                          {validAmount ? money(netAmount, currency) : "—"}
+                          {validAmount ? money(netAmount, donationCurrency) : "—"}
                         </span>
                       </div>
                     </div>
@@ -631,7 +726,7 @@ export default function DonateInMemory({
                         className={cn("fill-current", submitting && "hidden")}
                       />
                       {validAmount
-                        ? `Complete Donation of ${money(amount, currency)}`
+                        ? `Complete Donation of ${money(amount, donationCurrency)}${recurring ? " / month" : ""}`
                         : "Complete Donation"}
                     </button>
 
