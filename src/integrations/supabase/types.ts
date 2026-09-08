@@ -948,9 +948,10 @@ export type Database = {
           created_at: string
           created_by: string
           display_name: string | null
+          email: string | null
           id: string
           memorial_id: string
-          phone: string
+          phone: string | null
           remembrance_id: string
         }
         Insert: {
@@ -958,9 +959,10 @@ export type Database = {
           created_at?: string
           created_by: string
           display_name?: string | null
+          email?: string | null
           id?: string
           memorial_id: string
-          phone: string
+          phone?: string | null
           remembrance_id: string
         }
         Update: {
@@ -968,9 +970,10 @@ export type Database = {
           created_at?: string
           created_by?: string
           display_name?: string | null
+          email?: string | null
           id?: string
           memorial_id?: string
-          phone?: string
+          phone?: string | null
           remembrance_id?: string
         }
         Relationships: [
