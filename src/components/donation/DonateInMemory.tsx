@@ -1,11 +1,24 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { HeartHandshake, Loader2, Users, Building2, User, Lock } from "lucide-react";
+import {
+  Heart,
+  HeartHandshake,
+  Building2,
+  User,
+  ShieldCheck,
+  X,
+  Loader2,
+  Users,
+  Lock,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,7 +51,7 @@ type Supporter = {
 
 type DonorType = "private" | "company";
 const FEE_RATES: Record<DonorType, number> = { private: 0.025, company: 0.03 };
-const PRESETS = [25, 50, 100];
+const PRESETS = [25, 50, 100, 250];
 
 interface Props {
   memorialId: string;
@@ -48,10 +61,18 @@ interface Props {
 }
 
 function money(v: number, currency = "EUR") {
-  return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 2 }).format(v);
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 2,
+  }).format(v);
 }
 
-export default function DonateInMemory({ memorialId, memorialName, isOwner, previewImage }: Props) {
+export default function DonateInMemory({
+  memorialId,
+  memorialName,
+  isOwner,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -61,20 +82,21 @@ export default function DonateInMemory({ memorialId, memorialName, isOwner, prev
   const [supporters, setSupporters] = useState<Supporter[]>([]);
 
   // Donation form
-  const [recurring, setRecurring] = useState(false);
-  const [preset, setPreset] = useState<number | "custom">(50);
-  const [custom, setCustom] = useState("");
   const [donorType, setDonorType] = useState<DonorType>("private");
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(50);
+  const [customAmount, setCustomAmount] = useState<string>("");
   const [donorName, setDonorName] = useState("");
   const [donorEmail, setDonorEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [anonymous, setAnonymous] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [notify, setNotify] = useState(true);
   const [accepted, setAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   // Organizer setup form
-  const [beneficiary, setBeneficiary] = useState(memorialName ? `Family of ${memorialName}` : "");
+  const [beneficiary, setBeneficiary] = useState(
+    memorialName ? `Family of ${memorialName}` : ""
+  );
   const [charity, setCharity] = useState("");
   const [goal, setGoal] = useState("1000");
   const [story, setStory] = useState("");
@@ -92,10 +114,16 @@ export default function DonateInMemory({ memorialId, memorialName, isOwner, prev
     if (c) {
       const [{ data: s }, { data: d }] = await Promise.all([
         supabase.rpc("get_campaign_public_summary", { _campaign_id: c.id }),
-        supabase.rpc("get_campaign_public_donations", { _campaign_id: c.id, _limit: 10 }),
+        supabase.rpc("get_campaign_public_donations", {
+          _campaign_id: c.id,
+          _limit: 10,
+        }),
       ]);
       const row = Array.isArray(s) ? s[0] : s;
-      setTotals({ raised: Number(row?.total_raised ?? 0), donors: Number(row?.donor_count ?? 0) });
+      setTotals({
+        raised: Number(row?.total_raised ?? 0),
+        donors: Number(row?.donor_count ?? 0),
+      });
       setSupporters((d as Supporter[]) ?? []);
     }
     setLoading(false);
@@ -110,38 +138,59 @@ export default function DonateInMemory({ memorialId, memorialName, isOwner, prev
     });
   }, []);
 
-  useEffect(() => { if (open) load(); }, [open, load]);
+  useEffect(() => {
+    if (open) load();
+  }, [open, load]);
 
-  const amount = preset === "custom" ? Number(custom.replace(",", ".")) : preset;
+  const amount = customAmount
+    ? parseFloat(customAmount) || 0
+    : selectedAmount || 0;
   const validAmount = Number.isFinite(amount) && amount >= 1 && amount <= 50000;
-  const fee = validAmount ? Math.round(amount * FEE_RATES[donorType] * 100) / 100 : 0;
-  const net = validAmount ? Math.round((amount - fee) * 100) / 100 : 0;
+  const platformFeeRate = FEE_RATES[donorType];
+  const platformFee = validAmount ? amount * platformFeeRate : 0;
+  const netAmount = validAmount ? amount - platformFee : 0;
   const currency = campaign?.currency ?? "EUR";
-  const pct = campaign ? Math.min(100, Math.round((totals.raised / Number(campaign.target_goal_amount || 1)) * 100)) : 0;
+  const pct = campaign
+    ? Math.min(
+        100,
+        Math.round(
+          (totals.raised / Number(campaign.target_goal_amount || 1)) * 100
+        )
+      )
+    : 0;
 
-  const canSubmit = validAmount && accepted && (userEmail || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(donorEmail)) && !(recurring && !userId);
+  const canSubmit =
+    validAmount &&
+    accepted &&
+    (userEmail || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(donorEmail));
 
   const handleDonate = async () => {
     if (!campaign || !canSubmit) return;
     setSubmitting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("create-donation-checkout", {
-        body: {
-          campaign_id: campaign.id,
-          amount,
-          donor_type: donorType,
-          recurring,
-          is_anonymous: anonymous,
-          notify_organizer: notify,
-          donor_name: donorName,
-          donor_email: userEmail ?? donorEmail,
-          condolence_message: message,
-          accepted_terms: accepted,
-        },
-      });
+      const { data, error } = await supabase.functions.invoke(
+        "create-donation-checkout",
+        {
+          body: {
+            campaign_id: campaign.id,
+            amount,
+            donor_type: donorType,
+            recurring: false,
+            is_anonymous: isAnonymous,
+            notify_organizer: notify,
+            donor_name: donorName,
+            donor_email: userEmail ?? donorEmail,
+            condolence_message: message,
+            accepted_terms: accepted,
+          },
+        }
+      );
       const url = (data as any)?.url;
       const err = error?.message || (data as any)?.error;
-      if (err || !url) { toast.error(err || "Could not start checkout"); return; }
+      if (err || !url) {
+        toast.error(err || "Could not start checkout");
+        return;
+      }
       window.location.href = url;
     } finally {
       setSubmitting(false);
@@ -149,11 +198,23 @@ export default function DonateInMemory({ memorialId, memorialName, isOwner, prev
   };
 
   const handleCreate = async () => {
-    if (!userId) { toast.error("Please sign in"); return; }
+    if (!userId) {
+      toast.error("Please sign in");
+      return;
+    }
     const g = Number(goal);
-    if (!beneficiary.trim()) { toast.error("Please name the beneficiary"); return; }
-    if (!Number.isFinite(g) || g < 50) { toast.error("Goal must be at least €50"); return; }
-    if (!orgAccepted) { toast.error("Please accept the donation terms"); return; }
+    if (!beneficiary.trim()) {
+      toast.error("Please name the beneficiary");
+      return;
+    }
+    if (!Number.isFinite(g) || g < 50) {
+      toast.error("Goal must be at least €50");
+      return;
+    }
+    if (!orgAccepted) {
+      toast.error("Please accept the donation terms");
+      return;
+    }
     setCreating(true);
     const { error } = await supabase.from("memorial_campaigns").insert({
       memory_wall_id: memorialId,
@@ -164,7 +225,10 @@ export default function DonateInMemory({ memorialId, memorialName, isOwner, prev
       target_goal_amount: g,
     });
     setCreating(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Fundraiser created");
     load();
   };
@@ -179,180 +243,449 @@ export default function DonateInMemory({ memorialId, memorialName, isOwner, prev
           Donate in Memory
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0">
-        {/* Header / banner */}
-        <div className="relative h-40 bg-gradient-to-br from-primary/30 via-primary/10 to-secondary/20 overflow-hidden">
-          {previewImage && <img src={previewImage} alt="" className="absolute inset-0 w-full h-full object-cover opacity-50" />}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-          <DialogHeader className="absolute bottom-4 left-6 right-6 text-left space-y-1">
-            <p className="text-xs uppercase tracking-widest text-muted-foreground">Memorial fundraiser</p>
-            <DialogTitle className="font-serif text-2xl md:text-3xl text-foreground">In Loving Memory: {memorialName}</DialogTitle>
-            <DialogDescription>
-              {campaign ? <>For {campaign.beneficiary_name}{campaign.charity_organization_name ? ` · ${campaign.charity_organization_name}` : ""}</> : "Support the family or a cause close to their heart."}
-            </DialogDescription>
-          </DialogHeader>
-        </div>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto p-0 border-0 bg-transparent">
+        <DialogTitle className="sr-only">Donate in Memory of {memorialName}</DialogTitle>
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full border border-slate-100 dark:border-slate-800 transition-all">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <span className="text-xs font-semibold tracking-wider text-amber-600 dark:text-amber-400 uppercase">
+                Reflectlife Memorial Support
+              </span>
+              <h2 className="text-xl font-serif text-slate-800 dark:text-slate-100 mt-1">
+                Donate in Memory of {memorialName}
+              </h2>
+            </div>
+            <button
+              onClick={() => setOpen(false)}
+              className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            >
+              <X size={20} />
+            </button>
+          </div>
 
-        <div className="p-6 space-y-6">
-          {loading ? (
-            <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
-          ) : !campaign ? (
-            isOwner ? (
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">Start a fundraiser for this memorial. Donations go to the beneficiary you name; Reflectlife deducts a small platform fee (2.5% private / 3.0% company donors) plus payment processing.</p>
-                <div className="grid gap-3">
-                  <div><Label htmlFor="ben">Beneficiary *</Label><Input id="ben" value={beneficiary} onChange={(e) => setBeneficiary(e.target.value)} placeholder="e.g. Family of Anna Müller" /></div>
-                  <div><Label htmlFor="char">Charity / organization (optional)</Label><Input id="char" value={charity} onChange={(e) => setCharity(e.target.value)} placeholder="e.g. German Cancer Aid" /></div>
-                  <div><Label htmlFor="goal">Goal amount (€) *</Label><Input id="goal" type="number" min={50} step={50} value={goal} onChange={(e) => setGoal(e.target.value)} /></div>
-                  <div><Label htmlFor="story">Story (optional)</Label><Textarea id="story" rows={4} value={story} onChange={(e) => setStory(e.target.value)} placeholder="Tell supporters what the donations will be used for…" maxLength={2000} /></div>
-                </div>
-                <label className="flex items-start gap-2 text-sm text-muted-foreground cursor-pointer">
-                  <Checkbox checked={orgAccepted} onCheckedChange={(v) => setOrgAccepted(v === true)} className="mt-0.5" />
-                  <span>I agree to the <Link to="/terms#donations" target="_blank" className="text-primary underline underline-offset-4">Reflectlife donation, campaign transparency and payout terms</Link>.</span>
-                </label>
-                <Button onClick={handleCreate} disabled={creating} className="rounded-full w-full">
-                  {creating ? "Creating…" : "Start fundraiser"}
-                </Button>
+          {/* Content */}
+          <div className="p-6 space-y-6">
+            {loading ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="w-6 h-6 animate-spin text-amber-600" />
               </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <HeartHandshake className="w-10 h-10 mx-auto mb-3 text-primary/60" />
-                <p>No fundraiser has been set up for this memorial yet.</p>
-              </div>
-            )
-          ) : (
-            <>
-              {/* Progress */}
-              <div>
-                <div className="flex items-baseline justify-between mb-2">
-                  <p className="text-2xl font-semibold text-foreground">{money(totals.raised, currency)}</p>
-                  <p className="text-sm text-muted-foreground">raised of {money(Number(campaign.target_goal_amount), currency)} goal</p>
-                </div>
-                <Progress value={pct} className="h-3" />
-                <p className="text-sm text-muted-foreground mt-2 flex items-center gap-1.5">
-                  <Users className="w-4 h-4" /> {totals.donors} {totals.donors === 1 ? "donor" : "donors"} · {pct}% funded
-                </p>
-                {campaign.story && <p className="text-sm text-muted-foreground mt-4 leading-relaxed whitespace-pre-line">{campaign.story}</p>}
-              </div>
-
-              {campaign.status !== "active" ? (
-                <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground text-center">This fundraiser is currently {campaign.status} and is not accepting donations.</div>
-              ) : (
-                <>
-                  <Separator />
-
-                  {/* Frequency */}
-                  <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-muted">
-                    {(["once", "monthly"] as const).map((f) => {
-                      const on = (f === "monthly") === recurring;
-                      return (
-                        <button key={f} type="button" onClick={() => setRecurring(f === "monthly")}
-                          className={cn("rounded-full py-2 text-sm font-medium transition-colors", on ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground")}>
-                          {f === "once" ? "Give once" : "Give monthly"}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {recurring && !userId && (
-                    <p className="text-xs text-destructive -mt-3">Please <Link to="/login" className="underline">sign in</Link> to set up a monthly donation.</p>
-                  )}
-
-                  {/* Amount chips */}
-                  <div>
-                    <Label>Amount</Label>
-                    <div className="grid grid-cols-4 gap-2 mt-2">
-                      {PRESETS.map((p) => (
-                        <button key={p} type="button" onClick={() => setPreset(p)}
-                          className={cn("rounded-full border py-2.5 text-sm font-semibold transition-colors", preset === p ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/50")}>
-                          {money(p, currency)}
-                        </button>
-                      ))}
-                      <button type="button" onClick={() => setPreset("custom")}
-                        className={cn("rounded-full border py-2.5 text-sm font-semibold transition-colors", preset === "custom" ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/50")}>
-                        Custom
-                      </button>
+            ) : !campaign ? (
+              isOwner ? (
+                <div className="space-y-4">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    Start a fundraiser for this memorial. Donations go to the
+                    beneficiary you name; Reflectlife deducts a small platform
+                    fee (2.5% private / 3.0% company donors) plus payment
+                    processing.
+                  </p>
+                  <div className="grid gap-3">
+                    <div>
+                      <Label
+                        htmlFor="ben"
+                        className="text-slate-700 dark:text-slate-300"
+                      >
+                        Beneficiary *
+                      </Label>
+                      <Input
+                        id="ben"
+                        value={beneficiary}
+                        onChange={(e) => setBeneficiary(e.target.value)}
+                        placeholder="e.g. Family of Anna Müller"
+                        className="mt-1"
+                      />
                     </div>
-                    {preset === "custom" && (
-                      <Input className="mt-2" type="number" min={1} step={1} inputMode="decimal" placeholder="Enter amount" value={custom} onChange={(e) => setCustom(e.target.value)} />
-                    )}
-                  </div>
-
-                  {/* Donor type */}
-                  <div>
-                    <Label>I am donating as</Label>
-                    <div className="grid grid-cols-2 gap-2 mt-2">
-                      {([["private", "Individual / Private", User], ["company", "Company / Organization", Building2]] as const).map(([v, label, Icon]) => (
-                        <button key={v} type="button" onClick={() => setDonorType(v)}
-                          className={cn("flex items-center gap-2 rounded-xl border p-3 text-sm text-left transition-colors", donorType === v ? "border-primary bg-primary/10" : "border-border hover:border-primary/50")}>
-                          <Icon className="w-4 h-4 text-primary shrink-0" />
-                          <span><span className="block font-medium text-foreground">{label}</span><span className="text-xs text-muted-foreground">{(FEE_RATES[v] * 100).toFixed(1)}% platform fee</span></span>
-                        </button>
-                      ))}
+                    <div>
+                      <Label
+                        htmlFor="char"
+                        className="text-slate-700 dark:text-slate-300"
+                      >
+                        Charity / organization (optional)
+                      </Label>
+                      <Input
+                        id="char"
+                        value={charity}
+                        onChange={(e) => setCharity(e.target.value)}
+                        placeholder="e.g. German Cancer Aid"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label
+                        htmlFor="goal"
+                        className="text-slate-700 dark:text-slate-300"
+                      >
+                        Goal amount (€) *
+                      </Label>
+                      <Input
+                        id="goal"
+                        type="number"
+                        min={50}
+                        step={50}
+                        value={goal}
+                        onChange={(e) => setGoal(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label
+                        htmlFor="story"
+                        className="text-slate-700 dark:text-slate-300"
+                      >
+                        Story (optional)
+                      </Label>
+                      <Textarea
+                        id="story"
+                        rows={4}
+                        value={story}
+                        onChange={(e) => setStory(e.target.value)}
+                        placeholder="Tell supporters what the donations will be used for…"
+                        maxLength={2000}
+                        className="mt-1"
+                      />
                     </div>
                   </div>
-
-                  {/* Details */}
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div><Label htmlFor="dn">{donorType === "company" ? "Company name" : "Your name"}</Label><Input id="dn" value={donorName} onChange={(e) => setDonorName(e.target.value)} disabled={anonymous} placeholder={anonymous ? "Anonymous" : ""} /></div>
-                    {!userEmail && (
-                      <div><Label htmlFor="de">Email (for your receipt) *</Label><Input id="de" type="email" value={donorEmail} onChange={(e) => setDonorEmail(e.target.value)} /></div>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="msg">Leave a few words of support (optional)</Label>
-                    <Textarea id="msg" rows={3} maxLength={500} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Thinking of you all…" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm cursor-pointer"><Checkbox checked={anonymous} onCheckedChange={(v) => setAnonymous(v === true)} /> Donate anonymously</label>
-                    <label className="flex items-center gap-2 text-sm cursor-pointer"><Checkbox checked={notify} onCheckedChange={(v) => setNotify(v === true)} /> Notify the organizer about my donation</label>
-                  </div>
-
-                  {/* Fee transparency */}
-                  <div className="rounded-xl bg-muted/60 p-4 text-sm space-y-1.5">
-                    <div className="flex justify-between"><span className="text-muted-foreground">Your donation</span><span className="font-medium">{validAmount ? money(amount, currency) : "—"}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Reflectlife platform fee ({(FEE_RATES[donorType] * 100).toFixed(1)}%)</span><span>− {money(fee, currency)}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Payment processing</span><span className="text-muted-foreground text-xs">standard Stripe fee, deducted at settlement</span></div>
-                    <Separator className="my-1" />
-                    <div className="flex justify-between font-semibold text-foreground"><span>Goes to {campaign.beneficiary_name}</span><span>{money(net, currency)}</span></div>
-                  </div>
-
-                  <label className="flex items-start gap-2 text-sm text-muted-foreground cursor-pointer">
-                    <Checkbox checked={accepted} onCheckedChange={(v) => setAccepted(v === true)} className="mt-0.5" />
-                    <span>I agree to the <Link to="/terms#donations" target="_blank" className="text-primary underline underline-offset-4">Reflectlife donation terms</Link>, campaign transparency guidelines and payout terms.</span>
+                  <label className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
+                    <Checkbox
+                      checked={orgAccepted}
+                      onCheckedChange={(v) => setOrgAccepted(v === true)}
+                      className="mt-0.5"
+                    />
+                    <span>
+                      I agree to the{" "}
+                      <Link
+                        to="/terms#donations"
+                        target="_blank"
+                        className="text-amber-600 underline underline-offset-4"
+                      >
+                        Reflectlife donation, campaign transparency and payout
+                        terms
+                      </Link>
+                      .
+                    </span>
                   </label>
-
-                  <Button onClick={handleDonate} disabled={!canSubmit || submitting} className="rounded-full w-full py-6 text-base font-semibold">
-                    {submitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
-                    {validAmount ? `Donate ${money(amount, currency)}${recurring ? " / month" : ""}` : "Donate"}
+                  <Button
+                    onClick={handleCreate}
+                    disabled={creating}
+                    className="rounded-xl w-full bg-amber-600 hover:bg-amber-700 text-white"
+                  >
+                    {creating ? "Creating…" : "Start fundraiser"}
                   </Button>
-                  <p className="text-xs text-center text-muted-foreground -mt-2">Secure payment by Stripe · Credit card, Apple Pay, Google Pay and PayPal</p>
-                </>
-              )}
-
-              {/* Supporters */}
-              {supporterList.length > 0 && (
-                <>
-                  <Separator />
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-3">Recent supporters</p>
-                    <ul className="space-y-3">
-                      {supporterList.map((s) => (
-                        <li key={s.id} className="flex gap-3 text-sm">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                            {s.donor_type === "company" ? <Building2 className="w-4 h-4 text-primary" /> : <User className="w-4 h-4 text-primary" />}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-foreground"><span className="font-medium">{s.donor_name}</span> · {money(Number(s.gross_amount), currency)}</p>
-                            {s.condolence_message && <p className="text-muted-foreground italic">"{s.condolence_message}"</p>}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                  <HeartHandshake className="w-10 h-10 mx-auto mb-3 text-amber-600/60" />
+                  <p>No fundraiser has been set up for this memorial yet.</p>
+                </div>
+              )
+            ) : (
+              <>
+                {/* Progress */}
+                <div>
+                  <div className="flex items-baseline justify-between mb-2">
+                    <p className="text-2xl font-semibold text-slate-800 dark:text-slate-100">
+                      {money(totals.raised, currency)}
+                    </p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      raised of {money(Number(campaign.target_goal_amount), currency)} goal
+                    </p>
                   </div>
-                </>
-              )}
-            </>
-          )}
+                  <Progress value={pct} className="h-3" />
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
+                    <Users className="w-4 h-4" /> {totals.donors}{" "}
+                    {totals.donors === 1 ? "donor" : "donors"} · {pct}% funded
+                  </p>
+                  {campaign.story && (
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-4 leading-relaxed whitespace-pre-line">
+                      {campaign.story}
+                    </p>
+                  )}
+                </div>
+
+                {campaign.status !== "active" ? (
+                  <div className="rounded-lg bg-slate-50 dark:bg-slate-950 p-4 text-sm text-slate-500 dark:text-slate-400 text-center">
+                    This fundraiser is currently {campaign.status} and is not
+                    accepting donations.
+                  </div>
+                ) : (
+                  <>
+                    <Separator />
+
+                    {/* Donor Type Selector */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Donating as
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setDonorType("private")}
+                          className={cn(
+                            "flex items-center justify-center gap-2 py-3 px-4 rounded-xl border font-medium text-sm transition-all",
+                            donorType === "private"
+                              ? "border-amber-600 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-500 shadow-sm"
+                              : "border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:text-slate-400"
+                          )}
+                        >
+                          <User size={16} /> Individual (2.5% fee)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDonorType("company")}
+                          className={cn(
+                            "flex items-center justify-center gap-2 py-3 px-4 rounded-xl border font-medium text-sm transition-all",
+                            donorType === "company"
+                              ? "border-amber-600 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-500 shadow-sm"
+                              : "border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:text-slate-400"
+                          )}
+                        >
+                          <Building2 size={16} /> Company (3.0% fee)
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Preset Amounts */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Select Donation Amount
+                      </label>
+                      <div className="grid grid-cols-4 gap-2 mb-3">
+                        {PRESETS.map((val) => (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => {
+                              setSelectedAmount(val);
+                              setCustomAmount("");
+                            }}
+                            className={cn(
+                              "py-2.5 rounded-xl border text-sm font-semibold transition",
+                              selectedAmount === val && !customAmount
+                                ? "border-slate-900 bg-slate-900 text-white dark:bg-amber-600 dark:border-amber-600"
+                                : "border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
+                            )}
+                          >
+                            €{val}
+                          </button>
+                        ))}
+                      </div>
+                      {/* Custom Amount Input */}
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
+                          €
+                        </span>
+                        <input
+                          type="number"
+                          placeholder="Custom Amount"
+                          value={customAmount}
+                          onChange={(e) => {
+                            setCustomAmount(e.target.value);
+                            setSelectedAmount(null);
+                          }}
+                          className="w-full pl-8 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Donor details */}
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <Label
+                          htmlFor="dn"
+                          className="text-slate-700 dark:text-slate-300"
+                        >
+                          {donorType === "company"
+                            ? "Company name"
+                            : "Your name"}
+                        </Label>
+                        <Input
+                          id="dn"
+                          value={donorName}
+                          onChange={(e) => setDonorName(e.target.value)}
+                          disabled={isAnonymous}
+                          placeholder={isAnonymous ? "Anonymous" : ""}
+                          className="mt-1"
+                        />
+                      </div>
+                      {!userEmail && (
+                        <div>
+                          <Label
+                            htmlFor="de"
+                            className="text-slate-700 dark:text-slate-300"
+                          >
+                            Email (for your receipt) *
+                          </Label>
+                          <Input
+                            id="de"
+                            type="email"
+                            value={donorEmail}
+                            onChange={(e) => setDonorEmail(e.target.value)}
+                            className="mt-1"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Words of Support */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Message of Condolence (Optional)
+                      </label>
+                      <textarea
+                        rows={3}
+                        placeholder="Write a message of remembrance…"
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        maxLength={500}
+                        className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm transition"
+                      />
+                    </div>
+
+                    {/* Options */}
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={isAnonymous}
+                          onChange={(e) => setIsAnonymous(e.target.checked)}
+                          className="rounded border-slate-300 text-amber-600 focus:ring-amber-500 h-4 w-4"
+                        />
+                        Hide my name publicly on the memory wall feed
+                      </label>
+                      <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={notify}
+                          onChange={(e) => setNotify(e.target.checked)}
+                          className="rounded border-slate-300 text-amber-600 focus:ring-amber-500 h-4 w-4"
+                        />
+                        Notify the organizer about my donation
+                      </label>
+                      <label className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
+                        <Checkbox
+                          checked={accepted}
+                          onCheckedChange={(v) => setAccepted(v === true)}
+                          className="mt-0.5"
+                        />
+                        <span>
+                          I agree to the{" "}
+                          <Link
+                            to="/terms#donations"
+                            target="_blank"
+                            className="text-amber-600 underline underline-offset-4"
+                          >
+                            Reflectlife donation terms
+                          </Link>
+                          , campaign transparency guidelines and payout terms.
+                        </span>
+                      </label>
+                    </div>
+
+                    {/* Fee & Transparent Breakdown */}
+                    <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-800 space-y-2 text-xs text-slate-500 dark:text-slate-400">
+                      <div className="flex justify-between">
+                        <span>Gross Donation:</span>
+                        <span className="font-medium text-slate-700 dark:text-slate-200">
+                          {validAmount ? money(amount, currency) : "—"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>
+                          Reflectlife Platform Fee (
+                          {donorType === "company" ? "3.0%" : "2.5%"}):
+                        </span>
+                        <span>
+                          {validAmount ? `−${money(platformFee, currency)}` : "—"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Payment Processing:</span>
+                        <span className="text-[11px]">
+                          standard Stripe fee, deducted at settlement
+                        </span>
+                      </div>
+                      <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-800 font-semibold text-slate-800 dark:text-slate-100 text-sm">
+                        <span>Net Amount to {campaign.beneficiary_name}:</span>
+                        <span className="text-emerald-600 dark:text-emerald-400">
+                          {validAmount ? money(netAmount, currency) : "—"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    <button
+                      type="button"
+                      onClick={handleDonate}
+                      disabled={!canSubmit || submitting}
+                      className={cn(
+                        "w-full py-3.5 px-6 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-medium shadow-lg shadow-amber-600/20 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                      )}
+                    >
+                      {submitting ? (
+                        <Loader2 size={18} className="animate-spin" />
+                      ) : (
+                        <Lock size={18} />
+                      )}
+                      <Heart
+                        size={18}
+                        className={cn("fill-current", submitting && "hidden")}
+                      />
+                      {validAmount
+                        ? `Complete Donation of ${money(amount, currency)}`
+                        : "Complete Donation"}
+                    </button>
+
+                    {/* Terms Footer */}
+                    <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 text-center">
+                      <ShieldCheck size={14} className="text-emerald-500" />
+                      <span>
+                        Encrypted payment. Subject to Reflectlife's Terms & Fee
+                        Structure.
+                      </span>
+                    </div>
+                  </>
+                )}
+
+                {/* Supporters */}
+                {supporterList.length > 0 && (
+                  <>
+                    <Separator />
+                    <div>
+                      <p className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-3">
+                        Recent supporters
+                      </p>
+                      <ul className="space-y-3">
+                        {supporterList.map((s) => (
+                          <li key={s.id} className="flex gap-3 text-sm">
+                            <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+                              {s.donor_type === "company" ? (
+                                <Building2 className="w-4 h-4 text-amber-600" />
+                              ) : (
+                                <User className="w-4 h-4 text-amber-600" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-slate-800 dark:text-slate-100">
+                                <span className="font-medium">
+                                  {s.donor_name}
+                                </span>{" "}
+                                · {money(Number(s.gross_amount), currency)}
+                              </p>
+                              {s.condolence_message && (
+                                <p className="text-slate-500 dark:text-slate-400 italic">
+                                  "{s.condolence_message}"
+                                </p>
+                              )}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
