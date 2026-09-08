@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
@@ -73,7 +73,7 @@ function parseDateKey(key: string) {
   return new Date(y, (m || 1) - 1, d || 1);
 }
 
-export default function RemembranceSection({ memorialId, memorialName, isOwner, hasAccess }: Props) {
+export default function RemembranceSection({ memorialId, memorialName, isOwner, hasAccess, actionSlot }: Props) {
   const [userId, setUserId] = useState<string | null>(null);
   const [schedule, setSchedule] = useState<Schedule | null>(null);
   const [recipients, setRecipients] = useState<PhoneRecipient[]>([]);

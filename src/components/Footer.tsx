@@ -35,6 +35,7 @@ const Footer = () => {
             <h3 className="font-serif font-semibold text-foreground mb-4">{t("footer.support")}</h3>
             <ul className="space-y-2">
               <li><Link to="/cookie-policy" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.cookiePolicy")}</Link></li>
+              <li><Link to="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">Terms & Conditions</Link></li>
               <li><Link to="/qa" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.qa")}</Link></li>
               <li><Link to="/help" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.helpCentre")}</Link></li>
               <li><Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.privacyPolicy")}</Link></li>
