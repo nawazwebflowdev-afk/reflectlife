@@ -419,6 +419,14 @@ const Memorial = () => {
             memorialName={memorial.name}
             isOwner={!!isCreator}
             hasAccess={false}
+            actionSlot={
+              <DonateInMemory
+                memorialId={memorial.id}
+                memorialName={memorial.name}
+                isOwner={!!isCreator}
+                previewImage={memorial.preview_image_url}
+              />
+            }
           />
         )}
 
