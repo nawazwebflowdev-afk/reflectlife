@@ -11,7 +11,8 @@
   dispatched via SMS/WhatsApp at the scheduled time.
 
 ## Memorial donations (new)
-- [x] "Donate in Memory" button left of Reminder button on memorial action bar
-- [ ] Donation modal (user-supplied component — awaiting paste), private 2.5% / company 3.0% fees
-- [x] Tables memorial_campaigns + memorial_donations (do not exist yet — create)
-- [x] Append donation chapter to Terms & Conditions page (awaiting text)
+- [x] "Donate in Memory" button left of Reminder on the memory wall
+- [x] Donation modal (designed in-house), private 2.5% / company 3.0% fees, Stripe one-time + monthly
+- [x] Tables memorial_campaigns + memorial_donations
+- [x] Terms & Conditions page at /terms with donation chapter (drafted — replace with official wording if supplied)
+- [ ] Charity/organizer payout dashboard + Stripe Connect payouts (not started — awaiting payout model decision)
