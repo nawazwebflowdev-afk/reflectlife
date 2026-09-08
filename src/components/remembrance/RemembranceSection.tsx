@@ -250,6 +250,8 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
 
           {/* Actions */}
           <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+            {actionSlot}
             {canEdit && (
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
@@ -368,6 +370,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                 </DialogContent>
               </Dialog>
             )}
+            </div>
 
             {savedCount > 0 && (
               <p className="text-xs text-muted-foreground flex items-center gap-1.5 justify-end">

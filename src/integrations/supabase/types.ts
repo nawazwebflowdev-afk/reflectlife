@@ -251,6 +251,56 @@ export type Database = {
           },
         ]
       }
+      memorial_campaigns: {
+        Row: {
+          beneficiary_name: string
+          charity_organization_name: string | null
+          created_at: string
+          currency: string
+          id: string
+          memory_wall_id: string
+          organizer_user_id: string
+          status: Database["public"]["Enums"]["campaign_status_enum"]
+          story: string | null
+          target_goal_amount: number
+          updated_at: string
+        }
+        Insert: {
+          beneficiary_name: string
+          charity_organization_name?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          memory_wall_id: string
+          organizer_user_id: string
+          status?: Database["public"]["Enums"]["campaign_status_enum"]
+          story?: string | null
+          target_goal_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          beneficiary_name?: string
+          charity_organization_name?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          memory_wall_id?: string
+          organizer_user_id?: string
+          status?: Database["public"]["Enums"]["campaign_status_enum"]
+          story?: string | null
+          target_goal_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_campaigns_memory_wall_id_fkey"
+            columns: ["memory_wall_id"]
+            isOneToOne: true
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memorial_candles: {
         Row: {
           anonymous: boolean
@@ -345,6 +395,81 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "memorial_posts"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      memorial_donations: {
+        Row: {
+          campaign_id: string
+          condolence_message: string | null
+          created_at: string
+          donor_email: string
+          donor_name: string | null
+          donor_type: Database["public"]["Enums"]["donor_type_enum"]
+          donor_user_id: string | null
+          gross_amount: number
+          id: string
+          is_anonymous: boolean
+          is_recurring: boolean
+          net_payout_amount: number
+          payment_status: string
+          platform_fee_amount: number
+          platform_fee_rate: number
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+        }
+        Insert: {
+          campaign_id: string
+          condolence_message?: string | null
+          created_at?: string
+          donor_email: string
+          donor_name?: string | null
+          donor_type?: Database["public"]["Enums"]["donor_type_enum"]
+          donor_user_id?: string | null
+          gross_amount: number
+          id?: string
+          is_anonymous?: boolean
+          is_recurring?: boolean
+          net_payout_amount?: number
+          payment_status?: string
+          platform_fee_amount?: number
+          platform_fee_rate?: number
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          condolence_message?: string | null
+          created_at?: string
+          donor_email?: string
+          donor_name?: string | null
+          donor_type?: Database["public"]["Enums"]["donor_type_enum"]
+          donor_user_id?: string | null
+          gross_amount?: number
+          id?: string
+          is_anonymous?: boolean
+          is_recurring?: boolean
+          net_payout_amount?: number
+          payment_status?: string
+          platform_fee_amount?: number
+          platform_fee_rate?: number
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_donations_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "memorial_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "memorial_donations_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "vw_charity_dashboard_summary"
+            referencedColumns: ["campaign_id"]
           },
         ]
       }
@@ -1561,6 +1686,20 @@ export type Database = {
         }
         Relationships: []
       }
+      vw_charity_dashboard_summary: {
+        Row: {
+          beneficiary_name: string | null
+          campaign_id: string | null
+          corporate_donor_count: number | null
+          private_donor_count: number | null
+          target_goal_amount: number | null
+          total_donor_count: number | null
+          total_gross_raised: number | null
+          total_net_payout: number | null
+          total_platform_fees_deducted: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       apply_candle_contribution: {
@@ -1601,6 +1740,24 @@ export type Database = {
         }
       }
       expire_stale_candles: { Args: never; Returns: undefined }
+      get_campaign_public_donations: {
+        Args: { _campaign_id: string; _limit?: number }
+        Returns: {
+          condolence_message: string
+          created_at: string
+          donor_name: string
+          donor_type: Database["public"]["Enums"]["donor_type_enum"]
+          gross_amount: number
+          id: string
+        }[]
+      }
+      get_campaign_public_summary: {
+        Args: { _campaign_id: string }
+        Returns: {
+          donor_count: number
+          total_raised: number
+        }[]
+      }
       has_memorial_access: {
         Args: { _memorial_id: string; _user_id: string }
         Returns: boolean
@@ -1698,6 +1855,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      campaign_status_enum: "active" | "paused" | "completed" | "closed"
+      donor_type_enum: "private" | "company"
       privacy_level: "public" | "friends" | "private"
     }
     CompositeTypes: {
@@ -1827,6 +1986,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      campaign_status_enum: ["active", "paused", "completed", "closed"],
+      donor_type_enum: ["private", "company"],
       privacy_level: ["public", "friends", "private"],
     },
   },

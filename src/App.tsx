@@ -38,6 +38,8 @@ import CandleSuccess from "./pages/CandleSuccess";
 import OAuthConsent from "./pages/OAuthConsent";
 import RemembrancePage from "./pages/Remembrance";
 import RemembranceDetail from "./pages/RemembranceDetail";
+import DonationSuccess from "./pages/DonationSuccess";
+import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +83,8 @@ const App = () => (
                 <Route path="/qa" element={<QA />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/candle-success" element={<CandleSuccess />} />
+                <Route path="/donation-success" element={<DonationSuccess />} />
+                <Route path="/terms" element={<Terms />} />
                 <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
