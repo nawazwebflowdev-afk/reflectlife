@@ -17,7 +17,7 @@ import { cn } from "@/utils/cn";
 import { toast } from "sonner";
 import PhoneRecipientPicker, { type PhoneRecipient } from "./PhoneRecipientPicker";
 
-type Frequency = "daily" | "weekly" | "monthly" | "yearly";
+type Frequency = "once" | "daily" | "weekly" | "monthly" | "yearly";
 type Timing = "2_minutes_before" | "1_day_before";
 
 const MESSAGE_MAX = 300;
@@ -125,7 +125,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
 
       const { data: rec } = await supabase
         .from("remembrance_phone_recipients")
-        .select("phone,display_name,channel")
+        .select("phone,email,display_name,channel")
         .eq("remembrance_id", s.id);
       if (mounted && rec) {
         setRecipients(rec as PhoneRecipient[]);
@@ -191,6 +191,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
             remembrance_id: scheduleId!,
             memorial_id: memorialId,
             phone: r.phone,
+            email: r.email,
             display_name: r.display_name,
             channel: r.channel,
             created_by: userId,
@@ -199,7 +200,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
         if (recErr) throw recErr;
       }
       setSavedCount(recipients.length);
-      toast.success("Time to Remember saved");
+      toast.success(frequency === "once" ? "One-time reminder scheduled successfully." : "Time to Remember saved");
       setOpen(false);
     } catch (e: any) {
       toast.error(e?.message ?? "Could not save the schedule");
@@ -300,6 +301,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                       <Select value={frequency} onValueChange={(v) => setFrequency(v as Frequency)}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="once">Once</SelectItem>
                           <SelectItem value="daily">Daily</SelectItem>
                           <SelectItem value="weekly">Weekly</SelectItem>
                           <SelectItem value="monthly">Monthly</SelectItem>
