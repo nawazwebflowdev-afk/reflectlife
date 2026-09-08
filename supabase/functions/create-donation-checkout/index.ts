@@ -62,7 +62,8 @@ Deno.serve(async (req) => {
     if (cErr || !campaign) return json({ error: 'Fundraiser not found.' }, 404);
     if (campaign.status !== 'active') return json({ error: 'This fundraiser is not accepting donations.' }, 400);
 
-    const currency = (campaign.currency || 'EUR').toLowerCase();
+    const currencyCode = donationCurrency ?? (campaign.currency || 'EUR').toUpperCase();
+    const currency = currencyCode.toLowerCase();
     const memorialName = (campaign as any).memorials?.name ?? campaign.beneficiary_name;
     const grossCents = Math.round(amount * 100);
     const feeRate = FEE_RATES[donor_type];
@@ -76,6 +77,7 @@ Deno.serve(async (req) => {
         donor_user_id: userId,
         donor_type,
         gross_amount: amount,
+        currency: currencyCode,
         donor_name: is_anonymous ? 'Anonymous' : (donor_name || 'Supporter'),
         donor_email,
         condolence_message,
