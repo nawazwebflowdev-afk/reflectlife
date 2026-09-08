@@ -43,6 +43,7 @@ interface Props {
   memorialName: string;
   isOwner: boolean;
   hasAccess: boolean;
+  actionSlot?: ReactNode;
 }
 
 function localToUtcTime(local: string): string {
