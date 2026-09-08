@@ -9,7 +9,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type Frequency = "daily" | "weekly" | "monthly" | "yearly";
+type Frequency = "once" | "daily" | "weekly" | "monthly" | "yearly";
 type Timing = "2_minutes_before" | "1_day_before";
 
 interface Schedule {
@@ -28,7 +28,8 @@ interface Schedule {
 }
 
 interface PhoneRecipient {
-  phone: string;
+  phone: string | null;
+  email: string | null;
   display_name: string | null;
   channel: string; // "sms" | "whatsapp"
 }
@@ -44,7 +45,11 @@ function nextEventAt(s: Schedule, from: Date): Date | null {
     new Date(Date.UTC(y, m, d, hh, mm, 0));
 
   let candidate: Date;
-  if (s.frequency === "daily") {
+  if (s.frequency === "once") {
+    candidate = build(anchor.getUTCFullYear(), anchor.getUTCMonth(), anchor.getUTCDate());
+    if (endCap && candidate > endCap) return null;
+    return candidate;
+  } else if (s.frequency === "daily") {
     candidate = build(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate());
     if (candidate < from) candidate = new Date(candidate.getTime() + 86400000);
   } else if (s.frequency === "weekly") {
@@ -141,6 +146,7 @@ async function sendPhoneMessages(
 
   let sent = 0;
   for (const r of recipients) {
+    if (!r.phone) continue;
     const isWhatsApp = r.channel === "whatsapp";
     const from = isWhatsApp ? TWILIO_WHATSAPP_FROM : TWILIO_SMS_FROM;
     if (!from) {
@@ -148,7 +154,7 @@ async function sendPhoneMessages(
       continue;
     }
     const params = new URLSearchParams({
-      To: isWhatsApp ? `whatsapp:${r.phone}` : r.phone,
+      To: isWhatsApp ? `whatsapp:${r.phone}` : r.phone!,
       From: isWhatsApp && !from.startsWith("whatsapp:") ? `whatsapp:${from}` : from,
       Body: body.slice(0, 1500),
     });
@@ -219,12 +225,16 @@ Deno.serve(async (req) => {
         .from("profiles")
         .select("id,email")
         .in("id", Array.from(userIds));
-      const emails = (profiles ?? []).map((p: any) => p.email).filter((e: string | null) => !!e) as string[];
+      const emails: string[] = (profiles ?? []).map((p: any) => p.email).filter((e: string | null) => !!e) as string[];
       const { data: phoneRecipients } = await supabase
         .from("remembrance_phone_recipients")
-        .select("phone,display_name,channel")
+        .select("phone,email,display_name,channel")
         .eq("remembrance_id", s.id);
-      const phones = (phoneRecipients ?? []) as PhoneRecipient[];
+      const allExtra = (phoneRecipients ?? []) as PhoneRecipient[];
+      const phones = allExtra.filter((r) => r.channel !== "email" && !!r.phone);
+      for (const r of allExtra) {
+        if (r.channel === "email" && r.email && !emails.includes(r.email)) emails.push(r.email);
+      }
 
       if (emails.length === 0 && phones.length === 0) continue;
 
