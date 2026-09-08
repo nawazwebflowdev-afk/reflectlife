@@ -75,6 +75,22 @@ Deno.serve(async (req) => {
         });
       }
 
+      // Memorial donations branch
+      if (session.metadata?.kind === 'donation') {
+        const donationId = session.metadata.donation_id;
+        const paymentIntent = typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id ?? null;
+        const { error: donErr } = await supabase
+          .from('memorial_donations')
+          .update({ payment_status: 'succeeded', stripe_payment_intent_id: paymentIntent })
+          .eq('id', donationId)
+          .eq('stripe_session_id', session.id);
+        if (donErr) console.error('Donation confirmation error:', donErr);
+        else console.log('Donation confirmed', donationId);
+        return new Response(JSON.stringify({ received: true }), {
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
       const { buyer_id, template_id, creator_id, platform_fee } = session.metadata || {};
 
       console.log('stripe-webhook: metadata extracted', { buyer_id, template_id, creator_id, session_id: session.id });

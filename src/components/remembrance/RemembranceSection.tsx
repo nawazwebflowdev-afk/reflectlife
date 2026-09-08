@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
@@ -43,6 +43,7 @@ interface Props {
   memorialName: string;
   isOwner: boolean;
   hasAccess: boolean;
+  actionSlot?: ReactNode;
 }
 
 function localToUtcTime(local: string): string {
@@ -72,7 +73,7 @@ function parseDateKey(key: string) {
   return new Date(y, (m || 1) - 1, d || 1);
 }
 
-export default function RemembranceSection({ memorialId, memorialName, isOwner, hasAccess }: Props) {
+export default function RemembranceSection({ memorialId, memorialName, isOwner, hasAccess, actionSlot }: Props) {
   const [userId, setUserId] = useState<string | null>(null);
   const [schedule, setSchedule] = useState<Schedule | null>(null);
   const [recipients, setRecipients] = useState<PhoneRecipient[]>([]);
@@ -250,6 +251,8 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
 
           {/* Actions */}
           <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+            {actionSlot}
             {canEdit && (
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
@@ -368,6 +371,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                 </DialogContent>
               </Dialog>
             )}
+            </div>
 
             {savedCount > 0 && (
               <p className="text-xs text-muted-foreground flex items-center gap-1.5 justify-end">

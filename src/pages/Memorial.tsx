@@ -14,6 +14,7 @@ import { AddMemoryModal } from "@/components/AddMemoryModal";
 import { CandleSection } from "@/components/candle/CandleSection";
 import ShareMemorial from "@/components/ShareMemorial";
 import RemembranceSection from "@/components/remembrance/RemembranceSection";
+import DonateInMemory from "@/components/donation/DonateInMemory";
 import PrintButton from "@/components/PrintButton";
 
 const Memorial = () => {
@@ -418,6 +419,14 @@ const Memorial = () => {
             memorialName={memorial.name}
             isOwner={!!isCreator}
             hasAccess={false}
+            actionSlot={
+              <DonateInMemory
+                memorialId={memorial.id}
+                memorialName={memorial.name}
+                isOwner={!!isCreator}
+                previewImage={memorial.preview_image_url}
+              />
+            }
           />
         )}
 
