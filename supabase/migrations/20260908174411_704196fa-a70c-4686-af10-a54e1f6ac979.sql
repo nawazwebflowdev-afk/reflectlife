@@ -1,0 +1,1 @@
+ALTER TABLE public.memorial_donations ADD COLUMN IF NOT EXISTS currency varchar(3) NOT NULL DEFAULT 'EUR';

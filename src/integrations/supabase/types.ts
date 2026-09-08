@@ -403,6 +403,7 @@ export type Database = {
           campaign_id: string
           condolence_message: string | null
           created_at: string
+          currency: string
           donor_email: string
           donor_name: string | null
           donor_type: Database["public"]["Enums"]["donor_type_enum"]
@@ -422,6 +423,7 @@ export type Database = {
           campaign_id: string
           condolence_message?: string | null
           created_at?: string
+          currency?: string
           donor_email: string
           donor_name?: string | null
           donor_type?: Database["public"]["Enums"]["donor_type_enum"]
@@ -441,6 +443,7 @@ export type Database = {
           campaign_id?: string
           condolence_message?: string | null
           created_at?: string
+          currency?: string
           donor_email?: string
           donor_name?: string | null
           donor_type?: Database["public"]["Enums"]["donor_type_enum"]
