@@ -53,40 +53,28 @@ export default function Terms() {
 
       <Separator className="my-8" />
 
-      <h2 id="donations" className="font-serif text-2xl font-bold text-foreground mb-2">6. Memorial Donation Terms</h2>
+      <h2 id="donations" className="font-serif text-2xl font-bold text-foreground mb-2">6. Memorial Donations & Charity Terms of Service</h2>
       <p className="text-sm text-muted-foreground mb-6">Applies to every "Donate in Memory" fundraiser on Reflectlife.</p>
 
-      <Section title="6.1 What a memorial fundraiser is">
-        <p>A memorial owner (the "Organizer") may open one fundraiser per memorial in favour of a named beneficiary — a family, a person, or a registered charity. Reflectlife provides the technology to collect donations; Reflectlife is not the beneficiary and does not decide how the funds are used.</p>
+      <Section title="6.1 Overview & Purpose">
+        <p>Reflectlife ("Platform") offers memorial fundraising features allowing users, families, and organizations to create memorial campaign causes and collect charitable donations in honor of loved ones.</p>
       </Section>
 
-      <Section title="6.2 Platform fee schedule">
-        <p>To keep the service running, Reflectlife deducts a platform fee from every donation, plus the standard payment-processing fee charged by our payment provider (Stripe):</p>
+      <Section title="6.2 Platform Service Fees">
+        <p>Reflectlife maintains a transparent platform service fee structure designed to support ongoing server operations, secure memorial preservation, payment infrastructure, and customer care. Fees are calculated automatically at checkout as follows:</p>
         <ul className="list-disc pl-6 space-y-1">
-          <li><strong className="text-foreground">Private / individual donors:</strong> 2.5% platform fee + payment processing fee.</li>
-          <li><strong className="text-foreground">Company / organization donors:</strong> 3.0% platform fee + payment processing fee.</li>
+          <li><strong className="text-foreground">Private / Individual Contributions:</strong> All donations initiated by private individuals are subject to a standard Reflectlife platform fee of 2.5% of the total gross transaction amount.</li>
+          <li><strong className="text-foreground">Corporate / Company Contributions:</strong> All donations initiated by commercial entities, organizations, or registered businesses are subject to a platform fee of 3.0% of the total gross transaction amount.</li>
+          <li><strong className="text-foreground">Payment Processing Fees:</strong> Standard third-party payment processing fees (e.g., via Stripe, PayPal, or card networks) apply separately and are deducted prior to net payout distribution.</li>
         </ul>
-        <p>The gross donation, the platform fee and the net amount going to the cause are shown to the donor before payment. Fees are calculated per transaction and are not refundable once a payment has been processed.</p>
       </Section>
 
-      <Section title="6.3 Donor commitments">
-        <p>Donations are voluntary gifts. Unless the beneficiary is a registered charity that issues its own receipts, donations made through Reflectlife are not tax-deductible. Recurring (monthly) donations can be cancelled at any time by the donor. Donors may choose to remain anonymous; their name will then never be displayed publicly, although the Organizer can still see the amount.</p>
+      <Section title="6.3 Disbursement & Net Payouts">
+        <p>All net funds (Gross Donation minus applicable 2.5% or 3.0% platform fees and payment processing costs) are credited toward the designated beneficiary account or verified charitable institution as specified in the campaign setup.</p>
       </Section>
 
-      <Section title="6.4 Campaign transparency guidelines">
-        <p>Organizers must describe the purpose of the fundraiser and the beneficiary truthfully and keep this information up to date. Funds must be used solely for the stated purpose. Reflectlife may pause or close a fundraiser and withhold payouts where we suspect misuse, fraud, or a breach of these terms, and may share information with payment providers or authorities where legally required.</p>
-      </Section>
-
-      <Section title="6.5 Payout terms">
-        <p>Net donations are paid out to the bank account registered by the Organizer (or the designated charity) after the payment provider's standard settlement period. Payouts require a verified identity and bank account. Reflectlife may delay payouts while a chargeback, refund request or review is pending. Chargebacks and refunds are deducted from future payouts.</p>
-      </Section>
-
-      <Section title="6.6 Refunds and disputes">
-        <p>Because donations are gifts, they are generally not refundable. If a donation was made in error, contact us within 14 days and we will do our best to reverse it if the funds have not yet been paid out. Disputes between donors and Organizers are to be resolved between those parties; Reflectlife may assist but is not obliged to mediate.</p>
-      </Section>
-
-      <Section title="6.7 Acceptance">
-        <p>Donors accept these Donation Terms by ticking the confirmation box before payment. Organizers accept them when creating a fundraiser. These Donation Terms form part of the Reflectlife Terms & Conditions.</p>
+      <Section title="6.4 Transparency & Reporting">
+        <p>Organizers and charities gain real-time access to the Reflectlife Charity Dashboard, which displays itemized gross contributions, platform fee deductions, net payout totals, and donor messages.</p>
       </Section>
     </div>
   );
