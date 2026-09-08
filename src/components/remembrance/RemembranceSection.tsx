@@ -310,12 +310,16 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                       </Select>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="tor-hasend">End on specific date</Label>
-                      <Switch id="tor-hasend" checked={hasEnd} onCheckedChange={setHasEnd} />
-                    </div>
-                    {hasEnd && (
-                      <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                    {frequency !== "once" && (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="tor-hasend">End on specific date</Label>
+                          <Switch id="tor-hasend" checked={hasEnd} onCheckedChange={setHasEnd} />
+                        </div>
+                        {hasEnd && (
+                          <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                        )}
+                      </>
                     )}
 
                     <div className="border-t pt-4 space-y-2">
