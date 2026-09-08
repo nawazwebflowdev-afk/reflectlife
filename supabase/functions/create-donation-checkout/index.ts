@@ -31,6 +31,8 @@ Deno.serve(async (req) => {
     const condolence_message = String(body?.condolence_message ?? '').trim().slice(0, 500) || null;
     const bodyEmail = String(body?.donor_email ?? '').trim().toLowerCase().slice(0, 255);
     const accepted_terms = Boolean(body?.accepted_terms);
+    const requestedCurrency = String(body?.currency ?? '').toUpperCase();
+    const donationCurrency = requestedCurrency === 'USD' ? 'USD' : requestedCurrency === 'EUR' ? 'EUR' : null;
 
     if (!campaign_id || !Number.isFinite(amount) || amount < MIN_AMOUNT || amount > MAX_AMOUNT) {
       return json({ error: 'Please enter a valid donation amount.' }, 400);
