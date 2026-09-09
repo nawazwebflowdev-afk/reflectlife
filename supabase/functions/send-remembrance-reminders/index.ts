@@ -10,7 +10,13 @@ const corsHeaders = {
 };
 
 type Frequency = "once" | "daily" | "weekly" | "monthly" | "yearly";
-type Timing = "2_minutes_before" | "1_day_before";
+type Timing =
+  | "2_minutes_before"
+  | "15_minutes_before"
+  | "1_hour_before"
+  | "1_day_before"
+  | "1_week_before";
+
 
 interface Schedule {
   id: string;
@@ -81,8 +87,15 @@ function nextEventAt(s: Schedule, from: Date): Date | null {
 }
 
 function reminderOffsetMs(t: Timing): number {
-  return t === "1_day_before" ? 86400000 : 2 * 60000;
+  switch (t) {
+    case "1_week_before": return 7 * 86400000;
+    case "1_day_before": return 86400000;
+    case "1_hour_before": return 3600000;
+    case "15_minutes_before": return 15 * 60000;
+    default: return 2 * 60000;
+  }
 }
+
 
 async function sendEmail(to: string[], memorial: { name: string; id: string }, when: Date, tz: string, customMessage: string | null) {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");

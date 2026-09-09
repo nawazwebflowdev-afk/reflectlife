@@ -6,7 +6,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const FEE_RATES = { private: 0.025, company: 0.03 } as const;
+// GoFundMe-style platform fees: personal 3.1% + 0.30, certified charity 2.9% + 0.30
+const FEE_RATES = { personal: 0.031, charity: 0.029 } as const;
+const FEE_FIXED = 0.3;
+
 const MIN_AMOUNT = 1;
 const MAX_AMOUNT = 50000;
 
@@ -56,7 +59,7 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const { data: campaign, error: cErr } = await supabase
       .from('memorial_campaigns')
-      .select('id, status, currency, beneficiary_name, memory_wall_id, memorials(name)')
+      .select('id, status, currency, beneficiary_name, fundraiser_type, memory_wall_id, memorials(name)')
       .eq('id', campaign_id)
       .maybeSingle();
     if (cErr || !campaign) return json({ error: 'Fundraiser not found.' }, 404);
@@ -66,8 +69,10 @@ Deno.serve(async (req) => {
     const currency = currencyCode.toLowerCase();
     const memorialName = (campaign as any).memorials?.name ?? campaign.beneficiary_name;
     const grossCents = Math.round(amount * 100);
-    const feeRate = FEE_RATES[donor_type];
-    const fee = Math.round(grossCents * feeRate) / 100;
+    const fundraiserType = (campaign as any).fundraiser_type === 'charity' ? 'charity' : 'personal';
+    const feeRate = FEE_RATES[fundraiserType];
+    const fee = Math.round(grossCents * feeRate) / 100 + FEE_FIXED;
+
 
     // Pending donation row (fees recomputed by DB trigger)
     const { data: donation, error: dErr } = await supabase

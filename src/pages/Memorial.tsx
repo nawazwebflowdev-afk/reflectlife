@@ -206,10 +206,86 @@ const Memorial = () => {
     }
   };
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
+  const [heartBusy, setHeartBusy] = useState(false);
+
+  const getGuestKey = () => {
+    let key = localStorage.getItem("reflectlife_guest_key");
+    if (!key) {
+      key = crypto.randomUUID();
+      localStorage.setItem("reflectlife_guest_key", key);
+    }
+    return key;
   };
+
+  useEffect(() => {
+    if (!memorial?.id) return;
+    let active = true;
+    (async () => {
+      const { count } = await supabase
+        .from("memorial_hearts")
+        .select("id", { count: "exact", head: true })
+        .eq("memorial_id", memorial.id);
+      if (!active) return;
+      setLikeCount(count ?? 0);
+
+      const query = supabase
+        .from("memorial_hearts")
+        .select("id")
+        .eq("memorial_id", memorial.id)
+        .limit(1);
+      const { data: mine } = currentUserId
+        ? await query.eq("user_id", currentUserId)
+        : await query.eq("guest_key", getGuestKey());
+      if (active) setIsLiked((mine?.length ?? 0) > 0);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [memorial?.id, currentUserId]);
+
+  const handleLike = async () => {
+    if (!memorial?.id || heartBusy) return;
+    const wasLiked = isLiked;
+    // Optimistic update
+    setIsLiked(!wasLiked);
+    setLikeCount((c) => Math.max(0, c + (wasLiked ? -1 : 1)));
+    setHeartBusy(true);
+    try {
+      if (wasLiked) {
+        if (!currentUserId) {
+          // Guests keep their heart for the memorial
+          setIsLiked(true);
+          setLikeCount((c) => c + 1);
+          return;
+        }
+        const { error } = await supabase
+          .from("memorial_hearts")
+          .delete()
+          .eq("memorial_id", memorial.id)
+          .eq("user_id", currentUserId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("memorial_hearts").insert(
+          currentUserId
+            ? { memorial_id: memorial.id, user_id: currentUserId }
+            : { memorial_id: memorial.id, guest_key: getGuestKey() }
+        );
+        if (error && error.code !== "23505") throw error;
+      }
+    } catch (error) {
+      console.error("Error updating heart:", error);
+      setIsLiked(wasLiked);
+      setLikeCount((c) => Math.max(0, c + (wasLiked ? 1 : -1)));
+      toast({
+        title: "Could not save your heart",
+        description: "Please try again in a moment.",
+        variant: "destructive",
+      });
+    } finally {
+      setHeartBusy(false);
+    }
+  };
+
 
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !e.target.files[0] || !memorial) return;
