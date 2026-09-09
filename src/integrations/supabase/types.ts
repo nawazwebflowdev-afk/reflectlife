@@ -305,6 +305,7 @@ export type Database = {
           charity_organization_name: string | null
           created_at: string
           currency: string
+          fundraiser_type: string
           id: string
           memory_wall_id: string
           organizer_user_id: string
@@ -318,6 +319,7 @@ export type Database = {
           charity_organization_name?: string | null
           created_at?: string
           currency?: string
+          fundraiser_type?: string
           id?: string
           memory_wall_id: string
           organizer_user_id: string
@@ -331,6 +333,7 @@ export type Database = {
           charity_organization_name?: string | null
           created_at?: string
           currency?: string
+          fundraiser_type?: string
           id?: string
           memory_wall_id?: string
           organizer_user_id?: string
@@ -556,6 +559,38 @@ export type Database = {
           {
             foreignKeyName: "memorial_entries_timeline_id_fkey"
             columns: ["timeline_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memorial_hearts: {
+        Row: {
+          created_at: string
+          guest_key: string | null
+          id: string
+          memorial_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          guest_key?: string | null
+          id?: string
+          memorial_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          guest_key?: string | null
+          id?: string
+          memorial_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_hearts_memorial_id_fkey"
+            columns: ["memorial_id"]
             isOneToOne: false
             referencedRelation: "memorials"
             referencedColumns: ["id"]
