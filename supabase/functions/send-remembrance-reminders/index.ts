@@ -181,24 +181,18 @@ Deno.serve(async (req) => {
         .select("phone,email,display_name,channel")
         .eq("remembrance_id", s.id);
       const allExtra = (phoneRecipients ?? []) as PhoneRecipient[];
-      const phones = allExtra.filter((r) => r.channel !== "email" && !!r.phone);
       for (const r of allExtra) {
-        if (r.channel === "email" && r.email && !emails.includes(r.email)) emails.push(r.email);
+        const mail = r.email?.trim().toLowerCase();
+        if (mail && !emails.includes(mail)) emails.push(mail);
       }
 
-      if (emails.length === 0 && phones.length === 0) continue;
+      if (emails.length === 0) continue;
 
-      if (emails.length > 0) {
-        await sendEmail(emails, { name: mem.name, id: mem.id }, evt, s.timezone, s.custom_message ?? null);
-      }
-      let smsSent = 0;
-      if (phones.length > 0) {
-        smsSent = await sendPhoneMessages(phones, { name: mem.name, id: mem.id }, s.custom_message ?? null);
-      }
+      await sendEmail(emails, { name: mem.name, id: mem.id }, evt, s.timezone, s.custom_message ?? null);
       await supabase.from("remembrance_notifications").insert({
         remembrance_id: s.id,
         event_at: evt.toISOString(),
-        recipients_count: emails.length + smsSent,
+        recipients_count: emails.length,
       });
       processed++;
     }
