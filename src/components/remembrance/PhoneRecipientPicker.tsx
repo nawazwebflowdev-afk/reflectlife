@@ -34,12 +34,10 @@ type ContactsNavigator = Navigator & {
 const contactKey = (r: PhoneRecipient) => `${r.channel}:${r.phone ?? r.email ?? ""}`;
 
 export default function PhoneRecipientPicker({ value, onChange }: Props) {
-  const [country, setCountry] = useState<CountryCode>(detectDefaultCountry());
-  const [phone, setPhone] = useState("");
-  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [country] = useState<CountryCode>(detectDefaultCountry());
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
-  const [channel, setChannel] = useState<"sms" | "whatsapp">("sms");
+
 
   const addMany = (items: PhoneRecipient[]) => {
     const merged = [...value];
