@@ -251,6 +251,54 @@ export type Database = {
           },
         ]
       }
+      memorial_campaign_payouts: {
+        Row: {
+          amount: number
+          campaign_id: string
+          created_at: string
+          id: string
+          organizer_user_id: string
+          payout_method: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          campaign_id: string
+          created_at?: string
+          id?: string
+          organizer_user_id: string
+          payout_method?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          organizer_user_id?: string
+          payout_method?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_campaign_payouts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "memorial_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "memorial_campaign_payouts_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "vw_charity_dashboard_summary"
+            referencedColumns: ["campaign_id"]
+          },
+        ]
+      }
       memorial_campaigns: {
         Row: {
           beneficiary_name: string
