@@ -1791,6 +1791,16 @@ export type Database = {
         }
       }
       expire_stale_candles: { Args: never; Returns: undefined }
+      get_campaign_payout_summary: {
+        Args: { _campaign_id: string }
+        Returns: {
+          available_payout: number
+          donor_count: number
+          total_gross: number
+          total_net: number
+          total_paid_out: number
+        }[]
+      }
       get_campaign_public_donations: {
         Args: { _campaign_id: string; _limit?: number }
         Returns: {

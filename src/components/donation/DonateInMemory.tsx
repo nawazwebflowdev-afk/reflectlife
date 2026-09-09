@@ -429,6 +429,17 @@ export default function DonateInMemory({
                       {campaign.story}
                     </p>
                   )}
+                  {isOwner && userId === campaign.organizer_user_id && (
+                    <div className="mt-4">
+                      <Link
+                        to={`/campaign-dashboard/${campaign.id}`}
+                        onClick={() => setOpen(false)}
+                        className="inline-flex items-center text-sm font-medium text-amber-600 hover:text-amber-700 underline underline-offset-4"
+                      >
+                        Manage campaign & payouts →
+                      </Link>
+                    </div>
+                  )}
                 </div>
 
                 {campaign.status !== "active" ? (
