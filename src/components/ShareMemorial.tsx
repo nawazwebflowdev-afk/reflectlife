@@ -122,6 +122,21 @@ export const ShareMemorial = ({
             </a>
           ))}
 
+          {appShares.map(({ label, icon: Icon, hoverColor, url }) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => handleAppShare(label, url)}
+              aria-label={label}
+              title={label}
+              className={`group flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition-all duration-200 hover:scale-110 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${hoverColor}`}
+            >
+              <Icon className="h-5 w-5" />
+            </button>
+          ))}
+
+
+
           <button
             type="button"
             onClick={handleCopy}
