@@ -252,15 +252,14 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
           {/* Actions */}
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-3">
-            {actionSlot}
-            {canEdit && (
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                  <Button className="rounded-full">
-                    <Bell className="w-4 h-4 mr-2" />
-                    {schedule ? "Edit Time to Remember" : "Set Time to Remember"}
-                  </Button>
-                </DialogTrigger>
+              {canEdit && (
+                <Dialog open={open} onOpenChange={setOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="rounded-full">
+                      <Bell className="w-4 h-4 mr-2" />
+                      {schedule ? "Edit Time to Remember" : "Set Time to Remember"}
+                    </Button>
+                  </DialogTrigger>
                 <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Set Time to Remember</DialogTitle>
