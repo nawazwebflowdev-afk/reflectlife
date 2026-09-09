@@ -164,8 +164,11 @@ export default function DonateInMemory({
     ? parseFloat(customAmount) || 0
     : selectedAmount || 0;
   const validAmount = Number.isFinite(amount) && amount >= 1 && amount <= 50000;
-  const platformFeeRate = FEE_RATES[donorType];
-  const platformFee = validAmount ? amount * platformFeeRate : 0;
+  const fundraiserType: FundraiserType =
+    campaign?.fundraiser_type === "charity" ? "charity" : "personal";
+  const platformFeeRate = FEE_RATES[fundraiserType];
+  const platformFee = validAmount ? amount * platformFeeRate + FEE_FIXED : 0;
+
   const netAmount = validAmount ? amount - platformFee : 0;
   const currency = (campaign?.currency ?? "EUR").toUpperCase();
   const symbol = SYMBOLS[donationCurrency];
