@@ -221,7 +221,7 @@ const CampaignDashboard = () => {
     if (error) {
       toast({ title: "Payout request failed", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Payout requested", description: "Your withdrawal request is pending review." });
+      toast({ title: "Monthly payout requested", description: "Funds will be sent to the beneficiary in this month's payout run." });
       setAmount("");
       setPaypalEmail("");
       setAccountHolder("");
