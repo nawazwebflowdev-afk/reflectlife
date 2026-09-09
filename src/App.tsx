@@ -39,6 +39,7 @@ import OAuthConsent from "./pages/OAuthConsent";
 import RemembrancePage from "./pages/Remembrance";
 import RemembranceDetail from "./pages/RemembranceDetail";
 import DonationSuccess from "./pages/DonationSuccess";
+import CampaignDashboard from "./pages/CampaignDashboard";
 import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
