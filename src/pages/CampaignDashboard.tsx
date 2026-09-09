@@ -154,9 +154,31 @@ const CampaignDashboard = () => {
     }
   };
 
+  const monthKey = (d: string | Date) => {
+    const date = typeof d === "string" ? new Date(d) : d;
+    return `${date.getUTCFullYear()}-${date.getUTCMonth()}`;
+  };
+
+  const currentMonthPayout = payouts.find(
+    (p) => p.status !== "failed" && monthKey(p.created_at) === monthKey(new Date())
+  );
+
+  const nextPayoutDate = new Date(
+    Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 1, 1)
+  );
+
   const handleRequestPayout = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!campaign || !userId || !summary) return;
+
+    if (currentMonthPayout) {
+      toast({
+        title: "Monthly payout already requested",
+        description: `Payouts run once per month. Your next payout can be requested on ${nextPayoutDate.toLocaleDateString()}.`,
+        variant: "destructive",
+      });
+      return;
+    }
 
     const requestAmount = parseFloat(amount);
     if (!requestAmount || requestAmount <= 0) {
@@ -171,6 +193,7 @@ const CampaignDashboard = () => {
       toast({ title: "Minimum payout", description: "Minimum withdrawal is €10.", variant: "destructive" });
       return;
     }
+
 
     const payoutMethod = method === "paypal"
       ? { type: "paypal", email: paypalEmail.trim() }
