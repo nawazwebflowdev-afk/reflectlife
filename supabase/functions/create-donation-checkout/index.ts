@@ -6,7 +6,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const FEE_RATES = { private: 0.025, company: 0.03 } as const;
+// GoFundMe-style platform fees: personal 3.1% + 0.30, certified charity 2.9% + 0.30
+const FEE_RATES = { personal: 0.031, charity: 0.029 } as const;
+const FEE_FIXED = 0.3;
+
 const MIN_AMOUNT = 1;
 const MAX_AMOUNT = 50000;
 
