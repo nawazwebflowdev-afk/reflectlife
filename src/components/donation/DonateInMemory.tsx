@@ -232,6 +232,11 @@ export default function DonateInMemory({
       toast.error("Please name the beneficiary");
       return;
     }
+    if (newType === "charity" && !charity.trim()) {
+      toast.error("Please name the certified charity");
+      return;
+    }
+
     if (!Number.isFinite(g) || g < 50) {
       toast.error(`Goal must be at least ${SYMBOLS[goalCurrency]}50`);
       return;
