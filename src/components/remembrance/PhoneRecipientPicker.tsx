@@ -3,10 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BookUser, Mail, X } from "lucide-react";
-import PhoneNumberField, { detectDefaultCountry, toE164 } from "@/components/PhoneNumberField";
-import type { CountryCode } from "libphonenumber-js";
 import { toast } from "sonner";
 
 export type RecipientChannel = "sms" | "whatsapp" | "email";
@@ -31,13 +28,11 @@ type ContactsNavigator = Navigator & {
   };
 };
 
-const contactKey = (r: PhoneRecipient) => `${r.channel}:${r.phone ?? r.email ?? ""}`;
+const contactKey = (r: PhoneRecipient) => `email:${r.email ?? ""}`;
 
 export default function PhoneRecipientPicker({ value, onChange }: Props) {
-  const [country] = useState<CountryCode>(detectDefaultCountry());
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
-
 
   const addMany = (items: PhoneRecipient[]) => {
     const merged = [...value];
@@ -49,20 +44,6 @@ export default function PhoneRecipientPicker({ value, onChange }: Props) {
     }
     onChange(merged);
     return added;
-  };
-
-  const addManualPhone = () => {
-    setPhoneError(null);
-    const e164 = toE164(phone, country);
-    if (!e164) {
-      setPhoneError("Please enter a valid phone number.");
-      return;
-    }
-    if (addMany([{ phone: e164, email: null, display_name: null, channel }]) === 0) {
-      toast.info("That number is already on the list.");
-      return;
-    }
-    setPhone("");
   };
 
   const addEmail = () => {
@@ -79,28 +60,22 @@ export default function PhoneRecipientPicker({ value, onChange }: Props) {
     setEmail("");
   };
 
-  const importFromPhonebook = async () => {
+  const importFromContacts = async () => {
     const nav = navigator as ContactsNavigator;
     if (!nav.contacts?.select) {
-      toast.error("Your device or browser doesn't support importing contacts. Please add the details manually.");
+      toast.error("Your device or browser doesn't support importing contacts. Please add the email address manually.");
       return;
     }
     try {
-      const picked = await nav.contacts.select(["name", "tel", "email"], { multiple: true });
+      const picked = await nav.contacts.select(["name", "email"], { multiple: true });
       const items: PhoneRecipient[] = [];
       for (const c of picked) {
         const name = c.name?.[0] ?? null;
-        const raw = c.tel?.[0];
-        if (raw) {
-          const e164 = toE164(raw, country) ?? (raw.startsWith("+") ? raw.replace(/[^\d+]/g, "") : null);
-          if (e164) items.push({ phone: e164, email: null, display_name: name, channel });
-          continue;
-        }
         const mail = c.email?.[0]?.trim().toLowerCase();
         if (mail && EMAIL_RE.test(mail)) items.push({ phone: null, email: mail, display_name: name, channel: "email" });
       }
       if (items.length === 0) {
-        toast.error("No usable phone numbers or emails found in the selected contacts.");
+        toast.error("None of the selected contacts have an email address.");
         return;
       }
       const added = addMany(items);
@@ -112,39 +87,13 @@ export default function PhoneRecipientPicker({ value, onChange }: Props) {
 
   const remove = (i: number) => onChange(value.filter((_, idx) => idx !== i));
 
-  const channelLabel = (c: RecipientChannel) => (c === "sms" ? "SMS" : c === "whatsapp" ? "WhatsApp" : "Email");
-
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <Label>Recipients</Label>
-        <Select value={channel} onValueChange={(v) => setChannel(v as "sms" | "whatsapp")}>
-          <SelectTrigger className="w-[150px] h-9" aria-label="Phone delivery method">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="sms">Send by SMS</SelectItem>
-            <SelectItem value="whatsapp">Send by WhatsApp</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <Label>Recipients</Label>
 
-      <Button type="button" variant="outline" className="w-full rounded-full" onClick={importFromPhonebook}>
+      <Button type="button" variant="outline" className="w-full rounded-full" onClick={importFromContacts}>
         <BookUser className="w-4 h-4 mr-2" />
-        Import from Phonebook
-      </Button>
-
-      <PhoneNumberField
-        id="remembrance-phone"
-        label="Add a phone number"
-        country={country}
-        onCountryChange={setCountry}
-        value={phone}
-        onValueChange={setPhone}
-        error={phoneError}
-      />
-      <Button type="button" variant="secondary" className="w-full rounded-full" onClick={addManualPhone}>
-        Add phone recipient
+        Import from Contacts
       </Button>
 
       <div className="space-y-2 pt-1">
@@ -157,6 +106,12 @@ export default function PhoneRecipientPicker({ value, onChange }: Props) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addEmail();
+                }
+              }}
               placeholder="name@example.com"
               className="pl-10"
               aria-invalid={!!emailError}
@@ -175,15 +130,14 @@ export default function PhoneRecipientPicker({ value, onChange }: Props) {
             <Badge key={contactKey(r)} variant="secondary" className="gap-2 py-1 pl-3 pr-1">
               <span className="text-xs">
                 {r.display_name ? `${r.display_name} · ` : ""}
-                {r.phone ?? r.email}
-                <span className="text-muted-foreground"> ({channelLabel(r.channel)})</span>
+                {r.email}
               </span>
               <Button
                 type="button"
                 size="icon"
                 variant="ghost"
                 className="h-5 w-5"
-                aria-label={`Remove ${r.phone ?? r.email}`}
+                aria-label={`Remove ${r.email}`}
                 onClick={() => remove(i)}
               >
                 <X className="h-3 w-3" />
@@ -193,7 +147,7 @@ export default function PhoneRecipientPicker({ value, onChange }: Props) {
         </div>
       )}
       <p className="text-xs text-muted-foreground">
-        Importing contacts only works on supported mobile browsers, and nothing leaves your device until you save.
+        Reminders are delivered by email. Importing contacts only works on supported mobile browsers, and nothing leaves your device until you save.
       </p>
     </div>
   );
