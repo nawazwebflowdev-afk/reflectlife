@@ -85,6 +85,7 @@ const App = () => (
                 <Route path="/about" element={<About />} />
                 <Route path="/candle-success" element={<CandleSuccess />} />
                 <Route path="/donation-success" element={<DonationSuccess />} />
+                <Route path="/campaign-dashboard/:id" element={<CampaignDashboard />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
                 <Route path="*" element={<NotFound />} />
