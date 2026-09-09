@@ -113,6 +113,8 @@ export default function DonateInMemory({
     memorialName ? `Family of ${memorialName}` : ""
   );
   const [charity, setCharity] = useState("");
+  const [newType, setNewType] = useState<FundraiserType>("personal");
+
   const [goal, setGoal] = useState("1000");
   const [goalCurrency, setGoalCurrency] = useState<CurrencyCode>("EUR");
   const [story, setStory] = useState("");
@@ -243,7 +245,9 @@ export default function DonateInMemory({
       memory_wall_id: memorialId,
       organizer_user_id: userId,
       beneficiary_name: beneficiary.trim().slice(0, 255),
-      charity_organization_name: charity.trim().slice(0, 255) || null,
+      charity_organization_name: newType === "charity" ? charity.trim().slice(0, 255) || null : null,
+      fundraiser_type: newType,
+
       story: story.trim().slice(0, 2000) || null,
       target_goal_amount: g,
       currency: goalCurrency,
@@ -299,11 +303,48 @@ export default function DonateInMemory({
                 <div className="space-y-4">
                   <p className="text-sm text-slate-600 dark:text-slate-400">
                     Start a fundraiser for this memorial. Donations go to the
-                    beneficiary you name; Reflectlife deducts a small platform
-                    fee (2.5% private / 3.0% company donors) plus payment
-                    processing.
+                    beneficiary you name; Reflectlife deducts a platform fee of
+                    3.1% + {SYMBOLS[goalCurrency]}0.30 per donation for personal
+                    fundraisers and 2.9% + {SYMBOLS[goalCurrency]}0.30 for
+                    certified charity fundraisers, plus payment processing.
                   </p>
                   <div className="grid gap-3">
+                    <div>
+                      <Label className="text-slate-700 dark:text-slate-300">
+                        Who receives the funds? *
+                      </Label>
+                      <div className="mt-1 grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setNewType("personal")}
+                          className={cn(
+                            "flex items-center justify-center gap-2 py-3 px-3 rounded-xl border font-medium text-sm transition-all text-center",
+                            newType === "personal"
+                              ? "border-amber-600 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-500 shadow-sm"
+                              : "border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:text-slate-400"
+                          )}
+                        >
+                          <User size={16} /> Personal fundraiser
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewType("charity")}
+                          className={cn(
+                            "flex items-center justify-center gap-2 py-3 px-3 rounded-xl border font-medium text-sm transition-all text-center",
+                            newType === "charity"
+                              ? "border-amber-600 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-500 shadow-sm"
+                              : "border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:text-slate-400"
+                          )}
+                        >
+                          <ShieldCheck size={16} /> Certified charity
+                        </button>
+                      </div>
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        {newType === "charity"
+                          ? "Funds go to the certified non-profit you name. Fee: 2.9% + 0.30 per donation."
+                          : "Funds go to the family or individual managing this wall. Fee: 3.1% + 0.30 per donation."}
+                      </p>
+                    </div>
                     <div>
                       <Label
                         htmlFor="ben"
@@ -319,21 +360,24 @@ export default function DonateInMemory({
                         className="mt-1"
                       />
                     </div>
-                    <div>
-                      <Label
-                        htmlFor="char"
-                        className="text-slate-700 dark:text-slate-300"
-                      >
-                        Charity / organization (optional)
-                      </Label>
-                      <Input
-                        id="char"
-                        value={charity}
-                        onChange={(e) => setCharity(e.target.value)}
-                        placeholder="e.g. German Cancer Aid"
-                        className="mt-1"
-                      />
-                    </div>
+                    {newType === "charity" && (
+                      <div>
+                        <Label
+                          htmlFor="char"
+                          className="text-slate-700 dark:text-slate-300"
+                        >
+                          Certified charity organization *
+                        </Label>
+                        <Input
+                          id="char"
+                          value={charity}
+                          onChange={(e) => setCharity(e.target.value)}
+                          placeholder="e.g. German Cancer Aid"
+                          className="mt-1"
+                        />
+                      </div>
+                    )}
+
                     <div>
                       <Label
                         htmlFor="goal"
@@ -461,6 +505,20 @@ export default function DonateInMemory({
                   <>
                     <Separator />
 
+                    {/* Fundraiser recipient */}
+                    <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50/60 dark:bg-amber-950/20 p-3 text-sm text-slate-700 dark:text-slate-300 flex items-start gap-2">
+                      {fundraiserType === "charity" ? (
+                        <ShieldCheck size={18} className="text-amber-600 mt-0.5 shrink-0" />
+                      ) : (
+                        <User size={18} className="text-amber-600 mt-0.5 shrink-0" />
+                      )}
+                      <span>
+                        {fundraiserType === "charity"
+                          ? `Certified charity fundraiser — proceeds go to ${campaign.charity_organization_name || campaign.beneficiary_name}. Fee 2.9% + ${symbol}0.30.`
+                          : `Personal fundraiser — proceeds go to ${campaign.beneficiary_name}. Fee 3.1% + ${symbol}0.30.`}
+                      </span>
+                    </div>
+
                     {/* Donor Type Selector */}
                     <div>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -477,7 +535,7 @@ export default function DonateInMemory({
                               : "border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:text-slate-400"
                           )}
                         >
-                          <User size={16} /> Individual (2.5% fee)
+                          <User size={16} /> Individual
                         </button>
                         <button
                           type="button"
@@ -489,10 +547,11 @@ export default function DonateInMemory({
                               : "border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:text-slate-400"
                           )}
                         >
-                          <Building2 size={16} /> Company (3.0% fee)
+                          <Building2 size={16} /> Company
                         </button>
                       </div>
                     </div>
+
 
                     {/* Currency + frequency */}
                     <div className="grid gap-3 sm:grid-cols-2">
@@ -564,7 +623,7 @@ export default function DonateInMemory({
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                         Select Donation Amount
                       </label>
-                      <div className="grid grid-cols-4 gap-2 mb-3">
+                      <div className="grid grid-cols-3 gap-2 mb-3">
                         {PRESETS[donationCurrency].map((val) => (
                           <button
                             key={val}
