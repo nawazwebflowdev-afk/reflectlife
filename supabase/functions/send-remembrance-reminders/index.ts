@@ -125,56 +125,6 @@ function escapeHtml(v: string): string {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] as string));
 }
 
-// Sends SMS / WhatsApp reminders through the Twilio connector gateway.
-// Returns the number of messages accepted by Twilio.
-async function sendPhoneMessages(
-  recipients: PhoneRecipient[],
-  memorial: { name: string; id: string },
-  customMessage: string | null,
-): Promise<number> {
-  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-  const TWILIO_API_KEY = Deno.env.get("TWILIO_API_KEY");
-  const TWILIO_SMS_FROM = Deno.env.get("TWILIO_SMS_FROM");
-  const TWILIO_WHATSAPP_FROM = Deno.env.get("TWILIO_WHATSAPP_FROM");
-  if (!LOVABLE_API_KEY || !TWILIO_API_KEY) {
-    console.error("Twilio is not connected - skipping SMS/WhatsApp reminders");
-    return 0;
-  }
-
-  const url = `https://reflectlife.net/memorial/${memorial.id}`;
-  const body = `${customMessage?.trim() || `A gentle reminder to pause and remember ${memorial.name}.`}\n${url}`;
-
-  let sent = 0;
-  for (const r of recipients) {
-    if (!r.phone) continue;
-    const isWhatsApp = r.channel === "whatsapp";
-    const from = isWhatsApp ? TWILIO_WHATSAPP_FROM : TWILIO_SMS_FROM;
-    if (!from) {
-      console.error(`Missing sender number for channel ${r.channel}`);
-      continue;
-    }
-    const params = new URLSearchParams({
-      To: isWhatsApp ? `whatsapp:${r.phone}` : r.phone!,
-      From: isWhatsApp && !from.startsWith("whatsapp:") ? `whatsapp:${from}` : from,
-      Body: body.slice(0, 1500),
-    });
-    const resp = await fetch("https://connector-gateway.lovable.dev/twilio/Messages.json", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": TWILIO_API_KEY,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: params,
-    });
-    if (!resp.ok) {
-      console.error(`Twilio request failed [${resp.status}]: ${await resp.text()}`);
-      continue;
-    }
-    sent++;
-  }
-  return sent;
-}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
