@@ -384,9 +384,9 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
-            )}
-            {actionSlot}
+              {actionSlot}
             </div>
+
 
             {savedCount > 0 && (
               <p className="text-xs text-muted-foreground flex items-center gap-1.5 justify-end">
