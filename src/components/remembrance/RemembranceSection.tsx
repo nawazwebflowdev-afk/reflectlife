@@ -370,6 +370,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                 </DialogContent>
               </Dialog>
             )}
+            {actionSlot}
             </div>
 
             {savedCount > 0 && (
