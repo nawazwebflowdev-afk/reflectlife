@@ -490,20 +490,26 @@ const CampaignDashboard = () => {
 
                 <Button
                   type="submit"
-                  disabled={requesting || (summary?.available_payout || 0) < 10}
+                  disabled={requesting || !!currentMonthPayout || (summary?.available_payout || 0) < 10}
                 >
                   {requesting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       Processing...
                     </>
+                  ) : currentMonthPayout ? (
+                    <>
+                      <Clock className="h-4 w-4 mr-2" />
+                      Payout scheduled this month
+                    </>
                   ) : (
                     <>
                       <CreditCard className="h-4 w-4 mr-2" />
-                      Request Payout
+                      Send Monthly Payout
                     </>
                   )}
                 </Button>
+
               </form>
             </CardContent>
           </Card>
