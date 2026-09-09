@@ -43,12 +43,26 @@ interface CampaignRow {
   organizer_user_id: string;
   beneficiary_name: string;
   currency: string;
-  memorial_name: string;
-  organizer_email: string;
-  organizer_full_name: string | null;
 }
 
-async function sendReport(campaign: CampaignRow, donations: DonationRow[]) {
+interface MemorialRow {
+  id: string;
+  name: string;
+}
+
+interface ProfileRow {
+  id: string;
+  email: string;
+  full_name: string | null;
+}
+
+async function sendReport(
+  campaign: CampaignRow,
+  memorialName: string,
+  organizerEmail: string,
+  organizerName: string | null,
+  donations: DonationRow[],
+) {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
   if (!LOVABLE_API_KEY || !RESEND_API_KEY) {
@@ -83,8 +97,8 @@ async function sendReport(campaign: CampaignRow, donations: DonationRow[]) {
   const html = `
     <div style="font-family:Georgia,serif;max-width:600px;margin:0 auto;padding:32px;background:#faf7f2;color:#3a2a3a;">
       <h1 style="color:#4A324A;margin:0 0 12px;font-size:22px;">Weekly Donation Report</h1>
-      <p style="font-size:16px;line-height:1.6;">Hello ${escapeHtml(campaign.organizer_full_name || "organizer")},</p>
-      <p style="font-size:16px;line-height:1.6;">Here is this week's summary for <strong>${escapeHtml(campaign.beneficiary_name)}</strong> (${escapeHtml(campaign.memorial_name)}).</p>
+      <p style="font-size:16px;line-height:1.6;">Hello ${escapeHtml(organizerName || "organizer")},</p>
+      <p style="font-size:16px;line-height:1.6;">Here is this week's summary for <strong>${escapeHtml(campaign.beneficiary_name)}</strong> (${escapeHtml(memorialName)}).</p>
 
       <div style="background:#fff;padding:16px;border-radius:12px;margin:24px 0;border:1px solid #e8e0d8;">
         <p style="margin:0 0 8px;font-size:15px;"><strong>Total raised this week:</strong> ${money(totalGross, campaign.currency)}</p>
@@ -128,7 +142,7 @@ async function sendReport(campaign: CampaignRow, donations: DonationRow[]) {
     },
     body: JSON.stringify({
       from: "Reflectlife <noreply@reflectlife.net>",
-      to: [campaign.organizer_email],
+      to: [organizerEmail],
       subject: `Weekly donation report for ${campaign.beneficiary_name}`,
       html,
     }),
@@ -152,92 +166,83 @@ Deno.serve(async (req) => {
 
     const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Find donations from the last 7 days, joined with campaign and organizer info.
-    const { data: rows, error } = await supabase
+    // Find successful donations from the last 7 days.
+    const { data: donations, error: donationsError } = await supabase
       .from("memorial_donations")
-      .select(`
-        id,
-        campaign_id,
-        gross_amount,
-        platform_fee_amount,
-        net_payout_amount,
-        donor_type,
-        donor_name,
-        donor_email,
-        is_anonymous,
-        created_at,
-        currency,
-        campaign:memorial_campaigns!inner(
-          id,
-          memory_wall_id,
-          organizer_user_id,
-          beneficiary_name,
-          currency,
-          memorials!inner(name),
-          profiles!organizer_user_id(email, full_name)
-        )
-      `)
+      .select("*")
       .eq("payment_status", "succeeded")
       .gte("created_at", since)
       .order("created_at", { ascending: false });
+    if (donationsError) throw donationsError;
 
-    if (error) throw error;
-
-    // Group by campaign.
-    const campaigns = new Map<string, CampaignRow>();
-    const donationsByCampaign = new Map<string, DonationRow[]>();
-
-    for (const row of (rows ?? []) as any[]) {
-      const campaign = row.campaign;
-      if (!campaign) continue;
-
-      const memorialName = Array.isArray(campaign.memorials)
-        ? campaign.memorials[0]?.name
-        : campaign.memorials?.name;
-      const profile = Array.isArray(campaign.profiles)
-        ? campaign.profiles[0]
-        : campaign.profiles;
-
-      if (!campaigns.has(campaign.id)) {
-        campaigns.set(campaign.id, {
-          id: campaign.id,
-          memory_wall_id: campaign.memory_wall_id,
-          organizer_user_id: campaign.organizer_user_id,
-          beneficiary_name: campaign.beneficiary_name,
-          currency: campaign.currency,
-          memorial_name: memorialName || "Memorial",
-          organizer_email: profile?.email || "",
-          organizer_full_name: profile?.full_name || null,
-        });
-      }
-
-      if (!donationsByCampaign.has(campaign.id)) {
-        donationsByCampaign.set(campaign.id, []);
-      }
-      donationsByCampaign.get(campaign.id)!.push({
-        id: row.id,
-        campaign_id: row.campaign_id,
-        gross_amount: row.gross_amount,
-        platform_fee_amount: row.platform_fee_amount,
-        net_payout_amount: row.net_payout_amount,
-        donor_type: row.donor_type,
-        donor_name: row.donor_name,
-        donor_email: row.donor_email,
-        is_anonymous: row.is_anonymous,
-        created_at: row.created_at,
-        currency: row.currency,
+    const donationRows = (donations ?? []) as DonationRow[];
+    const campaignIds = [...new Set(donationRows.map((d) => d.campaign_id))];
+    if (campaignIds.length === 0) {
+      return new Response(JSON.stringify({ ok: true, campaigns: 0, reports_sent: 0 }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    // Fetch campaign details.
+    const { data: campaigns, error: campaignsError } = await supabase
+      .from("memorial_campaigns")
+      .select("id, memory_wall_id, organizer_user_id, beneficiary_name, currency")
+      .in("id", campaignIds);
+    if (campaignsError) throw campaignsError;
+
+    const campaignMap = new Map<string, CampaignRow>();
+    const memorialIds = new Set<string>();
+    const organizerIds = new Set<string>();
+    for (const c of (campaigns ?? []) as CampaignRow[]) {
+      campaignMap.set(c.id, c);
+      memorialIds.add(c.memory_wall_id);
+      organizerIds.add(c.organizer_user_id);
+    }
+
+    // Fetch memorial names and organizer emails in bulk.
+    const [{ data: memorials }, { data: profiles }] = await Promise.all([
+      supabase.from("memorials").select("id, name").in("id", Array.from(memorialIds)),
+      supabase.from("profiles").select("id, email, full_name").in("id", Array.from(organizerIds)),
+    ]);
+
+    const memorialMap = new Map<string, string>();
+    for (const m of (memorials ?? []) as MemorialRow[]) {
+      memorialMap.set(m.id, m.name);
+    }
+
+    const profileMap = new Map<string, ProfileRow>();
+    for (const p of (profiles ?? []) as ProfileRow[]) {
+      profileMap.set(p.id, p);
+    }
+
+    // Group donations by campaign.
+    const donationsByCampaign = new Map<string, DonationRow[]>();
+    for (const d of donationRows) {
+      if (!donationsByCampaign.has(d.campaign_id)) {
+        donationsByCampaign.set(d.campaign_id, []);
+      }
+      donationsByCampaign.get(d.campaign_id)!.push(d);
+    }
+
     let sent = 0;
-    for (const [campaignId, campaign] of campaigns) {
-      if (!campaign.organizer_email) continue;
-      const donations = donationsByCampaign.get(campaignId) ?? [];
-      const ok = await sendReport(campaign, donations);
+    for (const [campaignId, campaign] of campaignMap) {
+      const profile = profileMap.get(campaign.organizer_user_id);
+      if (!profile?.email) {
+        console.warn("Skipping campaign, no organizer email", campaignId);
+        continue;
+      }
+      const donationsForCampaign = donationsByCampaign.get(campaignId) ?? [];
+      const ok = await sendReport(
+        campaign,
+        memorialMap.get(campaign.memory_wall_id) || "Memorial",
+        profile.email,
+        profile.full_name,
+        donationsForCampaign,
+      );
       if (ok) sent++;
     }
 
-    return new Response(JSON.stringify({ ok: true, campaigns: campaigns.size, reports_sent: sent }), {
+    return new Response(JSON.stringify({ ok: true, campaigns: campaignMap.size, reports_sent: sent }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
