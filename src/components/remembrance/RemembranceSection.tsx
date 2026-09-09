@@ -103,7 +103,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
   const [hasEnd, setHasEnd] = useState(false);
   const [endDate, setEndDate] = useState("");
   const [reminderEnabled, setReminderEnabled] = useState(true);
-  const [reminderTiming, setReminderTiming] = useState<Timing>("2_minutes_before");
+  const [reminderTiming, setReminderTiming] = useState<Timing>("1_hour_before");
   const [message, setMessage] = useState("");
 
   const canEdit = isOwner || hasAccess;
@@ -365,8 +365,10 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                           <Select value={reminderTiming} onValueChange={(v) => setReminderTiming(v as Timing)}>
                             <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="2_minutes_before">2 minutes before</SelectItem>
-                              <SelectItem value="1_day_before">1 day before</SelectItem>
+                              {TIMING_OPTIONS.map((o) => (
+                                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                              ))}
+
                             </SelectContent>
                           </Select>
                           <p className="text-xs text-muted-foreground mt-2">
