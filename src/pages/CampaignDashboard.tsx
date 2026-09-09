@@ -154,9 +154,31 @@ const CampaignDashboard = () => {
     }
   };
 
+  const monthKey = (d: string | Date) => {
+    const date = typeof d === "string" ? new Date(d) : d;
+    return `${date.getUTCFullYear()}-${date.getUTCMonth()}`;
+  };
+
+  const currentMonthPayout = payouts.find(
+    (p) => p.status !== "failed" && monthKey(p.created_at) === monthKey(new Date())
+  );
+
+  const nextPayoutDate = new Date(
+    Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 1, 1)
+  );
+
   const handleRequestPayout = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!campaign || !userId || !summary) return;
+
+    if (currentMonthPayout) {
+      toast({
+        title: "Monthly payout already requested",
+        description: `Payouts run once per month. Your next payout can be requested on ${nextPayoutDate.toLocaleDateString()}.`,
+        variant: "destructive",
+      });
+      return;
+    }
 
     const requestAmount = parseFloat(amount);
     if (!requestAmount || requestAmount <= 0) {
@@ -171,6 +193,7 @@ const CampaignDashboard = () => {
       toast({ title: "Minimum payout", description: "Minimum withdrawal is €10.", variant: "destructive" });
       return;
     }
+
 
     const payoutMethod = method === "paypal"
       ? { type: "paypal", email: paypalEmail.trim() }
@@ -198,7 +221,7 @@ const CampaignDashboard = () => {
     if (error) {
       toast({ title: "Payout request failed", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Payout requested", description: "Your withdrawal request is pending review." });
+      toast({ title: "Monthly payout requested", description: "Funds will be sent to the beneficiary in this month's payout run." });
       setAmount("");
       setPaypalEmail("");
       setAccountHolder("");
@@ -381,11 +404,15 @@ const CampaignDashboard = () => {
             <CardHeader>
               <CardTitle className="font-serif text-xl flex items-center gap-2">
                 <Wallet className="h-5 w-5 text-primary" />
-                Request a Payout
+                Monthly Payout to Beneficiary
               </CardTitle>
               <CardDescription>
-                Withdraw available net funds. Minimum withdrawal is {money(10)}.
+                Payouts are sent once per month. Minimum withdrawal is {money(10)}.
+                {currentMonthPayout
+                  ? ` This month's payout of ${money(currentMonthPayout.amount)} is already requested — next payout available on ${nextPayoutDate.toLocaleDateString()}.`
+                  : ` Next payout window opens ${nextPayoutDate.toLocaleDateString()} if you skip this month.`}
               </CardDescription>
+
             </CardHeader>
             <CardContent>
               <form onSubmit={handleRequestPayout} className="space-y-4">
@@ -463,20 +490,26 @@ const CampaignDashboard = () => {
 
                 <Button
                   type="submit"
-                  disabled={requesting || (summary?.available_payout || 0) < 10}
+                  disabled={requesting || !!currentMonthPayout || (summary?.available_payout || 0) < 10}
                 >
                   {requesting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       Processing...
                     </>
+                  ) : currentMonthPayout ? (
+                    <>
+                      <Clock className="h-4 w-4 mr-2" />
+                      Payout scheduled this month
+                    </>
                   ) : (
                     <>
                       <CreditCard className="h-4 w-4 mr-2" />
-                      Request Payout
+                      Send Monthly Payout
                     </>
                   )}
                 </Button>
+
               </form>
             </CardContent>
           </Card>
