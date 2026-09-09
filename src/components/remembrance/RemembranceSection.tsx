@@ -18,7 +18,20 @@ import { toast } from "sonner";
 import PhoneRecipientPicker, { type PhoneRecipient } from "./PhoneRecipientPicker";
 
 type Frequency = "once" | "daily" | "weekly" | "monthly" | "yearly";
-type Timing = "2_minutes_before" | "1_day_before";
+type Timing =
+  | "2_minutes_before"
+  | "15_minutes_before"
+  | "1_hour_before"
+  | "1_day_before"
+  | "1_week_before";
+
+const TIMING_OPTIONS: { value: Timing; label: string }[] = [
+  { value: "15_minutes_before", label: "15 minutes before" },
+  { value: "1_hour_before", label: "1 hour before" },
+  { value: "1_day_before", label: "1 day before" },
+  { value: "1_week_before", label: "1 week before" },
+];
+
 
 const MESSAGE_MAX = 300;
 
