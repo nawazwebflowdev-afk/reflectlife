@@ -404,11 +404,15 @@ const CampaignDashboard = () => {
             <CardHeader>
               <CardTitle className="font-serif text-xl flex items-center gap-2">
                 <Wallet className="h-5 w-5 text-primary" />
-                Request a Payout
+                Monthly Payout to Beneficiary
               </CardTitle>
               <CardDescription>
-                Withdraw available net funds. Minimum withdrawal is {money(10)}.
+                Payouts are sent once per month. Minimum withdrawal is {money(10)}.
+                {currentMonthPayout
+                  ? ` This month's payout of ${money(currentMonthPayout.amount)} is already requested — next payout available on ${nextPayoutDate.toLocaleDateString()}.`
+                  : ` Next payout window opens ${nextPayoutDate.toLocaleDateString()} if you skip this month.`}
               </CardDescription>
+
             </CardHeader>
             <CardContent>
               <form onSubmit={handleRequestPayout} className="space-y-4">
