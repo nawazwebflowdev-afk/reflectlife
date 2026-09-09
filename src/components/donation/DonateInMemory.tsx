@@ -28,6 +28,8 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/utils/cn";
 
+type FundraiserType = "personal" | "charity";
+
 type Campaign = {
   id: string;
   memory_wall_id: string;
@@ -37,6 +39,7 @@ type Campaign = {
   story: string | null;
   target_goal_amount: number;
   currency: string;
+  fundraiser_type: FundraiserType;
   status: "active" | "paused" | "completed" | "closed";
 };
 
@@ -50,14 +53,18 @@ type Supporter = {
 };
 
 type DonorType = "private" | "company";
-const FEE_RATES: Record<DonorType, number> = { private: 0.025, company: 0.03 };
+// GoFundMe-style: personal 3.1% + 0.30, certified charity 2.9% + 0.30
+const FEE_RATES: Record<FundraiserType, number> = { personal: 0.031, charity: 0.029 };
+const FEE_FIXED = 0.3;
 const CURRENCIES = ["EUR", "USD"] as const;
 type CurrencyCode = (typeof CURRENCIES)[number];
 const SYMBOLS: Record<CurrencyCode, string> = { EUR: "\u20ac", USD: "$" };
+const PRESET_AMOUNTS = [50, 100, 200, 500, 1000, 2000];
 const PRESETS: Record<CurrencyCode, number[]> = {
-  EUR: [25, 50, 100, 250],
-  USD: [25, 50, 100, 250],
+  EUR: PRESET_AMOUNTS,
+  USD: PRESET_AMOUNTS,
 };
+
 
 interface Props {
   memorialId: string;
