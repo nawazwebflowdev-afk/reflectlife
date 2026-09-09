@@ -767,8 +767,9 @@ export default function DonateInMemory({
                       <div className="flex justify-between">
                         <span>
                           Reflectlife Platform Fee (
-                          {donorType === "company" ? "3.0%" : "2.5%"}):
+                          {fundraiserType === "charity" ? "2.9%" : "3.1%"} + {symbol}0.30):
                         </span>
+
                         <span>
                           {validAmount ? `−${money(platformFee, donationCurrency)}` : "—"}
                         </span>
