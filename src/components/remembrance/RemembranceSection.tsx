@@ -357,7 +357,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                             </SelectContent>
                           </Select>
                           <p className="text-xs text-muted-foreground mt-2">
-                            Sent to the memorial owner, everyone with accepted access, and any phone recipients above.
+                            Sent by email to the memorial owner, everyone with accepted access, and the recipients above.
                           </p>
                         </div>
                       )}
