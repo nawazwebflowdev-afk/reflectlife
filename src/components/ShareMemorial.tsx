@@ -88,6 +88,41 @@ export const ShareMemorial = ({
     },
   ];
 
+  const appShares = [
+    {
+      label: "Share on Instagram",
+      icon: InstagramIcon,
+      hoverColor: "hover:bg-[#E1306C] hover:text-white hover:border-[#E1306C]",
+      url: "https://www.instagram.com/",
+    },
+    {
+      label: "Share on TikTok",
+      icon: TikTokIcon,
+      hoverColor: "hover:bg-black hover:text-white hover:border-black",
+      url: "https://www.tiktok.com/upload",
+    },
+  ];
+
+  const handleAppShare = async (label: string, url: string) => {
+    const text = `${shareText ?? `Remembering ${name}`} ${shareUrl}`;
+    const platform = label.replace("Share on ", "");
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: name, text: shareText ?? `Remembering ${name}`, url: shareUrl });
+        return;
+      }
+    } catch {
+      // user cancelled or sharing unavailable — fall through to copy
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(`Link copied. Paste it into your ${platform} post or story.`);
+    } catch {
+      toast.error("Could not copy link. Please try again.");
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
@@ -96,6 +131,7 @@ export const ShareMemorial = ({
       toast.error("Could not copy link. Please try again.");
     }
   };
+
 
   return (
     <section className="my-10 py-8 px-6 rounded-2xl bg-card/80 backdrop-blur-sm shadow-elegant border border-border">
