@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const { data: campaign, error: cErr } = await supabase
       .from('memorial_campaigns')
-      .select('id, status, currency, beneficiary_name, memory_wall_id, memorials(name)')
+      .select('id, status, currency, beneficiary_name, fundraiser_type, memory_wall_id, memorials(name)')
       .eq('id', campaign_id)
       .maybeSingle();
     if (cErr || !campaign) return json({ error: 'Fundraiser not found.' }, 404);
@@ -69,8 +69,10 @@ Deno.serve(async (req) => {
     const currency = currencyCode.toLowerCase();
     const memorialName = (campaign as any).memorials?.name ?? campaign.beneficiary_name;
     const grossCents = Math.round(amount * 100);
-    const feeRate = FEE_RATES[donor_type];
-    const fee = Math.round(grossCents * feeRate) / 100;
+    const fundraiserType = (campaign as any).fundraiser_type === 'charity' ? 'charity' : 'personal';
+    const feeRate = FEE_RATES[fundraiserType];
+    const fee = Math.round(grossCents * feeRate) / 100 + FEE_FIXED;
+
 
     // Pending donation row (fees recomputed by DB trigger)
     const { data: donation, error: dErr } = await supabase
