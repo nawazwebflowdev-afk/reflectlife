@@ -15,6 +15,7 @@ import CreatorDashboard from "@/components/CreatorDashboard";
 import { ProfileEditModal } from "@/components/ProfileEditModal";
 
 import { tr } from "@/i18n/tr";
+import { optimizedImageUrl } from "@/lib/imageUrl";
 interface Profile {
   id: string;
   first_name: string | null;
@@ -425,7 +426,7 @@ const Dashboard = () => {
                     >
                       <div className="aspect-[3/4] overflow-hidden">
                         <img
-                          src={template.preview_url || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
+                          src={optimizedImageUrl(template.preview_url) || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
                           alt={template.name}
                           width={400}
                           height={533}

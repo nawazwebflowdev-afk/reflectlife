@@ -13,6 +13,7 @@ import hero1600Webp from "@/assets/hero-1600.webp.asset.json";
 import portraitPlaceholder from "@/assets/portrait-placeholder.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
+import DeferredRender from "@/components/DeferredRender";
 
 import { tr } from "@/i18n/tr";
 const FeaturedTemplates = lazy(() => import("@/components/FeaturedTemplates"));
@@ -278,9 +279,11 @@ const Landing = () => {
               {t("landing.featuredTemplatesDesc")}
             </p>
           </div>
-          <Suspense fallback={<DeferredSectionFallback />}>
-            <FeaturedTemplates />
-          </Suspense>
+          <DeferredRender fallback={<DeferredSectionFallback />}>
+            <Suspense fallback={<DeferredSectionFallback />}>
+              <FeaturedTemplates />
+            </Suspense>
+          </DeferredRender>
         </div>
       </section>
 
@@ -293,9 +296,11 @@ const Landing = () => {
               {t("landing.latestPrayersDesc")}
             </p>
           </div>
-          <Suspense fallback={<DeferredSectionFallback />}>
-            <LatestPrayers />
-          </Suspense>
+          <DeferredRender fallback={<DeferredSectionFallback />}>
+            <Suspense fallback={<DeferredSectionFallback />}>
+              <LatestPrayers />
+            </Suspense>
+          </DeferredRender>
         </div>
       </section>
 

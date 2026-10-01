@@ -22,6 +22,7 @@ import { countries } from "@/data/countries";
 import { getCountryFlag } from "@/lib/countryFlags";
 
 import { tr } from "@/i18n/tr";
+import { optimizedImageUrl } from "@/lib/imageUrl";
 interface CreatorTemplate {
   id: string;
   name: string;
@@ -422,7 +423,7 @@ const CreatorDashboard = () => {
           <Card key={template.id}>
             <div className="aspect-[3/4] overflow-hidden">
               <img
-                src={template.preview_url || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
+                src={optimizedImageUrl(template.preview_url) || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
                 alt={template.name}
                 width={400}
                 height={533}
