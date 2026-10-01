@@ -9,10 +9,11 @@ const SITE = "https://reflectlife.net";
 const LanguageAlternates = () => {
   const { pathname } = useLocation(); // already without the /es basename
   const { i18n } = useTranslation();
+  const isImprint = ["/imprint", "/impressum", "/aviso-legal"].includes(pathname);
   const base = pathname === "/" ? "" : pathname;
-  const en = `${SITE}${base || "/"}`;
-  const es = `${SITE}/es${base}`;
-  const de = `${SITE}/de${base}`;
+  const en = isImprint ? `${SITE}/imprint` : `${SITE}${base || "/"}`;
+  const es = isImprint ? `${SITE}/es/aviso-legal` : `${SITE}/es${base}`;
+  const de = isImprint ? `${SITE}/de/impressum` : `${SITE}/de${base}`;
   const lang = i18n.language.startsWith("es") ? "es" : i18n.language.startsWith("de") ? "de" : i18n.language.startsWith("uk") ? "uk" : "en";
   const meta = pageMeta(pathname, lang);
   const self = lang === "es" ? es : lang === "de" ? de : en;

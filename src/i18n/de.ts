@@ -60,9 +60,25 @@ const de = {
     "helpCentre": "Hilfe-Center",
     "privacyPolicy": "Datenschutzrichtlinie",
     "cookiePolicy": "Cookie-Richtlinie",
+    "imprint": "Impressum",
     "qa": "F&A",
     "about": "Über uns",
     "allRights": "© 2026 Sypera. Alle Rechte vorbehalten"
+  },
+  "imprint": {
+    "title": "Impressum",
+    "providerTitle": "Angaben gemäß § 5 DDG",
+    "representedByTitle": "Vertreten durch die Geschäftsführerin:",
+    "contactTitle": "Kontakt",
+    "phoneLabel": "Telefon",
+    "emailLabel": "E-Mail",
+    "registerTitle": "Registereintrag",
+    "registerCourtLabel": "Registergericht",
+    "registerNumberLabel": "Registernummer",
+    "contentResponsibilityTitle": "Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV:",
+    "addressAsAbove": "Anschrift wie oben",
+    "disputeTitle": "Verbraucherstreitbeilegung",
+    "disputeBody": "Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen."
   },
   "auth": {
     "signIn": "Anmelden",

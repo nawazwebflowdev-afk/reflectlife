@@ -4,7 +4,12 @@ import reflectlifeLogo from "@/assets/reflectlife-logo.png";
 
 import { tr } from "@/i18n/tr";
 const Footer = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const imprintPath = i18n.language.startsWith("de")
+    ? "/impressum"
+    : i18n.language.startsWith("es")
+      ? "/aviso-legal"
+      : "/imprint";
 
   return (
     <footer className="bg-muted/30 border-t border-border mt-auto">
@@ -37,6 +42,7 @@ const Footer = () => {
             <ul className="space-y-2">
               <li><Link to="/cookie-policy" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.cookiePolicy")}</Link></li>
               <li><Link to="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{tr("a.d35f2b98ed")}</Link></li>
+              <li><Link to={imprintPath} className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.imprint")}</Link></li>
               <li><Link to="/qa" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.qa")}</Link></li>
               <li><Link to="/help" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.helpCentre")}</Link></li>
               <li><Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.privacyPolicy")}</Link></li>

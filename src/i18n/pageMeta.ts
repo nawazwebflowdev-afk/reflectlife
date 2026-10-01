@@ -45,6 +45,24 @@ const pages: Record<string, Record<Lang, Meta>> = {
     es: { title: "Política de cookies | Reflectlife", description: "Qué cookies usa Reflectlife y cómo administrarlas." },
     de: { title: "Cookie-Richtlinie | Reflectlife", description: "Welche Cookies Reflectlife verwendet und wie du sie verwaltest." },
   },
+  "/imprint": {
+    en: { title: "Imprint | Reflectlife", description: "Legal provider and contact information for Reflectlife." },
+    uk: { title: "Imprint | Reflectlife", description: "Legal provider and contact information for Reflectlife." },
+    es: { title: "Aviso legal | Reflectlife", description: "Información legal, registral y de contacto de Reflectlife." },
+    de: { title: "Impressum | Reflectlife", description: "Anbieter-, Register- und Kontaktangaben von Reflectlife." },
+  },
+  "/impressum": {
+    en: { title: "Imprint | Reflectlife", description: "Legal provider and contact information for Reflectlife." },
+    uk: { title: "Imprint | Reflectlife", description: "Legal provider and contact information for Reflectlife." },
+    es: { title: "Aviso legal | Reflectlife", description: "Información legal, registral y de contacto de Reflectlife." },
+    de: { title: "Impressum | Reflectlife", description: "Anbieter-, Register- und Kontaktangaben von Reflectlife." },
+  },
+  "/aviso-legal": {
+    en: { title: "Imprint | Reflectlife", description: "Legal provider and contact information for Reflectlife." },
+    uk: { title: "Imprint | Reflectlife", description: "Legal provider and contact information for Reflectlife." },
+    es: { title: "Aviso legal | Reflectlife", description: "Información legal, registral y de contacto de Reflectlife." },
+    de: { title: "Impressum | Reflectlife", description: "Anbieter-, Register- und Kontaktangaben von Reflectlife." },
+  },
   "/signup": {
     en: { title: "Create your account | Reflectlife", description: "Join Reflectlife to create memorials and share memories." },
     uk: { title: "Реєстрація | Reflectlife", description: "Приєднуйтеся до Reflectlife, щоб створювати сторінки пам'яті." },
