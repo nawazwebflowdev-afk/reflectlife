@@ -43,7 +43,7 @@ type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 const faqData = [
   {
-    category: "Getting Started",
+    category: tr("a.010b85ad56"),
     questions: [
       {
         question: tr("a.2b4eb3dc4d"),
@@ -58,7 +58,7 @@ const faqData = [
     ],
   },
   {
-    category: "Managing Your Memorials",
+    category: tr("a.d00329957c"),
     questions: [
       {
         question: tr("a.ba0ebeb85a"),
@@ -71,7 +71,7 @@ const faqData = [
     ],
   },
   {
-    category: "Templates & Customization",
+    category: tr("a.004393ac66"),
     questions: [
       {
         question: tr("a.3a994773b4"),
@@ -85,7 +85,7 @@ const faqData = [
     ],
   },
   {
-    category: "Family & Friendship Trees",
+    category: tr("a.b6e8ea5a90"),
     questions: [
       {
         question: tr("a.7ec817b774"),
@@ -98,7 +98,7 @@ const faqData = [
     ],
   },
   {
-    category: "Payments & Earnings",
+    category: tr("a.a69c943526"),
     questions: [
       {
         question: tr("a.43ff8cbfc4"),
@@ -112,7 +112,7 @@ const faqData = [
     ],
   },
   {
-    category: "Account & Profile",
+    category: tr("a.8a259c8fe4"),
     questions: [
       {
         question: tr("a.b60d6428c2"),

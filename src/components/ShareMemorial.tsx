@@ -50,8 +50,8 @@ const TikTokIcon = ({ className }: { className?: string }) => (
 
 export const ShareMemorial = ({
   name,
-  title = "Share this Memorial",
-  description = "Help family and friends remember and celebrate this loved one's life.",
+  title = tr("a.5b68a8aa36"),
+  description = tr("a.07e65012ec"),
   shareText,
   shareUrl: shareUrlProp,
 }: ShareMemorialProps) => {

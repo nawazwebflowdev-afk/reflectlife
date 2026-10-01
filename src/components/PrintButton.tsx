@@ -1,11 +1,12 @@
 import { Printer } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
+import { tr } from "@/i18n/tr";
 interface PrintButtonProps {
   label?: string;
 }
 
-const PrintButton = ({ label = "Print / PDF" }: PrintButtonProps) => {
+const PrintButton = ({ label = tr("a.42fc8dc574") }: PrintButtonProps) => {
   return (
     <Tooltip>
       <TooltipTrigger asChild>

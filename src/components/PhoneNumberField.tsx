@@ -60,7 +60,7 @@ interface PhoneNumberFieldProps {
 
 const PhoneNumberField = ({
   id = "phoneNumber",
-  label = "Phone Number",
+  label = tr("a.ab25d61bb1"),
   country,
   onCountryChange,
   value,

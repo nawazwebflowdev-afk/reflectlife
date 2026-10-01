@@ -165,7 +165,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
 
   const scheduledSubtext = schedule
     ? `Scheduled for ${format(parseDateKey(schedule.anchor_date), "MMM d")} at ${displayTime} · ${savedCount} recipient${savedCount === 1 ? "" : "s"}`
-    : "No remembrance scheduled yet";
+    : tr("a.42f4bf5652");
 
   const handleSave = async () => {
     if (!userId) { toast.error(tr("a.74d04a61dc")); return; }

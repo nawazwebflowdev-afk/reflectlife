@@ -128,9 +128,9 @@ const PageTemplateSelector = ({
     }
   };
 
-  const pageLabel = pageType === "memorial" ? "Memorial Wall" : pageType === "tree" ? "Connection Tree" : "Timeline";
+  const pageLabel = pageType === "memorial" ? tr("a.a86506f38a") : pageType === "tree" ? tr("a.bc0bf7b892") : tr("a.018514a3d5");
   const triggerLabel =
-    pageType === "tree" ? "Tree Design" : pageType === "timeline" ? "Timeline Design" : "Memorial Design";
+    pageType === "tree" ? tr("a.5ef0f8e305") : pageType === "timeline" ? tr("a.57261c1c7b") : tr("a.a436ead0fa");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

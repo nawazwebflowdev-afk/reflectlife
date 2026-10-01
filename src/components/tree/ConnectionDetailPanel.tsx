@@ -114,8 +114,8 @@ const ConnectionDetailPanel = ({
   };
 
   const displayName = connection.person_id
-    ? (connection.profile?.full_name || "Unknown")
-    : (connection.related_person_name || "Unknown");
+    ? (connection.profile?.full_name || tr("a.bc7819b34f"))
+    : (connection.related_person_name || tr("a.bc7819b34f"));
   const avatarUrl =
     connection.image_url ||
     (connection.person_id ? connection.profile?.avatar_url : null) ||

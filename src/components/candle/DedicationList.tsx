@@ -19,7 +19,7 @@ export function DedicationList({ items }: { items: Contribution[] }) {
       </h3>
       <ul className="space-y-2">
         {items.slice(0, 5).map((c) => {
-          const name = c.anonymous || !c.contributor_name ? 'Anonymous' : c.contributor_name;
+          const name = c.anonymous || !c.contributor_name ? tr("a.9bed510400") : c.contributor_name;
           return (
             <li
               key={c.id}

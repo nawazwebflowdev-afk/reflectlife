@@ -113,7 +113,7 @@ const Success = () => {
         const message =
           error instanceof Error
             ? error.message
-            : "We couldn't finalize template access automatically.";
+            : tr("a.287b539b8c");
 
         setStatus("error");
         toast({
@@ -141,17 +141,17 @@ const Success = () => {
 
   const title =
     status === "checking"
-      ? "Confirming Your Purchase..."
+      ? tr("a.14601fb140")
       : status === "error"
-      ? "Purchase Received — Finalizing Access"
-      : "Thank You for Your Purchase!";
+      ? tr("a.6d22458935")
+      : tr("a.ead8d7c66d");
 
   const description =
     status === "checking"
-      ? "We're securely confirming your payment and unlocking your template now."
+      ? tr("a.e28f67a1c6")
       : status === "error"
-      ? "Your payment was received, but automatic confirmation needs one more step. You can still continue to Templates and retry selection."
-      : "Your new template is now available in your account and active on your profile.";
+      ? tr("a.fb51460210")
+      : tr("a.ccb7aff839");
 
   return (
     <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">

@@ -305,7 +305,7 @@ export default function RemembranceForm({
       onOpenChange(false);
       onSaved();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Something went wrong";
+      const msg = e instanceof Error ? e.message : tr("a.8d886c0ba6");
       toast.error(msg);
     } finally {
       setSaving(false);

@@ -15,7 +15,7 @@ import { tr } from "@/i18n/tr";
 const languages = [
   { code: "en", label: tr("a.649df08a44"), flag: "🇬🇧" },
   { code: "uk", label: "Українська", flag: "🇺🇦" },
-  { code: "es", label: "Español", flag: "🇲🇽" },
+  { code: "es", label: tr("a.2001ca082b"), flag: "🇲🇽" },
 ];
 
 // Full reload so every text (including text prepared at load time) switches language.

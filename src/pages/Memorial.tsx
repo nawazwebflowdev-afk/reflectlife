@@ -335,7 +335,7 @@ const Memorial = () => {
     } catch (error: any) {
       const rawMessage = error?.message || "Upload failed";
       const friendlyMessage = rawMessage.toLowerCase().includes("row-level security")
-        ? "You are no longer authenticated for upload. Please log in again and retry."
+        ? tr("a.2b4293120d")
         : rawMessage;
 
       toast({ title: tr("a.ad0d0603e2"), description: friendlyMessage, variant: "destructive" });

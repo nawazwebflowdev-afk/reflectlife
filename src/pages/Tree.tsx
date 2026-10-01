@@ -256,8 +256,8 @@ const Tree = () => {
 
     const createNodeEl = (conn: Connection, x: number, y: number, isContext = false): Node => {
       const displayName = conn.person_id 
-        ? (conn.profile?.full_name || "Unknown")
-        : (conn.related_person_name || "Unknown");
+        ? (conn.profile?.full_name || tr("a.bc7819b34f"))
+        : (conn.related_person_name || tr("a.bc7819b34f"));
       const avatarUrl =
         conn.image_url ||
         (conn.person_id ? conn.profile?.avatar_url : null) ||
@@ -551,8 +551,8 @@ const Tree = () => {
                         <div className="space-y-2">
                           {connections.map((conn) => {
                             const displayName = conn.person_id
-                              ? (conn.profile?.full_name || "Unknown")
-                              : (conn.related_person_name || "Unknown");
+                              ? (conn.profile?.full_name || tr("a.bc7819b34f"))
+                              : (conn.related_person_name || tr("a.bc7819b34f"));
                             const avatarUrl =
                               conn.image_url ||
                               (conn.person_id ? conn.profile?.avatar_url : null) ||

@@ -38,7 +38,7 @@ export function CandleCard({ candle, isMine, onRelight }: Props) {
   const expiresAt = candle.expires_at ? new Date(candle.expires_at) : null;
   const countdown = useCountdown(expiresAt);
   const lit = candle.status === 'active' && !countdown.done;
-  const name = candle.anonymous || !candle.contributor_name ? 'Anonymous' : candle.contributor_name;
+  const name = candle.anonymous || !candle.contributor_name ? tr("a.9bed510400") : candle.contributor_name;
   const litDate = candle.started_at ? new Date(candle.started_at) : null;
   const remaining = expiresAt ? formatRemaining(expiresAt.getTime() - Date.now()) : '';
 
