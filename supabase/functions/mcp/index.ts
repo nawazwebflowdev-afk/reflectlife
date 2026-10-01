@@ -3,10 +3,10 @@
 // supabase function: mcp
 // Bundled from src/lib/mcp/index.ts by @lovable.dev/mcp-js.
 // src/lib/mcp/index.ts
-import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@0.24.0";
+import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@3.0.4";
 
 // src/lib/mcp/tools/list-memorials.ts
-import { defineTool } from "npm:@lovable.dev/mcp-js@0.24.0";
+import { defineTool } from "npm:@lovable.dev/mcp-js@3.0.4";
 import { z } from "npm:zod@^3.25.76";
 
 // src/lib/mcp/supabase.ts
@@ -56,7 +56,7 @@ var list_memorials_default = defineTool({
 });
 
 // src/lib/mcp/tools/get-memorial.ts
-import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.24.0";
+import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@3.0.4";
 import { z as z2 } from "npm:zod@^3.25.76";
 var get_memorial_default = defineTool2({
   name: "get_memorial",
@@ -78,7 +78,7 @@ var get_memorial_default = defineTool2({
 });
 
 // src/lib/mcp/tools/create-memorial.ts
-import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.24.0";
+import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@3.0.4";
 import { z as z3 } from "npm:zod@^3.25.76";
 var create_memorial_default = defineTool3({
   name: "create_memorial",
@@ -114,7 +114,7 @@ var create_memorial_default = defineTool3({
 });
 
 // src/lib/mcp/tools/list-diary-entries.ts
-import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.24.0";
+import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@3.0.4";
 import { z as z4 } from "npm:zod@^3.25.76";
 var list_diary_entries_default = defineTool4({
   name: "list_diary_entries",
@@ -134,7 +134,7 @@ var list_diary_entries_default = defineTool4({
 });
 
 // src/lib/mcp/tools/create-diary-entry.ts
-import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.24.0";
+import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@3.0.4";
 import { z as z5 } from "npm:zod@^3.25.76";
 var create_diary_entry_default = defineTool5({
   name: "create_diary_entry",
@@ -166,7 +166,7 @@ var create_diary_entry_default = defineTool5({
 });
 
 // src/lib/mcp/tools/add-tribute.ts
-import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.24.0";
+import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@3.0.4";
 import { z as z6 } from "npm:zod@^3.25.76";
 var add_tribute_default = defineTool6({
   name: "add_tribute",
@@ -202,5 +202,5 @@ var mcp_default = defineMcp({
 });
 
 // lovable-mcp-supabase-entry.ts
-import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@0.24.0/stacks/supabase";
+import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@3.0.4/stacks/supabase";
 Deno.serve(createSupabaseHandler(mcp_default, { functionName: "mcp" }));
