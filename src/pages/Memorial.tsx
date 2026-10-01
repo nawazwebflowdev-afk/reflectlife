@@ -506,7 +506,12 @@ const Memorial = () => {
           />
         )}
 
-        {memorial?.name && <ShareMemorial name={memorial.name} />}
+        {memorial?.name && (
+          <ShareMemorial
+            name={memorial.name}
+            shareUrl={`https://reflectlife.net/memorial/${memorial.id}`}
+          />
+        )}
 
 
         {/* Tabs */}
