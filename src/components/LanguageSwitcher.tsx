@@ -9,12 +9,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
+import { isSpanishPath, pathForLang } from "@/i18n/langPath";
 
 import { tr } from "@/i18n/tr";
 const languages = [
   { code: "en", label: tr("a.649df08a44"), flag: "🇬🇧" },
   { code: "uk", label: "Українська", flag: "🇺🇦" },
+  { code: "es", label: "Español", flag: "🇲🇽" },
 ];
+
+// Full reload so every text (including text prepared at load time) switches language.
+const goTo = (lng: string) => {
+  const { pathname, search, hash } = window.location;
+  window.location.assign(pathForLang(pathname, lng) + search + hash);
+};
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
@@ -29,8 +37,10 @@ const LanguageSwitcher = () => {
           .select("preferred_language")
           .eq("id", session.user.id)
           .single();
-        if (data?.preferred_language && data.preferred_language !== i18n.language) {
-          i18n.changeLanguage(data.preferred_language);
+        // An explicit /es URL wins over the saved profile language.
+        if (data?.preferred_language && data.preferred_language !== i18n.language && !isSpanishPath(window.location.pathname)) {
+          localStorage.setItem("reflectlife-lang", data.preferred_language);
+          if (data.preferred_language === "es") goTo("es"); else i18n.changeLanguage(data.preferred_language);
         }
       }
     };
@@ -38,7 +48,6 @@ const LanguageSwitcher = () => {
   }, []);
 
   const changeLanguage = async (lng: string) => {
-    i18n.changeLanguage(lng);
     localStorage.setItem("reflectlife-lang", lng);
 
     // Save to profile if logged in
@@ -49,9 +58,10 @@ const LanguageSwitcher = () => {
         .update({ preferred_language: lng })
         .eq("id", session.user.id);
     }
+    goTo(lng);
   };
 
-  const currentLang = languages.find((l) => l.code === i18n.language) || languages[0];
+  const currentLang = languages.find((l) => i18n.language.startsWith(l.code)) || languages[0];
 
   return (
     <DropdownMenu>
@@ -66,7 +76,7 @@ const LanguageSwitcher = () => {
           <DropdownMenuItem
             key={lang.code}
             onClick={() => changeLanguage(lang.code)}
-            className={i18n.language === lang.code ? "bg-accent" : ""}
+            className={i18n.language.startsWith(lang.code) ? "bg-accent" : ""}
           >
             <span className="mr-2">{lang.flag}</span>
             {lang.label}
