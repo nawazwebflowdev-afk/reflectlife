@@ -396,20 +396,20 @@ const Memorial = () => {
       >
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
         
-        {templateTheme.templateName && (
+        {memorial.memorial_type !== "defender_of_ukraine" && templateTheme.templateName && (
           <div className="absolute top-6 left-6 text-white/90 text-sm font-medium bg-black/30 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/20">
             Theme: {templateTheme.templateName}
           </div>
         )}
         
-        <div className="absolute top-6 right-6">
+        {memorial.memorial_type !== "defender_of_ukraine" && <div className="absolute top-6 right-6">
           <Link to="/templates">
             <Button variant="outline" className="gap-2 bg-background/80 backdrop-blur-sm">
               <Palette className="h-4 w-4" />
               Change Template
             </Button>
           </Link>
-        </div>
+        </div>}
         
         <div className="relative container mx-auto px-4 pb-8">
           <div className="flex flex-col lg:flex-row items-center lg:items-end gap-4 lg:gap-6">
