@@ -1,0 +1,3 @@
+CREATE POLICY "No client access to guest candle limits" ON public.guest_candle_rate_limits FOR ALL TO anon, authenticated USING (false) WITH CHECK (false);
+CREATE POLICY "No client access to remembrance deliveries" ON public.memorial_remembrance_deliveries FOR ALL TO anon, authenticated USING (false) WITH CHECK (false);
+CREATE POLICY "No client access to candle conversions" ON public.guest_candle_conversions FOR ALL TO anon, authenticated USING (false) WITH CHECK (false);
