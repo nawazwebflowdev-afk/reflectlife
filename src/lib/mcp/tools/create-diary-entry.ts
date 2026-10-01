@@ -2,11 +2,10 @@ import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 import { errorResult, jsonResult, notAuthenticated, supabaseForUser } from "../supabase";
 
-import { tr } from "@/i18n/tr";
 export default defineTool({
   name: "create_diary_entry",
-  title: tr("a.0784e4d08d"),
-  description: tr("a.1b239d6b3f"),
+  title: "Create a diary entry",
+  description: "Write a new reflection diary entry for the signed-in Reflectlife user.",
   inputSchema: {
     title: z.string().describe("Title of the entry."),
     content: z.string().describe("Body text of the entry.").optional(),
