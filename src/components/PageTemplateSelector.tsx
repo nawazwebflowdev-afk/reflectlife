@@ -194,7 +194,7 @@ const PageTemplateSelector = ({
                   >
                     <div className="aspect-video bg-muted">
                       {template.preview_url ? (
-                        <img src={template.preview_url} alt={template.name} className="w-full h-full object-cover" />
+                        <img src={template.preview_url} alt={template.name} width={480} height={270} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
                           <Palette className="h-6 w-6 text-muted-foreground" />

@@ -424,6 +424,10 @@ const CreatorDashboard = () => {
               <img
                 src={template.preview_url || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
                 alt={template.name}
+                width={400}
+                height={533}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover"
               />
             </div>

@@ -280,6 +280,9 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
                         <img
                           src={imagePreview}
                           alt={tr("a.f1fbb2b43d")}
+                          width={512}
+                          height={192}
+                          decoding="async"
                           className="max-h-48 rounded-lg mx-auto"
                         />
                         <Button

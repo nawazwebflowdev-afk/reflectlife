@@ -276,6 +276,10 @@ const Diary = () => {
                       <img
                         src={entry.media_url}
                         alt={tr("a.924ffdb7a5")}
+                        width={640}
+                        height={256}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-32 object-cover"
                       />
                     </div>

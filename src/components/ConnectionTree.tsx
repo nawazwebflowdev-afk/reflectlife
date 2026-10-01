@@ -212,6 +212,10 @@ const ConnectionTree = () => {
                         <img
                           src={node.photo || portraitPlaceholder}
                           alt={node.name}
+                          width={80}
+                          height={80}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -263,6 +267,9 @@ const ConnectionTree = () => {
                   <img
                     src={selectedNode.photo || portraitPlaceholder}
                     alt={selectedNode.name}
+                    width={80}
+                    height={80}
+                    decoding="async"
                     className="w-full h-full object-cover"
                   />
                 </div>

@@ -442,6 +442,9 @@ const Memorial = () => {
               <img
                 src={memorial.preview_image_url || portraitPlaceholder}
                 alt={memorial.name}
+                width={160}
+                height={160}
+                decoding="async"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -600,6 +603,10 @@ const Memorial = () => {
                             <img
                               src={entry.content_url}
                               alt={entry.caption || tr("a.89c8a2851d")}
+                              width={768}
+                              height={512}
+                              loading="lazy"
+                              decoding="async"
                               className="w-full h-auto"
                             />
                           </div>
@@ -648,6 +655,10 @@ const Memorial = () => {
                           <img 
                             src={tribute.profiles.avatar_url} 
                             alt={tribute.profiles.full_name || tr("a.9f8a2389a2")}
+                            width={40}
+                            height={40}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-cover rounded-full"
                           />
                         ) : (
@@ -748,6 +759,10 @@ const Memorial = () => {
                         <img
                           src={media.media_url}
                           alt={media.caption || tr("a.10c2eb504b")}
+                          width={768}
+                          height={256}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-64 object-cover"
                         />
                       ) : (
