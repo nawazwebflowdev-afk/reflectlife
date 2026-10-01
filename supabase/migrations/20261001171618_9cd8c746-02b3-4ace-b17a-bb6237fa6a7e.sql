@@ -1,0 +1,1 @@
+CREATE POLICY "No client access to email log" ON public.owner_email_log FOR ALL TO anon, authenticated USING (false) WITH CHECK (false);
