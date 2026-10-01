@@ -43,9 +43,11 @@ import CampaignDashboard from "./pages/CampaignDashboard";
 import Terms from "./pages/Terms";
 import UkrainianMemorialLanding from "./pages/UkrainianMemorialLanding";
 import LanguageAlternates from "./components/LanguageAlternates";
-import { isSpanishPath, SPANISH_PREFIX } from "./i18n/langPath";
+import { langFromPath } from "./i18n/langPath";
+import SeasonalBanner from "./components/SeasonalBanner";
 
-const routerBasename = isSpanishPath(window.location.pathname) ? SPANISH_PREFIX : undefined;
+const urlLang = langFromPath(window.location.pathname);
+const routerBasename = urlLang ? `/${urlLang}` : undefined;
 
 const queryClient = new QueryClient();
 
@@ -59,6 +61,7 @@ const App = () => (
           <LanguageAlternates />
           <div className="flex flex-col min-h-screen">
             <Navigation />
+            <SeasonalBanner />
             <main className="flex-grow">
               <Routes>
                 <Route path="/" element={<Landing />} />
