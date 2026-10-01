@@ -17,6 +17,7 @@ import RemembranceSection from "@/components/remembrance/RemembranceSection";
 import DonateInMemory from "@/components/donation/DonateInMemory";
 import PrintButton from "@/components/PrintButton";
 import { useTranslation } from "react-i18next";
+import { MemorialDateReminders } from "@/components/remembrance/MemorialDateReminders";
 
 const Memorial = () => {
   const { id } = useParams();
@@ -431,6 +432,7 @@ const Memorial = () => {
               <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 text-foreground">
                 {memorial.name}
               </h1>
+              {memorial.memorial_type === "defender_of_ukraine" && <div className="mb-3 flex flex-wrap justify-center gap-2 lg:justify-start"><span className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-sm font-semibold">{memorial.defender_label === "defender_female" ? "Захисниця України" : "Захисник України"}</span>{memorial.service_unit && <span className="rounded-full border px-3 py-1 text-sm">{memorial.service_unit}</span>}{memorial.service_place && <span className="rounded-full border px-3 py-1 text-sm">{memorial.service_place}</span>}</div>}
               <p className="text-base sm:text-lg text-muted-foreground mb-3">
                 {formatDate(memorial.date_of_birth)} – {formatDate(memorial.date_of_death)}
               </p>
@@ -490,6 +492,7 @@ const Memorial = () => {
         )}
 
         {memorial?.id && <CandleSection memorialId={memorial.id} memorialName={memorial.name} isOwner={!!isCreator} guestEnabled={memorial.guest_candles_enabled !== false} isDefender={memorial.memorial_type === "defender_of_ukraine"} />}
+        <MemorialDateReminders memorialId={memorial.id} ownerId={memorial.user_id} isOwner={!!isCreator} dateOfDeath={memorial.date_of_death} />
 
         {memorial?.id && memorial?.name && (
           <RemembranceSection

@@ -8,12 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Flame } from 'lucide-react';
 import type { CandlePlanKey } from './candlePlans';
+import { GuestCandlePanel } from './GuestCandlePanel';
 
 const PAGE_SIZE = 100;
 
-interface Props { memorialId: string }
+interface Props { memorialId: string; memorialName: string; isOwner: boolean; guestEnabled: boolean; isDefender: boolean }
 
-export function CandleSection({ memorialId }: Props) {
+export function CandleSection({ memorialId, memorialName, isOwner, guestEnabled, isDefender }: Props) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -164,6 +165,12 @@ export function CandleSection({ memorialId }: Props) {
         await fetchCandles(0, true);
       } else {
         const { data, error } = await supabase.functions.invoke('create-candle-checkout', { body: payload });
+        if ((data as any)?.free) {
+          toast({ title: 'Your candle is lit', description: 'This candle is free on Defender memorials.' });
+          setDialogOpen(false);
+          await fetchCandles(0, true);
+          return;
+        }
         if (error || !data?.url) throw new Error((data as any)?.error || error?.message || 'Checkout failed');
         window.location.href = data.url;
       }
@@ -203,6 +210,9 @@ export function CandleSection({ memorialId }: Props) {
           <Flame className="w-4 h-4 mr-2" style={{ color: '#FFE9A8' }} />
           {myCandle ? 'Extend Your Candle' : 'Light a Candle'}
         </Button>
+        <p className="text-sm text-muted-foreground">
+          {isDefender ? 'All candle durations are free on this Defender memorial.' : 'Keep a candle burning for a month or a year.'}
+        </p>
 
         {loading ? (
           <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
@@ -234,6 +244,7 @@ export function CandleSection({ memorialId }: Props) {
             )}
           </>
         )}
+        <GuestCandlePanel memorialId={memorialId} memorialName={memorialName} isOwner={isOwner} enabled={guestEnabled} />
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

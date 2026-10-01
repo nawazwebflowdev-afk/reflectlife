@@ -51,13 +51,29 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const { data: memorial, error: memErr } = await supabase
       .from('memorials')
-      .select('id, name')
+      .select('id, name, memorial_type')
       .eq('id', memorial_id)
       .maybeSingle();
     if (memErr || !memorial) return json({ error: 'Memorial not found' }, 404);
 
-    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2025-08-27.basil' });
     const planDef = CANDLE_PLANS[plan];
+    if (memorial.memorial_type === 'defender_of_ukraine') {
+      const { data, error } = await supabase.rpc('light_user_candle', {
+        _memorial_id: memorial_id,
+        _user_id: userId,
+        _plan: plan,
+        _duration_seconds: planDef.duration_seconds,
+        _amount: 0,
+        _contributor_name: contributor_name,
+        _anonymous: anonymous,
+        _message: message,
+        _stripe_session_id: null,
+      });
+      if (error) return json({ error: 'Could not light the candle.' }, 500);
+      return json({ free: true, candle: data });
+    }
+
+    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2025-08-27.basil' });
     const origin = req.headers.get('origin') || Deno.env.get('SITE_URL') || 'https://reflectlife.lovable.app';
 
     const session = await stripe.checkout.sessions.create({
