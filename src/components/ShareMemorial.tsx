@@ -6,6 +6,7 @@ interface ShareMemorialProps {
   title?: string;
   description?: string;
   shareText?: string;
+  shareUrl?: string;
 }
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -50,8 +51,9 @@ export const ShareMemorial = ({
   title = "Share this Memorial",
   description = "Help family and friends remember and celebrate this loved one's life.",
   shareText,
+  shareUrl: shareUrlProp,
 }: ShareMemorialProps) => {
-  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const shareUrl = shareUrlProp ?? (typeof window !== "undefined" ? window.location.href : "");
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedText = encodeURIComponent(shareText ?? `Remembering ${name}`);
 

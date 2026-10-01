@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.send-remembrance-notifications]
 verify_jwt = false
+
+[functions.memorial-share]
+verify_jwt = false

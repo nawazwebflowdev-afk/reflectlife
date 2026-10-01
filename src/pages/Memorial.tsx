@@ -506,7 +506,12 @@ const Memorial = () => {
           />
         )}
 
-        {memorial?.name && <ShareMemorial name={memorial.name} />}
+        {memorial?.name && (
+          <ShareMemorial
+            name={memorial.name}
+            shareUrl={`https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/memorial-share?id=${memorial.id}`}
+          />
+        )}
 
 
         {/* Tabs */}
