@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { pageMeta } from "@/i18n/pageMeta";
 
 const SITE = "https://reflectlife.net";
 
@@ -13,15 +14,24 @@ const LanguageAlternates = () => {
   const es = `${SITE}/es${base}`;
   const de = `${SITE}/de${base}`;
   const lang = i18n.language.startsWith("es") ? "es" : i18n.language.startsWith("de") ? "de" : i18n.language.startsWith("uk") ? "uk" : "en";
+  const meta = pageMeta(pathname, lang);
+  const self = lang === "es" ? es : lang === "de" ? de : en;
   return (
     <Helmet htmlAttributes={{ lang }}>
+      <title>{meta.title}</title>
+      <meta name="description" content={meta.description} />
+      <meta property="og:title" content={meta.title} />
+      <meta property="og:description" content={meta.description} />
+      <meta property="og:url" content={self} />
+      <meta name="twitter:title" content={meta.title} />
+      <meta name="twitter:description" content={meta.description} />
       <link rel="alternate" hrefLang="en" href={en} />
       <link rel="alternate" hrefLang="uk" href={en} />
       <link rel="alternate" hrefLang="es" href={es} />
       <link rel="alternate" hrefLang="es-MX" href={es} />
       <link rel="alternate" hrefLang="de" href={de} />
       <link rel="alternate" hrefLang="x-default" href={en} />
-      <link rel="canonical" href={lang === "es" ? es : lang === "de" ? de : en} />
+      <link rel="canonical" href={self} />
       <meta property="og:locale" content={lang === "es" ? "es_MX" : lang === "de" ? "de_DE" : lang === "uk" ? "uk_UA" : "en_GB"} />
     </Helmet>
   );
