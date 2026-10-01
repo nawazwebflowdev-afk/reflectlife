@@ -17,7 +17,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="flex items-center gap-3 group">
-              <img src={reflectlifeLogo} alt={tr("a.1a0e32b358")} className="h-10 w-auto object-contain transition-smooth group-hover:scale-105" />
+              <img src={reflectlifeLogo} alt={tr("a.1a0e32b358")} width={1166} height={460} loading="lazy" decoding="async" className="h-10 w-auto object-contain transition-smooth group-hover:scale-105" />
             </Link>
             <p className="text-muted-foreground text-sm max-w-md mb-4">
               {t("footer.tagline")}
