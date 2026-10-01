@@ -27,13 +27,14 @@ Deno.serve(async req => {
     if (!memorial.guest_candles_enabled) return json({ error: 'Guest candles are not available for this memorial.' }, 403);
     const [deviceHash, ipHash] = await Promise.all([hash(parsed.data.device_id), hash(ip)]);
     const today = new Date().toISOString().slice(0,10);
-    const [{ count: deviceCount }, { count: ipCount }] = await Promise.all([
-      service.from('guest_candle_rate_limits').select('id', { count:'exact', head:true }).eq('memorial_id', memorial.id).eq('device_hash', deviceHash).eq('rate_date', today),
-      service.from('guest_candle_rate_limits').select('id', { count:'exact', head:true }).eq('memorial_id', memorial.id).eq('ip_hash', ipHash).eq('rate_date', today),
-    ]);
-    if ((deviceCount ?? 0) >= 3 || (ipCount ?? 0) >= 3) return json({ error: 'Three candles have already been lit from this device or network today.' }, 429);
-    const { error: limitError } = await service.from('guest_candle_rate_limits').insert({ memorial_id: memorial.id, device_hash: deviceHash, ip_hash: ipHash, rate_date: today });
-    if (limitError) return json({ error: 'Could not light the candle.' }, 500);
+    const { data: claimed, error: claimError } = await service.rpc('claim_guest_candle_rate_limit', {
+      _memorial_id: memorial.id,
+      _device_hash: deviceHash,
+      _ip_hash: ipHash,
+      _rate_date: today,
+    });
+    if (claimError) return json({ error: 'Could not light the candle.' }, 500);
+    if (!claimed) return json({ error: 'Three candles have already been lit from this device or network today.' }, 429);
     const name = parsed.data.contributor_name?.replace(/[<>]/g, '').trim() || null;
     const { data: candle, error } = await service.from('memorial_guest_candles').insert({ memorial_id: memorial.id, contributor_name: name, device_hash: deviceHash, ip_hash: ipHash }).select('id,contributor_name,lit_at,burns_until').single();
     if (error) return json({ error: 'Could not light the candle.' }, 500);
