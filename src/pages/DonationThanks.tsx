@@ -33,7 +33,7 @@ export default function DonationThanks() {
             <h1 className="text-2xl font-semibold">{t("don.thanksTitle")}</h1>
             <p className="text-muted-foreground">{t("don.thanksText")}</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button asChild><Link to={`${path}#candles`}><Flame className="mr-2 h-4 w-4" />{t("don.lightCandle")}</Link></Button>
+              <Button asChild><Link to={`${path}#candles-of-remembrance`}><Flame className="mr-2 h-4 w-4" />{t("don.lightCandle")}</Link></Button>
               <Button variant="outline" onClick={share}><Share2 className="mr-2 h-4 w-4" />{t("don.share")}</Button>
             </div>
             <Link to={path} className="text-sm underline text-muted-foreground block">{t("don.backToMemorial")}</Link>
