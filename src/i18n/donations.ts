@@ -1,5 +1,13 @@
 /** Donation UI text in all site languages (merged under the `don` namespace). */
 const en = {
+  remDates: "Remembrance dates",
+  remNinth: "9th day",
+  remFortieth: "40th day",
+  remFirst: "First anniversary",
+  remAnnual: "Every following anniversary",
+  remEmailMe: "Email me these reminders",
+  remNext: "Next reminder: {{what}} · {{date}}",
+  remTime: "Remembrance time",
   cardTitle: "Donations",
   collect: "Collect donations",
   optStripe: "Receive donations via Reflectlife",
@@ -93,6 +101,14 @@ const en = {
 type Dict = typeof en;
 
 const uk: Dict = {
+  remDates: "Дні пам'яті",
+  remNinth: "9-й день",
+  remFortieth: "40-й день",
+  remFirst: "Перша річниця",
+  remAnnual: "Кожна наступна річниця",
+  remEmailMe: "Надсилати мені ці нагадування",
+  remNext: "Наступне нагадування: {{what}} · {{date}}",
+  remTime: "Час пам'яті",
   cardTitle: "Пожертви",
   collect: "Збирати пожертви",
   optStripe: "Отримувати пожертви через Reflectlife",
@@ -180,6 +196,14 @@ const uk: Dict = {
 };
 
 const es: Dict = {
+  remDates: "Fechas de recuerdo",
+  remNinth: "Día 9",
+  remFortieth: "Día 40",
+  remFirst: "Primer aniversario",
+  remAnnual: "Cada aniversario siguiente",
+  remEmailMe: "Enviarme estos recordatorios por correo",
+  remNext: "Próximo recordatorio: {{what}} · {{date}}",
+  remTime: "Momento de recuerdo",
   cardTitle: "Donaciones",
   collect: "Recibir donaciones",
   optStripe: "Recibir donaciones a través de Reflectlife",
@@ -267,6 +291,14 @@ const es: Dict = {
 };
 
 const de: Dict = {
+  remDates: "Gedenktage",
+  remNinth: "9. Tag",
+  remFortieth: "40. Tag",
+  remFirst: "Erster Jahrestag",
+  remAnnual: "Jeder folgende Jahrestag",
+  remEmailMe: "Diese Erinnerungen per E-Mail an mich senden",
+  remNext: "Nächste Erinnerung: {{what}} · {{date}}",
+  remTime: "Gedenkzeit",
   cardTitle: "Spenden",
   collect: "Spenden sammeln",
   optStripe: "Spenden über Reflectlife empfangen",
