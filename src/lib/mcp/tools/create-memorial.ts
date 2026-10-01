@@ -2,11 +2,10 @@ import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 import { errorResult, jsonResult, notAuthenticated, supabaseForUser } from "../supabase";
 
-import { tr } from "@/i18n/tr";
 export default defineTool({
   name: "create_memorial",
-  title: tr("a.ce9ad284ad"),
-  description: tr("a.3dfab8ce6b"),
+  title: "Create a memorial",
+  description: "Create a new memorial page owned by the signed-in Reflectlife user.",
   inputSchema: {
     name: z.string().describe("Full name of the person being remembered."),
     bio: z.string().describe("Short biography or remembrance text.").optional(),

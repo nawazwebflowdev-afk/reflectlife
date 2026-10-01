@@ -2,11 +2,10 @@ import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 import { errorResult, jsonResult, notAuthenticated, supabaseForUser } from "../supabase";
 
-import { tr } from "@/i18n/tr";
 export default defineTool({
   name: "list_memorials",
-  title: tr("a.649a299be4"),
-  description: tr("a.acd39dc10b"),
+  title: "List my memorials",
+  description: "List memorial pages created by the signed-in Reflectlife user.",
   inputSchema: {
     limit: z.number().int().describe("Maximum number of memorials to return (default 20).").optional(),
   },
