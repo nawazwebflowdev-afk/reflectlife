@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { formatDate } from "@/lib/dateFormat";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +21,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, ArrowLeft, Wallet, TrendingUp, Users, Clock, CheckCircle, XCircle, Landmark, CreditCard, AlertCircle } from "lucide-react";
 
+import { tr } from "@/i18n/tr";
 interface Campaign {
   id: string;
   memory_wall_id: string;
@@ -107,8 +109,8 @@ const CampaignDashboard = () => {
       if (campaignError) throw campaignError;
       if (campaignData.organizer_user_id !== uid) {
         toast({
-          title: "Access denied",
-          description: "Only the campaign organizer can view this dashboard.",
+          title: tr("a.64343a83ad"),
+          description: tr("a.6ed06d3cf6"),
           variant: "destructive",
         });
         navigate("/dashboard");
@@ -145,8 +147,8 @@ const CampaignDashboard = () => {
       }
     } catch (err: any) {
       toast({
-        title: "Error loading dashboard",
-        description: err.message || "Could not load campaign data.",
+        title: tr("a.7ad7e91622"),
+        description: err.message || tr("a.ed4c1cf6f0"),
         variant: "destructive",
       });
     } finally {
@@ -173,8 +175,8 @@ const CampaignDashboard = () => {
 
     if (currentMonthPayout) {
       toast({
-        title: "Monthly payout already requested",
-        description: `Payouts run once per month. Your next payout can be requested on ${nextPayoutDate.toLocaleDateString()}.`,
+        title: tr("a.a050a0d86f"),
+        description: `Payouts run once per month. Your next payout can be requested on ${formatDate(nextPayoutDate)}.`,
         variant: "destructive",
       });
       return;
@@ -182,15 +184,15 @@ const CampaignDashboard = () => {
 
     const requestAmount = parseFloat(amount);
     if (!requestAmount || requestAmount <= 0) {
-      toast({ title: "Invalid amount", description: "Enter a positive amount.", variant: "destructive" });
+      toast({ title: tr("a.a2f6ca327e"), description: tr("a.ea70556eb6"), variant: "destructive" });
       return;
     }
     if (requestAmount > summary.available_payout) {
-      toast({ title: "Insufficient funds", description: "The requested amount exceeds the available payout.", variant: "destructive" });
+      toast({ title: tr("a.0f1b4fb91c"), description: tr("a.ebb6c45b78"), variant: "destructive" });
       return;
     }
     if (requestAmount < 10) {
-      toast({ title: "Minimum payout", description: "Minimum withdrawal is €10.", variant: "destructive" });
+      toast({ title: tr("a.3117d66203"), description: tr("a.0b0eeabaa3"), variant: "destructive" });
       return;
     }
 
@@ -200,11 +202,11 @@ const CampaignDashboard = () => {
       : { type: "bank", account_holder: accountHolder.trim(), iban: iban.trim() };
 
     if (method === "paypal" && !payoutMethod.email) {
-      toast({ title: "PayPal email required", variant: "destructive" });
+      toast({ title: tr("a.c28edc8f79"), variant: "destructive" });
       return;
     }
     if (method === "bank" && (!payoutMethod.account_holder || !payoutMethod.iban)) {
-      toast({ title: "Bank details required", variant: "destructive" });
+      toast({ title: tr("a.06a3f1eafd"), variant: "destructive" });
       return;
     }
 
@@ -219,9 +221,9 @@ const CampaignDashboard = () => {
     setRequesting(false);
 
     if (error) {
-      toast({ title: "Payout request failed", description: error.message, variant: "destructive" });
+      toast({ title: tr("a.aa3e027c21"), description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Monthly payout requested", description: "Funds will be sent to the beneficiary in this month's payout run." });
+      toast({ title: tr("a.3343491ea1"), description: tr("a.a069e9d880") });
       setAmount("");
       setPaypalEmail("");
       setAccountHolder("");
@@ -240,11 +242,11 @@ const CampaignDashboard = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge variant="secondary" className="bg-green-500/10 text-green-700">Completed</Badge>;
+        return <Badge variant="secondary" className="bg-green-500/10 text-green-700">{tr("a.1798b3ba42")}</Badge>;
       case "pending":
-        return <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-700">Pending</Badge>;
+        return <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-700">{tr("a.96f608c16c")}</Badge>;
       case "failed":
-        return <Badge variant="secondary" className="bg-red-500/10 text-red-700">Failed</Badge>;
+        return <Badge variant="secondary" className="bg-red-500/10 text-red-700">{tr("a.09fef5d8d9")}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -262,10 +264,10 @@ const CampaignDashboard = () => {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <AlertCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-        <h1 className="font-serif text-2xl font-semibold mb-2">Campaign not found</h1>
-        <p className="text-muted-foreground mb-6">The campaign dashboard you are looking for does not exist.</p>
+        <h1 className="font-serif text-2xl font-semibold mb-2">{tr("a.1ae44bb422")}</h1>
+        <p className="text-muted-foreground mb-6">{tr("a.658a70ee2e")}</p>
         <Button asChild>
-          <Link to="/dashboard">Go to Dashboard</Link>
+          <Link to="/dashboard">{tr("a.f7b5bf8cef")}</Link>
         </Button>
       </div>
     );
@@ -285,7 +287,7 @@ const CampaignDashboard = () => {
           </Link>
         </Button>
         <div>
-          <h1 className="font-serif text-2xl md:text-3xl font-bold">Campaign Dashboard</h1>
+          <h1 className="font-serif text-2xl md:text-3xl font-bold">{tr("a.7ccc21e58b")}</h1>
           <p className="text-muted-foreground text-sm">{campaign.beneficiary_name}</p>
         </div>
       </div>
@@ -293,96 +295,96 @@ const CampaignDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total Raised</CardDescription>
+            <CardDescription>{tr("a.1bbce7c6a7")}</CardDescription>
             <CardTitle className="font-serif text-2xl flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
               {money(summary?.total_gross || 0)}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">{percentOfGoal}% of {money(campaign.target_goal_amount)} goal</p>
+            <p className="text-sm text-muted-foreground">{percentOfGoal}{tr("a.0f9771a13a")} {money(campaign.target_goal_amount)} goal</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Net Payout</CardDescription>
+            <CardDescription>{tr("a.110f85cef4")}</CardDescription>
             <CardTitle className="font-serif text-2xl flex items-center gap-2">
               <Wallet className="h-5 w-5 text-primary" />
               {money(summary?.total_net || 0)}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">After platform fees</p>
+            <p className="text-sm text-muted-foreground">{tr("a.2ebbdada6a")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Available to Withdraw</CardDescription>
+            <CardDescription>{tr("a.e7bd7a0352")}</CardDescription>
             <CardTitle className="font-serif text-2xl flex items-center gap-2">
               <Landmark className="h-5 w-5 text-primary" />
               {money(summary?.available_payout || 0)}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">Minus completed payouts</p>
+            <p className="text-sm text-muted-foreground">{tr("a.da7b7b58f5")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Supporters</CardDescription>
+            <CardDescription>{tr("a.74b5d46318")}</CardDescription>
             <CardTitle className="font-serif text-2xl flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
               {summary?.donor_count || 0}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">Successful donations</p>
+            <p className="text-sm text-muted-foreground">{tr("a.69a4b1f1ec")}</p>
           </CardContent>
         </Card>
       </div>
 
       <Tabs defaultValue="donations" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="donations">Donations</TabsTrigger>
-          <TabsTrigger value="payouts">Payouts & Withdraw</TabsTrigger>
-          <TabsTrigger value="details">Campaign Details</TabsTrigger>
+          <TabsTrigger value="donations">{tr("a.a2e2fff532")}</TabsTrigger>
+          <TabsTrigger value="payouts">{tr("a.1a48f23dca")}</TabsTrigger>
+          <TabsTrigger value="details">{tr("a.0cfdcf4d38")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="donations" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Donation History</CardTitle>
-              <CardDescription>All successful donations for this campaign</CardDescription>
+              <CardTitle>{tr("a.8a6da9b5e5")}</CardTitle>
+              <CardDescription>{tr("a.760a9a1451")}</CardDescription>
             </CardHeader>
             <CardContent>
               {donations.length === 0 ? (
                 <div className="text-center py-10 text-muted-foreground">
-                  <p>No donations yet.</p>
-                  <p className="text-sm">Share the memorial page to start receiving contributions.</p>
+                  <p>{tr("a.ad64fa771c")}</p>
+                  <p className="text-sm">{tr("a.39f72b9e39")}</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Donor</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Gross</TableHead>
-                        <TableHead>Fee</TableHead>
-                        <TableHead>Net</TableHead>
-                        <TableHead>Message</TableHead>
+                        <TableHead>{tr("a.eb9a4bc1c0")}</TableHead>
+                        <TableHead>{tr("a.4962c9f8e2")}</TableHead>
+                        <TableHead>{tr("a.3deb745651")}</TableHead>
+                        <TableHead>{tr("a.9580a6176f")}</TableHead>
+                        <TableHead>{tr("a.c6e89c9caf")}</TableHead>
+                        <TableHead>{tr("a.9bb81c2ecc")}</TableHead>
+                        <TableHead>{tr("a.68f4145fee")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {donations.map((d) => (
                         <TableRow key={d.id}>
-                          <TableCell>{new Date(d.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell>{formatDate(d.created_at)}</TableCell>
                           <TableCell>
-                            {d.is_anonymous ? "Anonymous" : d.donor_name || d.donor_email}
+                            {d.is_anonymous ? tr("a.9bed510400") : d.donor_name || d.donor_email}
                           </TableCell>
                           <TableCell className="capitalize">{d.donor_type}</TableCell>
                           <TableCell>{money(d.gross_amount)}</TableCell>
@@ -404,20 +406,20 @@ const CampaignDashboard = () => {
             <CardHeader>
               <CardTitle className="font-serif text-xl flex items-center gap-2">
                 <Wallet className="h-5 w-5 text-primary" />
-                Monthly Payout to Beneficiary
+                {tr("a.7613b8d59d")}
               </CardTitle>
               <CardDescription>
-                Payouts are sent once per month. Minimum withdrawal is {money(10)}.
+                {tr("a.dc8f089d41")} {money(10)}.
                 {currentMonthPayout
-                  ? ` This month's payout of ${money(currentMonthPayout.amount)} is already requested — next payout available on ${nextPayoutDate.toLocaleDateString()}.`
-                  : ` Next payout window opens ${nextPayoutDate.toLocaleDateString()} if you skip this month.`}
+                  ? ` This month's payout of ${money(currentMonthPayout.amount)} is already requested — next payout available on ${formatDate(nextPayoutDate)}.`
+                  : ` Next payout window opens ${formatDate(nextPayoutDate)} if you skip this month.`}
               </CardDescription>
 
             </CardHeader>
             <CardContent>
               <form onSubmit={handleRequestPayout} className="space-y-4">
                 <div>
-                  <Label htmlFor="payoutAmount">Amount ({campaign.currency}) *</Label>
+                  <Label htmlFor="payoutAmount">{tr("a.52b139c9d3")}{campaign.currency}) *</Label>
                   <Input
                     id="payoutAmount"
                     type="number"
@@ -430,7 +432,7 @@ const CampaignDashboard = () => {
                     required
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Available: {money(summary?.available_payout || 0)}
+                    {tr("a.4a8c2fb2e5")} {money(summary?.available_payout || 0)}
                   </p>
                 </div>
 
@@ -440,48 +442,48 @@ const CampaignDashboard = () => {
                     variant={method === "paypal" ? "default" : "outline"}
                     onClick={() => setMethod("paypal")}
                   >
-                    PayPal
+                    {tr("a.559ef5544c")}
                   </Button>
                   <Button
                     type="button"
                     variant={method === "bank" ? "default" : "outline"}
                     onClick={() => setMethod("bank")}
                   >
-                    Bank Transfer
+                    {tr("a.17ef50d8f8")}
                   </Button>
                 </div>
 
                 {method === "paypal" ? (
                   <div>
-                    <Label htmlFor="paypalEmail">PayPal Email *</Label>
+                    <Label htmlFor="paypalEmail">{tr("a.d8a403b62a")}</Label>
                     <Input
                       id="paypalEmail"
                       type="email"
                       value={paypalEmail}
                       onChange={(e) => setPaypalEmail(e.target.value)}
-                      placeholder="your.email@example.com"
+                      placeholder={tr("a.9b5ca72bb2")}
                       required
                     />
                   </div>
                 ) : (
                   <div className="space-y-3">
                     <div>
-                      <Label htmlFor="accountHolder">Account Holder Name *</Label>
+                      <Label htmlFor="accountHolder">{tr("a.a51fafdcfc")}</Label>
                       <Input
                         id="accountHolder"
                         value={accountHolder}
                         onChange={(e) => setAccountHolder(e.target.value)}
-                        placeholder="Full name on the account"
+                        placeholder={tr("a.c6784774ff")}
                         required
                       />
                     </div>
                     <div>
-                      <Label htmlFor="iban">IBAN *</Label>
+                      <Label htmlFor="iban">{tr("a.36fa8baf67")}</Label>
                       <Input
                         id="iban"
                         value={iban}
                         onChange={(e) => setIban(e.target.value)}
-                        placeholder="DE89 3704 0044 0532 0130 00"
+                        placeholder={tr("a.1e13899480")}
                         required
                       />
                     </div>
@@ -495,17 +497,17 @@ const CampaignDashboard = () => {
                   {requesting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Processing...
+                      {tr("a.272bc02ec5")}
                     </>
                   ) : currentMonthPayout ? (
                     <>
                       <Clock className="h-4 w-4 mr-2" />
-                      Payout scheduled this month
+                      {tr("a.dd85f8adfa")}
                     </>
                   ) : (
                     <>
                       <CreditCard className="h-4 w-4 mr-2" />
-                      Send Monthly Payout
+                      {tr("a.e268c84cda")}
                     </>
                   )}
                 </Button>
@@ -516,34 +518,34 @@ const CampaignDashboard = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>Payout History</CardTitle>
-              <CardDescription>Track withdrawal requests and their status</CardDescription>
+              <CardTitle>{tr("a.877b60eff7")}</CardTitle>
+              <CardDescription>{tr("a.becd9db401")}</CardDescription>
             </CardHeader>
             <CardContent>
               {payouts.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  <p>No payout requests yet.</p>
+                  <p>{tr("a.6c6baaf298")}</p>
                 </div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Method</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>{tr("a.eb9a4bc1c0")}</TableHead>
+                      <TableHead>{tr("a.43dc8532f7")}</TableHead>
+                      <TableHead>{tr("a.88306943fe")}</TableHead>
+                      <TableHead>{tr("a.bae7d5be70")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {payouts.map((p) => (
                       <TableRow key={p.id}>
-                        <TableCell>{new Date(p.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell>{formatDate(p.created_at)}</TableCell>
                         <TableCell className="font-semibold">{money(p.amount)}</TableCell>
                         <TableCell>
                           {p.payout_method?.type === "paypal" ? (
-                            <span className="text-sm">PayPal — {p.payout_method.email}</span>
+                            <span className="text-sm">{tr("a.674695c99a")} {p.payout_method.email}</span>
                           ) : p.payout_method?.type === "bank" ? (
-                            <span className="text-sm">Bank — {p.payout_method.account_holder}</span>
+                            <span className="text-sm">{tr("a.456c594210")} {p.payout_method.account_holder}</span>
                           ) : (
                             "—"
                           )}
@@ -561,29 +563,29 @@ const CampaignDashboard = () => {
         <TabsContent value="details" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Campaign Details</CardTitle>
+              <CardTitle>{tr("a.0cfdcf4d38")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <Label>Beneficiary</Label>
+                <Label>{tr("a.3f327acd78")}</Label>
                 <p className="text-sm">{campaign.beneficiary_name}</p>
               </div>
               {campaign.charity_organization_name && (
                 <div>
-                  <Label>Charity / Organization</Label>
+                  <Label>{tr("a.5f4672aef2")}</Label>
                   <p className="text-sm">{campaign.charity_organization_name}</p>
                 </div>
               )}
               <div>
-                <Label>Goal</Label>
+                <Label>{tr("a.9fe00acebc")}</Label>
                 <p className="text-sm">{money(campaign.target_goal_amount)}</p>
               </div>
               <div>
-                <Label>Status</Label>
+                <Label>{tr("a.bae7d5be70")}</Label>
                 <p className="text-sm capitalize">{campaign.status}</p>
               </div>
               <div>
-                <Label>Story</Label>
+                <Label>{tr("a.86b4ba2ff9")}</Label>
                 <p className="text-sm whitespace-pre-wrap">{campaign.story || "—"}</p>
               </div>
             </CardContent>

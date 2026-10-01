@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Repeat, Users } from "lucide-react";
-import { format } from "date-fns";
+import { format } from "@/lib/dateFormat";
 import {
   EVENT_TYPE_EMOJI,
   EVENT_TYPE_LABELS,

@@ -1,7 +1,9 @@
 import { CandleDisplay } from './CandleDisplay';
+import { formatDate } from "@/lib/dateFormat";
 import { useCountdown } from '@/hooks/useCountdown';
 import { cn } from '@/utils/cn';
 
+import { tr } from "@/i18n/tr";
 export interface MemorialCandle {
   id: string;
   memorial_id: string;
@@ -36,7 +38,7 @@ export function CandleCard({ candle, isMine, onRelight }: Props) {
   const expiresAt = candle.expires_at ? new Date(candle.expires_at) : null;
   const countdown = useCountdown(expiresAt);
   const lit = candle.status === 'active' && !countdown.done;
-  const name = candle.anonymous || !candle.contributor_name ? 'Anonymous' : candle.contributor_name;
+  const name = candle.anonymous || !candle.contributor_name ? tr("a.9bed510400") : candle.contributor_name;
   const litDate = candle.started_at ? new Date(candle.started_at) : null;
   const remaining = expiresAt ? formatRemaining(expiresAt.getTime() - Date.now()) : '';
 
@@ -44,7 +46,7 @@ export function CandleCard({ candle, isMine, onRelight }: Props) {
     <div
       tabIndex={0}
       role="group"
-      aria-label={`Candle lit by ${name}${litDate ? ` on ${litDate.toLocaleDateString()}` : ''}. ${remaining}`}
+      aria-label={`Candle lit by ${name}${litDate ? ` on ${formatDate(litDate)}` : ''}. ${remaining}`}
       className={cn(
         'flex flex-col items-center gap-1 rounded-2xl border border-border bg-card/50 px-2 py-4 text-center',
         'transition-all animate-fade-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
@@ -53,12 +55,12 @@ export function CandleCard({ candle, isMine, onRelight }: Props) {
     >
       <CandleDisplay lit={lit} size="md" />
       <p className="text-sm font-medium text-foreground leading-tight">
-        {isMine ? 'Your candle' : `Lit by ${name}`}
+        {isMine ? tr("a.17dc40f366") : `Lit by ${name}`}
       </p>
       {litDate && (
-        <p className="text-xs text-muted-foreground">{litDate.toLocaleDateString()}</p>
+        <p className="text-xs text-muted-foreground">{formatDate(litDate)}</p>
       )}
-      <p className="text-xs text-muted-foreground">{lit ? remaining : 'Gone out'}</p>
+      <p className="text-xs text-muted-foreground">{lit ? remaining : tr("a.f0c2447b55")}</p>
       {candle.message && (
         <p className="mt-1 line-clamp-3 px-1 text-xs italic text-foreground/70">"{candle.message}"</p>
       )}
@@ -69,7 +71,7 @@ export function CandleCard({ candle, isMine, onRelight }: Props) {
           className="mt-2 rounded-full px-3 py-1 text-xs font-semibold text-white transition-all hover:brightness-110"
           style={{ backgroundColor: '#4A324A' }}
         >
-          {lit ? 'Extend' : 'Relight'}
+          {lit ? tr("a.281dd83602") : tr("a.db79bf8fa9")}
         </button>
       )}
     </div>

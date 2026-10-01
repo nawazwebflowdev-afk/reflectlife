@@ -12,6 +12,7 @@ import { AvatarSelector, AvatarDisplay } from "@/components/EmojiAvatarSelector"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AVATARS } from "@/config/avatars";
 
+import { tr } from "@/i18n/tr";
 const familyRelationships = [
   "Mother", "Father", "Sister", "Brother", "Spouse",
   "Daughter", "Son", "Grandmother", "Grandfather",
@@ -62,15 +63,15 @@ export const AddChildConnectionModal = ({
 
       if (!file.type.startsWith('image/')) {
         toast({
-          title: "Invalid file type",
-          description: "Please upload an image file",
+          title: tr("a.56f848f49e"),
+          description: tr("a.ea5e446104"),
           variant: "destructive",
         });
         return;
       }
 
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      if (!user) throw new Error(tr("a.0c91acbae2"));
 
       const fileExt = file.name.split(".").pop();
       const filePath = `${user.id}/connections/${Date.now()}.${fileExt}`;
@@ -87,12 +88,12 @@ export const AddChildConnectionModal = ({
 
       setImageUrl(publicUrl);
       toast({
-        title: "Image uploaded",
-        description: "Profile image uploaded successfully",
+        title: tr("a.82dd62753e"),
+        description: tr("a.3ea18bea46"),
       });
     } catch (error: any) {
       toast({
-        title: "Upload failed",
+        title: tr("a.ad0d0603e2"),
         description: error.message,
         variant: "destructive",
       });
@@ -110,8 +111,8 @@ export const AddChildConnectionModal = ({
   const handleSendInvitation = async () => {
     if (!inviteEmail.trim()) {
       toast({
-        title: "Email required",
-        description: "Please enter an email address",
+        title: tr("a.887c8dbb94"),
+        description: tr("a.23b8381506"),
         variant: "destructive",
       });
       return;
@@ -120,7 +121,7 @@ export const AddChildConnectionModal = ({
     setSendingInvite(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      if (!user) throw new Error(tr("a.0c91acbae2"));
 
       const { data: profile } = await supabase
         .from("profiles")
@@ -141,13 +142,13 @@ export const AddChildConnectionModal = ({
       if (error) throw error;
 
       toast({
-        title: "Invitation sent successfully! 💌",
+        title: tr("a.bc6a44ee4f"),
         description: `${inviteEmail} will receive an invitation to contribute`,
       });
       setInviteEmail("");
     } catch (error: any) {
       toast({
-        title: "Unable to send invitation, please try again.",
+        title: tr("a.b3b04ef8c1"),
         description: error.message,
         variant: "destructive",
       });
@@ -160,8 +161,8 @@ export const AddChildConnectionModal = ({
     const finalRelationship = relationship === "__custom" ? customRelationship.trim() : relationship;
     if (!name.trim() || !finalRelationship) {
       toast({
-        title: "Missing information",
-        description: "Please provide at least a name and relationship",
+        title: tr("a.67cc34b1cd"),
+        description: tr("a.d5ca2188b0"),
         variant: "destructive",
       });
       return;
@@ -170,7 +171,7 @@ export const AddChildConnectionModal = ({
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      if (!user) throw new Error(tr("a.0c91acbae2"));
 
       // Ensure parent exists before creating child connection
       const { data: parentConnection, error: parentError } = await supabase
@@ -180,7 +181,7 @@ export const AddChildConnectionModal = ({
         .maybeSingle();
 
       if (parentError) throw parentError;
-      if (!parentConnection) throw new Error("Parent connection not found");
+      if (!parentConnection) throw new Error(tr("a.96b47e672f"));
 
       let finalImageUrl = imageUrl;
       
@@ -219,7 +220,7 @@ export const AddChildConnectionModal = ({
       if (error) throw error;
 
       toast({
-        title: "Connection added 🌿",
+        title: tr("a.bc5dd14b31"),
         description: `${name} has been added to the tree`,
       });
 
@@ -228,7 +229,7 @@ export const AddChildConnectionModal = ({
       resetForm();
     } catch (error: any) {
       toast({
-        title: "Error adding connection",
+        title: tr("a.f49805ab54"),
         description: error.message,
         variant: "destructive",
       });
@@ -254,9 +255,9 @@ export const AddChildConnectionModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add Connection to This Person</DialogTitle>
+          <DialogTitle>{tr("a.f8516b6bc6")}</DialogTitle>
           <DialogDescription>
-            Add someone connected to this person - family member, friend, or loved one.
+            {tr("a.c27a243db3")}
           </DialogDescription>
         </DialogHeader>
 
@@ -270,7 +271,7 @@ export const AddChildConnectionModal = ({
               </Avatar>
             ) : (
               <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
-                <span className="text-muted-foreground text-sm">No image</span>
+                <span className="text-muted-foreground text-sm">{tr("a.fc5e5bdcd5")}</span>
               </div>
             )}
             
@@ -279,7 +280,7 @@ export const AddChildConnectionModal = ({
                 <Button type="button" variant="outline" size="sm" disabled={uploading} asChild>
                   <span>
                     <Upload className="h-4 w-4 mr-2" />
-                    {uploading ? "Uploading..." : "Upload Photo"}
+                    {uploading ? tr("a.070e328ec8") : tr("a.84f26e4f34")}
                   </span>
                 </Button>
               </Label>
@@ -295,7 +296,7 @@ export const AddChildConnectionModal = ({
 
           {/* Avatar Selector */}
           <div className="space-y-2">
-            <Label>Or choose an avatar</Label>
+            <Label>{tr("a.66574c0ec3")}</Label>
             <AvatarSelector
               selectedAvatar={avatarIndex}
               onSelectAvatar={setAvatarIndex}
@@ -306,17 +307,17 @@ export const AddChildConnectionModal = ({
           {/* Form Fields */}
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name *</Label>
+              <Label htmlFor="name">{tr("a.d145bb8309")}</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Enter full name"
+                placeholder={tr("a.29362f24d4")}
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Relationship *</Label>
+              <Label>{tr("a.901dacc248")}</Label>
               <Select
                 value={relationship}
                 onValueChange={(value) => {
@@ -334,32 +335,32 @@ export const AddChildConnectionModal = ({
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select relationship..." />
+                  <SelectValue placeholder={tr("a.d7587196fd")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__family_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60">Family</SelectItem>
+                  <SelectItem value="__family_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60">{tr("a.4efb6cb7c0")}</SelectItem>
                   {familyRelationships.map((rel) => (
                     <SelectItem key={rel} value={rel}>{rel}</SelectItem>
                   ))}
-                  <SelectItem value="__friend_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60 mt-2">Friendship</SelectItem>
+                  <SelectItem value="__friend_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60 mt-2">{tr("a.743dfd77ca")}</SelectItem>
                   {friendshipRelationships.map((rel) => (
                     <SelectItem key={rel} value={rel}>{rel}</SelectItem>
                   ))}
-                  <SelectItem value="__custom" className="font-medium mt-1 border-t pt-1">✏️ Custom...</SelectItem>
+                  <SelectItem value="__custom" className="font-medium mt-1 border-t pt-1">{tr("a.a047f82a1b")}</SelectItem>
                 </SelectContent>
               </Select>
               {relationship === "__custom" && (
                 <Input
                   value={customRelationship}
                   onChange={(e) => setCustomRelationship(e.target.value)}
-                  placeholder="Enter custom relationship..."
+                  placeholder={tr("a.a89dc8ef8e")}
                   className="mt-2"
                 />
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="connection-type">Connection Type</Label>
+              <Label htmlFor="connection-type">{tr("a.1d86d4c525")}</Label>
               <Select
                 value={connectionType}
                 onValueChange={(value: "family" | "friendship") => {
@@ -371,33 +372,33 @@ export const AddChildConnectionModal = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="family">Family</SelectItem>
-                  <SelectItem value="friendship">Friendship</SelectItem>
+                  <SelectItem value="family">{tr("a.4efb6cb7c0")}</SelectItem>
+                  <SelectItem value="friendship">{tr("a.743dfd77ca")}</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                Family shows in 🌳 Family Tree. Friendship shows in 🌐 Friendship Web.
+                {tr("a.0ddc6e33d0")}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{tr("a.70440046a3")}</Label>
               <Textarea
                 id="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add any special notes or memories..."
+                placeholder={tr("a.c278e2fa21")}
                 rows={3}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="details">Additional Details</Label>
+              <Label htmlFor="details">{tr("a.cc7b272da6")}</Label>
               <Textarea
                 id="details"
                 value={details}
                 onChange={(e) => setDetails(e.target.value)}
-                placeholder="Birth date, location, or other details..."
+                placeholder={tr("a.a7c345f909")}
                 rows={2}
               />
             </div>
@@ -405,16 +406,16 @@ export const AddChildConnectionModal = ({
 
           {/* Invitation Section */}
           <div className="border-t pt-4 space-y-3">
-            <Label className="text-sm font-medium">Invite Friends to Contribute</Label>
+            <Label className="text-sm font-medium">{tr("a.3486bb5b56")}</Label>
             <p className="text-xs text-muted-foreground">
-              Send an invitation email to friends or family to add tributes and memories for this person.
+              {tr("a.6494fc1202")}
             </p>
             <div className="flex gap-2">
               <Input
                 type="email"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="friend@example.com"
+                placeholder={tr("a.c7363c9f0a")}
               />
               <Button
                 type="button"
@@ -427,7 +428,7 @@ export const AddChildConnectionModal = ({
                 ) : (
                   <>
                     <Mail className="h-4 w-4 mr-2" />
-                    Send
+                    {tr("a.9bc2575c39")}
                   </>
                 )}
               </Button>
@@ -437,16 +438,16 @@ export const AddChildConnectionModal = ({
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {tr("a.77dfd2135f")}
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Adding...
+                {tr("a.268c06a28a")}
               </>
             ) : (
-              "Add Connection"
+              tr("a.18d2cf5498")
             )}
           </Button>
         </div>

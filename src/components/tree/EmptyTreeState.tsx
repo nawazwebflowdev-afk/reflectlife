@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
+import { tr } from "@/i18n/tr";
 interface EmptyTreeStateProps {
   mode: "family" | "friendship";
   onAddConnection: () => void;
@@ -17,19 +18,19 @@ const EmptyTreeState = ({ mode, onAddConnection }: EmptyTreeStateProps) => {
         <div className="space-y-2">
           <h3 className="font-serif text-2xl font-bold">
             {mode === "family"
-              ? "Your family tree is waiting to grow"
-              : "Your friendship web is ready to connect"}
+              ? tr("a.366f739839")
+              : tr("a.05e05df531")}
           </h3>
           <p className="text-muted-foreground">
             {mode === "family"
-              ? "Start building your family tree by adding your first family member."
-              : "Begin weaving your friendship web by adding your first friend."}
+              ? tr("a.419f7810ea")
+              : tr("a.c1391825f1")}
           </p>
         </div>
 
         <Button onClick={onAddConnection} size="lg" className="gap-2">
           <Plus className="h-5 w-5" />
-          Add First Connection
+          {tr("a.ddb8c8a4e4")}
         </Button>
       </div>
     </div>

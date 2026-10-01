@@ -14,6 +14,7 @@ import { CreateTimelineModal } from "@/components/CreateTimelineModal";
 import CreatorDashboard from "@/components/CreatorDashboard";
 import { ProfileEditModal } from "@/components/ProfileEditModal";
 
+import { tr } from "@/i18n/tr";
 interface Profile {
   id: string;
   first_name: string | null;
@@ -177,8 +178,8 @@ const Dashboard = () => {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     toast({
-      title: "Signed out",
-      description: "You've been successfully signed out.",
+      title: tr("a.1b8337c8ac"),
+      description: tr("a.038669fd68"),
     });
     navigate("/");
   };
@@ -250,7 +251,7 @@ const Dashboard = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen py-8 flex items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
+        <p className="text-muted-foreground">{tr("a.b04ba49f84")}</p>
       </div>
     );
   }
@@ -278,7 +279,7 @@ const Dashboard = () => {
               
               <div className="flex-grow text-center md:text-left">
                 <h1 className="font-serif text-3xl font-bold mb-2">
-                  {profile?.full_name || `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || user?.email?.split('@')[0] || "User"}
+                  {profile?.full_name || `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || user?.email?.split('@')[0] || tr("a.9f8a2389a2")}
                 </h1>
                 {profile?.country && (
                   <p className="text-muted-foreground mb-2">📍 {profile.country}</p>
@@ -288,19 +289,19 @@ const Dashboard = () => {
                     className="text-sm text-muted-foreground mb-2 cursor-pointer hover:text-primary transition-colors"
                     onClick={() => navigate("/templates?filter=owned")}
                   >
-                    🎨 Active Template: <span className="font-medium text-foreground underline">{activeTemplateName}</span>
+                    {tr("a.3ec023dad9")} <span className="font-medium text-foreground underline">{activeTemplateName}</span>
                   </p>
                 )}
                 {!profile?.first_name && !profile?.last_name && (
                   <p className="text-sm text-muted-foreground bg-muted/50 inline-block px-3 py-1 rounded-full">
-                    Complete your profile to personalize your experience
+                    {tr("a.50ef855f3b")}
                   </p>
                 )}
               </div>
 
               <Button onClick={() => setShowEditProfile(true)} className="gap-2">
                 <Edit className="h-4 w-4" />
-                Edit Profile
+                {tr("a.cd280a41f7")}
               </Button>
             </div>
           </CardContent>
@@ -313,9 +314,9 @@ const Dashboard = () => {
               <div className="flex items-center gap-3">
                 <Clock className="h-5 w-5 text-primary animate-pulse" />
                 <div>
-                  <p className="font-semibold">Creator Application Pending Review</p>
+                  <p className="font-semibold">{tr("a.7058445e7d")}</p>
                   <p className="text-sm text-muted-foreground">
-                    Your application is under review. You'll gain access to template uploads once approved.
+                    {tr("a.6b0b74d80c")}
                   </p>
                 </div>
               </div>
@@ -328,7 +329,7 @@ const Dashboard = () => {
           <Card className="hover:shadow-elegant transition-smooth">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardDescription>Total Memorials Created</CardDescription>
+                <CardDescription>{tr("a.b5480b974c")}</CardDescription>
                 <Heart className="h-5 w-5 text-primary" />
               </div>
               <CardTitle className="text-4xl font-serif bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -340,7 +341,7 @@ const Dashboard = () => {
           <Card className="hover:shadow-elegant transition-smooth">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardDescription>Templates Purchased</CardDescription>
+                <CardDescription>{tr("a.154b4ffb7b")}</CardDescription>
                 <ShoppingBag className="h-5 w-5 text-primary" />
               </div>
               <CardTitle className="text-4xl font-serif bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -352,7 +353,7 @@ const Dashboard = () => {
           <Card className="hover:shadow-elegant transition-smooth">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardDescription>Likes Received</CardDescription>
+                <CardDescription>{tr("a.76af270609")}</CardDescription>
                 <Sparkles className="h-5 w-5 text-primary" />
               </div>
               <CardTitle className="text-4xl font-serif bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -365,33 +366,33 @@ const Dashboard = () => {
         {/* Quick Links Section */}
         <Card className="mb-8 animate-fade-up">
           <CardHeader>
-            <CardTitle className="font-serif">Quick Links</CardTitle>
-            <CardDescription>Navigate to your favorite sections</CardDescription>
+            <CardTitle className="font-serif">{tr("a.917bcf00a5")}</CardTitle>
+            <CardDescription>{tr("a.40663b99bb")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Link to="/memorials">
                 <Button variant="outline" className="w-full gap-2 h-auto py-4 hover:shadow-elegant transition-smooth">
                   <FileText className="h-5 w-5" />
-                  <span>My Memorial Wall</span>
+                  <span>{tr("a.16ccd9ab86")}</span>
                 </Button>
               </Link>
               <Link to="/timeline">
                 <Button variant="outline" className="w-full gap-2 h-auto py-4 hover:shadow-elegant transition-smooth">
                   <Clock className="h-5 w-5" />
-                  <span>My Timeline</span>
+                  <span>{tr("a.ab5f120e0a")}</span>
                 </Button>
               </Link>
               <Link to="/templates?filter=owned">
                 <Button variant="outline" className="w-full gap-2 h-auto py-4 hover:shadow-elegant transition-smooth">
                   <Image className="h-5 w-5" />
-                  <span>My Templates</span>
+                  <span>{tr("a.17a8348930")}</span>
                 </Button>
               </Link>
               <Link to="/become-creator">
                 <Button variant="outline" className="w-full gap-2 h-auto py-4 hover:shadow-elegant transition-smooth">
                   <Sparkles className="h-5 w-5" />
-                  <span>Become a Creator</span>
+                  <span>{tr("a.3183be0fbd")}</span>
                 </Button>
               </Link>
             </div>
@@ -404,11 +405,11 @@ const Dashboard = () => {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="font-serif">My Purchased Templates</CardTitle>
-                  <CardDescription>Templates you've purchased from the marketplace</CardDescription>
+                  <CardTitle className="font-serif">{tr("a.cde367f8bc")}</CardTitle>
+                  <CardDescription>{tr("a.b5fbeda872")}</CardDescription>
                 </div>
                 <Link to="/templates?filter=owned">
-                  <Button variant="outline" size="sm">View All</Button>
+                  <Button variant="outline" size="sm">{tr("a.efd8355920")}</Button>
                 </Link>
               </div>
             </CardHeader>
@@ -433,7 +434,7 @@ const Dashboard = () => {
                         <h4 className="font-serif font-semibold text-sm truncate">{template.name}</h4>
                         <p className="text-xs text-muted-foreground">{template.country}</p>
                         {isActive && (
-                          <Badge className="mt-1 text-xs">Active</Badge>
+                          <Badge className="mt-1 text-xs">{tr("a.a733b809d2")}</Badge>
                         )}
                       </CardContent>
                     </Card>
@@ -448,8 +449,8 @@ const Dashboard = () => {
         {isCreator ? (
           <Tabs defaultValue="memorials" className="space-y-6">
             <TabsList>
-              <TabsTrigger value="memorials">My Memorials</TabsTrigger>
-              <TabsTrigger value="templates">Creator Dashboard</TabsTrigger>
+              <TabsTrigger value="memorials">{tr("a.816ce5a094")}</TabsTrigger>
+              <TabsTrigger value="templates">{tr("a.7df02aa31f")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="memorials" className="space-y-4">
@@ -484,13 +485,13 @@ const Dashboard = () => {
                           <div className="flex flex-wrap gap-3">
                             <Link to={`/memorial/${memorial.id}`}>
                               <Button variant="default" size="sm">
-                                View Memorial
+                                {tr("a.034aaa38bf")}
                               </Button>
                             </Link>
                             <Link to={`/memorial/${memorial.id}/edit`}>
                               <Button variant="outline" size="sm" className="gap-2">
                                 <Settings className="h-4 w-4" />
-                                Edit
+                                {tr("a.5301648dcf")}
                               </Button>
                             </Link>
                           </div>
@@ -507,15 +508,15 @@ const Dashboard = () => {
                         <Plus className="h-10 w-10 text-primary" />
                       </div>
                       <h3 className="font-serif text-2xl font-semibold mb-3">
-                        No Memorials Yet
+                        {tr("a.efa16e6d64")}
                       </h3>
                       <p className="text-muted-foreground mb-6">
-                        Create your first memorial to start preserving precious memories and celebrating the lives of your loved ones.
+                        {tr("a.de26151070")}
                       </p>
                       <Link to="/memorial/new">
                         <Button size="lg" className="gap-2">
                           <Plus className="h-5 w-5" />
-                          Create Your First Memorial
+                          {tr("a.6a934fd301")}
                         </Button>
                       </Link>
                     </div>
@@ -561,13 +562,13 @@ const Dashboard = () => {
                         <div className="flex flex-wrap gap-3">
                           <Link to={`/memorial/${memorial.id}`}>
                             <Button variant="default" size="sm">
-                              View Memorial
+                              {tr("a.034aaa38bf")}
                             </Button>
                           </Link>
                           <Link to={`/memorial/${memorial.id}/edit`}>
                             <Button variant="outline" size="sm" className="gap-2">
                               <Settings className="h-4 w-4" />
-                              Edit
+                              {tr("a.5301648dcf")}
                             </Button>
                           </Link>
                         </div>
@@ -584,15 +585,15 @@ const Dashboard = () => {
                       <Plus className="h-10 w-10 text-primary" />
                     </div>
                     <h3 className="font-serif text-2xl font-semibold mb-3">
-                      No Memorials Yet
+                      {tr("a.efa16e6d64")}
                     </h3>
                     <p className="text-muted-foreground mb-6">
-                      Create your first memorial to start preserving precious memories and celebrating the lives of your loved ones.
+                      {tr("a.de26151070")}
                     </p>
                     <Link to="/memorial/new">
                       <Button size="lg" className="gap-2">
                         <Plus className="h-5 w-5" />
-                        Create Your First Memorial
+                        {tr("a.6a934fd301")}
                       </Button>
                     </Link>
                   </div>

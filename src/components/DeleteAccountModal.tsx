@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
+import { tr } from "@/i18n/tr";
 interface DeleteAccountModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -45,8 +46,8 @@ const DeleteAccountModal = ({ open, onOpenChange, userId }: DeleteAccountModalPr
       await supabase.auth.signOut();
 
       toast({
-        title: "Account Deleted",
-        description: "Your account and all data have been permanently deleted. We hope Reflectlife brought comfort and connection along the way.",
+        title: tr("a.dff8c1d804"),
+        description: tr("a.c49d75adf5"),
         duration: 5000,
       });
 
@@ -54,8 +55,8 @@ const DeleteAccountModal = ({ open, onOpenChange, userId }: DeleteAccountModalPr
     } catch (error: any) {
       console.error("Delete account error:", error);
       toast({
-        title: "Error",
-        description: "Failed to delete account. Please try again or contact support.",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.614ae01561"),
         variant: "destructive",
       });
     } finally {
@@ -71,19 +72,19 @@ const DeleteAccountModal = ({ open, onOpenChange, userId }: DeleteAccountModalPr
             <Heart className="h-12 w-12 text-destructive" />
           </div>
           <DialogTitle className="text-center text-2xl">
-            We're sorry to see you go 💔
+            {tr("a.b3415211a0")}
           </DialogTitle>
           <DialogDescription className="text-center text-base pt-2">
-            Would you like to share why you're leaving? (optional)
+            {tr("a.d9a83ee834")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="reason">Reason for leaving (optional)</Label>
+            <Label htmlFor="reason">{tr("a.96c95ac80e")}</Label>
             <Textarea
               id="reason"
-              placeholder="Tell us what we could improve..."
+              placeholder={tr("a.265230fd58")}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={4}
@@ -93,10 +94,10 @@ const DeleteAccountModal = ({ open, onOpenChange, userId }: DeleteAccountModalPr
 
           <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
             <p className="text-sm text-destructive font-medium mb-2">
-              ⚠️ This action cannot be undone
+              {tr("a.d95a3a5733")}
             </p>
             <p className="text-xs text-muted-foreground">
-              All your memorials, diary entries, timelines, and personal data will be permanently deleted.
+              {tr("a.d3b16fe91f")}
             </p>
           </div>
         </div>
@@ -107,14 +108,14 @@ const DeleteAccountModal = ({ open, onOpenChange, userId }: DeleteAccountModalPr
             onClick={() => onOpenChange(false)}
             disabled={isDeleting}
           >
-            Cancel
+            {tr("a.77dfd2135f")}
           </Button>
           <Button
             variant="destructive"
             onClick={handleDeleteAccount}
             disabled={isDeleting}
           >
-            {isDeleting ? "Deleting..." : "Delete Account Permanently"}
+            {isDeleting ? tr("a.e16cac651b") : tr("a.01dd86adde")}
           </Button>
         </DialogFooter>
       </DialogContent>

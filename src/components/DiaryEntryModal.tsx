@@ -14,8 +14,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Upload, Music, Trash2, Save } from "lucide-react";
-import { format } from "date-fns";
+import { format } from "@/lib/dateFormat";
 
+import { tr } from "@/i18n/tr";
 interface DiaryEntry {
   id: string;
   user_id: string;
@@ -107,7 +108,7 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
       return data.publicUrl;
     } catch (error: any) {
       toast({
-        title: "Upload failed",
+        title: tr("a.ad0d0603e2"),
         description: error.message,
         variant: "destructive",
       });
@@ -120,8 +121,8 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
   const handleSave = async () => {
     if (!title.trim()) {
       toast({
-        title: "Title required",
-        description: "Please enter a title for your entry",
+        title: tr("a.4e01d5a2e8"),
+        description: tr("a.ed17c52d03"),
         variant: "destructive",
       });
       return;
@@ -130,7 +131,7 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
     try {
       setSaving(true);
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      if (!user) throw new Error(tr("a.0c91acbae2"));
 
       const mediaUrl = await uploadMedia();
       const tagsArray = tags
@@ -157,8 +158,8 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
         if (error) throw error;
 
         toast({
-          title: "Entry updated",
-          description: "Your diary entry has been updated successfully",
+          title: tr("a.53550cff74"),
+          description: tr("a.a647c80e6e"),
         });
       } else {
         const { error } = await (supabase as any)
@@ -168,8 +169,8 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
         if (error) throw error;
 
         toast({
-          title: "Entry created",
-          description: "Your diary entry has been created successfully",
+          title: tr("a.140b632f8a"),
+          description: tr("a.d224843a3a"),
         });
       }
 
@@ -178,7 +179,7 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
       resetForm();
     } catch (error: any) {
       toast({
-        title: "Error saving entry",
+        title: tr("a.c52c54b941"),
         description: error.message,
         variant: "destructive",
       });
@@ -190,7 +191,7 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
   const handleDelete = async () => {
     if (!entry) return;
 
-    if (!confirm("Are you sure you want to delete this entry?")) return;
+    if (!confirm(tr("a.26f2ceb643"))) return;
 
     try {
       const { error } = await (supabase as any)
@@ -201,15 +202,15 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
       if (error) throw error;
 
       toast({
-        title: "Entry deleted",
-        description: "Your diary entry has been deleted",
+        title: tr("a.c7211d42e1"),
+        description: tr("a.6abbc8a083"),
       });
 
       onSaved();
       onOpenChange(false);
     } catch (error: any) {
       toast({
-        title: "Error deleting entry",
+        title: tr("a.54dcff654c"),
         description: error.message,
         variant: "destructive",
       });
@@ -221,26 +222,26 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-serif">
-            {entry ? "Edit Entry" : "New Diary Entry"}
+            {entry ? tr("a.5f69d39f1c") : tr("a.e05ee1dc29")}
           </DialogTitle>
           <DialogDescription>
-            Write your thoughts, memories, and reflections
+            {tr("a.7807725bdb")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
+            <Label htmlFor="title">{tr("a.9616975c7a")}</Label>
             <Input
               id="title"
-              placeholder="Give your entry a title..."
+              placeholder={tr("a.2d7117e56d")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date">{tr("a.eb9a4bc1c0")}</Label>
             <Input
               id="date"
               type="date"
@@ -250,10 +251,10 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">Content</Label>
+            <Label htmlFor="content">{tr("a.4f9be057f0")}</Label>
             <Textarea
               id="content"
-              placeholder="Write your thoughts here..."
+              placeholder={tr("a.d04062c739")}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={8}
@@ -262,17 +263,17 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tags">Tags (comma-separated)</Label>
+            <Label htmlFor="tags">{tr("a.32bf672278")}</Label>
             <Input
               id="tags"
-              placeholder="e.g., family, travel, reflection"
+              placeholder={tr("a.50d4375fa7")}
               value={tags}
               onChange={(e) => setTags(e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="media">Media Upload</Label>
+            <Label htmlFor="media">{tr("a.6e6ef11190")}</Label>
             <div className="flex gap-2">
               <Input
                 id="media"
@@ -286,7 +287,7 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
               <div className="relative mt-2">
                 <img
                   src={mediaPreview}
-                  alt="Preview"
+                  alt={tr("a.f1fbb2b43d")}
                   className="w-full h-48 object-cover rounded-md"
                 />
                 <Button
@@ -307,7 +308,7 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
           <div className="space-y-2">
             <Label htmlFor="song">
               <Music className="inline h-4 w-4 mr-2" />
-              Favorite Song (YouTube or Spotify URL)
+              {tr("a.540662f2a8")}
             </Label>
             <Input
               id="song"
@@ -321,12 +322,12 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
           <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
             <div>
               <Label htmlFor="privacy" className="font-semibold">
-                Privacy Setting
+                {tr("a.1ee06bcab5")}
               </Label>
               <p className="text-sm text-muted-foreground">
                 {isPrivate
-                  ? "🔒 Only you can see this entry"
-                  : "🌍 Public - Visible to visitors"}
+                  ? tr("a.e5ef20165d")
+                  : tr("a.01e2814d26")}
               </p>
             </div>
             <Switch
@@ -341,17 +342,17 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
           {entry && (
             <Button variant="destructive" onClick={handleDelete}>
               <Trash2 className="h-4 w-4 mr-2" />
-              Delete
+              {tr("a.f6fdbe48dc")}
             </Button>
           )}
           <div className="flex gap-2 ml-auto">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {tr("a.77dfd2135f")}
             </Button>
             <Button onClick={handleSave} disabled={saving || uploading}>
               {(saving || uploading) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               <Save className="h-4 w-4 mr-2" />
-              {entry ? "Update" : "Save"}
+              {entry ? tr("a.fb91e24fa5") : tr("a.efc007a393")}
             </Button>
           </div>
         </div>

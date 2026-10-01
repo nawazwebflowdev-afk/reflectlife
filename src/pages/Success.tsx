@@ -6,6 +6,7 @@ import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+import { tr } from "@/i18n/tr";
 type PurchaseConfirmationState = "checking" | "success" | "error";
 
 const Success = () => {
@@ -36,7 +37,7 @@ const Success = () => {
         } = await supabase.auth.getSession();
 
         if (!session?.access_token) {
-          throw new Error("Please sign in again to confirm your purchase.");
+          throw new Error(tr("a.c1dc590cab"));
         }
 
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://osmyfzkcydvtwgnbjplx.supabase.co";
@@ -70,7 +71,7 @@ const Success = () => {
         }
 
         if (!data?.success) {
-          throw new Error(data?.error || "Failed to unlock your template");
+          throw new Error(data?.error || tr("a.01aa5d7e16"));
         }
 
         console.log('Purchase confirmed successfully:', data);
@@ -100,8 +101,8 @@ const Success = () => {
           await supabase.auth.refreshSession();
           setStatus("success");
           toast({
-            title: "Purchase confirmed",
-            description: "Your bought template is now active on your profile.",
+            title: tr("a.4a01b5c758"),
+            description: tr("a.31b7581a62"),
           });
         } else {
           setStatus("success");
@@ -112,11 +113,11 @@ const Success = () => {
         const message =
           error instanceof Error
             ? error.message
-            : "We couldn't finalize template access automatically.";
+            : tr("a.287b539b8c");
 
         setStatus("error");
         toast({
-          title: "Finalizing purchase",
+          title: tr("a.e70d42a133"),
           description: `${message} Please open Templates and retry selection once.`,
           variant: "destructive",
         });
@@ -140,17 +141,17 @@ const Success = () => {
 
   const title =
     status === "checking"
-      ? "Confirming Your Purchase..."
+      ? tr("a.14601fb140")
       : status === "error"
-      ? "Purchase Received — Finalizing Access"
-      : "Thank You for Your Purchase!";
+      ? tr("a.6d22458935")
+      : tr("a.ead8d7c66d");
 
   const description =
     status === "checking"
-      ? "We're securely confirming your payment and unlocking your template now."
+      ? tr("a.e28f67a1c6")
       : status === "error"
-      ? "Your payment was received, but automatic confirmation needs one more step. You can still continue to Templates and retry selection."
-      : "Your new template is now available in your account and active on your profile.";
+      ? tr("a.fb51460210")
+      : tr("a.ccb7aff839");
 
   return (
     <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
@@ -174,7 +175,7 @@ const Success = () => {
 
           <div className="space-y-3">
             <Button onClick={() => navigate("/templates")} size="lg" className="w-full">
-              View My Templates
+              {tr("a.4eb8573725")}
             </Button>
 
             <Button
@@ -183,12 +184,12 @@ const Success = () => {
               size="lg"
               className="w-full"
             >
-              Go to Dashboard
+              {tr("a.f7b5bf8cef")}
             </Button>
           </div>
 
           <p className="text-sm text-muted-foreground mt-6">
-            Redirecting to templates in a few seconds...
+            {tr("a.5dab184a69")}
           </p>
         </CardContent>
       </Card>

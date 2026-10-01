@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageCircle, Image as ImageIcon, MapPin, Calendar, Loader2, Share2 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "@/lib/dateFormat";
 import type { User } from "@supabase/supabase-js";
 import { CommentsModal } from "@/components/CommentsModal";
 import { SharePostModal } from "@/components/SharePostModal";
@@ -19,6 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import { tr } from "@/i18n/tr";
 interface Post {
   id: string;
   user_id: string;
@@ -120,8 +121,8 @@ const Timeline = () => {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to load posts",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.c1f2701818"),
         variant: "destructive",
       });
     } else {
@@ -182,7 +183,7 @@ const Timeline = () => {
 
     if (uploadError) {
       toast({
-        title: "Upload Error",
+        title: tr("a.19699254ac"),
         description: uploadError.message,
         variant: "destructive",
       });
@@ -199,8 +200,8 @@ const Timeline = () => {
   const handleCreatePost = async () => {
     if (!user) {
       toast({
-        title: "Authentication Required",
-        description: "Please sign in to create posts",
+        title: tr("a.fbbe499440"),
+        description: tr("a.db07b31f7c"),
         variant: "destructive",
       });
       return;
@@ -208,8 +209,8 @@ const Timeline = () => {
 
     if (!caption && !mediaFile) {
       toast({
-        title: "Content Required",
-        description: "Please add a caption or media",
+        title: tr("a.4ef1340d96"),
+        description: tr("a.3f686dcfc9"),
         variant: "destructive",
       });
       return;
@@ -237,14 +238,14 @@ const Timeline = () => {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to create post",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.3350fd7062"),
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Success",
-        description: "Memory shared successfully!",
+        title: tr("a.42a8f651d7"),
+        description: tr("a.31d9e7c042"),
       });
       setCaption("");
       setLocation("");
@@ -259,8 +260,8 @@ const Timeline = () => {
   const handleToggleLike = async (postId: string, isLiked: boolean) => {
     if (!user) {
       toast({
-        title: "Authentication Required",
-        description: "Please sign in to like posts",
+        title: tr("a.fbbe499440"),
+        description: tr("a.a4ee9ce209"),
         variant: "destructive",
       });
       return;
@@ -276,8 +277,8 @@ const Timeline = () => {
 
       if (error) {
         toast({
-          title: "Error",
-          description: "Failed to unlike",
+          title: tr("a.7f2f6a15cf"),
+          description: tr("a.e094518e68"),
           variant: "destructive",
         });
       }
@@ -292,8 +293,8 @@ const Timeline = () => {
 
       if (error) {
         toast({
-          title: "Error",
-          description: "Failed to like",
+          title: tr("a.7f2f6a15cf"),
+          description: tr("a.ad0e341a0a"),
           variant: "destructive",
         });
       }
@@ -316,19 +317,19 @@ const Timeline = () => {
         {/* Header */}
         <div className="text-center mb-8 animate-fade-in">
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Timeline
+            {tr("a.018514a3d5")}
           </h1>
-          <p className="text-muted-foreground">Share and cherish memories together</p>
+          <p className="text-muted-foreground">{tr("a.86e6d48cfc")}</p>
         </div>
 
         {/* Create Post Section */}
         {user && (
           <Card className="p-6 mb-8 shadow-elegant animate-scale-in">
-            <h2 className="text-xl font-semibold mb-4">Share a Memory</h2>
+            <h2 className="text-xl font-semibold mb-4">{tr("a.f57ba92cd5")}</h2>
             
             <div className="space-y-4">
               <Textarea
-                placeholder="Write about your memory..."
+                placeholder={tr("a.cfa2fa30aa")}
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
                 className="min-h-[100px] resize-none"
@@ -339,7 +340,7 @@ const Timeline = () => {
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Add location"
+                      placeholder={tr("a.80fb1d443b")}
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                       className="pl-10"
@@ -364,7 +365,7 @@ const Timeline = () => {
                     onClick={() => document.getElementById("media-upload")?.click()}
                   >
                     <ImageIcon className="h-4 w-4 mr-2" />
-                    Add Photo/Video
+                    {tr("a.ede788a98f")}
                   </Button>
                 </label>
 
@@ -372,7 +373,7 @@ const Timeline = () => {
                   <div className="relative rounded-lg overflow-hidden">
                     <img
                       src={mediaPreview}
-                      alt="Preview"
+                      alt={tr("a.f1fbb2b43d")}
                       className="w-full h-48 object-cover"
                     />
                     <Button
@@ -384,7 +385,7 @@ const Timeline = () => {
                         setMediaPreview(null);
                       }}
                     >
-                      Remove
+                      {tr("a.e963907dac")}
                     </Button>
                   </div>
                 )}
@@ -398,10 +399,10 @@ const Timeline = () => {
                 {uploading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Sharing...
+                    {tr("a.5b25b6526d")}
                   </>
                 ) : (
-                  "Share Memory"
+                  tr("a.1659a83bd3")
                 )}
               </Button>
             </div>
@@ -413,11 +414,11 @@ const Timeline = () => {
           {loading ? (
             <div className="text-center py-12">
               <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-              <p className="text-muted-foreground mt-2">Loading memories...</p>
+              <p className="text-muted-foreground mt-2">{tr("a.81024242cd")}</p>
             </div>
           ) : posts.length === 0 ? (
             <Card className="p-12 text-center">
-              <p className="text-muted-foreground">No memories shared yet. Be the first!</p>
+              <p className="text-muted-foreground">{tr("a.7bc6db8146")}</p>
             </Card>
           ) : (
             posts.map((post, index) => (
@@ -436,7 +437,7 @@ const Timeline = () => {
                   </Avatar>
                   <div className="flex-1">
                     <p className="font-semibold">
-                      {post.profiles?.full_name || "Anonymous"}
+                      {post.profiles?.full_name || tr("a.9bed510400")}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
@@ -449,7 +450,7 @@ const Timeline = () => {
                   <div className="relative">
                     <img
                       src={post.media_url}
-                      alt="Memory"
+                      alt={tr("a.89c8a2851d")}
                       className="w-full h-auto max-h-[500px] object-cover"
                     />
                   </div>
@@ -507,12 +508,12 @@ const Timeline = () => {
                             className="gap-2 transition-all duration-200 hover:scale-110"
                           >
                             <Share2 className="h-4 w-4" />
-                            <span className="text-sm">Share</span>
+                            <span className="text-sm">{tr("a.09ca55ca52")}</span>
                           </Button>
                         </TooltipTrigger>
                         {!user && (
                           <TooltipContent>
-                            <p>Sign in to share memories</p>
+                            <p>{tr("a.da87c0fbd5")}</p>
                           </TooltipContent>
                         )}
                       </Tooltip>
@@ -527,7 +528,7 @@ const Timeline = () => {
         {/* Link to Memorial Wall */}
         <div className="text-center mt-12">
           <Button variant="outline" onClick={() => window.location.href = "/memorials"}>
-            Go to Memorial Wall
+            {tr("a.9643588f17")}
           </Button>
         </div>
       </div>

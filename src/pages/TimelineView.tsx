@@ -6,10 +6,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AddMemoryModal } from "@/components/AddMemoryModal";
 import { useToast } from "@/hooks/use-toast";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
-import { format } from "date-fns";
+import { format } from "@/lib/dateFormat";
 import { ArrowLeft, Calendar, FileText, Image as ImageIcon, Plus, Video } from "lucide-react";
 import PageTemplateSelector from "@/components/PageTemplateSelector";
 
+import { tr } from "@/i18n/tr";
 interface Timeline {
   id: string;
   title: string;
@@ -83,8 +84,8 @@ const TimelineView = () => {
       setEntries(entriesData || []);
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to load timeline",
+        title: tr("a.7f2f6a15cf"),
+        description: error.message || tr("a.823239af8c"),
         variant: "destructive",
       });
     } finally {
@@ -97,7 +98,7 @@ const TimelineView = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Loading timeline...</p>
+        <p className="text-muted-foreground">{tr("a.564195bd43")}</p>
       </div>
     );
   }
@@ -106,8 +107,8 @@ const TimelineView = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-muted-foreground mb-4">Timeline not found</p>
-          <Button onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
+          <p className="text-muted-foreground mb-4">{tr("a.65be370100")}</p>
+          <Button onClick={() => navigate("/dashboard")}>{tr("a.f7b5bf8cef")}</Button>
         </div>
       </div>
     );
@@ -144,11 +145,11 @@ const TimelineView = () => {
         <div className="absolute top-6 left-6 flex items-center gap-3">
           <Button variant="outline" onClick={() => navigate("/dashboard")} className="gap-2 bg-background/80 backdrop-blur-sm">
             <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
+            {tr("a.8fb719081e")}
           </Button>
           {templateTheme.templateName && (
             <div className="text-white/90 text-sm font-medium bg-black/30 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/20">
-              Theme: {templateTheme.templateName}
+              {tr("a.0485a02659")} {templateTheme.templateName}
             </div>
           )}
         </div>
@@ -173,11 +174,11 @@ const TimelineView = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="font-serif text-3xl font-bold">Timeline Memories</h2>
+            <h2 className="font-serif text-3xl font-bold">{tr("a.0212420f87")}</h2>
             {canEdit && (
               <Button onClick={() => setShowAddMemory(true)} className="gap-2">
                 <Plus className="h-4 w-4" />
-                Add Memory
+                {tr("a.22012e09a4")}
               </Button>
             )}
           </div>
@@ -200,14 +201,14 @@ const TimelineView = () => {
                   >
                     <Plus className="h-10 w-10" style={{ color: templateTheme.accentColor }} />
                   </div>
-                  <h3 className="font-serif text-2xl font-semibold mb-3">No Memories Yet</h3>
+                  <h3 className="font-serif text-2xl font-semibold mb-3">{tr("a.2ed71e829f")}</h3>
                   <p className="text-muted-foreground mb-6">
-                    Start adding photos, videos, and notes to create a beautiful timeline.
+                    {tr("a.ac40067d4f")}
                   </p>
                   {canEdit && (
                     <Button onClick={() => setShowAddMemory(true)} className="gap-2">
                       <Plus className="h-5 w-5" />
-                      Add Your First Memory
+                      {tr("a.5faf5f9827")}
                     </Button>
                   )}
                 </div>
@@ -264,7 +265,7 @@ const TimelineView = () => {
                         {entry.content_url && entry.content_type === "photo" && (
                           <img
                             src={entry.content_url}
-                            alt={entry.caption || "Memory"}
+                            alt={entry.caption || tr("a.89c8a2851d")}
                             className="w-full max-w-lg rounded-lg mb-4"
                           />
                         )}

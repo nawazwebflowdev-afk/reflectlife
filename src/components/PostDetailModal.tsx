@@ -13,9 +13,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Heart, MessageCircle, MapPin, Loader2, Send } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "@/lib/dateFormat";
 import type { User } from "@supabase/supabase-js";
 
+import { tr } from "@/i18n/tr";
 interface Post {
   id: string;
   caption: string | null;
@@ -114,7 +115,7 @@ const PostDetailModal = ({
 
   const handleLike = async () => {
     if (!user) {
-      toast({ title: "Sign in to like posts", variant: "destructive" });
+      toast({ title: tr("a.a8410b29c6"), variant: "destructive" });
       return;
     }
     if (!post) return;
@@ -139,7 +140,7 @@ const PostDetailModal = ({
 
   const handleSubmitComment = async () => {
     if (!user) {
-      toast({ title: "Sign in to comment", variant: "destructive" });
+      toast({ title: tr("a.109260a186"), variant: "destructive" });
       return;
     }
     if (!post || !newComment.trim()) return;
@@ -150,7 +151,7 @@ const PostDetailModal = ({
       .insert({ post_id: post.id, user_id: user.id, content: newComment.trim() });
 
     if (error) {
-      toast({ title: "Error posting comment", description: error.message, variant: "destructive" });
+      toast({ title: tr("a.9b295d57da"), description: error.message, variant: "destructive" });
     } else {
       setNewComment("");
       setCommentsCount((c) => c + 1);
@@ -211,7 +212,7 @@ const PostDetailModal = ({
               <div className="rounded-lg overflow-hidden mb-4">
                 <img
                   src={post.media_url}
-                  alt="Memory"
+                  alt={tr("a.89c8a2851d")}
                   className="w-full h-auto max-h-[400px] object-cover"
                 />
               </div>
@@ -239,7 +240,7 @@ const PostDetailModal = ({
             {/* Comments Section */}
             <div className="py-4">
               <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">
-                Comments
+                {tr("a.fce06e20e5")}
               </h4>
 
               {loadingComments ? (
@@ -248,7 +249,7 @@ const PostDetailModal = ({
                 </div>
               ) : comments.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-6">
-                  No comments yet. Be the first to share your thoughts.
+                  {tr("a.c490acf7a4")}
                 </p>
               ) : (
                 <div className="space-y-4">
@@ -263,7 +264,7 @@ const PostDetailModal = ({
                       <div className="flex-1">
                         <div className="bg-muted/50 rounded-lg p-3">
                           <p className="font-semibold text-sm">
-                            {comment.profile?.full_name || "Anonymous"}
+                            {comment.profile?.full_name || tr("a.9bed510400")}
                           </p>
                           <p className="text-foreground text-sm mt-1">{comment.content}</p>
                         </div>
@@ -284,7 +285,7 @@ const PostDetailModal = ({
           <div className="border-t px-6 py-4">
             <div className="flex gap-2">
               <Textarea
-                placeholder="Write a comment..."
+                placeholder={tr("a.7b01f9dc74")}
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 className="min-h-[60px] resize-none"
@@ -312,7 +313,7 @@ const PostDetailModal = ({
         ) : (
           <div className="border-t px-6 py-4 text-center">
             <p className="text-sm text-muted-foreground">
-              <a href="/login" className="text-primary hover:underline font-medium">Sign in</a> to like and comment
+              <a href="/login" className="text-primary hover:underline font-medium">{tr("a.ada2e9e96f")}</a> {tr("a.a6bbc0c430")}
             </p>
           </div>
         )}

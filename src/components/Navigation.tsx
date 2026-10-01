@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
+import { tr } from "@/i18n/tr";
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -99,7 +100,7 @@ const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-3 group">
-            <img src={reflectlifeLogo} alt="Reflectlife" className="h-10 w-auto object-contain transition-smooth group-hover:scale-105" />
+            <img src={reflectlifeLogo} alt={tr("a.1a0e32b358")} className="h-10 w-auto object-contain transition-smooth group-hover:scale-105" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -164,7 +165,7 @@ const Navigation = () => {
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="md:hidden p-2 text-foreground hover:bg-muted rounded-lg transition-smooth"
-            aria-label="Toggle menu"
+            aria-label={tr("a.52092247b8")}
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>

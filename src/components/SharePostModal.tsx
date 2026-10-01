@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 
+import { tr } from "@/i18n/tr";
 interface SharePostModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -39,7 +40,7 @@ export const SharePostModal = ({
       const validation = emailSchema.safeParse(recipientEmail);
       if (!validation.success) {
         toast({
-          title: "Invalid Email",
+          title: tr("a.cb7cce3a8e"),
           description: validation.error.errors[0].message,
           variant: "destructive",
         });
@@ -61,15 +62,15 @@ export const SharePostModal = ({
       if (error) throw error;
 
       toast({
-        title: "Post shared successfully! 💌",
+        title: tr("a.c2b0814eff"),
         description: `Email sent to ${recipientEmail}`,
       });
       onOpenChange(false);
       setRecipientEmail("");
     } catch (error: any) {
       toast({
-        title: "Unable to send message",
-        description: error.message || "Failed to share via email. Please try again.",
+        title: tr("a.75f2455759"),
+        description: error.message || tr("a.d3845b060d"),
         variant: "destructive",
       });
     } finally {
@@ -84,8 +85,8 @@ export const SharePostModal = ({
     );
     window.open(`https://wa.me/?text=${message}`, "_blank");
     toast({
-      title: "Post shared successfully! 💌",
-      description: "Opening WhatsApp to complete sharing",
+      title: tr("a.c2b0814eff"),
+      description: tr("a.64f74760f2"),
     });
     onOpenChange(false);
   };
@@ -102,9 +103,9 @@ export const SharePostModal = ({
     }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Share Memory</DialogTitle>
+          <DialogTitle>{tr("a.1659a83bd3")}</DialogTitle>
           <DialogDescription>
-            Choose how you'd like to share this special memory
+            {tr("a.552fe443da")}
           </DialogDescription>
         </DialogHeader>
 
@@ -117,9 +118,9 @@ export const SharePostModal = ({
             >
               <Mail className="h-5 w-5" />
               <div className="text-left">
-                <div className="font-semibold">Share via Email</div>
+                <div className="font-semibold">{tr("a.03b277b752")}</div>
                 <div className="text-xs text-muted-foreground">
-                  Send this memory to a friend's inbox
+                  {tr("a.e6fcdc96c7")}
                 </div>
               </div>
             </Button>
@@ -131,9 +132,9 @@ export const SharePostModal = ({
             >
               <MessageCircle className="h-5 w-5" />
               <div className="text-left">
-                <div className="font-semibold">Share via WhatsApp</div>
+                <div className="font-semibold">{tr("a.6f3eb997a8")}</div>
                 <div className="text-xs text-muted-foreground">
-                  Share instantly through WhatsApp
+                  {tr("a.93d31c66ff")}
                 </div>
               </div>
             </Button>
@@ -141,11 +142,11 @@ export const SharePostModal = ({
         ) : shareMethod === "email" ? (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Recipient's Email</Label>
+              <Label htmlFor="email">{tr("a.d0f57d77f6")}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="friend@example.com"
+                placeholder={tr("a.c7363c9f0a")}
                 value={recipientEmail}
                 onChange={(e) => setRecipientEmail(e.target.value)}
                 disabled={loading}
@@ -158,7 +159,7 @@ export const SharePostModal = ({
                 disabled={loading}
                 className="flex-1"
               >
-                Back
+                {tr("a.b52b36b726")}
               </Button>
               <Button
                 onClick={handleEmailShare}
@@ -166,15 +167,14 @@ export const SharePostModal = ({
                 className="flex-1"
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Send Email
+                {tr("a.be4e8e2d03")}
               </Button>
             </div>
           </div>
         ) : (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Clicking continue will open WhatsApp with a pre-filled message containing
-              this memory.
+              {tr("a.37e866b490")}
             </p>
             <div className="flex gap-2">
               <Button
@@ -182,10 +182,10 @@ export const SharePostModal = ({
                 onClick={resetModal}
                 className="flex-1"
               >
-                Back
+                {tr("a.b52b36b726")}
               </Button>
               <Button onClick={handleWhatsAppShare} className="flex-1">
-                Continue to WhatsApp
+                {tr("a.8f8dd5e3eb")}
               </Button>
             </div>
           </div>

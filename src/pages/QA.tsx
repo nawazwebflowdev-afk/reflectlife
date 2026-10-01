@@ -7,6 +7,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+import { tr } from "@/i18n/tr";
 const faqItems = [
   { qKey: "q1", aKey: "a1" },
   { qKey: "q2", aKey: "a2" },
@@ -39,7 +40,7 @@ const QA = () => {
   return (
     <>
       <Helmet>
-        <title>Questions & Answers — Reflectlife | Online Memorial, Light a Candle Online</title>
+        <title>{tr("a.e8bb848ca3")}</title>
         <meta
           name="description"
           content="Frequently asked questions about Reflectlife — online memorial pages, lighting candles, grief diary, remembering loved ones online, and more."

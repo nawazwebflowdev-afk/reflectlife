@@ -14,6 +14,7 @@ import { countries } from "@/data/countries";
 import PhoneNumberField, { detectDefaultCountry, toE164 } from "@/components/PhoneNumberField";
 import type { CountryCode } from "libphonenumber-js";
 
+import { tr } from "@/i18n/tr";
 // Error boundary to catch render crashes
 class SignupErrorBoundary extends Component<
   { children: ReactNode },
@@ -42,15 +43,15 @@ class SignupErrorBoundary extends Component<
                 <AlertTriangle className="h-7 w-7 text-destructive" />
               </div>
               <CardTitle className="font-serif text-2xl text-card-foreground">
-                Something went wrong
+                {tr("a.8d886c0ba6")}
               </CardTitle>
               <CardDescription>
-                The signup page encountered an error. Please try again.
+                {tr("a.c9723fc1bf")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground text-center">
-                {this.state.error?.message || "An unexpected error occurred."}
+                {this.state.error?.message || tr("a.4444a27dbd")}
               </p>
               <Button
                 className="w-full"
@@ -60,7 +61,7 @@ class SignupErrorBoundary extends Component<
                 }}
               >
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Reload Page
+                {tr("a.6e41ee3f30")}
               </Button>
             </CardContent>
           </Card>
@@ -126,21 +127,21 @@ const SignupForm = () => {
 
     if (normalized.includes("rate limit") || normalized.includes("429") || normalized.includes("over_email_send_rate_limit")) {
       return {
-        title: "Too many attempts",
-        description: "Please try again in a few minutes.",
+        title: tr("a.3a29f9eaa4"),
+        description: tr("a.4b9fbc463a"),
       };
     }
 
     if (normalized.includes("already exists") || normalized.includes("already registered")) {
       return {
-        title: "Account already exists",
-        description: "Please sign in with your existing account.",
+        title: tr("a.452864f755"),
+        description: tr("a.75284a959a"),
       };
     }
 
     return {
-      title: "Sign up failed",
-      description: raw || "An unexpected error occurred. Please try again.",
+      title: tr("a.a7bdefb078"),
+      description: raw || tr("a.d07ac08788"),
     };
   };
 
@@ -173,8 +174,8 @@ const SignupForm = () => {
     
     if (!fullName || !email || !password || !phoneNumber || !country) {
       toast({
-        title: "Error",
-        description: "All fields are required",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.16a9c9e05b"),
         variant: "destructive",
       });
       return;
@@ -185,8 +186,8 @@ const SignupForm = () => {
     if (!e164) {
       setPhoneError("Please enter a valid phone number for the selected country.");
       toast({
-        title: "Invalid phone number",
-        description: "Please enter a valid phone number for the selected country.",
+        title: tr("a.43c82e71b6"),
+        description: tr("a.e3350826ff"),
         variant: "destructive",
       });
       return;
@@ -195,8 +196,8 @@ const SignupForm = () => {
 
     if (!termsAccepted) {
       toast({
-        title: "Error",
-        description: "Please agree to the terms and conditions",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.8643b54bf9"),
         variant: "destructive",
       });
       return;
@@ -204,8 +205,8 @@ const SignupForm = () => {
 
     if (passwordStrength.score < 3) {
       toast({
-        title: "Weak Password",
-        description: "Please choose a stronger password (at least 'Good' strength)",
+        title: tr("a.7e83f13ca0"),
+        description: tr("a.2e193731fc"),
         variant: "destructive",
       });
       return;
@@ -233,11 +234,11 @@ const SignupForm = () => {
 
       if (error) {
         const errorMessage = await extractFunctionErrorMessage(error);
-        throw new Error(errorMessage || (error as any)?.message || "Signup failed");
+        throw new Error(errorMessage || (error as any)?.message || tr("a.149dfa301d"));
       }
 
       if (data?.error) {
-        throw new Error(typeof data.error === "string" ? data.error : "Signup failed");
+        throw new Error(typeof data.error === "string" ? data.error : tr("a.149dfa301d"));
       }
 
       if (guestMemorialId) {
@@ -247,8 +248,8 @@ const SignupForm = () => {
       }
 
       toast({
-        title: "Account created!",
-        description: "Please check your email to verify your account.",
+        title: tr("a.552cd3c724"),
+        description: tr("a.1aa4a201cc"),
       });
 
       navigate("/verify", { state: { email } });
@@ -272,9 +273,9 @@ const SignupForm = () => {
     <div className="min-h-screen flex items-center justify-center py-12 px-4 gradient-subtle">
       <div className="w-full max-w-2xl space-y-6">
         <div className="text-center space-y-2 animate-fade-in">
-          <h1 className="font-serif text-4xl font-bold text-foreground">Begin Your Journey</h1>
+          <h1 className="font-serif text-4xl font-bold text-foreground">{tr("a.02d59877b8")}</h1>
           <p className="text-muted-foreground">
-            Begin your journey of remembrance securely
+            {tr("a.461898105b")}
           </p>
         </div>
 
@@ -283,7 +284,7 @@ const SignupForm = () => {
             <CardContent className="flex items-start gap-3 py-4">
               <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
               <div className="space-y-1">
-                <p className="text-sm font-medium text-destructive">Sign up failed</p>
+                <p className="text-sm font-medium text-destructive">{tr("a.a7bdefb078")}</p>
                 <p className="text-sm text-muted-foreground">{signupError}</p>
                 <Button
                   variant="ghost"
@@ -291,7 +292,7 @@ const SignupForm = () => {
                   className="mt-1 h-auto p-0 text-primary underline underline-offset-4"
                   onClick={() => setSignupError(null)}
                 >
-                  Dismiss
+                  {tr("a.70afe9eff3")}
                 </Button>
               </div>
             </CardContent>
@@ -300,21 +301,21 @@ const SignupForm = () => {
 
         <Card className="shadow-elegant animate-fade-up border-border/50">
           <CardHeader className="space-y-1">
-            <CardTitle className="font-serif text-2xl text-card-foreground">Create Your Account</CardTitle>
+            <CardTitle className="font-serif text-2xl text-card-foreground">{tr("a.c586a432ec")}</CardTitle>
             <CardDescription>
-              Fill in your details to get started with Reflectlife
+              {tr("a.a491984f6c")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSignup} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="fullName">{tr("a.64346b483c")}</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="fullName"
                     type="text"
-                    placeholder="John Doe"
+                    placeholder={tr("a.ae6e4d1209")}
                     className="pl-10"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
@@ -325,13 +326,13 @@ const SignupForm = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{tr("a.84add5b295")}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder={tr("a.2894efbef0")}
                     className="pl-10"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -342,7 +343,7 @@ const SignupForm = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{tr("a.8be3c943b1")}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -372,11 +373,11 @@ const SignupForm = () => {
                       <Shield className="h-3 w-3 mt-0.5 flex-shrink-0" />
                       <div>
                         {passwordStrength.score < 3 ? (
-                          <span className="text-orange-600">Use a mix of uppercase, lowercase, numbers, and special characters</span>
+                          <span className="text-orange-600">{tr("a.bd0c40bce3")}</span>
                         ) : (
                           <span className="text-green-600 flex items-center gap-1">
                             <CheckCircle2 className="h-3 w-3" />
-                            Strong password
+                            {tr("a.a4ca8db559")}
                           </span>
                         )}
                       </div>
@@ -395,12 +396,12 @@ const SignupForm = () => {
               />
 
               <div className="space-y-2">
-                <Label htmlFor="country">Country</Label>
+                <Label htmlFor="country">{tr("a.d523ebbd10")}</Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
                   <Select value={country} onValueChange={setCountry} required disabled={isLoading}>
                     <SelectTrigger id="country" className="pl-10">
-                      <SelectValue placeholder="Select your country" />
+                      <SelectValue placeholder={tr("a.5536b471cb")} />
                     </SelectTrigger>
                     <SelectContent className="max-h-[300px]">
                       {countries.map((c) => (
@@ -423,10 +424,10 @@ const SignupForm = () => {
                   />
                   <div className="space-y-1">
                     <Label htmlFor="terms" className="text-sm font-normal cursor-pointer">
-                      I agree to all terms and conditions
+                      {tr("a.1ebb6156b5")}
                     </Label>
                     <p className="text-xs text-muted-foreground">
-                      We respect your privacy and protect your data with care.
+                      {tr("a.f856f187c0")}
                     </p>
                   </div>
                 </div>
@@ -436,24 +437,24 @@ const SignupForm = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating account...
+                    {tr("a.27b8a2d710")}
                   </>
                 ) : (
                   <>
-                    Create Account
+                    {tr("a.eff4fd865f")}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </>
                 )}
               </Button>
 
               <div className="text-center text-sm text-muted-foreground">
-                Already have an account?{" "}
+                {tr("a.8559034a07")}{" "}
                 <button
                   type="button"
                   onClick={() => navigate("/login")}
                   className="text-primary underline underline-offset-4 hover:text-primary/80 transition-smooth"
                 >
-                  Sign in
+                  {tr("a.ada2e9e96f")}
                 </button>
               </div>
             </form>

@@ -2,10 +2,11 @@ import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 import { errorResult, jsonResult, notAuthenticated, supabaseForUser } from "../supabase";
 
+import { tr } from "@/i18n/tr";
 export default defineTool({
   name: "get_memorial",
-  title: "Get memorial details",
-  description: "Fetch a single memorial the caller may view, including its recent tributes.",
+  title: tr("a.a98f3bab2a"),
+  description: tr("a.c4d8f39489"),
   inputSchema: {
     memorial_id: z.string().describe("UUID of the memorial."),
   },

@@ -7,6 +7,7 @@ import { Palette, Check, Loader2, Lock } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+import { tr } from "@/i18n/tr";
 interface Template {
   id: string;
   name: string;
@@ -89,7 +90,7 @@ const PageTemplateSelector = ({
 
       if (isPaid && !purchasedIds.includes(templateId)) {
         toast({
-          title: "Purchase required",
+          title: tr("a.990f7d707c"),
           description: `You need to purchase "${template?.name}" before using it.`,
           variant: "destructive",
         });
@@ -102,7 +103,7 @@ const PageTemplateSelector = ({
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      if (!user) throw new Error(tr("a.0c91acbae2"));
 
       // 2. Database Update
       const field = PROFILE_FIELD_MAP[pageType];
@@ -116,20 +117,20 @@ const PageTemplateSelector = ({
       // 3. UI Sync
       onTemplateChange(templateId);
       toast({
-        title: templateId ? "Design applied" : "Canvas cleared",
+        title: templateId ? tr("a.d4a351df4e") : tr("a.3f9d5ae70c"),
         description: `Successfully updated to ${templateId ? "selected template" : "default blank view"}.`,
       });
       setOpen(false);
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: tr("a.7f2f6a15cf"), description: err.message, variant: "destructive" });
     } finally {
       setSaving(false);
     }
   };
 
-  const pageLabel = pageType === "memorial" ? "Memorial Wall" : pageType === "tree" ? "Connection Tree" : "Timeline";
+  const pageLabel = pageType === "memorial" ? tr("a.a86506f38a") : pageType === "tree" ? tr("a.bc0bf7b892") : tr("a.018514a3d5");
   const triggerLabel =
-    pageType === "tree" ? "Tree Design" : pageType === "timeline" ? "Timeline Design" : "Memorial Design";
+    pageType === "tree" ? tr("a.5ef0f8e305") : pageType === "timeline" ? tr("a.57261c1c7b") : tr("a.a436ead0fa");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -141,18 +142,18 @@ const PageTemplateSelector = ({
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Choose a Design for {pageLabel}</DialogTitle>
+          <DialogTitle>{tr("a.6e83071789")} {pageLabel}</DialogTitle>
         </DialogHeader>
 
         <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-muted-foreground">Select a background for your {pageLabel}.</p>
+          <p className="text-sm text-muted-foreground">{tr("a.1778372c83")} {pageLabel}.</p>
           <Select value={filter} onValueChange={(v) => setFilter(v as FilterType)}>
             <SelectTrigger className="w-[160px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Designs</SelectItem>
-              <SelectItem value="my">My Purchased</SelectItem>
+              <SelectItem value="all">{tr("a.347ec23da3")}</SelectItem>
+              <SelectItem value="my">{tr("a.ec224288f8")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -170,7 +171,7 @@ const PageTemplateSelector = ({
                 className={`relative rounded-lg border-2 overflow-hidden transition-all hover:shadow-md ${!currentTemplateId ? "border-primary ring-2 ring-primary/30" : "border-border"}`}
               >
                 <div className="aspect-video bg-gradient-to-br from-muted to-background flex items-center justify-center">
-                  <span className="text-sm font-medium text-muted-foreground">Blank</span>
+                  <span className="text-sm font-medium text-muted-foreground">{tr("a.276c9361ff")}</span>
                 </div>
                 {!currentTemplateId && (
                   <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">

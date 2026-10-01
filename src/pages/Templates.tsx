@@ -10,6 +10,7 @@ import { Loader2, Check, Search, Type, Layout } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getCountryFlag } from "@/lib/countryFlags";
 
+import { tr } from "@/i18n/tr";
 interface ColorPalette {
   primary?: string;
   secondary?: string;
@@ -153,8 +154,8 @@ const Templates = () => {
 
     if (!user) {
       toast({
-        title: "Sign in required",
-        description: "Please sign in to select a template",
+        title: tr("a.934d2a9003"),
+        description: tr("a.586bd33514"),
         variant: "destructive",
       });
       navigate("/login");
@@ -177,8 +178,8 @@ const Templates = () => {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to select template",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.48c5807eb4"),
         variant: "destructive",
       });
     } else {
@@ -188,8 +189,8 @@ const Templates = () => {
         fetchPurchasedTemplates(user.id),
       ]);
       toast({
-        title: "Template Applied!",
-        description: "Your template has been applied to your memorials",
+        title: tr("a.e6a9ec0544"),
+        description: tr("a.719375aa5f"),
       });
     }
   };
@@ -218,10 +219,10 @@ const Templates = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
-              Memorial Templates
+              {tr("a.87c2d9c5ad")}
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Choose a beautiful template to personalize your memorial wall and timeline
+              {tr("a.1735bf8fb6")}
             </p>
           </div>
 
@@ -236,7 +237,7 @@ const Templates = () => {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search by country or name..."
+                    placeholder={tr("a.89d3f57e49")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
@@ -244,13 +245,13 @@ const Templates = () => {
                 </div>
                 <Select value={filterType} onValueChange={(value: "all" | "free" | "paid") => setFilterType(value)}>
                   <SelectTrigger className="w-full md:w-[180px]">
-                    <SelectValue placeholder="Filter by type" />
+                    <SelectValue placeholder={tr("a.e55aa1d9ec")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Templates</SelectItem>
-                    <SelectItem value="free">Free Only</SelectItem>
-                    <SelectItem value="paid">Paid Only</SelectItem>
-                    <SelectItem value="owned">My Templates</SelectItem>
+                    <SelectItem value="all">{tr("a.fd96ddccba")}</SelectItem>
+                    <SelectItem value="free">{tr("a.2b4e70bb2d")}</SelectItem>
+                    <SelectItem value="paid">{tr("a.a1acf2ccf7")}</SelectItem>
+                    <SelectItem value="owned">{tr("a.17a8348930")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -258,7 +259,7 @@ const Templates = () => {
               {/* Templates Grid */}
               {filteredTemplates.length === 0 ? (
                 <div className="text-center py-20">
-                  <p className="text-muted-foreground">No templates found matching your criteria.</p>
+                  <p className="text-muted-foreground">{tr("a.81c81851ca")}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto mb-16">
@@ -322,9 +323,9 @@ const Templates = () => {
                         </p>
                         <div className="flex items-center justify-between">
                           {template.is_free ? (
-                            <Badge variant="secondary">Free</Badge>
+                            <Badge variant="secondary">{tr("a.75f527181b")}</Badge>
                           ) : purchasedTemplateIds.has(template.id) ? (
-                            <Badge variant="default">Owned</Badge>
+                            <Badge variant="default">{tr("a.b62ff5ccd1")}</Badge>
                           ) : (
                             <Badge variant="outline">€{template.price}</Badge>
                           )}
@@ -335,9 +336,9 @@ const Templates = () => {
                             disabled={selectedTemplateId === template.id}
                           >
                             {selectedTemplateId === template.id
-                              ? "Selected"
+                              ? tr("a.9a976fc228")
                               : isOwned(template.id, template.is_free)
-                              ? "Use Template"
+                              ? tr("a.2379761496")
                               : `Buy €${template.price}`}
                           </Button>
                         </div>
@@ -352,10 +353,10 @@ const Templates = () => {
                 <>
                   <div className="text-center mb-8 mt-16">
                     <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-                      Templates by Other Creators
+                      {tr("a.ef5cc70d17")}
                     </h2>
                     <p className="text-lg text-muted-foreground">
-                      Unique designs from our community of talented creators
+                      {tr("a.b5578d2ba8")}
                     </p>
                   </div>
 
@@ -386,7 +387,7 @@ const Templates = () => {
                             <h3 className="font-serif text-lg font-semibold">{template.name}</h3>
                           </div>
                           <p className="text-xs text-muted-foreground mb-2">
-                            By @{template.creator_name}
+                            {tr("a.538010be8f")}{template.creator_name}
                           </p>
                           {/* Theme preview: color swatches */}
                           {template.color_palette && typeof template.color_palette === 'object' && template.color_palette.primary && (
@@ -422,9 +423,9 @@ const Templates = () => {
                           </p>
                           <div className="flex items-center justify-between">
                             {template.is_free ? (
-                              <Badge variant="secondary">Free</Badge>
+                              <Badge variant="secondary">{tr("a.75f527181b")}</Badge>
                             ) : purchasedTemplateIds.has(template.id) ? (
-                              <Badge variant="default">Owned</Badge>
+                              <Badge variant="default">{tr("a.b62ff5ccd1")}</Badge>
                             ) : (
                               <Badge variant="outline">€{template.price}</Badge>
                             )}
@@ -435,9 +436,9 @@ const Templates = () => {
                               disabled={selectedTemplateId === template.id}
                             >
                               {selectedTemplateId === template.id
-                                ? "Selected"
+                                ? tr("a.9a976fc228")
                                 : isOwned(template.id, template.is_free)
-                                ? "Use Template"
+                                ? tr("a.2379761496")
                                 : `Buy €${template.price}`}
                             </Button>
                           </div>

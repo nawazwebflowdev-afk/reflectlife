@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Upload } from "lucide-react";
 import { countries } from "@/data/countries";
 
+import { tr } from "@/i18n/tr";
 interface ProfileEditModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -76,8 +77,8 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
       // Validate file type
       if (!file.type.startsWith('image/')) {
         toast({
-          title: "Invalid file type",
-          description: "Please upload an image file (jpg, png, etc.)",
+          title: tr("a.56f848f49e"),
+          description: tr("a.374003b3d8"),
           variant: "destructive",
         });
         setUploading(false);
@@ -100,14 +101,14 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
       setProfile({ ...profile, avatar_url: publicUrl });
       
       toast({
-        title: "Image uploaded",
-        description: "Your profile image has been uploaded successfully.",
+        title: tr("a.82dd62753e"),
+        description: tr("a.d14c8cb6aa"),
       });
     } catch (error) {
       console.error("Error uploading image:", error);
       toast({
-        title: "Upload failed",
-        description: "Failed to upload image. Please try again.",
+        title: tr("a.ad0d0603e2"),
+        description: tr("a.22d25a7239"),
         variant: "destructive",
       });
     } finally {
@@ -134,8 +135,8 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
       if (error) throw error;
 
       toast({
-        title: "Profile updated successfully",
-        description: "Your profile has been updated.",
+        title: tr("a.183f8bad27"),
+        description: tr("a.7a0b15c263"),
       });
       
       onProfileUpdate();
@@ -143,8 +144,8 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
     } catch (error) {
       console.error("Error updating profile:", error);
       toast({
-        title: "Update failed",
-        description: "Failed to update profile. Please try again.",
+        title: tr("a.4de04cd91a"),
+        description: tr("a.e7c3a79781"),
         variant: "destructive",
       });
     } finally {
@@ -162,9 +163,9 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogTitle>{tr("a.cd280a41f7")}</DialogTitle>
           <DialogDescription>
-            Update your profile information and preferences.
+            {tr("a.c5fe97f70a")}
           </DialogDescription>
         </DialogHeader>
 
@@ -180,7 +181,7 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
                 <Button type="button" variant="outline" size="sm" disabled={uploading} asChild>
                   <span>
                     <Upload className="h-4 w-4 mr-2" />
-                    {uploading ? "Uploading..." : "Upload Photo"}
+                    {uploading ? tr("a.070e328ec8") : tr("a.84f26e4f34")}
                   </span>
                 </Button>
               </Label>
@@ -199,30 +200,30 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="first_name">First Name</Label>
+                <Label htmlFor="first_name">{tr("a.b6ea992aab")}</Label>
                 <Input
                   id="first_name"
                   value={profile.first_name}
                   onChange={(e) => setProfile({ ...profile, first_name: e.target.value })}
-                  placeholder="Enter first name"
+                  placeholder={tr("a.5bf521d8d9")}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="last_name">Last Name</Label>
+                <Label htmlFor="last_name">{tr("a.863cb39fbe")}</Label>
                 <Input
                   id="last_name"
                   value={profile.last_name}
                   onChange={(e) => setProfile({ ...profile, last_name: e.target.value })}
-                  placeholder="Enter last name"
+                  placeholder={tr("a.d05ae9c499")}
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="country">Country</Label>
+              <Label htmlFor="country">{tr("a.d523ebbd10")}</Label>
               <Select value={profile.country} onValueChange={(value) => setProfile({ ...profile, country: value })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select country" />
+                  <SelectValue placeholder={tr("a.59ee76bad1")} />
                 </SelectTrigger>
                 <SelectContent>
                   {countries.map((country) => (
@@ -235,7 +236,7 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="color_theme">Theme Color</Label>
+              <Label htmlFor="color_theme">{tr("a.29ddb7dcd0")}</Label>
               <div className="flex gap-2 items-center">
                 <Input
                   id="color_theme"
@@ -252,10 +253,10 @@ export const ProfileEditModal = ({ open, onOpenChange, userId, onProfileUpdate }
 
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
-            Cancel
+            {tr("a.77dfd2135f")}
           </Button>
           <Button onClick={handleSave} disabled={loading}>
-            {loading ? "Saving..." : "Save Changes"}
+            {loading ? tr("a.ae7e887517") : tr("a.fa2984b367")}
           </Button>
         </div>
       </DialogContent>

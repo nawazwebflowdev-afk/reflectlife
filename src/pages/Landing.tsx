@@ -12,6 +12,7 @@ import PostDetailModal from "@/components/PostDetailModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 
+import { tr } from "@/i18n/tr";
 const Landing = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -71,26 +72,26 @@ const Landing = () => {
   const features = [
     {
       icon: Heart,
-      title: "Create a Memorial",
-      desc: "Design a private space to honor and preserve their unique story forever.",
+      title: tr("a.0bfb9d7153"),
+      desc: tr("a.1c75545e20"),
       path: "/memorials",
     },
     {
       icon: Flame,
-      title: "Light a Candle",
-      desc: "A warm, enduring symbol of remembrance to keep their memory glowing.",
+      title: tr("a.8cce2bbe38"),
+      desc: tr("a.8c3e837e1a"),
       path: "/candle",
     },
     {
       icon: Clock,
-      title: "Celebrate a Journey",
-      desc: "Walk through the milestones, moments, and memories that defined them.",
+      title: tr("a.1586899420"),
+      desc: tr("a.70bb4ce3ea"),
       path: "/timeline",
     },
     {
       icon: BookOpen,
-      title: "Private Diary",
-      desc: "A secure, personal place to write down your thoughts and feelings.",
+      title: tr("a.f2d98ec797"),
+      desc: tr("a.713df6bec9"),
       path: "/diary",
     },
   ];
@@ -107,7 +108,7 @@ const Landing = () => {
       {/* Hero Banner */}
       <section className="relative w-full">
         <div className="relative w-full h-[500px] md:h-[600px] overflow-hidden">
-          <img src={heroBanner} alt="Reflectlife floral memorial banner" className="w-full h-full object-cover" />
+          <img src={heroBanner} alt={tr("a.119e758436")} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40" />
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
             <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 md:mb-6 drop-shadow-lg animate-fade-in">
@@ -125,7 +126,7 @@ const Landing = () => {
               className="px-8 md:px-12 py-6 text-base md:text-lg shadow-elegant-lg animate-fade-in"
               style={{ animationDelay: "400ms" }}
             >
-              Light a 🕯️
+              {tr("a.bc9c8fe700")}
             </Button>
           </div>
         </div>

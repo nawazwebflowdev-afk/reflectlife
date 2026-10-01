@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 
 
+import { tr } from "@/i18n/tr";
 const Settings = () => {
   
   const [fullName, setFullName] = useState("");
@@ -98,8 +99,8 @@ const Settings = () => {
     // Validate file type
     if (!file.type.startsWith('image/')) {
       toast({
-        title: "Invalid file type",
-        description: "Please upload an image file (jpg, png, etc.)",
+        title: tr("a.56f848f49e"),
+        description: tr("a.374003b3d8"),
         variant: "destructive",
       });
       return;
@@ -146,8 +147,8 @@ const Settings = () => {
       setAvatarUrl(publicUrl);
 
       toast({
-        title: "Success",
-        description: "Profile picture updated successfully",
+        title: tr("a.42a8f651d7"),
+        description: tr("a.57b1894dce"),
       });
 
       // Force refresh the page to update avatar in navigation
@@ -155,8 +156,8 @@ const Settings = () => {
     } catch (error: any) {
       console.error('Upload error:', error);
       toast({
-        title: "Upload failed",
-        description: error.message || "Failed to upload profile picture",
+        title: tr("a.ad0d0603e2"),
+        description: error.message || tr("a.1454bdf1d0"),
         variant: "destructive",
       });
     } finally {
@@ -183,13 +184,13 @@ const Settings = () => {
 
       setAvatarUrl(null);
       toast({
-        title: "Success",
-        description: "Profile picture removed",
+        title: tr("a.42a8f651d7"),
+        description: tr("a.20407bc6b2"),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to remove profile picture",
+        title: tr("a.7f2f6a15cf"),
+        description: error.message || tr("a.2d2645ef4f"),
         variant: "destructive",
       });
     } finally {
@@ -234,14 +235,14 @@ const Settings = () => {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to update profile",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.bc8dc9b46d"),
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Success",
-        description: "Profile updated successfully",
+        title: tr("a.42a8f651d7"),
+        description: tr("a.183f8bad27"),
       });
     }
   };
@@ -249,8 +250,8 @@ const Settings = () => {
   const handleSubmitReview = async () => {
     if (!rating || !reviewMessage.trim()) {
       toast({
-        title: "Incomplete Review",
-        description: "Please provide a rating and message",
+        title: tr("a.033c4b5b07"),
+        description: tr("a.2ee182647f"),
         variant: "destructive",
       });
       return;
@@ -270,15 +271,15 @@ const Settings = () => {
       if (error) throw error;
 
       toast({
-        title: "Review Sent",
-        description: "Thank you for your feedback — it helps us keep Reflectlife meaningful for everyone 🌿",
+        title: tr("a.cebfeb4961"),
+        description: tr("a.0b27385d67"),
       });
       setRating(0);
       setReviewMessage("");
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to send review",
+        title: tr("a.7f2f6a15cf"),
+        description: error.message || tr("a.e96cffaf4e"),
         variant: "destructive",
       });
     } finally {
@@ -291,8 +292,8 @@ const Settings = () => {
     <div className="min-h-screen py-12">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="mb-8 animate-fade-in">
-          <h1 className="font-serif text-4xl font-bold mb-2">Settings</h1>
-          <p className="text-muted-foreground">Manage your account and preferences</p>
+          <h1 className="font-serif text-4xl font-bold mb-2">{tr("a.c7f73bb54d")}</h1>
+          <p className="text-muted-foreground">{tr("a.ad84defebe")}</p>
         </div>
 
         <div className="space-y-6">
@@ -301,14 +302,14 @@ const Settings = () => {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <User className="h-5 w-5 text-primary" />
-                <CardTitle>Account Information</CardTitle>
+                <CardTitle>{tr("a.0cbd67db52")}</CardTitle>
               </div>
-              <CardDescription>Update your personal details</CardDescription>
+              <CardDescription>{tr("a.13f22471c0")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Profile Picture Section */}
               <div className="space-y-4">
-                <Label>Profile Picture</Label>
+                <Label>{tr("a.ea918c42e4")}</Label>
                 <div className="flex items-center gap-6">
                   <Avatar className="h-24 w-24 border-4 border-primary/10">
                     <AvatarImage src={avatarUrl || undefined} alt={fullName} />
@@ -328,12 +329,12 @@ const Settings = () => {
                         {isUploading ? (
                           <>
                             <Loader2 className="h-4 w-4 animate-spin" />
-                            Uploading...
+                            {tr("a.070e328ec8")}
                           </>
                         ) : (
                           <>
                             <Upload className="h-4 w-4" />
-                            {avatarUrl ? "Change Picture" : "Upload Picture"}
+                            {avatarUrl ? tr("a.2f5a204508") : tr("a.0a1a781756")}
                           </>
                         )}
                       </Button>
@@ -346,7 +347,7 @@ const Settings = () => {
                           className="gap-2 text-destructive hover:text-destructive"
                         >
                           <X className="h-4 w-4" />
-                          Remove
+                          {tr("a.e963907dac")}
                         </Button>
                       )}
                     </div>
@@ -355,13 +356,13 @@ const Settings = () => {
                       <div className="space-y-2">
                         <Progress value={uploadProgress} className="h-2" />
                         <p className="text-xs text-muted-foreground">
-                          Uploading... {uploadProgress}%
+                          {tr("a.070e328ec8")} {uploadProgress}%
                         </p>
                       </div>
                     )}
                     
                     <p className="text-xs text-muted-foreground">
-                      Upload a profile picture. Recommended: square image, at least 400x400px
+                      {tr("a.99deddcb5a")}
                     </p>
                   </div>
                   
@@ -378,10 +379,10 @@ const Settings = () => {
               <Separator />
 
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name">{tr("a.64346b483c")}</Label>
                 <Input 
                   id="name" 
-                  placeholder="John Doe" 
+                  placeholder={tr("a.ae6e4d1209")} 
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                 />
@@ -389,17 +390,17 @@ const Settings = () => {
               <div className="space-y-2">
                 <PhoneNumberField
                   id="settings-phone"
-                  label="Phone number"
+                  label={tr("a.8961d3bf56")}
                   country={phoneCountry}
                   onCountryChange={setPhoneCountry}
                   value={phone}
                   onValueChange={(v) => { setPhone(v); setPhoneError(null); }}
                   error={phoneError}
                 />
-                <p className="text-xs text-muted-foreground">Optional. Used for remembrance reminders and account recovery.</p>
+                <p className="text-xs text-muted-foreground">{tr("a.4e4a6d3b59")}</p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{tr("a.84add5b295")}</Label>
                 <Input 
                   id="email" 
                   type="email" 
@@ -407,10 +408,10 @@ const Settings = () => {
                   disabled
                   className="bg-muted"
                 />
-                <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+                <p className="text-xs text-muted-foreground">{tr("a.dfa8765bb9")}</p>
               </div>
               <Button onClick={handleSaveProfile} disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save Changes"}
+                {isLoading ? tr("a.ae7e887517") : tr("a.fa2984b367")}
               </Button>
             </CardContent>
           </Card>
@@ -420,23 +421,23 @@ const Settings = () => {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Bell className="h-5 w-5 text-primary" />
-                <CardTitle>Notifications</CardTitle>
+                <CardTitle>{tr("a.753a22b2eb")}</CardTitle>
               </div>
-              <CardDescription>Configure how you receive updates</CardDescription>
+              <CardDescription>{tr("a.208a05e128")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium">Email Notifications</p>
-                  <p className="text-sm text-muted-foreground">Receive updates about new tributes</p>
+                  <p className="font-medium">{tr("a.128113074a")}</p>
+                  <p className="text-sm text-muted-foreground">{tr("a.b58f57bbe9")}</p>
                 </div>
                 <Switch defaultChecked />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium">Memorial Updates</p>
-                  <p className="text-sm text-muted-foreground">Get notified when someone contributes</p>
+                  <p className="font-medium">{tr("a.8d86586822")}</p>
+                  <p className="text-sm text-muted-foreground">{tr("a.9df28916b4")}</p>
                 </div>
                 <Switch defaultChecked />
               </div>
@@ -448,28 +449,28 @@ const Settings = () => {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Palette className="h-5 w-5 text-primary" />
-                <CardTitle>Color Theme</CardTitle>
+                <CardTitle>{tr("a.aa480fb6f8")}</CardTitle>
               </div>
-              <CardDescription>Choose your preferred color theme</CardDescription>
+              <CardDescription>{tr("a.3f3cf24a0a")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="theme">Theme</Label>
+                <Label htmlFor="theme">{tr("a.a797e30923")}</Label>
                 <Select value={colorTheme} onValueChange={setColorTheme}>
                   <SelectTrigger id="theme">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="blue">Blue</SelectItem>
-                    <SelectItem value="green">Green</SelectItem>
-                    <SelectItem value="purple">Purple</SelectItem>
+                    <SelectItem value="light">{tr("a.a36ef8aba2")}</SelectItem>
+                    <SelectItem value="dark">{tr("a.ae1ef01432")}</SelectItem>
+                    <SelectItem value="blue">{tr("a.7d44bc449c")}</SelectItem>
+                    <SelectItem value="green">{tr("a.933bf21afd")}</SelectItem>
+                    <SelectItem value="purple">{tr("a.32576f4fed")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <Button onClick={handleSaveProfile} disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save Theme"}
+                {isLoading ? tr("a.ae7e887517") : tr("a.3f3ec4f121")}
               </Button>
             </CardContent>
           </Card>
@@ -479,20 +480,20 @@ const Settings = () => {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Lock className="h-5 w-5 text-primary" />
-                <CardTitle>Privacy & Security</CardTitle>
+                <CardTitle>{tr("a.9bb6e9c0aa")}</CardTitle>
               </div>
-              <CardDescription>Control your privacy settings</CardDescription>
+              <CardDescription>{tr("a.3d2dd61f22")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="current-password">Current Password</Label>
+                <Label htmlFor="current-password">{tr("a.4d59678960")}</Label>
                 <Input id="current-password" type="password" placeholder="••••••••" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="new-password">New Password</Label>
+                <Label htmlFor="new-password">{tr("a.4894cb39ee")}</Label>
                 <Input id="new-password" type="password" placeholder="••••••••" />
               </div>
-              <Button>Update Password</Button>
+              <Button>{tr("a.61dcf34e70")}</Button>
             </CardContent>
           </Card>
 
@@ -501,13 +502,13 @@ const Settings = () => {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Star className="h-5 w-5 text-primary" />
-                <CardTitle>Leave a Review</CardTitle>
+                <CardTitle>{tr("a.5e65b6501a")}</CardTitle>
               </div>
-              <CardDescription>Share your experience with Reflectlife</CardDescription>
+              <CardDescription>{tr("a.8646803e66")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>Your Rating</Label>
+                <Label>{tr("a.d48bc1a96e")}</Label>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -528,10 +529,10 @@ const Settings = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="review-message">Your Review</Label>
+                <Label htmlFor="review-message">{tr("a.41bed490c8")}</Label>
                 <Textarea
                   id="review-message"
-                  placeholder="Tell us about your experience..."
+                  placeholder={tr("a.a676b8cf6e")}
                   value={reviewMessage}
                   onChange={(e) => setReviewMessage(e.target.value)}
                   rows={4}
@@ -544,10 +545,10 @@ const Settings = () => {
                 {isSubmittingReview ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
+                    {tr("a.c338c191ab")}
                   </>
                 ) : (
-                  "Send Review"
+                  tr("a.d45c5afda3")
                 )}
               </Button>
             </CardContent>
@@ -559,16 +560,16 @@ const Settings = () => {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Share2 className="h-5 w-5 text-primary" />
-                  <CardTitle>Share Your Design</CardTitle>
+                  <CardTitle>{tr("a.f69ef99d0d")}</CardTitle>
                 </div>
-                <CardDescription>Upload and manage your memorial templates</CardDescription>
+                <CardDescription>{tr("a.00e8ef6054")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                  As an approved creator, you can create and sell memorial templates to help others honor their loved ones.
+                  {tr("a.482220902e")}
                 </p>
                 <Button onClick={() => navigate("/dashboard")}>
-                  Go to Creator Dashboard
+                  {tr("a.74415bfe36")}
                 </Button>
               </CardContent>
             </Card>
@@ -579,15 +580,15 @@ const Settings = () => {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Download className="h-5 w-5 text-primary" />
-                <CardTitle>Data Export</CardTitle>
+                <CardTitle>{tr("a.fd369935a2")}</CardTitle>
               </div>
-              <CardDescription>Download your memorial data</CardDescription>
+              <CardDescription>{tr("a.4b48b3d04f")}</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Export all your memorial data including photos, tributes, and timeline entries as a downloadable archive.
+                {tr("a.f90b6c9822")}
               </p>
-              <Button variant="outline">Export Data (ZIP)</Button>
+              <Button variant="outline">{tr("a.ed18235e1d")}</Button>
             </CardContent>
           </Card>
 
@@ -596,19 +597,19 @@ const Settings = () => {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Trash2 className="h-5 w-5 text-destructive" />
-                <CardTitle className="text-destructive">Danger Zone</CardTitle>
+                <CardTitle className="text-destructive">{tr("a.8fc83aac97")}</CardTitle>
               </div>
-              <CardDescription>Irreversible actions</CardDescription>
+              <CardDescription>{tr("a.e048b51042")}</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Are you sure? This action will permanently remove your account and all associated memorials.
+                {tr("a.5f2945572c")}
               </p>
               <Button 
                 variant="destructive"
                 onClick={() => setShowDeleteModal(true)}
               >
-                Delete Account
+                {tr("a.ee1b9a9f23")}
               </Button>
             </CardContent>
           </Card>

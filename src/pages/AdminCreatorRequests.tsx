@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { formatDate } from "@/lib/dateFormat";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 
+import { tr } from "@/i18n/tr";
 interface CreatorApplication {
   id: string;
   user_id: string;
@@ -50,8 +52,8 @@ const AdminCreatorRequests = () => {
 
     if (!roleData) {
       toast({
-        title: "Access Denied",
-        description: "You don't have permission to access this page",
+        title: tr("a.1647b9db6c"),
+        description: tr("a.9b2ce8f6ad"),
         variant: "destructive",
       });
       navigate("/dashboard");
@@ -71,8 +73,8 @@ const AdminCreatorRequests = () => {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to fetch applications",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.a19ce3f7be"),
         variant: "destructive",
       });
       setLoading(false);
@@ -107,14 +109,14 @@ const AdminCreatorRequests = () => {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to approve creator",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.38eda54909"),
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Success",
-        description: "User approved as creator",
+        title: tr("a.42a8f651d7"),
+        description: tr("a.a0d53be0f8"),
       });
       fetchApplications();
     }
@@ -128,14 +130,14 @@ const AdminCreatorRequests = () => {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to reject application",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.4d8bc29cb7"),
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Success",
-        description: "Application rejected",
+        title: tr("a.42a8f651d7"),
+        description: tr("a.036461bf90"),
       });
       fetchApplications();
     }
@@ -149,8 +151,8 @@ const AdminCreatorRequests = () => {
     <div className="py-12 bg-gradient-subtle">
         <div className="container mx-auto px-4">
           <div className="mb-8">
-            <h1 className="font-serif text-4xl font-bold mb-2">Creator Applications</h1>
-            <p className="text-muted-foreground">Review and approve creator applications</p>
+            <h1 className="font-serif text-4xl font-bold mb-2">{tr("a.a071cff206")}</h1>
+            <p className="text-muted-foreground">{tr("a.e63a93ee8d")}</p>
           </div>
 
           {loading ? (
@@ -160,7 +162,7 @@ const AdminCreatorRequests = () => {
           ) : applications.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">No applications found</p>
+                <p className="text-muted-foreground">{tr("a.bad0ca78dd")}</p>
               </CardContent>
             </Card>
           ) : (
@@ -174,11 +176,11 @@ const AdminCreatorRequests = () => {
                           {app.display_name}
                         </CardTitle>
                         <div className="space-y-1 text-sm text-muted-foreground">
-                          <p>Email: {app.profiles?.email || "N/A"}</p>
-                          <p>Country: {app.country}</p>
+                          <p>{tr("a.4c4e6b2d1d")} {app.profiles?.email || "N/A"}</p>
+                          <p>{tr("a.8c24c41756")} {app.country}</p>
                           {app.portfolio && (
                             <p>
-                              Portfolio:{" "}
+                              {tr("a.262135e475")}{" "}
                               <a
                                 href={app.portfolio}
                                 target="_blank"
@@ -189,18 +191,18 @@ const AdminCreatorRequests = () => {
                               </a>
                             </p>
                           )}
-                          <p>Applied: {new Date(app.created_at).toLocaleDateString()}</p>
+                          <p>{tr("a.4b62b9d7ac")} {formatDate(app.created_at)}</p>
                         </div>
                       </div>
                       <Badge variant={app.approved ? "default" : "secondary"}>
-                        {app.approved ? "Approved" : "Pending"}
+                        {app.approved ? tr("a.41b81eb8db") : tr("a.96f608c16c")}
                       </Badge>
                     </div>
                   </CardHeader>
                   <CardContent>
                     {app.description && (
                       <div className="mb-4">
-                        <h4 className="font-semibold mb-2">Motivation:</h4>
+                        <h4 className="font-semibold mb-2">{tr("a.1a0fd21980")}</h4>
                         <p className="text-sm text-muted-foreground">{app.description}</p>
                       </div>
                     )}
@@ -212,7 +214,7 @@ const AdminCreatorRequests = () => {
                           className="flex items-center gap-2"
                         >
                           <CheckCircle className="h-4 w-4" />
-                          Approve
+                          {tr("a.7b2c7f146a")}
                         </Button>
                         <Button
                           variant="destructive"
@@ -220,7 +222,7 @@ const AdminCreatorRequests = () => {
                           className="flex items-center gap-2"
                         >
                           <XCircle className="h-4 w-4" />
-                          Reject
+                          {tr("a.2b03b59293")}
                         </Button>
                       </div>
                     )}

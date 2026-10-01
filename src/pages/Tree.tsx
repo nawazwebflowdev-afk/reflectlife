@@ -26,6 +26,7 @@ import EmptyTreeState from "@/components/tree/EmptyTreeState";
 import { InviteAccessPanel } from "@/components/InviteAccessPanel";
 import PageTemplateSelector from "@/components/PageTemplateSelector";
 
+import { tr } from "@/i18n/tr";
 type ConnectionType = "family" | "friendship";
 
 interface Connection {
@@ -148,8 +149,8 @@ const Tree = () => {
       if (!user) {
         setLoading(false);
         toast({
-          title: "Authentication required",
-          description: "Please sign in to view and edit your connection tree.",
+          title: tr("a.682810de81"),
+          description: tr("a.b31cd65bd6"),
           variant: "destructive",
         });
         navigate("/login");
@@ -180,7 +181,7 @@ const Tree = () => {
       setConnections(data as Connection[]);
     } catch (error: any) {
       toast({
-        title: "Error loading connections",
+        title: tr("a.32421f08bb"),
         description: error.message,
         variant: "destructive",
       });
@@ -221,7 +222,7 @@ const Tree = () => {
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="text-sm font-semibold text-center bg-background/80 backdrop-blur-sm px-2 py-1 rounded">You</div>
+            <div className="text-sm font-semibold text-center bg-background/80 backdrop-blur-sm px-2 py-1 rounded">{tr("a.905cb326c7")}</div>
           </div>
         ),
       },
@@ -255,8 +256,8 @@ const Tree = () => {
 
     const createNodeEl = (conn: Connection, x: number, y: number, isContext = false): Node => {
       const displayName = conn.person_id 
-        ? (conn.profile?.full_name || "Unknown")
-        : (conn.related_person_name || "Unknown");
+        ? (conn.profile?.full_name || tr("a.bc7819b34f"))
+        : (conn.related_person_name || tr("a.bc7819b34f"));
       const avatarUrl =
         conn.image_url ||
         (conn.person_id ? conn.profile?.avatar_url : null) ||
@@ -282,7 +283,7 @@ const Tree = () => {
                 {conn.relationship_type}
               </div>
               {isContext && (
-                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Context</div>
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{tr("a.cc11b3a28f")}</div>
               )}
             </div>
           ),
@@ -492,10 +493,10 @@ const Tree = () => {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="font-serif text-3xl md:text-4xl font-bold mb-2">
-                My Connection Tree
+                {tr("a.bf36fdd450")}
               </h1>
               <p className="text-muted-foreground">
-                Visualize your family and friendship bonds.
+                {tr("a.4b6ddb0363")}
               </p>
             </div>
 
@@ -510,18 +511,18 @@ const Tree = () => {
               >
                 <ToggleGroupItem value="family" className="gap-2">
                   <span>🌳</span>
-                  <span className="hidden sm:inline">Family Tree</span>
+                  <span className="hidden sm:inline">{tr("a.b38512be96")}</span>
                 </ToggleGroupItem>
                 <ToggleGroupItem value="friendship" className="gap-2">
                   <span>🌐</span>
-                  <span className="hidden sm:inline">Friendship Web</span>
+                  <span className="hidden sm:inline">{tr("a.70948c270a")}</span>
                 </ToggleGroupItem>
               </ToggleGroup>
 
               <Button onClick={() => setShowAddModal(true)} className="gap-2">
                 <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Add Connection</span>
-                <span className="sm:hidden">Add</span>
+                <span className="hidden sm:inline">{tr("a.18d2cf5498")}</span>
+                <span className="sm:hidden">{tr("a.61cc55aa04")}</span>
               </Button>
 
               <PageTemplateSelector
@@ -533,25 +534,25 @@ const Tree = () => {
                 <SheetTrigger asChild>
                   <Button variant="outline" className="gap-2">
                     <Settings className="h-4 w-4" />
-                    <span className="hidden sm:inline">Settings</span>
+                    <span className="hidden sm:inline">{tr("a.c7f73bb54d")}</span>
                   </Button>
                 </SheetTrigger>
                 <SheetContent className="overflow-y-auto">
                   <SheetHeader>
-                    <SheetTitle>Tree Settings</SheetTitle>
+                    <SheetTitle>{tr("a.7a5f709c48")}</SheetTitle>
                   </SheetHeader>
                   <div className="mt-6 space-y-6">
                     {/* Connections List */}
                     <div>
-                      <h3 className="text-sm font-semibold mb-3">People in your tree</h3>
+                      <h3 className="text-sm font-semibold mb-3">{tr("a.2ba01178e6")}</h3>
                       {connections.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">No connections yet. Add your first connection!</p>
+                        <p className="text-sm text-muted-foreground">{tr("a.4c56b16912")}</p>
                       ) : (
                         <div className="space-y-2">
                           {connections.map((conn) => {
                             const displayName = conn.person_id
-                              ? (conn.profile?.full_name || "Unknown")
-                              : (conn.related_person_name || "Unknown");
+                              ? (conn.profile?.full_name || tr("a.bc7819b34f"))
+                              : (conn.related_person_name || tr("a.bc7819b34f"));
                             const avatarUrl =
                               conn.image_url ||
                               (conn.person_id ? conn.profile?.avatar_url : null) ||
@@ -587,7 +588,7 @@ const Tree = () => {
 
                     {/* Privacy & Sharing */}
                     <div className="border-t pt-4">
-                      <h3 className="text-sm font-semibold mb-3">Privacy & Sharing</h3>
+                      <h3 className="text-sm font-semibold mb-3">{tr("a.3967c45a44")}</h3>
                       {userTree ? (
                         <InviteAccessPanel
                           type="tree"
@@ -599,15 +600,15 @@ const Tree = () => {
                               .update({ is_public: newIsPublic })
                               .eq("id", userTree.id);
                             if (error) {
-                              toast({ title: "Error", description: "Failed to update privacy", variant: "destructive" });
+                              toast({ title: tr("a.7f2f6a15cf"), description: tr("a.8649d65a48"), variant: "destructive" });
                             } else {
-                              toast({ title: "Privacy updated" });
+                              toast({ title: tr("a.66f5270655") });
                               setUserTree({ ...userTree, is_public: newIsPublic });
                             }
                           }}
                         />
                       ) : (
-                        <p className="text-sm text-muted-foreground">Loading privacy settings...</p>
+                        <p className="text-sm text-muted-foreground">{tr("a.90b914d427")}</p>
                       )}
                     </div>
                   </div>
@@ -660,8 +661,8 @@ const Tree = () => {
       <div className="max-w-4xl mx-auto px-4">
         <ShareMemorial
           name="My Family Tree"
-          title="Share My Tree"
-          description="Invite family and friends to explore your family tree."
+          title={tr("a.fe75194dd8")}
+          description={tr("a.11064e16e0")}
           shareText="Explore my family tree on Reflectlife"
         />
       </div>

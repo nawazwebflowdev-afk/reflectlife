@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { format, appLocale } from "@/lib/dateFormat";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { cn } from "@/utils/cn";
 import { toast } from "sonner";
 import PhoneRecipientPicker, { type PhoneRecipient } from "./PhoneRecipientPicker";
 
+import { tr } from "@/i18n/tr";
 type Frequency = "once" | "daily" | "weekly" | "monthly" | "yearly";
 type Timing =
   | "2_minutes_before"
@@ -26,10 +27,10 @@ type Timing =
   | "1_week_before";
 
 const TIMING_OPTIONS: { value: Timing; label: string }[] = [
-  { value: "15_minutes_before", label: "15 minutes before" },
-  { value: "1_hour_before", label: "1 hour before" },
-  { value: "1_day_before", label: "1 day before" },
-  { value: "1_week_before", label: "1 week before" },
+  { value: "15_minutes_before", label: tr("a.4bba5a7257") },
+  { value: "1_hour_before", label: tr("a.f2a1e2cbf0") },
+  { value: "1_day_before", label: tr("a.0ef8e54401") },
+  { value: "1_week_before", label: tr("a.efb33729dd") },
 ];
 
 
@@ -72,7 +73,7 @@ function utcTimeToLocalDisplay(utc: string, tz: string): string {
   const [h, m] = utc.split(":").map(Number);
   const d = new Date();
   d.setUTCHours(h, m, 0, 0);
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat(appLocale(), {
     hour: "2-digit", minute: "2-digit", timeZone: tz || Intl.DateTimeFormat().resolvedOptions().timeZone,
   }).format(d);
 }
@@ -160,15 +161,15 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
     ? utcTimeToLocalDisplay(schedule.time_utc, schedule.timezone)
     : "—:—";
 
-  const nowStr = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(now);
+  const nowStr = new Intl.DateTimeFormat(appLocale(), { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(now);
 
   const scheduledSubtext = schedule
     ? `Scheduled for ${format(parseDateKey(schedule.anchor_date), "MMM d")} at ${displayTime} · ${savedCount} recipient${savedCount === 1 ? "" : "s"}`
-    : "No remembrance scheduled yet";
+    : tr("a.42f4bf5652");
 
   const handleSave = async () => {
-    if (!userId) { toast.error("Please sign in"); return; }
-    if (!canEdit) { toast.error("Only the memorial owner or collaborators can set the schedule"); return; }
+    if (!userId) { toast.error(tr("a.74d04a61dc")); return; }
+    if (!canEdit) { toast.error(tr("a.532725526a")); return; }
     setSaving(true);
     try {
       const payload = {
@@ -214,10 +215,10 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
         if (recErr) throw recErr;
       }
       setSavedCount(recipients.length);
-      toast.success(frequency === "once" ? "One-time reminder scheduled successfully." : "Time to Remember saved");
+      toast.success(frequency === "once" ? tr("a.1a237f5de7") : tr("a.973bda2f69"));
       setOpen(false);
     } catch (e: any) {
-      toast.error(e?.message ?? "Could not save the schedule");
+      toast.error(e?.message ?? tr("a.d8866cc1c8"));
     } finally {
       setSaving(false);
     }
@@ -235,7 +236,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
       try { await navigator.share({ title: text, url }); } catch { /* dismissed */ }
     } else {
       await navigator.clipboard.writeText(url);
-      toast.success("Link copied");
+      toast.success(tr("a.c2e98476ef"));
     }
   };
 
@@ -249,7 +250,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
               <Clock className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <p className="text-xs uppercase tracking-widest text-muted-foreground">Time to Remember</p>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground">{tr("a.1705f344ad")}</p>
               <div className="font-mono text-4xl md:text-5xl font-light tracking-tight text-foreground tabular-nums">
                 {schedule ? displayTime : nowStr.slice(0, 5)}
               </div>
@@ -269,18 +270,18 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                 <DialogTrigger asChild>
                   <Button className="rounded-full">
                     <Bell className="w-4 h-4 mr-2" />
-                    {schedule ? "Edit Time to Remember" : "Set Time to Remember"}
+                    {schedule ? tr("a.1645dfdd7e") : tr("a.28d5ec3c85")}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
 
                   <DialogHeader>
-                    <DialogTitle>Set Time to Remember</DialogTitle>
+                    <DialogTitle>{tr("a.28d5ec3c85")}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-5">
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <Label>Date</Label>
+                        <Label>{tr("a.eb9a4bc1c0")}</Label>
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button
@@ -288,7 +289,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                               className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {date ? format(date, "PPP") : <span>Pick a date</span>}
+                              {date ? format(date, "PPP") : <span>{tr("a.629b7ca5d3")}</span>}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
@@ -306,21 +307,21 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                         </Popover>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="tor-time">Time ({tz})</Label>
+                        <Label htmlFor="tor-time">{tr("a.eff4a229ed")}{tz})</Label>
                         <Input id="tor-time" type="time" value={timeLocal} onChange={(e) => setTimeLocal(e.target.value)} />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Frequency</Label>
+                      <Label>{tr("a.89836a870e")}</Label>
                       <Select value={frequency} onValueChange={(v) => setFrequency(v as Frequency)}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="once">Once</SelectItem>
-                          <SelectItem value="daily">Daily</SelectItem>
-                          <SelectItem value="weekly">Weekly</SelectItem>
-                          <SelectItem value="monthly">Monthly</SelectItem>
-                          <SelectItem value="yearly">Yearly</SelectItem>
+                          <SelectItem value="once">{tr("a.d9c768782e")}</SelectItem>
+                          <SelectItem value="daily">{tr("a.728298d3db")}</SelectItem>
+                          <SelectItem value="weekly">{tr("a.158f3da592")}</SelectItem>
+                          <SelectItem value="monthly">{tr("a.d31edb7b8a")}</SelectItem>
+                          <SelectItem value="yearly">{tr("a.7622eb5aa4")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -328,7 +329,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                     {frequency !== "once" && (
                       <>
                         <div className="flex items-center justify-between">
-                          <Label htmlFor="tor-hasend">End on specific date</Label>
+                          <Label htmlFor="tor-hasend">{tr("a.860294a3af")}</Label>
                           <Switch id="tor-hasend" checked={hasEnd} onCheckedChange={setHasEnd} />
                         </div>
                         {hasEnd && (
@@ -338,7 +339,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                     )}
 
                     <div className="border-t pt-4 space-y-2">
-                      <Label htmlFor="tor-message">Your reminder message</Label>
+                      <Label htmlFor="tor-message">{tr("a.a903690960")}</Label>
                       <Textarea
                         id="tor-message"
                         value={message}
@@ -356,12 +357,12 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
 
                     <div className="border-t pt-4 space-y-3">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="tor-remind">Send reminder email</Label>
+                        <Label htmlFor="tor-remind">{tr("a.1e9a491991")}</Label>
                         <Switch id="tor-remind" checked={reminderEnabled} onCheckedChange={setReminderEnabled} />
                       </div>
                       {reminderEnabled && (
                         <div>
-                          <Label>Remind me</Label>
+                          <Label>{tr("a.25df3f712a")}</Label>
                           <Select value={reminderTiming} onValueChange={(v) => setReminderTiming(v as Timing)}>
                             <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
@@ -372,15 +373,15 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                             </SelectContent>
                           </Select>
                           <p className="text-xs text-muted-foreground mt-2">
-                            Sent by email to the memorial owner, everyone with accepted access, and the recipients above.
+                            {tr("a.5bb4db62ca")}
                           </p>
                         </div>
                       )}
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>Cancel</Button>
-                    <Button onClick={handleSave} disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
+                    <Button variant="outline" onClick={() => setOpen(false)} disabled={saving}>{tr("a.77dfd2135f")}</Button>
+                    <Button onClick={handleSave} disabled={saving}>{saving ? tr("a.56a2285c5b") : tr("a.efc007a393")}</Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
@@ -391,26 +392,26 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
             {savedCount > 0 && (
               <p className="text-xs text-muted-foreground flex items-center gap-1.5 justify-end">
                 <Users className="w-3.5 h-3.5" />
-                {savedCount} recipient{savedCount === 1 ? "" : "s"} will be notified
+                {savedCount} recipient{savedCount === 1 ? "" : "s"} {tr("a.a00a8dd71c")}
               </p>
             )}
 
             {/* Share row */}
             <div className="flex items-center gap-2 justify-end">
-              <span className="text-xs text-muted-foreground mr-1 hidden md:inline">Share:</span>
-              <a href={wa} target="_blank" rel="noreferrer" aria-label="Share on WhatsApp"
+              <span className="text-xs text-muted-foreground mr-1 hidden md:inline">{tr("a.fe783f0c10")}</span>
+              <a href={wa} target="_blank" rel="noreferrer" aria-label={tr("a.7e03939f86")}
                 className="w-10 h-10 rounded-full bg-[#25D366] text-white flex items-center justify-center hover:scale-110 transition-transform shadow-sm">
                 <MessageCircle className="w-5 h-5" />
               </a>
-              <a href={tg} target="_blank" rel="noreferrer" aria-label="Share on Telegram"
+              <a href={tg} target="_blank" rel="noreferrer" aria-label={tr("a.26ea633cf7")}
                 className="w-10 h-10 rounded-full bg-[#229ED9] text-white flex items-center justify-center hover:scale-110 transition-transform shadow-sm">
                 <Send className="w-5 h-5" />
               </a>
-              <a href={viber} aria-label="Share on Viber"
+              <a href={viber} aria-label={tr("a.4d7069d9e0")}
                 className="w-10 h-10 rounded-full bg-[#7360F2] text-white flex items-center justify-center hover:scale-110 transition-transform shadow-sm">
                 <Phone className="w-5 h-5" />
               </a>
-              <button onClick={nativeShare} aria-label="Share this Memorial"
+              <button onClick={nativeShare} aria-label={tr("a.5b68a8aa36")}
                 className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:scale-110 transition-transform shadow-sm">
                 <Share2 className="w-5 h-5" />
               </button>

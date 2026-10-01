@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { XCircle } from "lucide-react";
 
+import { tr } from "@/i18n/tr";
 const Cancel = () => {
   const navigate = useNavigate();
 
@@ -17,12 +18,11 @@ const Cancel = () => {
           </div>
           
           <h1 className="font-serif text-3xl font-bold mb-4">
-            Payment Cancelled
+            {tr("a.d2ba3687a1")}
           </h1>
           
           <p className="text-muted-foreground text-lg mb-6">
-            Your payment was not completed. Don't worry, you haven't been charged. 
-            Feel free to try again whenever you're ready.
+            {tr("a.497b0ec37c")}
           </p>
           
           <div className="space-y-3">
@@ -31,7 +31,7 @@ const Cancel = () => {
               size="lg"
               className="w-full"
             >
-              Back to Templates
+              {tr("a.32ded662f3")}
             </Button>
             
             <Button 
@@ -40,12 +40,12 @@ const Cancel = () => {
               size="lg"
               className="w-full"
             >
-              Go to Dashboard
+              {tr("a.f7b5bf8cef")}
             </Button>
           </div>
           
           <p className="text-sm text-muted-foreground mt-6">
-            Need help? Contact our support team.
+            {tr("a.9460b75b03")}
           </p>
         </CardContent>
       </Card>

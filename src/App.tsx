@@ -42,6 +42,10 @@ import DonationSuccess from "./pages/DonationSuccess";
 import CampaignDashboard from "./pages/CampaignDashboard";
 import Terms from "./pages/Terms";
 import UkrainianMemorialLanding from "./pages/UkrainianMemorialLanding";
+import LanguageAlternates from "./components/LanguageAlternates";
+import { isSpanishPath, SPANISH_PREFIX } from "./i18n/langPath";
+
+const routerBasename = isSpanishPath(window.location.pathname) ? SPANISH_PREFIX : undefined;
 
 const queryClient = new QueryClient();
 
@@ -51,7 +55,8 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter basename={routerBasename}>
+          <LanguageAlternates />
           <div className="flex flex-col min-h-screen">
             <Navigation />
             <main className="flex-grow">

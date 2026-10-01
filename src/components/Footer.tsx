@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import reflectlifeLogo from "@/assets/reflectlife-logo.png";
 
+import { tr } from "@/i18n/tr";
 const Footer = () => {
   const { t } = useTranslation();
 
@@ -11,13 +12,13 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="flex items-center gap-3 group">
-              <img src={reflectlifeLogo} alt="Reflectlife" className="h-10 w-auto object-contain transition-smooth group-hover:scale-105" />
+              <img src={reflectlifeLogo} alt={tr("a.1a0e32b358")} className="h-10 w-auto object-contain transition-smooth group-hover:scale-105" />
             </Link>
             <p className="text-muted-foreground text-sm max-w-md mb-4">
               {t("footer.tagline")}
             </p>
             <div className="text-sm text-muted-foreground">
-              Made with ❤️ for a life we never forget and to heal our souls
+              {tr("a.1ba166286d")}
             </div>
           </div>
 
@@ -35,7 +36,7 @@ const Footer = () => {
             <h3 className="font-serif font-semibold text-foreground mb-4">{t("footer.support")}</h3>
             <ul className="space-y-2">
               <li><Link to="/cookie-policy" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.cookiePolicy")}</Link></li>
-              <li><Link to="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">Terms & Conditions</Link></li>
+              <li><Link to="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{tr("a.d35f2b98ed")}</Link></li>
               <li><Link to="/qa" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.qa")}</Link></li>
               <li><Link to="/help" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.helpCentre")}</Link></li>
               <li><Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">{t("footer.privacyPolicy")}</Link></li>
@@ -45,7 +46,7 @@ const Footer = () => {
 
         <div className="border-t border-border mt-8 pt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            © 2026 Sypera. All rights reserved
+            {tr("a.e7a224b591")}
           </p>
         </div>
       </div>

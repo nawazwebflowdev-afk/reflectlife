@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { formatDate } from "@/lib/dateFormat";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AvatarSelector } from "@/components/EmojiAvatarSelector";
 import { AVATARS } from "@/config/avatars";
 
+import { tr } from "@/i18n/tr";
 interface AddConnectionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -170,7 +172,7 @@ const AddConnectionModal = ({
     try {
       setUploadingImage(true);
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      if (!user) throw new Error(tr("a.0c91acbae2"));
 
       const fileExt = ext || (imageFile ? imageFile.name.split(".").pop() : "png");
       const fileName = `${Date.now()}.${fileExt}`;
@@ -189,7 +191,7 @@ const AddConnectionModal = ({
       return data.publicUrl;
     } catch (error: any) {
       toast({
-        title: "Image upload failed",
+        title: tr("a.ed893f3754"),
         description: error.message,
         variant: "destructive",
       });
@@ -216,8 +218,8 @@ const AddConnectionModal = ({
     
     if (!relationshipType) {
       toast({
-        title: "Missing information",
-        description: "Please select a relationship type.",
+        title: tr("a.67cc34b1cd"),
+        description: tr("a.f7913f133b"),
         variant: "destructive",
       });
       return;
@@ -225,8 +227,8 @@ const AddConnectionModal = ({
 
     if (addType === "existing" && !selectedPerson) {
       toast({
-        title: "Missing information",
-        description: "Please select a person.",
+        title: tr("a.67cc34b1cd"),
+        description: tr("a.203a2201d1"),
         variant: "destructive",
       });
       return;
@@ -234,8 +236,8 @@ const AddConnectionModal = ({
 
     if (addType === "new" && !newPersonName.trim()) {
       toast({
-        title: "Missing information",
-        description: "Please enter a name.",
+        title: tr("a.67cc34b1cd"),
+        description: tr("a.f18324c8c4"),
         variant: "destructive",
       });
       return;
@@ -245,7 +247,7 @@ const AddConnectionModal = ({
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       
-      if (!user) throw new Error("Not authenticated");
+      if (!user) throw new Error(tr("a.0c91acbae2"));
 
       let imageUrl = null;
       if (imageFile) {
@@ -279,7 +281,7 @@ const AddConnectionModal = ({
 
       const personName = addType === "existing" ? selectedPerson?.full_name : newPersonName;
       toast({
-        title: "Connection added",
+        title: tr("a.8b8870e8d7"),
         description: `${personName} has been added to your ${connectionType} tree.`,
       });
 
@@ -287,7 +289,7 @@ const AddConnectionModal = ({
       handleClose();
     } catch (error: any) {
       toast({
-        title: "Error adding connection",
+        title: tr("a.f49805ab54"),
         description: error.message,
         variant: "destructive",
       });
@@ -318,15 +320,15 @@ const AddConnectionModal = ({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add Connection</DialogTitle>
+          <DialogTitle>{tr("a.18d2cf5498")}</DialogTitle>
           <DialogDescription>
-            Add someone to your {connectionType} tree
+            {tr("a.676191ef17")} {connectionType} tree
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>Connection Type</Label>
+            <Label>{tr("a.1d86d4c525")}</Label>
             <Select
               value={connectionType}
               onValueChange={(value: "family" | "friendship") => {
@@ -338,25 +340,25 @@ const AddConnectionModal = ({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="family">🌳 Family</SelectItem>
-                <SelectItem value="friendship">🌐 Friendship</SelectItem>
+                <SelectItem value="family">{tr("a.45f88f670f")}</SelectItem>
+                <SelectItem value="friendship">{tr("a.75278f4807")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <Tabs value={addType} onValueChange={(v) => setAddType(v as "existing" | "new")}>
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="existing">Add Existing User</TabsTrigger>
-              <TabsTrigger value="new">Add New Person</TabsTrigger>
+              <TabsTrigger value="existing">{tr("a.f99b58a637")}</TabsTrigger>
+              <TabsTrigger value="new">{tr("a.5ba9299ea3")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="existing" className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label>Search Person</Label>
+                <Label>{tr("a.86434fba20")}</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search by name or email..."
+                    placeholder={tr("a.852a13512e")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
@@ -416,7 +418,7 @@ const AddConnectionModal = ({
                       size="sm"
                       onClick={() => setSelectedPerson(null)}
                     >
-                      Change
+                      {tr("a.64fbd995d3")}
                     </Button>
                   </div>
                 )}
@@ -425,19 +427,19 @@ const AddConnectionModal = ({
 
             <TabsContent value="new" className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label>Person's Name</Label>
+                <Label>{tr("a.bb721187ad")}</Label>
                 <Input
-                  placeholder="Enter full name..."
+                  placeholder={tr("a.2796ce07f1")}
                   value={newPersonName}
                   onChange={(e) => setNewPersonName(e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Profile Picture (Optional)</Label>
+                <Label>{tr("a.5f68f7a2bb")}</Label>
                 {imagePreview ? (
                   <div className="relative w-32 h-32 rounded-lg overflow-hidden border">
-                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                    <img src={imagePreview} alt={tr("a.f1fbb2b43d")} className="w-full h-full object-cover" />
                     <Button
                       type="button"
                       variant="destructive"
@@ -466,14 +468,14 @@ const AddConnectionModal = ({
                       className="flex items-center gap-2 px-4 py-2 border rounded-md cursor-pointer hover:bg-accent"
                     >
                       <Upload className="h-4 w-4" />
-                      Upload Image
+                      {tr("a.159031eaee")}
                     </Label>
                   </div>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label>Or choose an avatar</Label>
+                <Label>{tr("a.66574c0ec3")}</Label>
                 <AvatarSelector
                   selectedAvatar={selectedAvatarIndex ?? -1}
                   onSelectAvatar={(index) => {
@@ -488,7 +490,7 @@ const AddConnectionModal = ({
           </Tabs>
 
           <div className="space-y-2">
-            <Label>Relationship Type</Label>
+            <Label>{tr("a.fba21daf1e")}</Label>
             <Select value={relationshipType} onValueChange={(value) => {
               setRelationshipType(value);
               if (familyRelationships.includes(value)) {
@@ -498,14 +500,14 @@ const AddConnectionModal = ({
               }
             }}>
               <SelectTrigger>
-                <SelectValue placeholder="Select relationship..." />
+                <SelectValue placeholder={tr("a.d7587196fd")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__family_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60">Family</SelectItem>
+                <SelectItem value="__family_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60">{tr("a.4efb6cb7c0")}</SelectItem>
                 {familyRelationships.map((rel) => (
                   <SelectItem key={rel} value={rel}>{rel}</SelectItem>
                 ))}
-                <SelectItem value="__friend_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60 mt-2">Friendship</SelectItem>
+                <SelectItem value="__friend_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60 mt-2">{tr("a.743dfd77ca")}</SelectItem>
                 {friendshipRelationships.map((rel) => (
                   <SelectItem key={rel} value={rel}>{rel}</SelectItem>
                 ))}
@@ -515,15 +517,15 @@ const AddConnectionModal = ({
 
           {connectionType === "friendship" && sharedMemories.length > 0 && (
             <div className="space-y-2">
-              <Label>Link to Shared Memory (Optional)</Label>
+              <Label>{tr("a.209bb5d34f")}</Label>
               <Select value={selectedMemoryId} onValueChange={setSelectedMemoryId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a memory..." />
+                  <SelectValue placeholder={tr("a.e4cd01434e")} />
                 </SelectTrigger>
                 <SelectContent>
                   {sharedMemories.map((memory) => (
                     <SelectItem key={memory.id} value={memory.id}>
-                      {memory.caption || `Memory from ${new Date(memory.created_at).toLocaleDateString()}`}
+                      {memory.caption || `Memory from ${formatDate(memory.created_at)}`}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -533,16 +535,16 @@ const AddConnectionModal = ({
 
           <div className="flex gap-2 justify-end pt-4 border-t">
             <Button type="button" variant="outline" onClick={handleClose}>
-              Cancel
+              {tr("a.77dfd2135f")}
             </Button>
             <Button type="submit" disabled={loading || uploadingImage || !relationshipType}>
               {loading || uploadingImage ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  {uploadingImage ? "Uploading..." : "Adding..."}
+                  {uploadingImage ? tr("a.070e328ec8") : tr("a.268c06a28a")}
                 </>
               ) : (
-                "Add Connection"
+                tr("a.18d2cf5498")
               )}
             </Button>
           </div>

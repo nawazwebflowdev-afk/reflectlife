@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Flame } from 'lucide-react';
 
+import { tr } from "@/i18n/tr";
 export default function CandleSuccess() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -35,17 +36,17 @@ export default function CandleSuccess() {
       {status === 'ok' && <Flame className="w-12 h-12 text-secondary" />}
       <h1 className="font-serif text-2xl text-foreground">
         {status === 'ok'
-          ? 'Your candle is now burning'
+          ? tr("a.f8daad6fae")
           : status === 'error'
-          ? 'We could not confirm your payment'
-          : 'Confirming your candle…'}
+          ? tr("a.3b0dd9a029")
+          : tr("a.4132ef974a")}
       </h1>
       <p className="text-muted-foreground max-w-md">
         {status === 'ok'
-          ? 'Thank you for keeping this memory alive. Returning to the memorial…'
+          ? tr("a.f28fb6f395")
           : status === 'error'
-          ? 'If you were charged, please contact support. Returning you back…'
-          : 'One moment while we light the flame.'}
+          ? tr("a.2fb17f0132")
+          : tr("a.f0885d89c9")}
       </p>
     </div>
   );

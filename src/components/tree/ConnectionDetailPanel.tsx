@@ -32,8 +32,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { format } from "date-fns";
+import { format } from "@/lib/dateFormat";
 
+import { tr } from "@/i18n/tr";
 interface ConnectionDetailPanelProps {
   connection: any;
   onClose: () => void;
@@ -113,8 +114,8 @@ const ConnectionDetailPanel = ({
   };
 
   const displayName = connection.person_id
-    ? (connection.profile?.full_name || "Unknown")
-    : (connection.related_person_name || "Unknown");
+    ? (connection.profile?.full_name || tr("a.bc7819b34f"))
+    : (connection.related_person_name || tr("a.bc7819b34f"));
   const avatarUrl =
     connection.image_url ||
     (connection.person_id ? connection.profile?.avatar_url : null) ||
@@ -129,11 +130,11 @@ const ConnectionDetailPanel = ({
         .delete()
         .eq("id", connection.id);
       if (error) throw error;
-      toast({ title: "Connection removed", description: "The connection has been removed from your tree." });
+      toast({ title: tr("a.144e7d8a58"), description: tr("a.391f91fc2c") });
       onUpdate();
       onClose();
     } catch (error: any) {
-      toast({ title: "Error removing connection", description: error.message, variant: "destructive" });
+      toast({ title: tr("a.b1b31511fb"), description: error.message, variant: "destructive" });
     }
   };
 
@@ -178,12 +179,12 @@ const ConnectionDetailPanel = ({
 
   const handleSaveEdit = async () => {
     if (!editRelationship.trim()) {
-      toast({ title: "Missing information", description: "Relationship is required.", variant: "destructive" });
+      toast({ title: tr("a.67cc34b1cd"), description: tr("a.24ff60cb6a"), variant: "destructive" });
       return;
     }
 
     if (!connection.person_id && !editName.trim()) {
-      toast({ title: "Missing information", description: "Name is required.", variant: "destructive" });
+      toast({ title: tr("a.67cc34b1cd"), description: tr("a.d7659e2c4a"), variant: "destructive" });
       return;
     }
 
@@ -192,11 +193,11 @@ const ConnectionDetailPanel = ({
       const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
       const user = refreshed.session?.user;
       if (refreshError || !user) {
-        throw new Error("Your session expired. Please log in again.");
+        throw new Error(tr("a.c0ff7bf6d5"));
       }
 
       if (connection.owner_id && connection.owner_id !== user.id) {
-        throw new Error("You don't have permission to edit this connection.");
+        throw new Error(tr("a.ceb9b75cde"));
       }
 
       let imageUrl: string | null = null;
@@ -230,14 +231,14 @@ const ConnectionDetailPanel = ({
 
       if (error) throw error;
       if (!updatedConnection) {
-        throw new Error("You don't have permission to edit this connection.");
+        throw new Error(tr("a.ceb9b75cde"));
       }
 
-      toast({ title: "Connection updated", description: "Your changes were saved." });
+      toast({ title: tr("a.0cc0ffbb78"), description: tr("a.ed73070caa") });
       setShowEditModal(false);
       onUpdate();
     } catch (error: any) {
-      toast({ title: "Error updating connection", description: error.message, variant: "destructive" });
+      toast({ title: tr("a.5f07a37032"), description: error.message, variant: "destructive" });
     } finally {
       setSavingEdit(false);
       setUploadingImage(false);
@@ -250,7 +251,7 @@ const ConnectionDetailPanel = ({
     <Sheet open={!!connection} onOpenChange={(open) => !open && onClose()}>
       <SheetContent className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Connection Details</SheetTitle>
+          <SheetTitle>{tr("a.e77c19c11b")}</SheetTitle>
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
@@ -275,36 +276,36 @@ const ConnectionDetailPanel = ({
           <div className="flex flex-wrap items-center justify-center gap-2">
             <Badge variant="secondary" className="text-sm">{connection.relationship_type}</Badge>
             <Badge variant={connection.connection_type === "family" ? "default" : "outline"}>
-              {connection.connection_type === "family" ? "🌳 Family" : "🌐 Friendship"}
+              {connection.connection_type === "family" ? tr("a.45f88f670f") : tr("a.75278f4807")}
             </Badge>
-            {isDeceased && <Badge variant="secondary" className="bg-muted">In Memoriam</Badge>}
-            {!isRegisteredUser && <Badge variant="outline" className="text-xs">Not on ReflectLife</Badge>}
+            {isDeceased && <Badge variant="secondary" className="bg-muted">{tr("a.79b6788eb8")}</Badge>}
+            {!isRegisteredUser && <Badge variant="outline" className="text-xs">{tr("a.047c69ccb5")}</Badge>}
           </div>
 
           <Separator />
 
           {/* Details Section */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Details</h4>
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{tr("a.dc3decbb93")}</h4>
 
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="space-y-1">
-                <p className="text-muted-foreground flex items-center gap-1"><StickyNote className="h-3 w-3" /> Relationship</p>
+                <p className="text-muted-foreground flex items-center gap-1"><StickyNote className="h-3 w-3" /> {tr("a.9b4a86cba4")}</p>
                 <p className="font-medium">{connection.relationship_type}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-muted-foreground">Type</p>
+                <p className="text-muted-foreground">{tr("a.3deb745651")}</p>
                 <p className="font-medium capitalize">{connection.connection_type}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-muted-foreground flex items-center gap-1"><CalendarDays className="h-3 w-3" /> Added</p>
-                <p className="font-medium">{connection.created_at ? format(new Date(connection.created_at), "dd MMM yyyy") : "Unknown"}</p>
+                <p className="text-muted-foreground flex items-center gap-1"><CalendarDays className="h-3 w-3" /> {tr("a.b68734c259")}</p>
+                <p className="font-medium">{connection.created_at ? format(new Date(connection.created_at), "dd MMM yyyy") : tr("a.bc7819b34f")}</p>
               </div>
               {connection.shared_memory_id && (
                 <div className="space-y-1">
-                  <p className="text-muted-foreground">Shared Memory</p>
+                  <p className="text-muted-foreground">{tr("a.555ea2ea39")}</p>
                   <Button variant="link" className="p-0 h-auto text-sm" onClick={() => navigate(`/post/${connection.shared_memory_id}`)}>
-                    View Memory
+                    {tr("a.127bc88e5c")}
                   </Button>
                 </div>
               )}
@@ -315,26 +316,26 @@ const ConnectionDetailPanel = ({
 
           {/* Actions */}
           <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Actions</h4>
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">{tr("a.c3cd636a58")}</h4>
 
             <Button className="w-full justify-between" variant="outline" onClick={() => setShowEditModal(true)}>
-              Edit Connection
+              {tr("a.fd93f6d745")}
               <Pencil className="h-4 w-4" />
             </Button>
 
             <Button className="w-full justify-between" variant="outline" onClick={() => setShowAddChildModal(true)}>
-              Add Connection to This Person
+              {tr("a.f8516b6bc6")}
               <UserPlus className="h-4 w-4" />
             </Button>
 
             {isRegisteredUser && (
               <>
                 <Button className="w-full justify-between" variant="outline" onClick={() => navigate(`/profile/${connection.person_id}`)}>
-                  View Profile
+                  {tr("a.685ed0a4a1")}
                   <ExternalLink className="h-4 w-4" />
                 </Button>
                 <Button className="w-full justify-between" variant="outline" onClick={() => navigate(isDeceased ? `/memorial/${connection.person_id}` : `/timeline/${connection.person_id}`)}>
-                  {isDeceased ? "View Memorial" : "View Timeline"}
+                  {isDeceased ? tr("a.034aaa38bf") : tr("a.1f450b91c7")}
                   <ExternalLink className="h-4 w-4" />
                 </Button>
               </>
@@ -343,20 +344,20 @@ const ConnectionDetailPanel = ({
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button className="w-full justify-between" variant="destructive">
-                  Remove Connection
+                  {tr("a.80ad279d34")}
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Remove Connection</AlertDialogTitle>
+                  <AlertDialogTitle>{tr("a.80ad279d34")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to remove {displayName} from your {connection.connection_type} tree? This cannot be undone.
+                    {tr("a.39db6fb24f")} {displayName} {tr("a.2cb91a719e")} {connection.connection_type} {tr("a.507ff4abef")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete}>Remove</AlertDialogAction>
+                  <AlertDialogCancel>{tr("a.77dfd2135f")}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>{tr("a.e963907dac")}</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -377,8 +378,8 @@ const ConnectionDetailPanel = ({
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Connection</DialogTitle>
-            <DialogDescription>Update this person's details and photo.</DialogDescription>
+            <DialogTitle>{tr("a.fd93f6d745")}</DialogTitle>
+            <DialogDescription>{tr("a.72be1fced9")}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
@@ -401,21 +402,21 @@ const ConnectionDetailPanel = ({
                 onChange={handleImageSelect}
               />
               <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()}>
-                {editImageFile ? "Change Photo" : "Upload Photo"}
+                {editImageFile ? tr("a.6080b454e5") : tr("a.84f26e4f34")}
               </Button>
             </div>
 
             {/* Name (non-registered only) */}
             {!connection.person_id && (
               <div className="space-y-2">
-                <Label htmlFor="edit-name">Name</Label>
-                <Input id="edit-name" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Enter name" />
+                <Label htmlFor="edit-name">{tr("a.709a23220f")}</Label>
+                <Input id="edit-name" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder={tr("a.5df85959e9")} />
               </div>
             )}
 
             {/* Relationship */}
             <div className="space-y-2">
-              <Label htmlFor="edit-relationship">Relationship</Label>
+              <Label htmlFor="edit-relationship">{tr("a.9b4a86cba4")}</Label>
               <Select
                 value={editRelationship}
                 onValueChange={(value) => {
@@ -428,17 +429,17 @@ const ConnectionDetailPanel = ({
                 }}
               >
                 <SelectTrigger id="edit-relationship">
-                  <SelectValue placeholder="Select relationship..." />
+                  <SelectValue placeholder={tr("a.d7587196fd")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__family_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60">
-                    Family
+                    {tr("a.4efb6cb7c0")}
                   </SelectItem>
                   {familyRelationships.map((rel) => (
                     <SelectItem key={rel} value={rel}>{rel}</SelectItem>
                   ))}
                   <SelectItem value="__friendship_header" disabled className="font-semibold text-xs uppercase tracking-wider opacity-60 mt-2">
-                    Friendship
+                    {tr("a.743dfd77ca")}
                   </SelectItem>
                   {friendshipRelationships.map((rel) => (
                     <SelectItem key={rel} value={rel}>{rel}</SelectItem>
@@ -449,21 +450,21 @@ const ConnectionDetailPanel = ({
 
             {/* Connection Type */}
             <div className="space-y-2">
-              <Label>Connection Type</Label>
+              <Label>{tr("a.1d86d4c525")}</Label>
               <Select value={editConnectionType} onValueChange={(v: "family" | "friendship") => setEditConnectionType(v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="family">🌳 Family</SelectItem>
-                  <SelectItem value="friendship">🌐 Friendship</SelectItem>
+                  <SelectItem value="family">{tr("a.45f88f670f")}</SelectItem>
+                  <SelectItem value="friendship">{tr("a.75278f4807")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditModal(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setShowEditModal(false)}>{tr("a.77dfd2135f")}</Button>
             <Button onClick={handleSaveEdit} disabled={savingEdit}>
-              {uploadingImage ? "Uploading..." : savingEdit ? "Saving..." : "Save changes"}
+              {uploadingImage ? tr("a.070e328ec8") : savingEdit ? tr("a.ae7e887517") : tr("a.179359b39e")}
             </Button>
           </DialogFooter>
         </DialogContent>

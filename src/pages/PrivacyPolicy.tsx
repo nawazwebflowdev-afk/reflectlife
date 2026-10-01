@@ -1,39 +1,34 @@
 import { Separator } from "@/components/ui/separator";
 
+import { tr } from "@/i18n/tr";
 const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <h1 className="text-4xl font-serif font-bold text-foreground mb-2">Privacy Policy</h1>
+        <h1 className="text-4xl font-serif font-bold text-foreground mb-2">{tr("a.9db108ba6b")}</h1>
         <p className="text-lg text-muted-foreground mb-8">
-          Effective date / Gültigkeitsdatum: May 15, 2025
+          {tr("a.e458eefec3")}
         </p>
 
         <div className="space-y-10">
           {/* Section 1 */}
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
-              1. Introduction / Einleitung
+              {tr("a.286487b494")}
             </h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                Welcome to Reflectlife (www.reflectlife.net), an online remembrance platform operated by Sypera
-                UG (Rablstr. 12/629, 81669 Munich, Germany).
+                {tr("a.fdd16ce073")}
               </p>
               <p>
-                We respect your privacy and are committed to protecting your personal data. This Privacy Policy
-                explains how we collect, use, and safeguard your information when you use our website and
-                services.
+                {tr("a.4c16fc30a2")}
               </p>
               <Separator className="my-4" />
               <p>
-                Willkommen bei Reflectlife (www.reflectlife.net), einer Online-Gedenkplattform, betrieben von
-                Sypera UG (Rablstr. 12/629, 81669 München, Deutschland).
+                {tr("a.f61cee3368")}
               </p>
               <p>
-                Wir respektieren Ihre Privatsphäre und verpflichten uns, Ihre persönlichen Daten zu schützen.
-                Diese Datenschutzrichtlinie erläutert, wie wir Ihre Daten erfassen, verwenden und schützen, wenn
-                Sie unsere Website und Dienstleistungen nutzen.
+                {tr("a.792ddee695")}
               </p>
             </div>
           </section>
@@ -41,39 +36,39 @@ const PrivacyPolicy = () => {
           {/* Section 2 */}
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
-              2. Data Controller / Verantwortlicher
+              {tr("a.e2467f4e73")}
             </h2>
             <div className="space-y-2 text-muted-foreground bg-muted/30 p-6 rounded-lg">
-              <p className="font-semibold text-foreground">Sypera UG</p>
-              <p>Attn: Sylvia Perez</p>
-              <p>Rablstr. 12/629, 81669 Munich, Germany</p>
-              <p>Phone: +49 151 40017533</p>
-              <p>Email: sypera.sylvia@gmail.com</p>
+              <p className="font-semibold text-foreground">{tr("a.6d24f78d1b")}</p>
+              <p>{tr("a.090f48ba17")}</p>
+              <p>{tr("a.4303f7ff7e")}</p>
+              <p>{tr("a.73f7414ac5")}</p>
+              <p>{tr("a.615ba86183")}</p>
             </div>
           </section>
 
           {/* Section 3 */}
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
-              3. Data We Collect / Erhobene Daten
+              {tr("a.0b0f414caf")}
             </h2>
             <div className="space-y-4 text-muted-foreground">
-              <p>We collect the following categories of data:</p>
+              <p>{tr("a.e2dc68d074")}</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>Personal information (e.g., name, email address, password)</li>
-                <li>Usage data (analytics, browser type, device information)</li>
-                <li>Uploaded content (images, texts, journals, family trees)</li>
-                <li>Communication data (messages, comments)</li>
-                <li>Cookies and tracking data</li>
+                <li>{tr("a.4dbf1d1cec")}</li>
+                <li>{tr("a.1c30849771")}</li>
+                <li>{tr("a.1780952adb")}</li>
+                <li>{tr("a.6f82546133")}</li>
+                <li>{tr("a.5b31d64a9a")}</li>
               </ul>
               <Separator className="my-4" />
-              <p>Wir erfassen folgende Datenkategorien:</p>
+              <p>{tr("a.f657fd0755")}</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>Persönliche Daten (z. B. Name, E-Mail-Adresse, Passwort)</li>
-                <li>Nutzungsdaten (Analysen, Browsertyp, Geräteinformationen)</li>
-                <li>Hochgeladene Inhalte (Bilder, Texte, Erinnerungen, Familienstammbäume)</li>
-                <li>Kommunikationsdaten (Nachrichten, Kommentare)</li>
-                <li>Cookies und Tracking-Daten</li>
+                <li>{tr("a.19a602d836")}</li>
+                <li>{tr("a.fd374e7b2e")}</li>
+                <li>{tr("a.c093b962ca")}</li>
+                <li>{tr("a.ce0ced5abe")}</li>
+                <li>{tr("a.527fd9e13d")}</li>
               </ul>
             </div>
           </section>
@@ -81,25 +76,25 @@ const PrivacyPolicy = () => {
           {/* Section 4 */}
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
-              4. Purpose of Data Processing / Zweck der Datenverarbeitung
+              {tr("a.8c524568ae")}
             </h2>
             <div className="space-y-4 text-muted-foreground">
-              <p>Your data is used for:</p>
+              <p>{tr("a.1a5164eb6b")}</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>Creating and managing user accounts</li>
-                <li>Sending newsletters and updates</li>
-                <li>Analyzing usage to improve our services</li>
-                <li>Providing customer support</li>
-                <li>Enhancing platform security</li>
+                <li>{tr("a.98120d36b7")}</li>
+                <li>{tr("a.8619354578")}</li>
+                <li>{tr("a.175155304e")}</li>
+                <li>{tr("a.69ff76fa31")}</li>
+                <li>{tr("a.b696619621")}</li>
               </ul>
               <Separator className="my-4" />
-              <p>Ihre Daten werden verwendet, um:</p>
+              <p>{tr("a.6e40f5832f")}</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>Benutzerkonten zu erstellen und zu verwalten</li>
-                <li>Newsletter und Updates zu versenden</li>
-                <li>Die Nutzung zu analysieren und unsere Dienste zu verbessern</li>
-                <li>Kundensupport bereitzustellen</li>
-                <li>Die Plattform sicherer zu gestalten</li>
+                <li>{tr("a.5caea4d87b")}</li>
+                <li>{tr("a.b6e09a9ec9")}</li>
+                <li>{tr("a.14a777641e")}</li>
+                <li>{tr("a.9c7dc4bfad")}</li>
+                <li>{tr("a.48b336f555")}</li>
               </ul>
             </div>
           </section>
@@ -107,33 +102,31 @@ const PrivacyPolicy = () => {
           {/* Section 5 */}
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
-              5. Use of Third-Party Services / Nutzung von Drittanbietern
+              {tr("a.c7188762e1")}
             </h2>
             <div className="space-y-4 text-muted-foreground">
-              <p>We may use trusted third-party services for:</p>
+              <p>{tr("a.e4f8eedcca")}</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>Hosting (e.g., AWS, IONOS)</li>
-                <li>Analytics (e.g., Google Analytics)</li>
-                <li>Payments (e.g., Stripe, PayPal)</li>
-                <li>Email and newsletter management (e.g., Mailchimp, Brevo)</li>
-                <li>Social media integrations (e.g., Facebook, Instagram)</li>
+                <li>{tr("a.8fed91eb22")}</li>
+                <li>{tr("a.828dfed41e")}</li>
+                <li>{tr("a.4d5281a20f")}</li>
+                <li>{tr("a.b4b9dd4ef2")}</li>
+                <li>{tr("a.aad013db10")}</li>
               </ul>
               <p className="mt-4">
-                These providers may process data outside the EU, but we ensure adequate data protection
-                measures (such as Standard Contractual Clauses) are in place.
+                {tr("a.01c4bd173d")}
               </p>
               <Separator className="my-4" />
-              <p>Wir verwenden vertrauenswürdige Drittanbieter für:</p>
+              <p>{tr("a.6f72e919c5")}</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>Hosting (z. B. AWS, IONOS)</li>
-                <li>Analysen (z. B. Google Analytics)</li>
-                <li>Zahlungen (z. B. Stripe, PayPal)</li>
-                <li>E-Mail- und Newsletter-Verwaltung (z. B. Mailchimp, Brevo)</li>
-                <li>Social-Media-Integrationen (z. B. Facebook, Instagram)</li>
+                <li>{tr("a.927db4f51a")}</li>
+                <li>{tr("a.732c96138e")}</li>
+                <li>{tr("a.5a80861eca")}</li>
+                <li>{tr("a.b5897315d8")}</li>
+                <li>{tr("a.343ea13ee9")}</li>
               </ul>
               <p className="mt-4">
-                Diese Anbieter können Daten außerhalb der EU verarbeiten, jedoch stellen wir sicher, dass
-                angemessene Datenschutzmaßnahmen (z. B. Standardvertragsklauseln) bestehen.
+                {tr("a.1783416730")}
               </p>
             </div>
           </section>
@@ -141,65 +134,61 @@ const PrivacyPolicy = () => {
           {/* Section 6 */}
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
-              6. Cookies & Tracking / Cookies & Tracking
+              {tr("a.9204225dfd")}
             </h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                Reflectlife uses cookies to improve your browsing experience, analyze traffic, and personalize
-                content.
+                {tr("a.d22259f1de")}
               </p>
-              <p>You can manage your cookie preferences through your browser settings.</p>
+              <p>{tr("a.70aa7c9623")}</p>
               <Separator className="my-4" />
               <p>
-                Reflectlife verwendet Cookies, um Ihr Nutzungserlebnis zu verbessern, den Datenverkehr zu
-                analysieren und Inhalte zu personalisieren.
+                {tr("a.ed8beb6efc")}
               </p>
-              <p>Sie können Ihre Cookie-Einstellungen über Ihren Browser anpassen.</p>
+              <p>{tr("a.6f4dd32667")}</p>
             </div>
           </section>
 
           {/* Section 7 */}
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
-              7. Data Retention / Datenspeicherung
+              {tr("a.80f5bc6227")}
             </h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                We retain personal data only as long as necessary to fulfill the purposes described or as required
-                by law.
+                {tr("a.3d3adfa9cf")}
               </p>
-              <p>Users may request deletion of their data or account at any time.</p>
+              <p>{tr("a.3aa52b6775")}</p>
               <Separator className="my-4" />
               <p>
-                Wir speichern personenbezogene Daten nur so lange, wie es für die genannten Zwecke
-                erforderlich ist oder gesetzlich vorgeschrieben wird.
+                {tr("a.4527240cda")}
               </p>
-              <p>Benutzer können jederzeit die Löschung ihrer Daten oder ihres Kontos verlangen.</p>
+              <p>{tr("a.3109c9c29a")}</p>
             </div>
           </section>
 
           {/* Section 8 */}
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
-              8. User Rights / Rechte der Nutzer
+              {tr("a.baccfc9812")}
             </h2>
             <div className="space-y-4 text-muted-foreground">
-              <p>Under the GDPR and other privacy laws, you have the right to:</p>
+              <p>{tr("a.c3551655ad")}</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>Access and obtain a copy of your data</li>
-                <li>Correct or delete your data</li>
-                <li>Restrict or object to data processing</li>
-                <li>Withdraw consent at any time</li>
-                <li>File a complaint with a data protection authority</li>
+                <li>{tr("a.9b8c0131d4")}</li>
+                <li>{tr("a.06a49f4d74")}</li>
+                <li>{tr("a.eb739ea412")}</li>
+                <li>{tr("a.708fa3d7b5")}</li>
+                <li>{tr("a.e8633525ea")}</li>
               </ul>
               <Separator className="my-4" />
-              <p>Nach der DSGVO und anderen Datenschutzgesetzen haben Sie das Recht:</p>
+              <p>{tr("a.091517fa6c")}</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
-                <li>Zugriff auf Ihre Daten zu erhalten</li>
-                <li>Ihre Daten zu berichtigen oder zu löschen</li>
-                <li>Die Verarbeitung einzuschränken oder zu widersprechen</li>
-                <li>Ihre Einwilligung jederzeit zu widerrufen</li>
-                <li>Eine Beschwerde bei einer Datenschutzbehörde einzureichen</li>
+                <li>{tr("a.ea9f164f44")}</li>
+                <li>{tr("a.c4d817b43a")}</li>
+                <li>{tr("a.56682770a5")}</li>
+                <li>{tr("a.edefdb9e9f")}</li>
+                <li>{tr("a.fd4e2f5a11")}</li>
               </ul>
             </div>
           </section>
@@ -207,18 +196,15 @@ const PrivacyPolicy = () => {
           {/* Section 9 */}
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
-              9. International Data Transfers / Internationale Datenübertragungen
+              {tr("a.503cb7a731")}
             </h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                If personal data is transferred to countries outside the European Union, we ensure adequate
-                protection through appropriate legal safeguards such as Standard Contractual Clauses.
+                {tr("a.3f530e5e24")}
               </p>
               <Separator className="my-4" />
               <p>
-                Wenn personenbezogene Daten in Länder außerhalb der Europäischen Union übertragen werden,
-                stellen wir einen angemessenen Schutz durch geeignete rechtliche Garantien (z. B.
-                Standardvertragsklauseln) sicher.
+                {tr("a.3ff1ca10eb")}
               </p>
             </div>
           </section>
@@ -226,17 +212,15 @@ const PrivacyPolicy = () => {
           {/* Section 10 */}
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
-              10. Updates to This Policy / Aktualisierung dieser Richtlinie
+              {tr("a.3612b3dea4")}
             </h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                We may update this Privacy Policy from time to time. Any changes will be published on this page
-                with a revised effective date.
+                {tr("a.86b00ca063")}
               </p>
               <Separator className="my-4" />
               <p>
-                Wir können diese Datenschutzrichtlinie von Zeit zu Zeit aktualisieren. Änderungen werden auf
-                dieser Seite mit einem neuen Gültigkeitsdatum veröffentlicht.
+                {tr("a.c60404411b")}
               </p>
             </div>
           </section>
@@ -244,22 +228,21 @@ const PrivacyPolicy = () => {
           {/* Section 11 */}
           <section>
             <h2 className="text-2xl font-serif font-semibold text-foreground mb-4">
-              11. Contact / Kontakt
+              {tr("a.c687865f1b")}
             </h2>
             <div className="space-y-4 text-muted-foreground">
-              <p>If you have any questions about this Privacy Policy or your personal data, please contact us at:</p>
+              <p>{tr("a.747caf1f4c")}</p>
               <div className="bg-muted/30 p-6 rounded-lg space-y-2">
-                <p>Email: sypera.sylvia@gmail.com</p>
-                <p>Phone: +49 151 40017533</p>
+                <p>{tr("a.615ba86183")}</p>
+                <p>{tr("a.73f7414ac5")}</p>
               </div>
               <Separator className="my-4" />
               <p>
-                Wenn Sie Fragen zu dieser Datenschutzrichtlinie oder zu Ihren personenbezogenen Daten haben,
-                kontaktieren Sie uns bitte unter:
+                {tr("a.bd8e11c0d5")}
               </p>
               <div className="bg-muted/30 p-6 rounded-lg space-y-2">
-                <p>E-Mail: sypera.sylvia@gmail.com</p>
-                <p>Telefon: +49 151 40017533</p>
+                <p>{tr("a.93422a7d00")}</p>
+                <p>{tr("a.fb247c9668")}</p>
               </div>
             </div>
           </section>

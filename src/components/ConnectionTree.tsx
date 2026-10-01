@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 
+import { tr } from "@/i18n/tr";
 type TreeType = "family" | "friendship";
 type RelationshipNode = {
   id: string;
@@ -82,10 +83,10 @@ const ConnectionTree = () => {
         {/* Header */}
         <div className="flex items-center gap-2">
           <Users className="h-5 w-5 text-primary" />
-          <h3 className="font-semibold text-lg">Connection Tree</h3>
+          <h3 className="font-semibold text-lg">{tr("a.bc0bf7b892")}</h3>
         </div>
         <p className="text-sm text-muted-foreground">
-          Create your family tree or friendship network
+          {tr("a.95c152ce02")}
         </p>
 
         {/* Tree Type Selector */}
@@ -96,7 +97,7 @@ const ConnectionTree = () => {
             className="flex-1"
           >
             <Users className="h-4 w-4 mr-2" />
-            Family Tree
+            {tr("a.b38512be96")}
           </Button>
           <Button
             variant={activeTreeType === "friendship" ? "default" : "outline"}
@@ -104,13 +105,13 @@ const ConnectionTree = () => {
             className="flex-1"
           >
             <Heart className="h-4 w-4 mr-2" />
-            Friendship Tree
+            {tr("a.af5ec86337")}
           </Button>
         </div>
 
         {/* Template Selection */}
         <div className="space-y-3">
-          <h4 className="font-medium text-sm">Choose a Template</h4>
+          <h4 className="font-medium text-sm">{tr("a.71b9b2b0ca")}</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {defaultTemplates.map((template) => (
               <button
@@ -133,11 +134,11 @@ const ConnectionTree = () => {
                       {template.price}
                     </span>
                     <Button size="sm" variant="outline" className="h-7 text-xs">
-                      Purchase
+                      {tr("a.160f06d479")}
                     </Button>
                   </div>
                 ) : (
-                  <span className="text-xs text-green-600 font-medium">Free</span>
+                  <span className="text-xs text-green-600 font-medium">{tr("a.75f527181b")}</span>
                 )}
               </button>
             ))}
@@ -148,7 +149,7 @@ const ConnectionTree = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="font-medium text-sm">
-              {activeTreeType === "family" ? "Family Members" : "Friendship Network"}
+              {activeTreeType === "family" ? tr("a.0507492b67") : tr("a.de3785a5c1")}
             </h4>
             <Button
               size="sm"
@@ -156,31 +157,31 @@ const ConnectionTree = () => {
               onClick={() => setShowAddRelationship(!showAddRelationship)}
             >
               <Plus className="h-4 w-4 mr-1" />
-              Add Person
+              {tr("a.26b9537111")}
             </Button>
           </div>
 
           {showAddRelationship && (
             <div className="bg-muted/30 rounded-lg p-4 space-y-3 animate-fade-in border border-border">
               <Input 
-                placeholder="Name" 
+                placeholder={tr("a.709a23220f")} 
                 value={newPerson.name}
                 onChange={(e) => setNewPerson({...newPerson, name: e.target.value})}
               />
               <Input 
-                placeholder={activeTreeType === "family" ? "Relationship (e.g., Mother, Son)" : "Connection (e.g., Best Friend, Mentor)"}
+                placeholder={activeTreeType === "family" ? tr("a.5a8e8e41e2") : tr("a.fbda5aeaad")}
                 value={newPerson.relationshipLabel}
                 onChange={(e) => setNewPerson({...newPerson, relationshipLabel: e.target.value})}
               />
               <textarea
                 className="w-full min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm"
-                placeholder="Short note or memory..."
+                placeholder={tr("a.c8f8ac963a")}
                 value={newPerson.note}
                 onChange={(e) => setNewPerson({...newPerson, note: e.target.value})}
               />
               <div className="flex gap-2">
-                <Button size="sm" className="flex-1" onClick={handleAddPerson}>Save</Button>
-                <Button size="sm" variant="outline" onClick={() => setShowAddRelationship(false)}>Cancel</Button>
+                <Button size="sm" className="flex-1" onClick={handleAddPerson}>{tr("a.efc007a393")}</Button>
+                <Button size="sm" variant="outline" onClick={() => setShowAddRelationship(false)}>{tr("a.77dfd2135f")}</Button>
               </div>
             </div>
           )}
@@ -191,11 +192,11 @@ const ConnectionTree = () => {
               <div className="flex flex-col items-center justify-center h-full text-center space-y-3 py-12">
                 <Users className="h-12 w-12 text-muted-foreground/50" />
                 <p className="text-sm text-muted-foreground">
-                  Start building your {activeTreeType} tree by adding people
+                  {tr("a.9957d4aa87")} {activeTreeType} {tr("a.2ce9688e9b")}
                 </p>
                 <Button size="sm" variant="outline" onClick={() => setShowAddRelationship(true)}>
                   <Plus className="h-4 w-4 mr-1" />
-                  Add First Person
+                  {tr("a.31a502e3aa")}
                 </Button>
               </div>
             ) : (
@@ -220,7 +221,7 @@ const ConnectionTree = () => {
                         {node.memorialId && (
                           <div className="mt-2 flex items-center justify-center gap-1 text-xs text-muted-foreground">
                             <ExternalLink className="h-3 w-3" />
-                            <span>View Profile</span>
+                            <span>{tr("a.685ed0a4a1")}</span>
                           </div>
                         )}
                       </div>
@@ -234,16 +235,16 @@ const ConnectionTree = () => {
 
         {/* Share Template Option */}
         <div className="pt-4 border-t space-y-3">
-          <h4 className="font-medium text-sm">Share Your Design</h4>
+          <h4 className="font-medium text-sm">{tr("a.f69ef99d0d")}</h4>
           <p className="text-xs text-muted-foreground">
-            Create a custom template and share it with the Reflectlife community
+            {tr("a.2e169c91ba")}
           </p>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="flex-1">
-              Create Custom Template
+              {tr("a.eff78eab54")}
             </Button>
             <Button variant="outline" size="sm" className="flex-1">
-              Browse Community Templates
+              {tr("a.183581159e")}
             </Button>
           </div>
         </div>
@@ -253,7 +254,7 @@ const ConnectionTree = () => {
       <Dialog open={!!selectedNode} onOpenChange={() => setSelectedNode(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Profile Quick View</DialogTitle>
+            <DialogTitle>{tr("a.c99a9f23cd")}</DialogTitle>
           </DialogHeader>
           {selectedNode && (
             <div className="space-y-4">
@@ -297,12 +298,12 @@ const ConnectionTree = () => {
                 {selectedNode.memorialId ? (
                   <Button className="flex-1" asChild>
                     <a href={`/memorial/${selectedNode.memorialId}`}>
-                      View Full Timeline
+                      {tr("a.be617bae6b")}
                     </a>
                   </Button>
                 ) : (
                   <Button className="flex-1" variant="outline">
-                    Create Memorial Profile
+                    {tr("a.119bb724fa")}
                   </Button>
                 )}
               </div>

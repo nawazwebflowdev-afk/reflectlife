@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Flame, Heart } from "lucide-react";
 
+import { tr } from "@/i18n/tr";
 interface FeaturedPrayer {
   id: number;
   title: string;
@@ -13,27 +14,27 @@ interface FeaturedPrayer {
 const FEATURED_PRAYERS: FeaturedPrayer[] = [
   {
     id: 1,
-    title: "Prayer for Eternal Rest",
+    title: tr("a.83fee3cc6a"),
     author: "Andriy Shevchenko",
-    text: "Eternal rest grant unto them, O Lord, and let perpetual light shine upon them. May they rest in peace, and may Your everlasting love surround them forever. Amen.",
+    text: tr("a.ff43566463"),
   },
   {
     id: 2,
-    title: "Eternal Memory",
+    title: tr("a.48d507d570"),
     author: "Olena Melnyk",
-    text: "May their memory be eternal. May their kindness never be forgotten. May their love continue to live in the hearts of those they touched. Though they have departed this world, their spirit remains with us always. Eternal memory.",
+    text: tr("a.a836c169c0"),
   },
   {
     id: 3,
-    title: "Prayer for Peace",
+    title: tr("a.f711a2c006"),
     author: "Oleksandr Kovalenko",
-    text: "Lord, receive this precious soul into Your heavenly kingdom. Grant them peace beyond all understanding. Comfort those who mourn, strengthen those who grieve, and remind us that love never ends. Amen.",
+    text: tr("a.ab4611edd1"),
   },
   {
     id: 4,
-    title: "The Shepherd's Prayer",
+    title: tr("a.a4087f66e9"),
     author: "Kateryna Bondarenko",
-    text: "The Lord is my Shepherd; I shall not want. He leads me beside still waters and restores my soul. Even though I walk through the valley of the shadow of death, I will fear no evil, for You are with me. Your love comforts me today and always.",
+    text: tr("a.762d137ac0"),
   },
 ];
 
@@ -67,7 +68,7 @@ export const LatestPrayers = () => {
                 >
                   <Link to={`/memorial-wall?prayer=${prayer.id}`}>
                     <Flame className="w-4 h-4 mr-2" />
-                    Light a Candle with this Prayer
+                    {tr("a.5f313782fe")}
                   </Link>
                 </Button>
               </div>

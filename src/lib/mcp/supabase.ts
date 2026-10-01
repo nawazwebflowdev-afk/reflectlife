@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { ToolContext } from "@lovable.dev/mcp-js";
 
+import { tr } from "@/i18n/tr";
 declare const process: { env: Record<string, string | undefined> };
 
 
@@ -18,7 +19,7 @@ export function supabaseForUser(ctx: ToolContext) {
 
 export function notAuthenticated() {
   return {
-    content: [{ type: "text" as const, text: "Not authenticated. Connect this MCP server with your Reflectlife account." }],
+    content: [{ type: "text" as const, text: tr("a.d042465af8") }],
     isError: true,
   };
 }

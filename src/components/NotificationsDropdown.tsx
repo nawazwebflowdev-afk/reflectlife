@@ -10,8 +10,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "@/lib/dateFormat";
 
+import { tr } from "@/i18n/tr";
 interface Notification {
   id: string;
   type: string;
@@ -96,8 +97,8 @@ const NotificationsDropdown = () => {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to mark notification as read",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.f1cbb07e80"),
         variant: "destructive",
       });
       return;
@@ -118,8 +119,8 @@ const NotificationsDropdown = () => {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to mark all as read",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.9b4d086829"),
         variant: "destructive",
       });
       return;
@@ -127,8 +128,8 @@ const NotificationsDropdown = () => {
 
     fetchNotifications();
     toast({
-      title: "Success",
-      description: "All notifications marked as read",
+      title: tr("a.42a8f651d7"),
+      description: tr("a.974736572b"),
     });
   };
 
@@ -140,8 +141,8 @@ const NotificationsDropdown = () => {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete notification",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.939f282d3e"),
         variant: "destructive",
       });
       return;
@@ -181,7 +182,7 @@ const NotificationsDropdown = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 bg-popover">
         <div className="flex items-center justify-between p-4 border-b border-border">
-          <h3 className="font-semibold text-foreground">Notifications</h3>
+          <h3 className="font-semibold text-foreground">{tr("a.753a22b2eb")}</h3>
           {unreadCount > 0 && (
             <Button
               variant="ghost"
@@ -189,7 +190,7 @@ const NotificationsDropdown = () => {
               onClick={markAllAsRead}
               className="text-xs text-primary hover:text-primary"
             >
-              Mark all read
+              {tr("a.8958e22c23")}
             </Button>
           )}
         </div>
@@ -198,7 +199,7 @@ const NotificationsDropdown = () => {
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
               <Bell className="h-12 w-12 mb-2 opacity-50" />
-              <p className="text-sm">No notifications yet</p>
+              <p className="text-sm">{tr("a.d2609b6af1")}</p>
             </div>
           ) : (
             <div className="divide-y divide-border">

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { BookUser, Mail, X } from "lucide-react";
 import { toast } from "sonner";
 
+import { tr } from "@/i18n/tr";
 export type RecipientChannel = "sms" | "whatsapp" | "email";
 
 export interface PhoneRecipient {
@@ -54,7 +55,7 @@ export default function PhoneRecipientPicker({ value, onChange }: Props) {
       return;
     }
     if (addMany([{ phone: null, email: v, display_name: null, channel: "email" }]) === 0) {
-      toast.info("That email is already on the list.");
+      toast.info(tr("a.a13ae0c634"));
       return;
     }
     setEmail("");
@@ -63,7 +64,7 @@ export default function PhoneRecipientPicker({ value, onChange }: Props) {
   const importFromContacts = async () => {
     const nav = navigator as ContactsNavigator;
     if (!nav.contacts?.select) {
-      toast.error("Your device or browser doesn't support importing contacts. Please add the email address manually.");
+      toast.error(tr("a.7232162412"));
       return;
     }
     try {
@@ -75,7 +76,7 @@ export default function PhoneRecipientPicker({ value, onChange }: Props) {
         if (mail && EMAIL_RE.test(mail)) items.push({ phone: null, email: mail, display_name: name, channel: "email" });
       }
       if (items.length === 0) {
-        toast.error("None of the selected contacts have an email address.");
+        toast.error(tr("a.9091b0f6da"));
         return;
       }
       const added = addMany(items);
@@ -89,15 +90,15 @@ export default function PhoneRecipientPicker({ value, onChange }: Props) {
 
   return (
     <div className="space-y-3">
-      <Label>Recipients</Label>
+      <Label>{tr("a.78cbf8eb1d")}</Label>
 
       <Button type="button" variant="outline" className="w-full rounded-full" onClick={importFromContacts}>
         <BookUser className="w-4 h-4 mr-2" />
-        Import from Contacts
+        {tr("a.2f420b163f")}
       </Button>
 
       <div className="space-y-2 pt-1">
-        <Label htmlFor="remembrance-email">Add an email address</Label>
+        <Label htmlFor="remembrance-email">{tr("a.3668efae1f")}</Label>
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -112,13 +113,13 @@ export default function PhoneRecipientPicker({ value, onChange }: Props) {
                   addEmail();
                 }
               }}
-              placeholder="name@example.com"
+              placeholder={tr("a.9703026304")}
               className="pl-10"
               aria-invalid={!!emailError}
             />
           </div>
           <Button type="button" variant="secondary" onClick={addEmail}>
-            Add
+            {tr("a.61cc55aa04")}
           </Button>
         </div>
         {emailError && <p className="text-xs text-destructive">{emailError}</p>}
@@ -147,7 +148,7 @@ export default function PhoneRecipientPicker({ value, onChange }: Props) {
         </div>
       )}
       <p className="text-xs text-muted-foreground">
-        Reminders are delivered by email. Importing contacts only works on supported mobile browsers, and nothing leaves your device until you save.
+        {tr("a.f079eefb5a")}
       </p>
     </div>
   );

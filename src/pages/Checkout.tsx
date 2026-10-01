@@ -12,6 +12,7 @@ import { Loader2, ShoppingCart, Lock, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getCountryFlag } from "@/lib/countryFlags";
 
+import { tr } from "@/i18n/tr";
 interface Template {
   id: string;
   name: string;
@@ -67,8 +68,8 @@ const Checkout = () => {
 
     if (!user) {
       toast({
-        title: "Authentication Required",
-        description: "Please sign in to purchase templates",
+        title: tr("a.fbbe499440"),
+        description: tr("a.bf2d23ff5d"),
         variant: "destructive",
       });
       navigate("/login");
@@ -79,8 +80,8 @@ const Checkout = () => {
 
     if (!templateId) {
       toast({
-        title: "Invalid Template",
-        description: "Template not found",
+        title: tr("a.51ae02c551"),
+        description: tr("a.a2d38583a8"),
         variant: "destructive",
       });
       navigate("/templates");
@@ -95,8 +96,8 @@ const Checkout = () => {
 
     if (templateError || !templateData) {
       toast({
-        title: "Template Not Found",
-        description: "The requested template does not exist",
+        title: tr("a.834744e1f4"),
+        description: tr("a.5325b8260b"),
         variant: "destructive",
       });
       navigate("/templates");
@@ -105,8 +106,8 @@ const Checkout = () => {
 
     if (templateData.is_free) {
       toast({
-        title: "Free Template",
-        description: "This template is free. Redirecting...",
+        title: tr("a.26f7c651cd"),
+        description: tr("a.68c26c80f4"),
       });
       navigate("/templates");
       return;
@@ -131,8 +132,8 @@ const Checkout = () => {
     const user = await getAuthenticatedUser();
     if (!user) {
       toast({
-        title: "Session expired",
-        description: "Please sign in again to use your template.",
+        title: tr("a.b828190ecb"),
+        description: tr("a.06c76c0dad"),
         variant: "destructive",
       });
       navigate("/login");
@@ -150,16 +151,16 @@ const Checkout = () => {
 
     if (error) {
       toast({
-        title: "Could not apply template",
-        description: "Please try again from the Templates page.",
+        title: tr("a.2625dbc908"),
+        description: tr("a.5d114b4926"),
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "Template applied",
-      description: "Your purchased template is now active on your profile.",
+      title: tr("a.8dc9d6251d"),
+      description: tr("a.c561c040b8"),
     });
     navigate("/dashboard");
   };
@@ -173,7 +174,7 @@ const Checkout = () => {
       const user = await getAuthenticatedUser();
 
       if (!user) {
-        throw new Error("Your session expired. Please sign in again.");
+        throw new Error(tr("a.4b190cdcc1"));
       }
 
       const response = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout-session`, {
@@ -204,11 +205,11 @@ const Checkout = () => {
     } catch (error) {
       console.error("Checkout error:", error);
       toast({
-        title: "Checkout Failed",
+        title: tr("a.4db451fbe8"),
         description:
           error instanceof Error
             ? error.message
-            : "Unable to start checkout. Please try again.",
+            : tr("a.a43115275b"),
         variant: "destructive",
       });
       setProcessing(false);
@@ -232,9 +233,9 @@ const Checkout = () => {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="font-serif text-3xl md:text-4xl font-bold mb-2">
-            Complete Your Purchase
+            {tr("a.2290ff2868")}
           </h1>
-          <p className="text-muted-foreground">Secure checkout powered by Stripe</p>
+          <p className="text-muted-foreground">{tr("a.ab2634aa92")}</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
@@ -265,20 +266,20 @@ const Checkout = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <ShoppingCart className="h-5 w-5" />
-                  Order Summary
+                  {tr("a.c7df8a995a")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center py-3 border-b border-border">
-                  <span className="text-muted-foreground">Template</span>
+                  <span className="text-muted-foreground">{tr("a.3ec1ae061c")}</span>
                   <span className="font-semibold">{template.name}</span>
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-border">
-                  <span className="text-muted-foreground">Price</span>
+                  <span className="text-muted-foreground">{tr("a.3e8248e32e")}</span>
                   <span className="font-semibold">€{template.price.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center py-3 text-lg font-bold">
-                  <span>Total</span>
+                  <span>{tr("a.b25928c699")}</span>
                   <span className="text-primary">€{template.price.toFixed(2)}</span>
                 </div>
               </CardContent>
@@ -288,33 +289,33 @@ const Checkout = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CreditCard className="h-5 w-5" />
-                  Payment Information
+                  {tr("a.88b8328c7c")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="bg-muted/50 p-4 rounded-md space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <Lock className="h-4 w-4 text-primary" />
-                    <span className="font-semibold">Secure Payment</span>
+                    <span className="font-semibold">{tr("a.bcb0285a5a")}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Your payment information is processed securely through Stripe.
+                    {tr("a.7d279e12de")}
                   </p>
                 </div>
 
                 {alreadyOwned ? (
                   <div className="space-y-4">
                     <Badge variant="secondary" className="w-full justify-center py-2">
-                      You already own this template
+                      {tr("a.51f1ade00a")}
                     </Badge>
                     <Button className="w-full" onClick={applyOwnedTemplate} disabled={processing}>
                       {processing ? (
                         <>
                           <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          Applying Template...
+                          {tr("a.b299bfbb38")}
                         </>
                       ) : (
-                        "Use This Template"
+                        tr("a.89f4a0a600")
                       )}
                     </Button>
                     <Button
@@ -323,7 +324,7 @@ const Checkout = () => {
                       onClick={() => navigate("/templates")}
                       disabled={processing}
                     >
-                      Back to Templates
+                      {tr("a.32ded662f3")}
                     </Button>
                   </div>
                 ) : (
@@ -337,12 +338,12 @@ const Checkout = () => {
                       {processing ? (
                         <>
                           <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          Processing...
+                          {tr("a.272bc02ec5")}
                         </>
                       ) : (
                         <>
                           <Lock className="h-4 w-4 mr-2" />
-                          Proceed to Secure Checkout
+                          {tr("a.3d8fda3253")}
                         </>
                       )}
                     </Button>
@@ -353,7 +354,7 @@ const Checkout = () => {
                       onClick={() => navigate("/templates")}
                       disabled={processing}
                     >
-                      Cancel
+                      {tr("a.77dfd2135f")}
                     </Button>
                   </>
                 )}
@@ -361,8 +362,7 @@ const Checkout = () => {
             </Card>
 
             <p className="text-xs text-center text-muted-foreground">
-              By completing this purchase, you agree to our terms of service and privacy policy.
-              After payment, this template will be available in your account.
+              {tr("a.a5e3ebeb31")}
             </p>
           </div>
         </div>
