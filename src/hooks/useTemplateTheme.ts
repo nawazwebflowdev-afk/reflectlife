@@ -31,17 +31,6 @@ const DEFAULT_THEME: TemplateTheme = {
   isLoading: true,
 };
 
-// Google Fonts loader — injects a <link> once per font
-const loadedFonts = new Set<string>();
-const loadGoogleFont = (font: string) => {
-  if (!font || loadedFonts.has(font)) return;
-  loadedFonts.add(font);
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font)}:wght@400;600;700&display=swap`;
-  document.head.appendChild(link);
-};
-
 interface UseTemplateThemeOptions {
   fallbackToProfile?: boolean;
 }
@@ -71,15 +60,13 @@ export const useTemplateTheme = (
     }
 
     if (t.fontFamily) {
-      loadGoogleFont(t.fontFamily);
-      root.style.setProperty("--template-font-body", `"${t.fontFamily}", serif`);
+      root.style.setProperty("--template-font-body", '"Playfair Display", Georgia, serif');
     } else {
       root.style.removeProperty("--template-font-body");
     }
 
     if (t.fontHeading) {
-      loadGoogleFont(t.fontHeading);
-      root.style.setProperty("--template-font-heading", `"${t.fontHeading}", serif`);
+      root.style.setProperty("--template-font-heading", '"Playfair Display", Georgia, serif');
     } else {
       root.style.removeProperty("--template-font-heading");
     }
