@@ -29,4 +29,4 @@
 - [x] Terms & Conditions page at /terms with donation chapter (drafted — replace with official wording if supplied)
 - [ ] Charity/organizer payout dashboard + Stripe Connect payouts (not started — awaiting payout model decision)
 
-- Memorial layout: remove Remembrance dates card, merge 9th/40th/anniversary checkboxes + email-me into Set Time to Remember dialog, show next upcoming reminder; Donations card in its place.
+- DONE (owner view untested: needs owner sign-in in preview) Memorial layout: remove Remembrance dates card, merge 9th/40th/anniversary checkboxes + email-me into Set Time to Remember dialog, show next upcoming reminder; Donations card in its place.
