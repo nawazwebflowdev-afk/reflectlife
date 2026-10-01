@@ -1,5 +1,6 @@
 
-import { tr } from "@/i18n/tr";export type CandlePlanKey = 'free' | 'monthly' | 'yearly';
+import { tr } from "@/i18n/tr";
+export type CandlePlanKey = 'free' | 'monthly' | 'yearly';
 
 export const CANDLE_PLAN_META: Record<CandlePlanKey, {
   title: string;

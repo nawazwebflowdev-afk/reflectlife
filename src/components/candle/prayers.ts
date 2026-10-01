@@ -1,5 +1,6 @@
 
-import { tr } from "@/i18n/tr";export interface Prayer {
+import { tr } from "@/i18n/tr";
+export interface Prayer {
   id: number;
   title: string;
   text: string;
