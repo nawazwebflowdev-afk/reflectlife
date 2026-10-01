@@ -15,6 +15,7 @@
   one-time scheduled dispatch that fires exactly once at the chosen date and time.
 
 ## Done
+- Donations parts 1–3 (Stripe Connect, checkout, webhook, memorial section, owner/admin dashboards, 4 languages) — awaiting Stripe keys from user.
 - Ukrainian memorial experience: native Ukrainian sharing and landing page; remembrance-date emails; Defender of Ukraine memorial type; Cyrillic-safe Latin slugs.
 - Guest candles: seven-day guest candles, optional 40-character name, atomic daily device/network limit, invisible captcha integration, owner moderation/off switch, prior-candle archive, conversion tracking, and post-lighting actions. Defender memorials receive all candle durations free.
 - Reminder popup: interactive date picker calendar, custom message field,

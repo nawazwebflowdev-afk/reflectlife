@@ -44,3 +44,15 @@ verify_jwt = false
 
 [functions.memorial-share]
 verify_jwt = false
+
+[functions.create-fundraiser-checkout]
+verify_jwt = false
+
+[functions.fundraiser-webhook]
+verify_jwt = false
+
+[functions.report-fundraiser]
+verify_jwt = false
+
+[functions.fundraiser-connect]
+verify_jwt = false

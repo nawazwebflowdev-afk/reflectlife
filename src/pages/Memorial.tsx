@@ -1,3 +1,5 @@
+import { Helmet } from "react-helmet-async";
+import { MemorialDonations } from "@/components/donation/MemorialDonations";
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Calendar, MapPin, Heart, MessageCircle, Image as ImageIcon, Edit, Palette, Loader2, Plus, Upload } from "lucide-react";
@@ -14,7 +16,6 @@ import { AddMemoryModal } from "@/components/AddMemoryModal";
 import { CandleSection } from "@/components/candle/CandleSection";
 import ShareMemorial from "@/components/ShareMemorial";
 import RemembranceSection from "@/components/remembrance/RemembranceSection";
-import DonateInMemory from "@/components/donation/DonateInMemory";
 import PrintButton from "@/components/PrintButton";
 import { useTranslation } from "react-i18next";
 import { MemorialDateReminders } from "@/components/remembrance/MemorialDateReminders";
@@ -509,14 +510,6 @@ const Memorial = () => {
             memorialName={memorial.name}
             isOwner={!!isCreator}
             hasAccess={false}
-            actionSlot={
-              <DonateInMemory
-                memorialId={memorial.id}
-                memorialName={memorial.name}
-                isOwner={!!isCreator}
-                previewImage={memorial.preview_image_url}
-              />
-            }
           />
         )}
 
@@ -781,6 +774,8 @@ const Memorial = () => {
             )}
           </TabsContent>
         </Tabs>
+
+        {memorial?.id && <MemorialDonations memorialId={memorial.id} memorialName={memorial.name} isOwner={!!isCreator} isDefender={memorial.memorial_type === "defender_of_ukraine"} />}
       </div>
 
       {/* Edit Modal */}

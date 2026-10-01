@@ -1,3 +1,6 @@
+import DonationThanks from "./pages/DonationThanks";
+import FundraiserDashboard from "./pages/FundraiserDashboard";
+import AdminFundraisers from "./pages/AdminFundraisers";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -95,6 +98,9 @@ const App = () => (
                 <Route path="/about" element={<About />} />
                 <Route path="/candle-success" element={<CandleSuccess />} />
                 <Route path="/donation-success" element={<DonationSuccess />} />
+                <Route path="/donation-thanks" element={<DonationThanks />} />
+                <Route path="/fundraiser-dashboard/:memorialId" element={<FundraiserDashboard />} />
+                <Route path="/admin/fundraisers" element={<AdminFundraisers />} />
                 <Route path="/campaign-dashboard/:id" element={<CampaignDashboard />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />

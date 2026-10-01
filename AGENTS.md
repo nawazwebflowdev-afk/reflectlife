@@ -7,3 +7,4 @@
 - Prefixed languages are served under their URL prefix via BrowserRouter basename, and switching language reloads the page, because text prepared at load time must re-evaluate.
 - Dates are formatted through src/lib/dateFormat.ts so they follow the active language.
 - Prefixed languages (currently es, de) are listed once in src/i18n/langPath.ts; routing, hreflang and redirects derive from it.
+- Memorial donations use Stripe Connect Express destination charges with a separate donations Stripe key, and are recorded only by the signed `fundraiser-webhook`, because Reflectlife must never hold or self-report donated money.
