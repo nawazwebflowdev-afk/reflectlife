@@ -1,3 +1,5 @@
+import { Helmet } from "react-helmet-async";
+import { MemorialDonations } from "@/components/donation/MemorialDonations";
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Calendar, MapPin, Heart, MessageCircle, Image as ImageIcon, Edit, Palette, Loader2, Plus, Upload } from "lucide-react";
