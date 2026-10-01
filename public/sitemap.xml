@@ -232,4 +232,40 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/login"/>
   </url>
   <url><loc>https://reflectlife.net/uk/pamiat</loc></url>
+  <url><loc>https://reflectlife.net/examples</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/examples"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/examples"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/examples"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/examples"/>
+  </url>
+  <url><loc>https://reflectlife.net/es/examples</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/examples"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/examples"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/examples"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/examples"/>
+  </url>
+  <url><loc>https://reflectlife.net/de/examples</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/examples"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/examples"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/examples"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/examples"/>
+  </url>
+  <url><loc>https://reflectlife.net/pricing</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/pricing"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/pricing"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/pricing"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/pricing"/>
+  </url>
+  <url><loc>https://reflectlife.net/es/pricing</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/pricing"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/pricing"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/pricing"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/pricing"/>
+  </url>
+  <url><loc>https://reflectlife.net/de/pricing</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/pricing"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/pricing"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/pricing"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/pricing"/>
+  </url>
 </urlset>
