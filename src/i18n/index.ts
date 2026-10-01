@@ -10,6 +10,7 @@ import autoEs from "./auto/es.json";
 import autoDe from "./auto/de.json";
 import { langFromPath } from "./langPath";
 import { donationsI18n } from "./donations";
+import { novI18n } from "./nov";
 
 // Spanish (/es) and German (/de) live under URL prefixes; the URL always wins over stored preference.
 const pathDetector = {
@@ -24,10 +25,10 @@ i18n
   .use(initReactI18next)
   .init({
     resources: {
-      en: { translation: { ...en, a: autoEn, don: donationsI18n.en } },
-      uk: { translation: { ...uk, don: donationsI18n.uk } },
-      es: { translation: { ...es, a: autoEs, don: donationsI18n.es } },
-      de: { translation: { ...de, a: autoDe, don: donationsI18n.de } },
+      en: { translation: { ...en, a: autoEn, don: donationsI18n.en, nov: novI18n.en } },
+      uk: { translation: { ...uk, don: donationsI18n.uk, nov: novI18n.uk } },
+      es: { translation: { ...es, a: autoEs, don: donationsI18n.es, nov: novI18n.es } },
+      de: { translation: { ...de, a: autoDe, don: donationsI18n.de, nov: novI18n.de } },
     },
     fallbackLng: "en",
     supportedLngs: ["en", "uk", "es", "de"],
