@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next";
 import { MemorialDateReminders } from "@/components/remembrance/MemorialDateReminders";
 
 import { tr } from "@/i18n/tr";
+import { formatDate as formatLongDate } from "@/lib/dateFormat";
 const Memorial = () => {
   const { id } = useParams();
   const navigate = useNavigate();
