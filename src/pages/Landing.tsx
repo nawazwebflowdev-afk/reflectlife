@@ -134,7 +134,7 @@ const Landing = () => {
               sizes="100vw"
               width={1600}
               height={914}
-              fetchPriority="high"
+              fetchpriority="high"
               loading="eager"
               decoding="async"
               alt={tr("a.119e758436")}
