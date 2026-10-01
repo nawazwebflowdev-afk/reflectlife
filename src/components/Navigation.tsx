@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-import reflectlifeLogo from "@/assets/reflectlife-logo.png";
+import reflectlifeLogo from "@/assets/reflectlife-logo.webp";
 import {
   DropdownMenu,
   DropdownMenuContent,

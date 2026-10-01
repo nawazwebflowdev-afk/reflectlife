@@ -10,7 +10,7 @@ import hero1600Avif from "@/assets/hero-1600.avif.asset.json";
 import hero640Webp from "@/assets/hero-640.webp.asset.json";
 import hero1024Webp from "@/assets/hero-1024.webp.asset.json";
 import hero1600Webp from "@/assets/hero-1600.webp.asset.json";
-import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
+import portraitPlaceholder from "@/assets/portrait-placeholder.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 

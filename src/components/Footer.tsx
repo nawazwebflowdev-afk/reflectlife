@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import reflectlifeLogo from "@/assets/reflectlife-logo.png";
+import reflectlifeLogo from "@/assets/reflectlife-logo.webp";
 
 import { tr } from "@/i18n/tr";
 const Footer = () => {

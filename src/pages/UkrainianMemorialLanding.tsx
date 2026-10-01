@@ -5,7 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
+import portraitPlaceholder from "@/assets/portrait-placeholder.webp";
 
 export default function UkrainianMemorialLanding() {
   const [examples, setExamples] = useState<any[]>([]);
@@ -15,7 +15,7 @@ export default function UkrainianMemorialLanding() {
   return <main className="bg-background text-foreground">
     <Helmet><html lang="uk" /><title>Пам'ять, яка залишається | Reflectlife</title><meta name="description" content="Створіть теплу сторінку пам'яті, щоб берегти історії та бути разом із рідними в Україні й за кордоном." /><link rel="canonical" href="https://reflectlife.net/uk/pamiat" /></Helmet>
     <section className="relative min-h-[72vh] flex items-end overflow-hidden">
-      <img src="/og-default.jpg" alt="Свічка пам'яті Reflectlife" className="absolute inset-0 h-full w-full object-cover" />
+      <img src="/og-default.webp" alt="Свічка пам'яті Reflectlife" className="absolute inset-0 h-full w-full object-cover" />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
       <div className="relative container mx-auto px-4 pb-14 max-w-5xl">
         <p className="text-sm font-semibold text-primary mb-3">Reflectlife українською</p>

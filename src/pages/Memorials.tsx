@@ -9,8 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import CreateMemorialModal from "@/components/CreateMemorialModal";
 import PageTemplateSelector from "@/components/PageTemplateSelector";
-import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
-import timelineBg from "@/assets/timeline-bg.jpg";
+import portraitPlaceholder from "@/assets/portrait-placeholder.webp";
+import timelineBg from "@/assets/timeline-bg.webp";
 import { format } from "@/lib/dateFormat";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
