@@ -214,6 +214,7 @@ const SignupForm = () => {
     setIsLoading(true);
 
     try {
+      const guestMemorialId = sessionStorage.getItem("reflectlife_guest_candle_memorial");
       const [firstName, ...rest] = fullName.trim().split(/\s+/);
       const lastName = rest.join(" ");
 
@@ -237,6 +238,12 @@ const SignupForm = () => {
 
       if (data?.error) {
         throw new Error(typeof data.error === "string" ? data.error : "Signup failed");
+      }
+
+      if (guestMemorialId) {
+        const deviceId = localStorage.getItem("reflectlife_candle_device");
+        if (deviceId) await supabase.functions.invoke("track-guest-candle-conversion", { body: { memorial_id: guestMemorialId, device_id: deviceId, event_type: "signup_completed" } });
+        sessionStorage.removeItem("reflectlife_guest_candle_memorial");
       }
 
       toast({

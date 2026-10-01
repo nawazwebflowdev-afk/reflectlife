@@ -16,12 +16,15 @@ import ShareMemorial from "@/components/ShareMemorial";
 import RemembranceSection from "@/components/remembrance/RemembranceSection";
 import DonateInMemory from "@/components/donation/DonateInMemory";
 import PrintButton from "@/components/PrintButton";
+import { useTranslation } from "react-i18next";
+import { MemorialDateReminders } from "@/components/remembrance/MemorialDateReminders";
 
 const Memorial = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const templateTheme = useTemplateTheme();
+  const { i18n } = useTranslation();
   const [memorial, setMemorial] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -52,7 +55,7 @@ const Memorial = () => {
       const { data, error } = await supabase
         .from("memorials")
         .select("*")
-        .eq("id", id)
+        .or(`id.eq.${id},slug.eq.${id}`)
         .maybeSingle();
 
       if (error) throw error;
@@ -393,20 +396,20 @@ const Memorial = () => {
       >
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
         
-        {templateTheme.templateName && (
+        {memorial.memorial_type !== "defender_of_ukraine" && templateTheme.templateName && (
           <div className="absolute top-6 left-6 text-white/90 text-sm font-medium bg-black/30 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/20">
             Theme: {templateTheme.templateName}
           </div>
         )}
         
-        <div className="absolute top-6 right-6">
+        {memorial.memorial_type !== "defender_of_ukraine" && <div className="absolute top-6 right-6">
           <Link to="/templates">
             <Button variant="outline" className="gap-2 bg-background/80 backdrop-blur-sm">
               <Palette className="h-4 w-4" />
               Change Template
             </Button>
           </Link>
-        </div>
+        </div>}
         
         <div className="relative container mx-auto px-4 pb-8">
           <div className="flex flex-col lg:flex-row items-center lg:items-end gap-4 lg:gap-6">
@@ -429,6 +432,7 @@ const Memorial = () => {
               <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 text-foreground">
                 {memorial.name}
               </h1>
+              {memorial.memorial_type === "defender_of_ukraine" && <div className="mb-3 flex flex-wrap justify-center gap-2 lg:justify-start"><span className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-sm font-semibold">{memorial.defender_label === "defender_female" ? "Захисниця України" : "Захисник України"}</span>{memorial.service_unit && <span className="rounded-full border px-3 py-1 text-sm">{memorial.service_unit}</span>}{memorial.service_place && <span className="rounded-full border px-3 py-1 text-sm">{memorial.service_place}</span>}</div>}
               <p className="text-base sm:text-lg text-muted-foreground mb-3">
                 {formatDate(memorial.date_of_birth)} – {formatDate(memorial.date_of_death)}
               </p>
@@ -487,7 +491,8 @@ const Memorial = () => {
           </Card>
         )}
 
-        {memorial?.id && <CandleSection memorialId={memorial.id} />}
+        {memorial?.id && <CandleSection memorialId={memorial.id} memorialName={memorial.name} isOwner={!!isCreator} guestEnabled={memorial.guest_candles_enabled !== false} isDefender={memorial.memorial_type === "defender_of_ukraine"} />}
+        <MemorialDateReminders memorialId={memorial.id} ownerId={memorial.user_id} isOwner={!!isCreator} dateOfDeath={memorial.date_of_death} />
 
         {memorial?.id && memorial?.name && (
           <RemembranceSection
@@ -509,7 +514,8 @@ const Memorial = () => {
         {memorial?.name && (
           <ShareMemorial
             name={memorial.name}
-            shareUrl={`https://reflectlife.net/memorial/${memorial.id}`}
+            shareUrl={`https://reflectlife.net/memorial/${memorial.slug || memorial.id}`}
+            shareText={i18n.language === "uk" ? `Світла пам'ять про ${memorial.name}` : `Remembering ${memorial.name}`}
           />
         )}
 

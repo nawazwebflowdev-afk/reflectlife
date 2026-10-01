@@ -27,10 +27,15 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
     location: "",
     date_of_birth: "",
     date_of_death: "",
+    memorial_type: "standard",
+    defender_label: "defender_male",
+    service_unit: "",
+    service_place: "",
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [isPublic, setIsPublic] = useState(true);
+  const [guestCandlesEnabled, setGuestCandlesEnabled] = useState(true);
 
   useEffect(() => {
     if (memorial && open) {
@@ -40,9 +45,14 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
         location: memorial.location || "",
         date_of_birth: memorial.date_of_birth || "",
         date_of_death: memorial.date_of_death || "",
+        memorial_type: memorial.memorial_type || "standard",
+        defender_label: memorial.defender_label || "defender_male",
+        service_unit: memorial.service_unit || "",
+        service_place: memorial.service_place || "",
       });
       setImagePreview(memorial.preview_image_url || "");
       setIsPublic(memorial.is_public ?? true);
+      setGuestCandlesEnabled(memorial.guest_candles_enabled ?? true);
     }
   }, [memorial, open]);
 
@@ -123,6 +133,11 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
           preview_image_url: previewImageUrl,
           is_public: isPublic,
           privacy_level: isPublic ? "public" : "private",
+          memorial_type: formData.memorial_type,
+          defender_label: formData.memorial_type === "defender_of_ukraine" ? formData.defender_label : null,
+          service_unit: formData.memorial_type === "defender_of_ukraine" ? formData.service_unit.trim() || null : null,
+          service_place: formData.memorial_type === "defender_of_ukraine" ? formData.service_place.trim() || null : null,
+          guest_candles_enabled: guestCandlesEnabled,
           updated_at: new Date().toISOString(),
         })
         .eq("id", memorial.id)
@@ -191,6 +206,10 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
                   required
                 />
               </div>
+
+              {/* Bio */}
+              <div className="space-y-2"><Label htmlFor="editMemorialType">Memorial type</Label><select id="editMemorialType" value={formData.memorial_type} onChange={(e) => setFormData({ ...formData, memorial_type: e.target.value })} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="standard">Memorial</option><option value="defender_of_ukraine">Defender of Ukraine</option></select></div>
+              {formData.memorial_type === "defender_of_ukraine" && <div className="grid gap-3 rounded-md border p-4"><div><Label htmlFor="editDefenderLabel">Badge</Label><select id="editDefenderLabel" value={formData.defender_label} onChange={(e) => setFormData({ ...formData, defender_label: e.target.value })} className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="defender_male">Захисник України</option><option value="defender_female">Захисниця України</option></select></div><div><Label htmlFor="editServiceUnit">Unit</Label><Input id="editServiceUnit" maxLength={160} value={formData.service_unit} onChange={(e) => setFormData({ ...formData, service_unit: e.target.value })}/></div><div><Label htmlFor="editServicePlace">Place of service</Label><Input id="editServicePlace" maxLength={160} value={formData.service_place} onChange={(e) => setFormData({ ...formData, service_place: e.target.value })}/></div></div>}
 
               {/* Bio */}
               <div className="space-y-2">
@@ -280,6 +299,9 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
                   </label>
                 </div>
               </div>
+
+              {/* Visibility Toggle */}
+              <div className="flex items-center justify-between rounded-lg border p-4"><div><Label htmlFor="guest-candles">Guest candles</Label><p className="text-xs text-muted-foreground">Allow visitors to light a free seven-day candle without signing in.</p></div><Switch id="guest-candles" checked={guestCandlesEnabled} onCheckedChange={setGuestCandlesEnabled}/></div>
 
               {/* Visibility Toggle */}
               <div className="flex items-center justify-between rounded-lg border p-4">

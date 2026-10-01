@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Upload, X, Loader2, Eye, EyeOff } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
+import { memorialSlug } from "@/utils/memorialSlug";
 
 interface CreateMemorialModalProps {
   open: boolean;
@@ -27,6 +28,10 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
     dateOfBirth: "",
     dateOfDeath: "",
     location: "",
+    memorialType: "standard",
+    defenderLabel: "defender_male",
+    serviceUnit: "",
+    servicePlace: "",
   });
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -159,6 +164,11 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
           preview_image_url: uploadedImageUrls[0],
           is_public: isPublic,
           privacy_level: isPublic ? 'public' : 'private',
+          slug: `${memorialSlug(formData.name)}-${crypto.randomUUID().slice(0, 6)}`,
+          memorial_type: formData.memorialType,
+          defender_label: formData.memorialType === "defender_of_ukraine" ? formData.defenderLabel : null,
+          service_unit: formData.memorialType === "defender_of_ukraine" ? formData.serviceUnit.trim() || null : null,
+          service_place: formData.memorialType === "defender_of_ukraine" ? formData.servicePlace.trim() || null : null,
         })
         .select()
         .single();
@@ -184,7 +194,7 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
       });
 
       // Reset form
-      setFormData({ name: "", bio: "", tributes: "", dateOfBirth: "", dateOfDeath: "", location: "" });
+      setFormData({ name: "", bio: "", tributes: "", dateOfBirth: "", dateOfDeath: "", location: "", memorialType: "standard", defenderLabel: "defender_male", serviceUnit: "", servicePlace: "" });
       setIsPublic(true);
       setImages([]);
       setImagePreviews([]);
@@ -266,6 +276,21 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
               required
             />
           </div>
+
+          {/* Description / Life Story */}
+          <div className="space-y-2">
+            <Label htmlFor="memorialType">Memorial type</Label>
+            <select id="memorialType" value={formData.memorialType} onChange={(e) => setFormData({ ...formData, memorialType: e.target.value })} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+              <option value="standard">Memorial</option>
+              <option value="defender_of_ukraine">Defender of Ukraine / Захисник або Захисниця України</option>
+            </select>
+          </div>
+          {formData.memorialType === "defender_of_ukraine" && <div className="grid gap-4 rounded-md border p-4">
+            <div><Label htmlFor="defenderLabel">Respectful badge</Label><select id="defenderLabel" value={formData.defenderLabel} onChange={(e) => setFormData({ ...formData, defenderLabel: e.target.value })} className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="defender_male">Захисник України</option><option value="defender_female">Захисниця України</option></select></div>
+            <div><Label htmlFor="serviceUnit">Unit (optional)</Label><Input id="serviceUnit" maxLength={160} value={formData.serviceUnit} onChange={(e) => setFormData({ ...formData, serviceUnit: e.target.value })} /></div>
+            <div><Label htmlFor="servicePlace">Place of service (optional)</Label><Input id="servicePlace" maxLength={160} value={formData.servicePlace} onChange={(e) => setFormData({ ...formData, servicePlace: e.target.value })} /></div>
+            <p className="text-xs text-muted-foreground">Defender memorials and every candle duration on them are free. No advertising or upgrade prompts are shown.</p>
+          </div>}
 
           {/* Description / Life Story */}
           <div className="space-y-2">
