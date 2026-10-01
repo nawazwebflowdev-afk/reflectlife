@@ -385,6 +385,15 @@ const Memorial = () => {
         backgroundAttachment: 'fixed',
       } as React.CSSProperties}
     >
+      {memorial && (
+        <Helmet>
+          <title>{`${memorial.name} | Reflectlife`}</title>
+          <meta name="description" content={(memorial.bio || memorial.name).slice(0, 155)} />
+          <meta property="og:title" content={`${memorial.name} | Reflectlife`} />
+          <meta property="og:description" content={(memorial.bio || memorial.name).slice(0, 155)} />
+          {memorial.is_public === false && <meta name="robots" content="noindex" />}
+        </Helmet>
+      )}
       {/* Hero Section */}
       <section 
         className="relative h-[400px] flex items-end transition-smooth"
