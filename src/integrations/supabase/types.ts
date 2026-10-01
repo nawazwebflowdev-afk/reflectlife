@@ -210,6 +210,125 @@ export type Database = {
         }
         Relationships: []
       }
+      fundraiser_donations: {
+        Row: {
+          amount_cents: number
+          anonymous: boolean
+          covered_fees: boolean
+          created_at: string
+          currency: string
+          donor_name: string | null
+          fee_cents: number
+          fundraiser_id: string
+          id: string
+          livemode: boolean
+          memorial_id: string
+          message: string | null
+          message_hidden: boolean
+          net_cents: number
+          refunded_cents: number
+          status: string
+          stripe_charge_id: string | null
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string
+        }
+        Insert: {
+          amount_cents: number
+          anonymous?: boolean
+          covered_fees?: boolean
+          created_at?: string
+          currency: string
+          donor_name?: string | null
+          fee_cents?: number
+          fundraiser_id: string
+          id?: string
+          livemode?: boolean
+          memorial_id: string
+          message?: string | null
+          message_hidden?: boolean
+          net_cents: number
+          refunded_cents?: number
+          status?: string
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_session_id: string
+        }
+        Update: {
+          amount_cents?: number
+          anonymous?: boolean
+          covered_fees?: boolean
+          created_at?: string
+          currency?: string
+          donor_name?: string | null
+          fee_cents?: number
+          fundraiser_id?: string
+          id?: string
+          livemode?: boolean
+          memorial_id?: string
+          message?: string | null
+          message_hidden?: boolean
+          net_cents?: number
+          refunded_cents?: number
+          status?: string
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fundraiser_donations_fundraiser_id_fkey"
+            columns: ["fundraiser_id"]
+            isOneToOne: false
+            referencedRelation: "memorial_fundraisers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fundraiser_donations_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fundraiser_reports: {
+        Row: {
+          created_at: string
+          id: string
+          memorial_id: string
+          reason: string
+          reporter_email: string | null
+          reporter_user_id: string | null
+          resolved: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          memorial_id: string
+          reason: string
+          reporter_email?: string | null
+          reporter_user_id?: string | null
+          resolved?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          memorial_id?: string
+          reason?: string
+          reporter_email?: string | null
+          reporter_user_id?: string | null
+          resolved?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fundraiser_reports_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guest_candle_conversions: {
         Row: {
           created_at: string
@@ -630,6 +749,74 @@ export type Database = {
             foreignKeyName: "memorial_entries_timeline_id_fkey"
             columns: ["timeline_id"]
             isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memorial_fundraisers: {
+        Row: {
+          admin_paused: boolean
+          charges_enabled: boolean
+          country: string | null
+          created_at: string
+          currency: string | null
+          enabled: boolean
+          external_url: string | null
+          id: string
+          memorial_id: string
+          owner_id: string
+          payouts_enabled: boolean
+          recipient_email: string | null
+          recipient_name: string | null
+          recipient_type: string
+          show_totals: boolean
+          stripe_account_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_paused?: boolean
+          charges_enabled?: boolean
+          country?: string | null
+          created_at?: string
+          currency?: string | null
+          enabled?: boolean
+          external_url?: string | null
+          id?: string
+          memorial_id: string
+          owner_id: string
+          payouts_enabled?: boolean
+          recipient_email?: string | null
+          recipient_name?: string | null
+          recipient_type?: string
+          show_totals?: boolean
+          stripe_account_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_paused?: boolean
+          charges_enabled?: boolean
+          country?: string | null
+          created_at?: string
+          currency?: string | null
+          enabled?: boolean
+          external_url?: string | null
+          id?: string
+          memorial_id?: string
+          owner_id?: string
+          payouts_enabled?: boolean
+          recipient_email?: string | null
+          recipient_name?: string | null
+          recipient_type?: string
+          show_totals?: boolean
+          stripe_account_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_fundraisers_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: true
             referencedRelation: "memorials"
             referencedColumns: ["id"]
           },
@@ -1236,6 +1423,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      platform_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -2096,6 +2301,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      can_view_memorial: { Args: { _memorial_id: string }; Returns: boolean }
       claim_guest_candle_rate_limit: {
         Args: {
           _device_hash: string
@@ -2132,6 +2338,32 @@ export type Database = {
         Returns: {
           donor_count: number
           total_raised: number
+        }[]
+      }
+      get_memorial_donors: {
+        Args: { _limit?: number; _memorial_id: string }
+        Returns: {
+          created_at: string
+          donor_name: string
+          id: string
+          message: string
+        }[]
+      }
+      get_memorial_fundraiser: {
+        Args: { _memorial_id: string }
+        Returns: {
+          currency: string
+          donor_count: number
+          enabled: boolean
+          external_url: string
+          fee_percent: number
+          paused: boolean
+          ready: boolean
+          recipient_name: string
+          recipient_type: string
+          show_totals: boolean
+          test_mode: boolean
+          total_raised_cents: number
         }[]
       }
       has_memorial_access: {
@@ -2223,6 +2455,10 @@ export type Database = {
           relation: string
           user_id: string
         }[]
+      }
+      set_donation_message_hidden: {
+        Args: { _donation_id: string; _hidden: boolean }
+        Returns: undefined
       }
       user_has_tree_access: {
         Args: { _tree_id: string; _user_id: string }
