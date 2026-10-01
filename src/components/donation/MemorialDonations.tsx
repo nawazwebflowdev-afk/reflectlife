@@ -1,3 +1,4 @@
+import { track } from "@/lib/analytics";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,6 +68,7 @@ export function MemorialDonations({ memorialId, memorialName, isOwner, isDefende
   const donate = async () => {
     if (!valid) return toast.error(t("don.minimum", { min: formatMoney(MIN * 100, currency) }));
     setBusy(true);
+    track("Donation Started");
     const { data, error } = await supabase.functions.invoke("create-fundraiser-checkout", {
       body: { memorialId, amount, coverFees: cover, donorName: name, message, anonymous: anon, lang: i18n.language },
     });
