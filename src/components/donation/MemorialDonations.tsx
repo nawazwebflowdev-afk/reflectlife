@@ -92,7 +92,6 @@ export function MemorialDonations({ memorialId, memorialName, isOwner, isDefende
     <section id="donations" className="mt-10 space-y-4" aria-labelledby="donations-title">
       {isOwner && <FundraiserOwnerSettings memorialId={memorialId} isDefender={isDefender} onChange={load} />}
 
-      {s?.enabled && s.paused && !isOwner && null}
       {visible && !s!.paused && (
         <Card className="shadow-elegant">
           <CardContent className="p-6 space-y-5">
