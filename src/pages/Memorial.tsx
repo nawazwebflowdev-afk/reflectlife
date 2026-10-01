@@ -19,6 +19,7 @@ import PrintButton from "@/components/PrintButton";
 import { useTranslation } from "react-i18next";
 import { MemorialDateReminders } from "@/components/remembrance/MemorialDateReminders";
 
+import { tr } from "@/i18n/tr";
 const Memorial = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -79,8 +80,8 @@ const Memorial = () => {
     } catch (error: any) {
       console.error("Error fetching memorial:", error);
       toast({
-        title: "Error",
-        description: "Failed to load memorial",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.2598406ac3"),
         variant: "destructive",
       });
       setMemorial(null);
@@ -147,8 +148,8 @@ const Memorial = () => {
 
     if (!user) {
       toast({
-        title: "Authentication required",
-        description: "You must be logged in to post a tribute.",
+        title: tr("a.682810de81"),
+        description: tr("a.59a9eb72c7"),
         variant: "destructive",
       });
       return;
@@ -156,8 +157,8 @@ const Memorial = () => {
 
     if (!tribute.trim()) {
       toast({
-        title: "Empty tribute",
-        description: "Please write something before posting.",
+        title: tr("a.6972d4c7c9"),
+        description: tr("a.93316ec0c7"),
         variant: "destructive",
       });
       return;
@@ -174,16 +175,16 @@ const Memorial = () => {
     if (error) {
       console.error(error);
       toast({
-        title: "Error",
-        description: "Failed to post tribute.",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.893803bc0a"),
         variant: "destructive",
       });
       return;
     }
 
     toast({
-      title: "Success",
-      description: "Your tribute has been shared.",
+      title: tr("a.42a8f651d7"),
+      description: tr("a.fefde4d03c"),
     });
 
     setTribute("");
@@ -278,8 +279,8 @@ const Memorial = () => {
       setIsLiked(wasLiked);
       setLikeCount((c) => Math.max(0, c + (wasLiked ? 1 : -1)));
       toast({
-        title: "Could not save your heart",
-        description: "Please try again in a moment.",
+        title: tr("a.82d897a0de"),
+        description: tr("a.a917db7af2"),
         variant: "destructive",
       });
     } finally {
@@ -299,11 +300,11 @@ const Memorial = () => {
       const user = refreshed.session?.user ?? null;
 
       if (refreshError || !user) {
-        throw new Error("Your session expired. Please log in again and retry.");
+        throw new Error(tr("a.ce6d6f1c66"));
       }
 
       if (memorial.user_id !== user.id) {
-        throw new Error("You don't have permission to upload media to this memorial.");
+        throw new Error(tr("a.a0d824a617"));
       }
 
       const fileExt = file.name.split(".").pop() || "jpg";
@@ -328,7 +329,7 @@ const Memorial = () => {
         });
       if (error) throw error;
 
-      toast({ title: "Uploaded!", description: "Media added to gallery." });
+      toast({ title: tr("a.352aad6e72"), description: tr("a.b91c9b1bf5") });
       fetchGalleryMedia();
     } catch (error: any) {
       const rawMessage = error?.message || "Upload failed";
@@ -336,7 +337,7 @@ const Memorial = () => {
         ? "You are no longer authenticated for upload. Please log in again and retry."
         : rawMessage;
 
-      toast({ title: "Upload failed", description: friendlyMessage, variant: "destructive" });
+      toast({ title: tr("a.ad0d0603e2"), description: friendlyMessage, variant: "destructive" });
     } finally {
       setGalleryUploading(false);
       e.target.value = "";
@@ -358,9 +359,9 @@ const Memorial = () => {
       <div className="min-h-screen flex items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="p-6 text-center">
-            <h2 className="font-serif text-2xl mb-2">Memorial Not Found</h2>
-            <p className="text-muted-foreground mb-4">This memorial doesn't exist or has been removed.</p>
-            <Button onClick={() => navigate("/memorials")}>View All Memorials</Button>
+            <h2 className="font-serif text-2xl mb-2">{tr("a.3b2c4ceb1a")}</h2>
+            <p className="text-muted-foreground mb-4">{tr("a.81a6028417")}</p>
+            <Button onClick={() => navigate("/memorials")}>{tr("a.7c9ebf1cc1")}</Button>
           </CardContent>
         </Card>
       </div>
@@ -396,7 +397,7 @@ const Memorial = () => {
         
         {memorial.memorial_type !== "defender_of_ukraine" && templateTheme.templateName && (
           <div className="absolute top-6 left-6 text-white/90 text-sm font-medium bg-black/30 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/20">
-            Theme: {templateTheme.templateName}
+            {tr("a.0485a02659")} {templateTheme.templateName}
           </div>
         )}
         
@@ -404,7 +405,7 @@ const Memorial = () => {
           <Link to="/templates">
             <Button variant="outline" className="gap-2 bg-background/80 backdrop-blur-sm">
               <Palette className="h-4 w-4" />
-              Change Template
+              {tr("a.5b98d0a6f0")}
             </Button>
           </Link>
         </div>}
@@ -442,9 +443,9 @@ const Memorial = () => {
               )}
               {memorial.profiles && (
                 <p className="text-sm text-muted-foreground/70 mt-2">
-                  Created by {memorial.profiles.full_name || 
+                  {tr("a.5d73cc3051")} {memorial.profiles.full_name || 
                     `${memorial.profiles.first_name || ''} ${memorial.profiles.last_name || ''}`.trim() || 
-                    'Anonymous'}
+                    tr("a.9bed510400")}
                 </p>
               )}
             </div>
@@ -468,7 +469,7 @@ const Memorial = () => {
                   onClick={() => setIsEditModalOpen(true)}
                 >
                   <Edit className="h-4 w-4" />
-                  Edit
+                  {tr("a.5301648dcf")}
                 </Button>
               )}
             </div>
@@ -521,11 +522,11 @@ const Memorial = () => {
         {/* Tabs */}
         <Tabs defaultValue="timeline" className="w-full">
           <TabsList className="mb-6">
-            <TabsTrigger value="timeline">Timeline</TabsTrigger>
+            <TabsTrigger value="timeline">{tr("a.018514a3d5")}</TabsTrigger>
             <TabsTrigger value="tributes">
-              Tributes ({tributePosts.length})
+              {tr("a.b9429f77d8")}{tributePosts.length})
             </TabsTrigger>
-            <TabsTrigger value="gallery">Gallery ({galleryMedia.length})</TabsTrigger>
+            <TabsTrigger value="gallery">{tr("a.242683fb39")}{galleryMedia.length})</TabsTrigger>
           </TabsList>
 
           {/* Timeline */}
@@ -534,7 +535,7 @@ const Memorial = () => {
               <div className="flex justify-end">
                 <Button className="gap-2" onClick={() => setShowAddMemoryModal(true)}>
                   <Plus className="h-4 w-4" />
-                  Add Memory
+                  {tr("a.22012e09a4")}
                 </Button>
               </div>
             )}
@@ -566,7 +567,7 @@ const Memorial = () => {
                         <div className="flex items-center gap-2 mb-2">
                           <Calendar className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm text-muted-foreground">
-                            {entry.event_date ? formatDate(entry.event_date) : 'No date'}
+                            {entry.event_date ? formatDate(entry.event_date) : tr("a.acb6273eca")}
                           </span>
                         </div>
                         {entry.caption && (
@@ -577,7 +578,7 @@ const Memorial = () => {
                           <div className="rounded-lg overflow-hidden max-w-md">
                             <img
                               src={entry.content_url}
-                              alt={entry.caption || "Memory"}
+                              alt={entry.caption || tr("a.89c8a2851d")}
                               className="w-full h-auto"
                             />
                           </div>
@@ -601,12 +602,12 @@ const Memorial = () => {
               <Card className="text-center py-12">
                 <CardContent>
                   <p className="text-muted-foreground mb-4">
-                    No timeline memories yet.
+                    {tr("a.d15329a213")}
                   </p>
                   {isCreator && (
                     <Button className="gap-2" onClick={() => setShowAddMemoryModal(true)}>
                       <Plus className="h-4 w-4" />
-                      Add Your First Memory
+                      {tr("a.5faf5f9827")}
                     </Button>
                   )}
                 </CardContent>
@@ -625,7 +626,7 @@ const Memorial = () => {
                         {tribute.profiles?.avatar_url ? (
                           <img 
                             src={tribute.profiles.avatar_url} 
-                            alt={tribute.profiles.full_name || 'User'}
+                            alt={tribute.profiles.full_name || tr("a.9f8a2389a2")}
                             className="w-full h-full object-cover rounded-full"
                           />
                         ) : (
@@ -637,7 +638,7 @@ const Memorial = () => {
                       <div className="flex-grow">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-semibold">
-                            {tribute.profiles?.full_name || 'Anonymous'}
+                            {tribute.profiles?.full_name || tr("a.9bed510400")}
                           </span>
                           <span className="text-sm text-muted-foreground">•</span>
                           <span className="text-sm text-muted-foreground">
@@ -656,7 +657,7 @@ const Memorial = () => {
               <Card className="text-center py-12">
                 <CardContent>
                   <p className="text-muted-foreground mb-4">
-                    No tributes yet. Be the first to share a memory.
+                    {tr("a.1efba6a412")}
                   </p>
                 </CardContent>
               </Card>
@@ -666,7 +667,7 @@ const Memorial = () => {
               <CardContent className="p-6 text-center">
                 <Button className="gap-2" onClick={() => setShowTributeModal(true)}>
                   <MessageCircle className="h-4 w-4" />
-                  Share a Memory
+                  {tr("a.f57ba92cd5")}
                 </Button>
               </CardContent>
             </Card>
@@ -675,23 +676,23 @@ const Memorial = () => {
             {showTributeModal && (
               <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                 <div className="bg-background p-6 rounded-xl max-w-lg w-full mx-4 shadow-lg">
-                  <h2 className="text-xl font-bold mb-4">Share a Tribute</h2>
+                  <h2 className="text-xl font-bold mb-4">{tr("a.3109569be5")}</h2>
 
                   <textarea
                     className="w-full border border-input rounded-md p-3 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     rows={4}
                     value={tribute}
                     onChange={(e) => setTribute(e.target.value)}
-                    placeholder="Write your tribute..."
+                    placeholder={tr("a.8e02f8ee0c")}
                   />
 
                   <div className="flex justify-end gap-3 mt-4">
                     <Button variant="ghost" onClick={() => setShowTributeModal(false)}>
-                      Cancel
+                      {tr("a.77dfd2135f")}
                     </Button>
 
                     <Button onClick={handleSubmitTribute}>
-                      Post Tribute
+                      {tr("a.acf56f325b")}
                     </Button>
                   </div>
                 </div>
@@ -706,7 +707,7 @@ const Memorial = () => {
                 <Button className="gap-2" asChild disabled={galleryUploading}>
                   <label className="cursor-pointer">
                     <Upload className="h-4 w-4" />
-                    {galleryUploading ? "Uploading..." : "Upload Media"}
+                    {galleryUploading ? tr("a.070e328ec8") : tr("a.7718b73ae9")}
                     <input
                       type="file"
                       accept="image/*,video/*"
@@ -725,7 +726,7 @@ const Memorial = () => {
                       {media.media_type === 'photo' || media.media_type === 'image' ? (
                         <img
                           src={media.media_url}
-                          alt={media.caption || "Gallery image"}
+                          alt={media.caption || tr("a.10c2eb504b")}
                           className="w-full h-64 object-cover"
                         />
                       ) : (
@@ -749,13 +750,13 @@ const Memorial = () => {
                 <CardContent>
                   <ImageIcon className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
                   <p className="text-muted-foreground mb-4">
-                    No photos or videos yet.
+                    {tr("a.203df629d0")}
                   </p>
                   {isCreator && (
                     <Button className="gap-2" asChild>
                       <label className="cursor-pointer">
                         <Upload className="h-4 w-4" />
-                        Upload Your First Photo
+                        {tr("a.17f6ffecb3")}
                         <input
                           type="file"
                           accept="image/*,video/*"

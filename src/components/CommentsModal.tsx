@@ -10,6 +10,7 @@ import { Loader2, Send } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { User } from "@supabase/supabase-js";
 
+import { tr } from "@/i18n/tr";
 interface Comment {
   id: string;
   post_id: string;
@@ -73,8 +74,8 @@ export const CommentsModal = ({ open, onOpenChange, postId, user }: CommentsModa
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to load comments",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.f9ed41b0fb"),
         variant: "destructive",
       });
     } else {
@@ -101,8 +102,8 @@ export const CommentsModal = ({ open, onOpenChange, postId, user }: CommentsModa
   const handleSubmitComment = async () => {
     if (!user) {
       toast({
-        title: "Authentication Required",
-        description: "Please sign in to comment",
+        title: tr("a.fbbe499440"),
+        description: tr("a.1f8c2cd629"),
         variant: "destructive",
       });
       return;
@@ -110,8 +111,8 @@ export const CommentsModal = ({ open, onOpenChange, postId, user }: CommentsModa
 
     if (!newComment.trim()) {
       toast({
-        title: "Empty Comment",
-        description: "Please write something",
+        title: tr("a.02b254f09e"),
+        description: tr("a.ace082b3a7"),
         variant: "destructive",
       });
       return;
@@ -129,16 +130,16 @@ export const CommentsModal = ({ open, onOpenChange, postId, user }: CommentsModa
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to post comment",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.9008b63183"),
         variant: "destructive",
       });
     } else {
       setNewComment("");
       await fetchComments(false);
       toast({
-        title: "Comment Posted",
-        description: "Your comment has been shared",
+        title: tr("a.2bf7635c36"),
+        description: tr("a.4289e7d501"),
       });
     }
 
@@ -156,7 +157,7 @@ export const CommentsModal = ({ open, onOpenChange, postId, user }: CommentsModa
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col backdrop-blur-lg bg-background/95 animate-fade-in">
         <DialogHeader>
-          <DialogTitle>Comments</DialogTitle>
+          <DialogTitle>{tr("a.fce06e20e5")}</DialogTitle>
         </DialogHeader>
 
         <ScrollArea className="flex-1 pr-4">
@@ -166,7 +167,7 @@ export const CommentsModal = ({ open, onOpenChange, postId, user }: CommentsModa
             </div>
           ) : comments.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No comments yet. Be the first to comment!
+              {tr("a.ba5c0dff08")}
             </div>
           ) : (
             <div className="space-y-4">
@@ -184,7 +185,7 @@ export const CommentsModal = ({ open, onOpenChange, postId, user }: CommentsModa
                   <div className="flex-1">
                     <div className="bg-muted/50 rounded-lg p-3">
                       <p className="font-semibold text-sm">
-                        {comment.profiles?.full_name || "Anonymous"}
+                        {comment.profiles?.full_name || tr("a.9bed510400")}
                       </p>
                       <p className="text-foreground mt-1">{comment.content}</p>
                     </div>
@@ -202,7 +203,7 @@ export const CommentsModal = ({ open, onOpenChange, postId, user }: CommentsModa
           <div className="border-t pt-4">
             <div className="flex gap-2">
               <Textarea
-                placeholder="Write a comment..."
+                placeholder={tr("a.7b01f9dc74")}
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 className="min-h-[80px] resize-none"

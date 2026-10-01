@@ -31,6 +31,7 @@ import { useToast } from "@/hooks/use-toast";
 import { countries } from "@/data/countries";
 import { HelpCircle, Send, Loader2 } from "lucide-react";
 
+import { tr } from "@/i18n/tr";
 const contactFormSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name must be less than 100 characters"),
   email: z.string().trim().email("Please enter a valid email").max(255, "Email must be less than 255 characters"),
@@ -45,14 +46,14 @@ const faqData = [
     category: "Getting Started",
     questions: [
       {
-        question: "What is Reflectlife?",
+        question: tr("a.2b4eb3dc4d"),
         answer:
-          "Reflectlife is a space to celebrate, honor, and remember loved ones who have passed away. You can create memorials, upload photos, and write tributes.",
+          tr("a.8579ccc197"),
       },
       {
-        question: "How do I create a memorial?",
+        question: tr("a.210850b6df"),
         answer:
-          'Go to "Memorial Wall" and click "Create a Memorial." Upload images, add tributes, and save your memorial.',
+          tr("a.1ce19b1354"),
       },
     ],
   },
@@ -60,12 +61,12 @@ const faqData = [
     category: "Managing Your Memorials",
     questions: [
       {
-        question: "Can I edit or delete a memorial?",
-        answer: "Yes, from your dashboard, you can edit or remove your memorials.",
+        question: tr("a.ba0ebeb85a"),
+        answer: tr("a.461f09ac9d"),
       },
       {
-        question: "Can I make a memorial private?",
-        answer: "Toggle the visibility setting in the memorial's edit section.",
+        question: tr("a.7338a7540d"),
+        answer: tr("a.ff649e4433"),
       },
     ],
   },
@@ -73,13 +74,13 @@ const faqData = [
     category: "Templates & Customization",
     questions: [
       {
-        question: "What are templates?",
-        answer: "Templates personalize the look of your memorial.",
+        question: tr("a.3a994773b4"),
+        answer: tr("a.ad0fbb5d74"),
       },
       {
-        question: "How can I get new templates?",
+        question: tr("a.48cca9aac7"),
         answer:
-          "Visit the Templates page — some are free, others are paid via Stripe.",
+          tr("a.a4bf4620c0"),
       },
     ],
   },
@@ -87,12 +88,12 @@ const faqData = [
     category: "Family & Friendship Trees",
     questions: [
       {
-        question: "What is a Family Tree?",
-        answer: "A visual connection of loved ones — parents, siblings, and relatives.",
+        question: tr("a.7ec817b774"),
+        answer: tr("a.47f8d86d6c"),
       },
       {
-        question: "What is a Friendship Tree?",
-        answer: "A web of mentors, friends, and life connections.",
+        question: tr("a.196f835ca0"),
+        answer: tr("a.863378486a"),
       },
     ],
   },
@@ -100,13 +101,13 @@ const faqData = [
     category: "Payments & Earnings",
     questions: [
       {
-        question: "How do I buy templates?",
-        answer: 'Click "Buy Template" and pay securely via card.',
+        question: tr("a.43ff8cbfc4"),
+        answer: tr("a.618ea1abea"),
       },
       {
-        question: "How do creators get paid?",
+        question: tr("a.9d938da604"),
         answer:
-          "Creators earn automatically when users purchase their templates.",
+          tr("a.9e53b3de5e"),
       },
     ],
   },
@@ -114,12 +115,12 @@ const faqData = [
     category: "Account & Profile",
     questions: [
       {
-        question: "How do I edit my profile?",
-        answer: "Go to your dashboard → Edit Profile.",
+        question: tr("a.b60d6428c2"),
+        answer: tr("a.f138de98c9"),
       },
       {
-        question: "How do I delete my account?",
-        answer: "Contact support to request deletion.",
+        question: tr("a.33e3b64a78"),
+        answer: tr("a.1ef4703c54"),
       },
     ],
   },
@@ -154,14 +155,14 @@ const HelpCentre = () => {
       if (functionError) throw functionError;
 
       toast({
-        title: "Message Received",
-        description: "Your message has been received. We'll reach out to you shortly 💌",
+        title: tr("a.377aaac441"),
+        description: tr("a.3aaeb89ffb"),
       });
       form.reset();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to send message. Please try again.",
+        title: tr("a.7f2f6a15cf"),
+        description: error.message || tr("a.5b7c984e1e"),
         variant: "destructive",
       });
     } finally {
@@ -177,18 +178,18 @@ const HelpCentre = () => {
           <div className="flex items-center justify-center gap-3 mb-4">
             <HelpCircle className="h-12 w-12 text-primary" />
             <h1 className="text-4xl md:text-5xl font-serif text-foreground">
-              Help Centre
+              {tr("a.869a36ef46")}
             </h1>
           </div>
           <p className="text-lg text-muted-foreground">
-            Find answers to common questions or reach out to our support team
+            {tr("a.bd4e3367c3")}
           </p>
         </div>
 
         {/* FAQ Section */}
         <div className="mb-16 animate-fade-up">
           <h2 className="text-2xl font-serif text-foreground mb-6 text-center">
-            Frequently Asked Questions
+            {tr("a.d790b402d7")}
           </h2>
           <div className="bg-background/80 backdrop-blur-sm rounded-lg shadow-elegant p-6 border border-border">
             <Accordion type="single" collapsible className="w-full space-y-2">
@@ -228,10 +229,10 @@ const HelpCentre = () => {
         <div className="animate-fade-up" style={{ animationDelay: "0.2s" }}>
           <div className="text-center mb-8">
             <h2 className="text-3xl font-serif text-foreground mb-3">
-              Still need help? We're here for you.
+              {tr("a.b0041bb366")}
             </h2>
             <p className="text-muted-foreground">
-              Send us a message and we'll get back to you as soon as possible
+              {tr("a.9828c268fa")}
             </p>
           </div>
 
@@ -243,9 +244,9 @@ const HelpCentre = () => {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>{tr("a.709a23220f")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your full name" {...field} />
+                        <Input placeholder={tr("a.d9047642f7")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -257,11 +258,11 @@ const HelpCentre = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{tr("a.84add5b295")}</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="your.email@example.com"
+                          placeholder={tr("a.9b5ca72bb2")}
                           {...field}
                         />
                       </FormControl>
@@ -275,14 +276,14 @@ const HelpCentre = () => {
                   name="country"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Country</FormLabel>
+                      <FormLabel>{tr("a.d523ebbd10")}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select your country" />
+                            <SelectValue placeholder={tr("a.5536b471cb")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-background max-h-[300px]">
@@ -303,10 +304,10 @@ const HelpCentre = () => {
                   name="message"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Message</FormLabel>
+                      <FormLabel>{tr("a.68f4145fee")}</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="How can we help you today?"
+                          placeholder={tr("a.0c77d59ab1")}
                           className="min-h-[150px] resize-none"
                           {...field}
                         />
@@ -324,12 +325,12 @@ const HelpCentre = () => {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending...
+                      {tr("a.c338c191ab")}
                     </>
                   ) : (
                     <>
                       <Send className="mr-2 h-4 w-4" />
-                      Send Message
+                      {tr("a.6dcd151222")}
                     </>
                   )}
                 </Button>

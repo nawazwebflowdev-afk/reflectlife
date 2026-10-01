@@ -19,6 +19,7 @@ import {
   type Remembrance,
 } from "@/lib/remembrance";
 
+import { tr } from "@/i18n/tr";
 const SELECT = "*, remembrance_subjects(*), remembrance_recipients(*)";
 
 export default function RemembrancePage() {
@@ -129,7 +130,7 @@ export default function RemembrancePage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Helmet>
-        <title>Reminders & Calendar | Reflectlife</title>
+        <title>{tr("a.ab81f5de8f")}</title>
         <meta
           name="description"
           content="Create reminders by the hour, day, week, month or year and see everything that matters in one calm calendar."
@@ -139,11 +140,11 @@ export default function RemembrancePage() {
       <main className="flex-1 container mx-auto px-4 py-8">
         <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="font-serif text-3xl md:text-4xl text-foreground">Reminders</h1>
+            <h1 className="font-serif text-3xl md:text-4xl text-foreground">{tr("a.ae8c393938")}</h1>
             <p className="text-muted-foreground mt-2 max-w-xl">
               {nextUp
                 ? `Next up: ${nextUp.remembrance.title || "your reminder"} — ${format(nextUp.date, "EEEE d MMM, HH:mm")}`
-                : "Everything that matters, from the next hour to many years from now."}
+                : tr("a.374c641e91")}
             </p>
           </div>
           <Button
@@ -151,7 +152,7 @@ export default function RemembrancePage() {
             className="rounded-full h-12 px-6"
             style={{ backgroundColor: "#4A324A", color: "#fff" }}
           >
-            <Plus className="h-4 w-4 mr-2" /> New reminder
+            <Plus className="h-4 w-4 mr-2" /> {tr("a.43fbcfbb61")}
           </Button>
         </header>
 
@@ -162,9 +163,9 @@ export default function RemembrancePage() {
         ) : (
           <Tabs defaultValue="today" className="space-y-6">
             <TabsList className="w-full sm:w-auto">
-              <TabsTrigger value="today" className="flex-1 sm:flex-none">Today</TabsTrigger>
-              <TabsTrigger value="calendar" className="flex-1 sm:flex-none">Calendar</TabsTrigger>
-              <TabsTrigger value="agenda" className="flex-1 sm:flex-none">Agenda</TabsTrigger>
+              <TabsTrigger value="today" className="flex-1 sm:flex-none">{tr("a.24345a1437")}</TabsTrigger>
+              <TabsTrigger value="calendar" className="flex-1 sm:flex-none">{tr("a.adab5090ac")}</TabsTrigger>
+              <TabsTrigger value="agenda" className="flex-1 sm:flex-none">{tr("a.891e9d6d47")}</TabsTrigger>
             </TabsList>
 
             {/* TODAY */}
@@ -173,7 +174,7 @@ export default function RemembrancePage() {
                 <Card className="border-destructive/40">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg font-serif flex items-center gap-2">
-                      <AlertCircle className="h-5 w-5 text-destructive" /> Missed
+                      <AlertCircle className="h-5 w-5 text-destructive" /> {tr("a.b564001a58")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -187,12 +188,12 @@ export default function RemembrancePage() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-serif flex items-center gap-2">
-                    <Sun className="h-5 w-5 text-[#4A324A]" /> Today
+                    <Sun className="h-5 w-5 text-[#4A324A]" /> {tr("a.24345a1437")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {todays.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">Nothing scheduled for today.</p>
+                    <p className="text-sm text-muted-foreground">{tr("a.9640ac4bab")}</p>
                   ) : (
                     todays.map((o, i) => (
                       <ReminderRow
@@ -209,11 +210,11 @@ export default function RemembrancePage() {
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-serif">Coming up</CardTitle>
+                  <CardTitle className="text-lg font-serif">{tr("a.f582e20e72")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {upcoming.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No upcoming reminders yet.</p>
+                    <p className="text-sm text-muted-foreground">{tr("a.95ae3efb9a")}</p>
                   ) : (
                     upcoming.map((o, i) => (
                       <ReminderRow key={`u-${o.remembrance.id}-${i}`} remembrance={o.remembrance} date={o.date} onOpen={openDetail} />
@@ -228,15 +229,15 @@ export default function RemembrancePage() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <Tabs value={view} onValueChange={(v) => setView(v as typeof view)}>
                   <TabsList>
-                    <TabsTrigger value="month">Month</TabsTrigger>
-                    <TabsTrigger value="week">Week</TabsTrigger>
-                    <TabsTrigger value="day">Day</TabsTrigger>
+                    <TabsTrigger value="month">{tr("a.082bc378cd")}</TabsTrigger>
+                    <TabsTrigger value="week">{tr("a.f82be68a7f")}</TabsTrigger>
+                    <TabsTrigger value="day">{tr("a.987b9ced08")}</TabsTrigger>
                   </TabsList>
                 </Tabs>
 
                 {view !== "month" && (
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" aria-label="Previous" onClick={() => stepAnchor(-1)}>
+                    <Button variant="outline" size="icon" aria-label={tr("a.50f94286ba")} onClick={() => stepAnchor(-1)}>
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <span className="text-sm font-medium min-w-[11rem] text-center">
@@ -247,11 +248,11 @@ export default function RemembrancePage() {
                           )}`
                         : format(anchor, "EEEE d MMMM yyyy")}
                     </span>
-                    <Button variant="outline" size="icon" aria-label="Next" onClick={() => stepAnchor(1)}>
+                    <Button variant="outline" size="icon" aria-label={tr("a.bc981983e7")} onClick={() => stepAnchor(1)}>
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => setAnchor(new Date())}>
-                      Today
+                      {tr("a.24345a1437")}
                     </Button>
                   </div>
                 )}
@@ -279,12 +280,12 @@ export default function RemembrancePage() {
                   <Card>
                     <CardHeader className="pb-3">
                       <CardTitle className="text-lg font-serif">
-                        {selected ? format(selected, "d MMMM yyyy") : "Pick a day"}
+                        {selected ? format(selected, "d MMMM yyyy") : tr("a.385a2e2b1f")}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       {selectedDay.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">Nothing on this day.</p>
+                        <p className="text-sm text-muted-foreground">{tr("a.188cac0fdd")}</p>
                       ) : (
                         selectedDay.map((o, i) => (
                           <ReminderRow
@@ -310,11 +311,11 @@ export default function RemembrancePage() {
             <TabsContent value="agenda">
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-serif">Next 60 days</CardTitle>
+                  <CardTitle className="text-lg font-serif">{tr("a.c50737acec")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {agenda.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">Nothing scheduled yet.</p>
+                    <p className="text-sm text-muted-foreground">{tr("a.103468f61a")}</p>
                   ) : (
                     agenda.map((o, i) => (
                       <ReminderRow key={`a-${o.remembrance.id}-${i}`} remembrance={o.remembrance} date={o.date} onOpen={openDetail} />

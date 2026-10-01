@@ -12,6 +12,7 @@ import type { CandlePlanKey } from './candlePlans';
 import { CANDLE_PLAN_META } from './candlePlans';
 import { PRAYERS } from './prayers';
 
+import { tr } from "@/i18n/tr";
 type DedicationMode = 'none' | 'preset' | 'custom';
 
 
@@ -85,12 +86,12 @@ export function CandlePlanPicker({ mode, initialPlan = 'free', defaultName = '',
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">
-              Your name (optional)
+              {tr("a.32861acdae")}
             </label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value.slice(0, 80))}
-              placeholder="A friend"
+              placeholder={tr("a.9911366443")}
               disabled={anonymous}
             />
           </div>
@@ -101,13 +102,13 @@ export function CandlePlanPicker({ mode, initialPlan = 'free', defaultName = '',
               onCheckedChange={(v) => setAnonymous(Boolean(v))}
             />
             <label htmlFor="candle-anon" className="text-sm text-foreground cursor-pointer">
-              Contribute anonymously
+              {tr("a.c83af02514")}
             </label>
           </div>
         </div>
         <div className="space-y-3">
           <label className="text-xs font-medium text-muted-foreground block">
-            Dedication (optional)
+            {tr("a.81eea7a0c0")}
           </label>
           <RadioGroup
             value={dedicationMode}
@@ -124,7 +125,7 @@ export function CandlePlanPicker({ mode, initialPlan = 'free', defaultName = '',
               >
                 <RadioGroupItem value={m} />
                 <span className="capitalize">
-                  {m === 'none' ? 'No dedication' : m === 'preset' ? 'Prayer or poem' : 'Custom message'}
+                  {m === 'none' ? tr("a.f3924631be") : m === 'preset' ? tr("a.8d5eb795a3") : tr("a.422377913c")}
                 </span>
               </label>
             ))}
@@ -134,7 +135,7 @@ export function CandlePlanPicker({ mode, initialPlan = 'free', defaultName = '',
             <div className="space-y-2">
               <Select value={String(presetId)} onValueChange={(v) => setPresetId(Number(v))}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Choose a prayer or poem" />
+                  <SelectValue placeholder={tr("a.c3deb64190")} />
                 </SelectTrigger>
                 <SelectContent>
                   {PRAYERS.map((p) => (
@@ -155,7 +156,7 @@ export function CandlePlanPicker({ mode, initialPlan = 'free', defaultName = '',
               <Textarea
                 value={customMessage}
                 onChange={(e) => setCustomMessage(e.target.value.slice(0, 100))}
-                placeholder="Forever in our hearts…"
+                placeholder={tr("a.3497cb5895")}
                 rows={2}
               />
               <div className="text-xs text-muted-foreground text-right mt-1">
@@ -188,11 +189,11 @@ export function CandlePlanPicker({ mode, initialPlan = 'free', defaultName = '',
         ) : (
           <Sparkles className="w-4 h-4 mr-2" style={{ color: '#FFE9A8' }} />
         )}
-        {mode === 'light' ? 'Light a Candle' : 'Extend the Candle'}
+        {mode === 'light' ? tr("a.8cce2bbe38") : tr("a.dd7fcf2622")}
         {plan !== 'free' && ` — ${CANDLE_PLAN_META[plan].price}`}
       </Button>
       <p className="text-xs text-center text-muted-foreground">
-        Secure payments powered by Stripe. Free lightings burn for 24 hours.
+        {tr("a.7b1fb24fd4")}
       </p>
     </div>
   );

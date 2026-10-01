@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+import { tr } from "@/i18n/tr";
 const COOLDOWN_SECONDS = 60;
 
 const Verify = () => {
@@ -43,8 +44,8 @@ const Verify = () => {
 
       if (!email) {
         toast({
-          title: "No email found",
-          description: "Please sign up again to receive a verification email.",
+          title: tr("a.0b3c656b48"),
+          description: tr("a.d87ea66ba7"),
           variant: "destructive",
         });
         navigate("/signup");
@@ -65,8 +66,8 @@ const Verify = () => {
 
       setCooldown(COOLDOWN_SECONDS);
       toast({
-        title: "Verification email sent! 📧",
-        description: "Please check your inbox and spam folder.",
+        title: tr("a.12206dfa58"),
+        description: tr("a.06a091532a"),
       });
     } catch (error: any) {
       console.error("Resend error:", error);
@@ -74,10 +75,10 @@ const Verify = () => {
       const isRateLimited = raw.toLowerCase().includes("rate limit") || raw.toLowerCase().includes("over_email_send_rate_limit") || raw.includes("429");
 
       toast({
-        title: isRateLimited ? "Email rate limit exceeded" : "Failed to resend",
+        title: isRateLimited ? tr("a.4d323287dd") : tr("a.49af7cee36"),
         description: isRateLimited
-          ? "Please wait a few minutes, then try resending again."
-          : (raw || "Something went wrong. Please try again later."),
+          ? tr("a.e3f26839ea")
+          : (raw || tr("a.73c841bf1e")),
         variant: "destructive",
       });
     } finally {
@@ -121,8 +122,8 @@ const Verify = () => {
           setIsVerifying(false);
 
           toast({
-            title: "Email verified! 🎉",
-            description: "Your email has been successfully verified. Redirecting to your dashboard...",
+            title: tr("a.eb82c6fff1"),
+            description: tr("a.32d2e777fc"),
           });
 
           setTimeout(() => {
@@ -131,8 +132,8 @@ const Verify = () => {
         } catch (error: any) {
           console.error('Profile creation error:', error);
           toast({
-            title: "Verification error",
-            description: error.message || "Something went wrong. Please try again.",
+            title: tr("a.1b5f28b082"),
+            description: error.message || tr("a.9a3ea0598e"),
             variant: "destructive",
           });
           setIsVerifying(false);
@@ -163,21 +164,21 @@ const Verify = () => {
               )}
             </div>
             <CardTitle className="font-serif text-2xl text-card-foreground">
-              {isVerifying ? "Setting things up..." : "Check your inbox"}
+              {isVerifying ? tr("a.9a3bbc6fb2") : tr("a.48faa67c34")}
             </CardTitle>
             <CardDescription>
               {isVerifying
-                ? "Please wait a moment"
+                ? tr("a.19a08bfe73")
                 : emailFromState
                   ? `We sent a verification link to ${emailFromState}`
-                  : "Click the verification link we sent to confirm your email"}
+                  : tr("a.472b2673b2")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-center">
             <p className="text-sm text-muted-foreground">
               {isVerifying
-                ? "This should only take a moment"
-                : "Didn't receive the email? Check your spam folder or resend it below."}
+                ? tr("a.d08dbf91a0")
+                : tr("a.d6e14a84c8")}
             </p>
 
             {!isVerifying && (
@@ -191,29 +192,29 @@ const Verify = () => {
                   {isResending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending...
+                      {tr("a.c338c191ab")}
                     </>
                   ) : cooldown > 0 ? (
                     <>
                       <RefreshCw className="mr-2 h-4 w-4" />
-                      Resend in {cooldown}s
+                      {tr("a.bd4bd134cc")} {cooldown}s
                     </>
                   ) : (
                     <>
                       <Mail className="mr-2 h-4 w-4" />
-                      Resend verification email
+                      {tr("a.0ca4ac3dd6")}
                     </>
                   )}
                 </Button>
 
                 <div className="text-sm text-muted-foreground">
-                  Already verified?{" "}
+                  {tr("a.25a8c46367")}{" "}
                   <button
                     type="button"
                     onClick={() => navigate("/login")}
                     className="text-primary underline underline-offset-4 hover:text-primary/80"
                   >
-                    Sign in
+                    {tr("a.ada2e9e96f")}
                   </button>
                 </div>
               </>

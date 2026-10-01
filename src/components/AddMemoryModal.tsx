@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { CalendarIcon, Upload } from "lucide-react";
 import { cn } from "@/utils";
 
+import { tr } from "@/i18n/tr";
 interface AddMemoryModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -40,8 +41,8 @@ export const AddMemoryModal = ({ open, onOpenChange, timelineId, userId, onMemor
     
     if (!caption.trim()) {
       toast({
-        title: "Error",
-        description: "Please add a caption",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.0640bb29c4"),
         variant: "destructive",
       });
       return;
@@ -49,8 +50,8 @@ export const AddMemoryModal = ({ open, onOpenChange, timelineId, userId, onMemor
 
     if (contentType !== "note" && !file) {
       toast({
-        title: "Error",
-        description: "Please upload a file",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.c2af4aca4b"),
         variant: "destructive",
       });
       return;
@@ -93,8 +94,8 @@ export const AddMemoryModal = ({ open, onOpenChange, timelineId, userId, onMemor
       if (error) throw error;
 
       toast({
-        title: "Memory added",
-        description: "Your memory has been added to the timeline",
+        title: tr("a.33f56f452b"),
+        description: tr("a.1f77c49d37"),
       });
 
       setCaption("");
@@ -104,8 +105,8 @@ export const AddMemoryModal = ({ open, onOpenChange, timelineId, userId, onMemor
       onMemoryAdded();
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to add memory",
+        title: tr("a.7f2f6a15cf"),
+        description: error.message || tr("a.61588a90e2"),
         variant: "destructive",
       });
     } finally {
@@ -117,26 +118,26 @@ export const AddMemoryModal = ({ open, onOpenChange, timelineId, userId, onMemor
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl">Add a Memory</DialogTitle>
+          <DialogTitle className="font-serif text-2xl">{tr("a.37c98f8a06")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="type">Memory Type</Label>
+            <Label htmlFor="type">{tr("a.2ae8ed8ee5")}</Label>
             <Select value={contentType} onValueChange={(value: any) => setContentType(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="photo">Photo</SelectItem>
-                <SelectItem value="video">Video</SelectItem>
-                <SelectItem value="note">Written Note</SelectItem>
+                <SelectItem value="photo">{tr("a.d01d900383")}</SelectItem>
+                <SelectItem value="video">{tr("a.bc17c1f017")}</SelectItem>
+                <SelectItem value="note">{tr("a.0d09f8f226")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {contentType !== "note" && (
             <div className="space-y-2">
-              <Label htmlFor="file">Upload {contentType === "photo" ? "Photo" : "Video"} *</Label>
+              <Label htmlFor="file">{tr("a.8bdf057f91")} {contentType === "photo" ? tr("a.d01d900383") : tr("a.bc17c1f017")} *</Label>
               <div className="flex items-center gap-2">
                 <Input
                   id="file"
@@ -154,19 +155,19 @@ export const AddMemoryModal = ({ open, onOpenChange, timelineId, userId, onMemor
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="caption">Caption *</Label>
+            <Label htmlFor="caption">{tr("a.103f57c11d")}</Label>
             <Textarea
               id="caption"
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              placeholder="Share your memory..."
+              placeholder={tr("a.8720a3f74c")}
               rows={4}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Event Date</Label>
+            <Label>{tr("a.0cd41f14b1")}</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -177,7 +178,7 @@ export const AddMemoryModal = ({ open, onOpenChange, timelineId, userId, onMemor
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {eventDate ? format(eventDate, "PPP") : <span>Pick a date</span>}
+                  {eventDate ? format(eventDate, "PPP") : <span>{tr("a.629b7ca5d3")}</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -199,10 +200,10 @@ export const AddMemoryModal = ({ open, onOpenChange, timelineId, userId, onMemor
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              {tr("a.77dfd2135f")}
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Adding..." : "Add Memory"}
+              {isLoading ? tr("a.268c06a28a") : tr("a.22012e09a4")}
             </Button>
           </div>
         </form>

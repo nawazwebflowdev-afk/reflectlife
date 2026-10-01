@@ -10,6 +10,7 @@ import PhoneNumberField, { detectDefaultCountry, toE164 } from "@/components/Pho
 import type { CountryCode } from "libphonenumber-js";
 import { toast } from "sonner";
 
+import { tr } from "@/i18n/tr";
 export interface SelectedRecipient {
   user_id: string | null;
   invited_email: string | null;
@@ -95,10 +96,10 @@ export default function RecipientPicker({ value, onChange, currentUserId, curren
         display_name: match.full_name || "Reflectlife member",
         avatar_url: match.avatar_url,
       });
-      toast.success("Added from your connections");
+      toast.success(tr("a.d682a9eb2a"));
     } else {
       add({ user_id: null, invited_email: null, invited_phone: e164, display_name: e164 });
-      toast.info("We'll invite this number to the remembrance.");
+      toast.info(tr("a.045b9c266c"));
     }
     setPhone("");
   };
@@ -106,7 +107,7 @@ export default function RecipientPicker({ value, onChange, currentUserId, curren
   const addEmail = () => {
     const v = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
-      toast.error("Please enter a valid email address.");
+      toast.error(tr("a.d2306dd897"));
       return;
     }
     add({ user_id: null, invited_email: v, invited_phone: null, display_name: v });
@@ -127,7 +128,7 @@ export default function RecipientPicker({ value, onChange, currentUserId, curren
           }
         >
           <UserPlus className="h-4 w-4 mr-2" />
-          {meSelected ? "Me — added" : "Remind me"}
+          {meSelected ? tr("a.81503cd4c7") : tr("a.25df3f712a")}
         </Button>
       )}
 
@@ -136,17 +137,17 @@ export default function RecipientPicker({ value, onChange, currentUserId, curren
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search people you're connected with"
+          placeholder={tr("a.59c87f903d")}
           className="pl-9 h-12"
         />
       </div>
 
       {query.trim().length >= 2 && (
         <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
-          {loading && <p className="px-3 py-3 text-sm text-muted-foreground">Searching…</p>}
+          {loading && <p className="px-3 py-3 text-sm text-muted-foreground">{tr("a.1a6a5ba8c2")}</p>}
           {!loading && results.length === 0 && (
             <p className="px-3 py-3 text-sm text-muted-foreground">
-              No one found among your connections. You can invite them by email or phone below.
+              {tr("a.d339de3cd8")}
             </p>
           )}
           {results.map((c) => (
@@ -168,7 +169,7 @@ export default function RecipientPicker({ value, onChange, currentUserId, curren
                 <AvatarImage src={c.avatar_url ?? undefined} alt={c.full_name ?? ""} />
                 <AvatarFallback>{(c.full_name ?? "?").slice(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
-              <span className="text-sm">{c.full_name || "Reflectlife member"}</span>
+              <span className="text-sm">{c.full_name || tr("a.1197b9997a")}</span>
             </button>
           ))}
         </div>
@@ -176,7 +177,7 @@ export default function RecipientPicker({ value, onChange, currentUserId, curren
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="invite-email">Invite by email</Label>
+          <Label htmlFor="invite-email">{tr("a.e705c7bf70")}</Label>
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -185,19 +186,19 @@ export default function RecipientPicker({ value, onChange, currentUserId, curren
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
+                placeholder={tr("a.9703026304")}
                 className="pl-10"
               />
             </div>
             <Button type="button" variant="outline" onClick={addEmail}>
-              Add
+              {tr("a.61cc55aa04")}
             </Button>
           </div>
         </div>
         <div className="space-y-2">
           <PhoneNumberField
             id="invite-phone"
-            label="Find someone by phone number"
+            label={tr("a.8d76a94e31")}
             country={country}
             onCountryChange={setCountry}
             value={phone}
@@ -205,7 +206,7 @@ export default function RecipientPicker({ value, onChange, currentUserId, curren
             error={phoneError}
           />
           <Button type="button" variant="outline" className="w-full" onClick={addPhone}>
-            Add contact
+            {tr("a.6da0b4b802")}
           </Button>
         </div>
       </div>
@@ -227,8 +228,7 @@ export default function RecipientPicker({ value, onChange, currentUserId, curren
         </div>
       )}
       <p className="text-xs text-muted-foreground">
-        We only show people you are already connected with. A phone number that isn't in your connections never reveals
-        whether it belongs to a Reflectlife account.
+        {tr("a.09771716ea")}
       </p>
     </div>
   );

@@ -33,6 +33,7 @@ import {
 } from "@/lib/remembrance";
 import { format } from "date-fns";
 
+import { tr } from "@/i18n/tr";
 export default function RemembranceDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ export default function RemembranceDetail() {
       toast.error(error.message);
       return;
     }
-    toast.success(active ? "Reminders resumed" : "Reminders paused");
+    toast.success(active ? tr("a.08fa72e952") : tr("a.633cf66408"));
     load();
   };
 
@@ -91,7 +92,7 @@ export default function RemembranceDetail() {
       toast.error(error.message);
       return;
     }
-    toast.success("Remembrance removed");
+    toast.success(tr("a.5a0b5caa4c"));
     navigate("/remembrance");
   };
 
@@ -109,10 +110,10 @@ export default function RemembranceDetail() {
     return (
       <div className="min-h-screen flex flex-col bg-background">
           <main className="flex-1 container mx-auto px-4 py-16 text-center">
-          <h1 className="font-serif text-2xl mb-3">This remembrance isn't available</h1>
-          <p className="text-muted-foreground mb-6">It may have been removed, or you may not be part of it.</p>
+          <h1 className="font-serif text-2xl mb-3">{tr("a.9144e4cac8")}</h1>
+          <p className="text-muted-foreground mb-6">{tr("a.8c2bb1f13c")}</p>
           <Button onClick={() => navigate("/remembrance")} className="rounded-full">
-            Back to calendar
+            {tr("a.7c41e8333f")}
           </Button>
         </main>
       </div>
@@ -128,20 +129,20 @@ export default function RemembranceDetail() {
     <div className="min-h-screen flex flex-col bg-background">
       <main className="flex-1 container mx-auto px-4 py-8 max-w-3xl">
         <Button variant="ghost" className="mb-4 -ml-2" onClick={() => navigate("/remembrance")}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Remembrance Calendar
+          <ArrowLeft className="h-4 w-4 mr-2" /> {tr("a.a8425aefc4")}
         </Button>
 
         <Card>
           <CardHeader>
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <p className="text-sm text-muted-foreground">In memory of</p>
+                <p className="text-sm text-muted-foreground">{tr("a.8e19c09f6e")}</p>
                 <CardTitle className="font-serif text-3xl">{subjectNames(item)}</CardTitle>
               </div>
               {isCreator && (
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" className="rounded-full" onClick={() => setFormOpen(true)}>
-                    <Pencil className="h-4 w-4 mr-2" /> Edit
+                    <Pencil className="h-4 w-4 mr-2" /> {tr("a.5301648dcf")}
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -151,14 +152,14 @@ export default function RemembranceDetail() {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Remove this remembrance?</AlertDialogTitle>
+                        <AlertDialogTitle>{tr("a.9a908369ac")}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          The reminder and its responses will be removed for everyone. This cannot be undone.
+                          {tr("a.67539ae531")}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Keep it</AlertDialogCancel>
-                        <AlertDialogAction onClick={remove}>Remove</AlertDialogAction>
+                        <AlertDialogCancel>{tr("a.d9f3692497")}</AlertDialogCancel>
+                        <AlertDialogAction onClick={remove}>{tr("a.e963907dac")}</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
@@ -182,7 +183,7 @@ export default function RemembranceDetail() {
                       className="h-auto p-0 text-xs"
                       onClick={() => navigate(`/memorial/${s.memorial_id}`)}
                     >
-                      Visit memorial
+                      {tr("a.8a0bf60aea")}
                     </Button>
                   )}
                 </div>
@@ -191,23 +192,23 @@ export default function RemembranceDetail() {
 
             <div className="grid gap-4 sm:grid-cols-2 text-sm">
               <div>
-                <p className="text-muted-foreground">Reminder sent to</p>
+                <p className="text-muted-foreground">{tr("a.8606afd2e0")}</p>
                 <p className="font-medium">
                   {visibleRecipients.map((r) => r.display_name || r.invited_email || r.invited_phone).join(", ") || "—"}
                 </p>
               </div>
               <div>
-                <p className="text-muted-foreground">Date</p>
+                <p className="text-muted-foreground">{tr("a.eb9a4bc1c0")}</p>
                 <p className="font-medium">{format(new Date(item.event_date), "d MMMM yyyy")}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Time</p>
+                <p className="text-muted-foreground">{tr("a.6c82e6dd86")}</p>
                 <p className="font-medium">
                   {formatTime(item.time_local)} · {item.timezone}
                 </p>
               </div>
               <div>
-                <p className="text-muted-foreground">Repeat</p>
+                <p className="text-muted-foreground">{tr("a.659eba1219")}</p>
                 <p className="font-medium">{recurrenceLabel(item)}</p>
               </div>
             </div>
@@ -216,10 +217,10 @@ export default function RemembranceDetail() {
               <Badge variant="secondary">{EVENT_TYPE_LABELS[item.event_type]}</Badge>
               {next && (
                 <Badge variant="outline">
-                  {isToday ? "Today" : `Next: ${format(next, "d MMM yyyy")}`} · {formatTime(item.time_local)}
+                  {isToday ? tr("a.24345a1437") : `Next: ${format(next, "d MMM yyyy")}`} · {formatTime(item.time_local)}
                 </Badge>
               )}
-              {!item.is_active && <Badge variant="outline">Paused</Badge>}
+              {!item.is_active && <Badge variant="outline">{tr("a.c7dfb6f1d9")}</Badge>}
             </div>
 
             {item.message && (
@@ -234,15 +235,15 @@ export default function RemembranceDetail() {
                   .filter((r) => r.user_id !== userId)
                   .map((r) => r.display_name || "A loved one")
                   .join(", ")}{" "}
-                {visibleRecipients.length > 2 ? "are" : "is"} also remembering {subjectNames(item)}.
+                {visibleRecipients.length > 2 ? "are" : "is"} {tr("a.6ddabda251")} {subjectNames(item)}.
               </p>
             )}
 
             {isCreator && (
               <div className="flex items-center justify-between rounded-lg border border-border p-4">
                 <div>
-                  <p className="text-sm font-medium">Reminders active</p>
-                  <p className="text-xs text-muted-foreground">Pause without losing this remembrance.</p>
+                  <p className="text-sm font-medium">{tr("a.17d1c005d7")}</p>
+                  <p className="text-xs text-muted-foreground">{tr("a.b8b3de8421")}</p>
                 </div>
                 <Switch checked={item.is_active} onCheckedChange={togglePaused} />
               </div>
@@ -251,8 +252,8 @@ export default function RemembranceDetail() {
             {recipients.some((r) => r.user_id === userId) && (
               <div className="flex items-center justify-between rounded-lg border border-border p-4">
                 <div>
-                  <p className="text-sm font-medium">Show others that I'm remembering too</p>
-                  <p className="text-xs text-muted-foreground">You can stay private and still respond.</p>
+                  <p className="text-sm font-medium">{tr("a.9c959c94c1")}</p>
+                  <p className="text-xs text-muted-foreground">{tr("a.7571165c14")}</p>
                 </div>
                 <Switch
                   checked={recipients.find((r) => r.user_id === userId)?.share_presence ?? true}
@@ -269,7 +270,7 @@ export default function RemembranceDetail() {
             <Separator />
 
             <div>
-              <h2 className="font-serif text-xl mb-4">Remember together</h2>
+              <h2 className="font-serif text-xl mb-4">{tr("a.1c4e2140ba")}</h2>
               <RemembranceThread
                 remembranceId={item.id}
                 currentUserId={userId}

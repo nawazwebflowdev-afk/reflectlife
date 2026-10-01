@@ -1,5 +1,6 @@
 import { formatDistanceToNow } from 'date-fns';
 
+import { tr } from "@/i18n/tr";
 interface Contribution {
   id: string;
   contributor_name: string | null;
@@ -14,7 +15,7 @@ export function DedicationList({ items }: { items: Contribution[] }) {
   return (
     <div className="w-full max-w-2xl mx-auto space-y-3">
       <h3 className="text-sm uppercase tracking-wide text-muted-foreground text-center">
-        Recent dedications
+        {tr("a.2c524b4caa")}
       </h3>
       <ul className="space-y-2">
         {items.slice(0, 5).map((c) => {

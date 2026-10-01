@@ -11,6 +11,7 @@ import DiaryEntryModal from "@/components/DiaryEntryModal";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
+import { tr } from "@/i18n/tr";
 interface DiaryEntry {
   id: string;
   user_id: string;
@@ -90,7 +91,7 @@ const Diary = () => {
       setEntries(data || []);
     } catch (error: any) {
       toast({
-        title: "Error loading entries",
+        title: tr("a.b81bf4a70f"),
         description: error.message,
         variant: "destructive",
       });
@@ -137,12 +138,12 @@ const Diary = () => {
       fetchEntries();
       
       toast({
-        title: "Reaction added",
+        title: tr("a.605b58e5d0"),
         description: `${emoji} reaction added successfully`,
       });
     } catch (error: any) {
       toast({
-        title: "Error adding reaction",
+        title: tr("a.92d51eaf5c"),
         description: error.message,
         variant: "destructive",
       });
@@ -151,8 +152,8 @@ const Diary = () => {
 
   const exportToPDF = () => {
     toast({
-      title: "Export feature",
-      description: "PDF export will be available soon!",
+      title: tr("a.eeeab03354"),
+      description: tr("a.b1d786a252"),
     });
   };
 
@@ -174,9 +175,9 @@ const Diary = () => {
         <div className="mb-8 bg-background/80 backdrop-blur-sm rounded-lg p-6 shadow-lg">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="font-serif text-4xl font-bold mb-2">My Diary</h1>
+              <h1 className="font-serif text-4xl font-bold mb-2">{tr("a.1ac08d508d")}</h1>
               <p className="text-muted-foreground">
-                Write your thoughts, memories, and reflections
+                {tr("a.7807725bdb")}
               </p>
             </div>
             <div className="flex gap-2 flex-wrap">
@@ -186,19 +187,19 @@ const Diary = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="default">📖 Default</SelectItem>
-                  <SelectItem value="nature">🌿 Nature</SelectItem>
-                  <SelectItem value="stars">✨ Stars</SelectItem>
-                  <SelectItem value="candlelight">🕯️ Candlelight</SelectItem>
+                  <SelectItem value="default">{tr("a.1117d06099")}</SelectItem>
+                  <SelectItem value="nature">{tr("a.438d5df9c4")}</SelectItem>
+                  <SelectItem value="stars">{tr("a.d42830cec0")}</SelectItem>
+                  <SelectItem value="candlelight">{tr("a.0dfaa74989")}</SelectItem>
                 </SelectContent>
               </Select>
               <Button variant="outline" onClick={exportToPDF}>
                 <FileDown className="h-4 w-4 mr-2" />
-                Export PDF
+                {tr("a.3dd7d56a8e")}
               </Button>
               <Button onClick={() => { setSelectedEntry(null); setShowModal(true); }}>
                 <Plus className="h-4 w-4 mr-2" />
-                New Entry
+                {tr("a.1bae251dc4")}
               </Button>
             </div>
           </div>
@@ -208,7 +209,7 @@ const Diary = () => {
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search entries by title, content, or tags..."
+                placeholder={tr("a.597c8c0391")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -220,9 +221,9 @@ const Diary = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Entries</SelectItem>
-                <SelectItem value="private">Private Only</SelectItem>
-                <SelectItem value="public">Public Only</SelectItem>
+                <SelectItem value="all">{tr("a.827649d87b")}</SelectItem>
+                <SelectItem value="private">{tr("a.b3f41eaf51")}</SelectItem>
+                <SelectItem value="public">{tr("a.09c769d3e5")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -233,13 +234,13 @@ const Diary = () => {
           <Card className="bg-background/80 backdrop-blur-sm">
             <CardContent className="py-12 text-center">
               <div className="text-6xl mb-4">{THEME_EMOJIS[currentTheme]}</div>
-              <h3 className="text-xl font-semibold mb-2">No entries yet</h3>
+              <h3 className="text-xl font-semibold mb-2">{tr("a.a37fce0013")}</h3>
               <p className="text-muted-foreground mb-6">
-                Start writing your first diary entry
+                {tr("a.0c41676b02")}
               </p>
               <Button onClick={() => setShowModal(true)}>
                 <Plus className="h-4 w-4 mr-2" />
-                Write Your First Entry
+                {tr("a.372549c739")}
               </Button>
             </CardContent>
           </Card>
@@ -260,7 +261,7 @@ const Diary = () => {
                       </CardDescription>
                     </div>
                     <Badge variant={entry.is_private ? "secondary" : "default"}>
-                      {entry.is_private ? "🔒 Private" : "🌍 Public"}
+                      {entry.is_private ? tr("a.074aaba415") : tr("a.aea4514bb2")}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -274,7 +275,7 @@ const Diary = () => {
                     <div className="mb-4 rounded-md overflow-hidden">
                       <img
                         src={entry.media_url}
-                        alt="Entry media"
+                        alt={tr("a.924ffdb7a5")}
                         className="w-full h-32 object-cover"
                       />
                     </div>

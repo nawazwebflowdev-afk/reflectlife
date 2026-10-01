@@ -10,6 +10,7 @@ import { Flame } from 'lucide-react';
 import type { CandlePlanKey } from './candlePlans';
 import { GuestCandlePanel } from './GuestCandlePanel';
 
+import { tr } from "@/i18n/tr";
 const PAGE_SIZE = 100;
 
 interface Props { memorialId: string; memorialName: string; isOwner: boolean; guestEnabled: boolean; isDefender: boolean }
@@ -118,8 +119,8 @@ export function CandleSection({ memorialId, memorialName, isOwner, guestEnabled,
   const requireAuth = () => {
     if (userId) return true;
     toast({
-      title: 'Please sign in',
-      description: 'Sign in or create an account to light your own candle.',
+      title: tr("a.74d04a61dc"),
+      description: tr("a.67d66f2fa0"),
     });
     navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
     return false;
@@ -160,22 +161,22 @@ export function CandleSection({ memorialId, memorialName, isOwner, guestEnabled,
       if (input.plan === 'free') {
         const { data, error } = await supabase.functions.invoke('light-free-candle', { body: payload });
         if (error || (data as any)?.error) throw new Error((data as any)?.error || error?.message);
-        toast({ title: 'Your candle is lit', description: 'Thank you for this act of remembrance.' });
+        toast({ title: tr("a.575d98d961"), description: tr("a.9a2712a847") });
         setDialogOpen(false);
         await fetchCandles(0, true);
       } else {
         const { data, error } = await supabase.functions.invoke('create-candle-checkout', { body: payload });
         if ((data as any)?.free) {
-          toast({ title: 'Your candle is lit', description: 'This candle is free on Defender memorials.' });
+          toast({ title: tr("a.575d98d961"), description: tr("a.e8c6fdc06a") });
           setDialogOpen(false);
           await fetchCandles(0, true);
           return;
         }
-        if (error || !data?.url) throw new Error((data as any)?.error || error?.message || 'Checkout failed');
+        if (error || !data?.url) throw new Error((data as any)?.error || error?.message || tr("a.9d8a3b9b82"));
         window.location.href = data.url;
       }
     } catch (e: any) {
-      toast({ title: 'Something went wrong', description: e?.message ?? 'Please try again.', variant: 'destructive' });
+      toast({ title: tr("a.8d886c0ba6"), description: e?.message ?? tr("a.83a6fd7b78"), variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
@@ -191,13 +192,13 @@ export function CandleSection({ memorialId, memorialName, isOwner, guestEnabled,
     <section id="candles-of-remembrance" className="py-14 px-4 gradient-subtle border-y border-border">
       <div className="max-w-6xl mx-auto flex flex-col items-center gap-6">
         <div className="text-center space-y-2">
-          <h2 className="font-serif text-2xl sm:text-3xl text-foreground">Candles of Remembrance</h2>
+          <h2 className="font-serif text-2xl sm:text-3xl text-foreground">{tr("a.db96980fc1")}</h2>
           <p className="text-muted-foreground">
-            Family and friends have lit these candles in loving memory.
+            {tr("a.34faf715f2")}
           </p>
           <p className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
             <Flame className="w-4 h-4" style={{ color: '#F5A83C' }} />
-            {total} {total === 1 ? 'Candle' : 'Candles'} Currently Burning
+            {total} {total === 1 ? tr("a.8d8fd6765e") : tr("a.fad29404d2")} {tr("a.3833a86bc1")}
           </p>
         </div>
 
@@ -208,10 +209,10 @@ export function CandleSection({ memorialId, memorialName, isOwner, guestEnabled,
           onClick={() => openPicker(myCandle ? ((myCandle.plan as CandlePlanKey) ?? 'free') : 'free')}
         >
           <Flame className="w-4 h-4 mr-2" style={{ color: '#FFE9A8' }} />
-          {myCandle ? 'Extend Your Candle' : 'Light a Candle'}
+          {myCandle ? tr("a.645bd748de") : tr("a.8cce2bbe38")}
         </Button>
         <p className="text-sm text-muted-foreground">
-          {isDefender ? 'All candle durations are free on this Defender memorial.' : 'Keep a candle burning for a month or a year.'}
+          {isDefender ? tr("a.cab44b52d1") : tr("a.2fe592c0d6")}
         </p>
 
         {loading ? (
@@ -222,7 +223,7 @@ export function CandleSection({ memorialId, memorialName, isOwner, guestEnabled,
           </div>
         ) : candles.length === 0 ? (
           <p className="text-muted-foreground text-center">
-            No candles are burning yet — be the first to light one.
+            {tr("a.8a177a4446")}
           </p>
         ) : (
           <>
@@ -239,7 +240,7 @@ export function CandleSection({ memorialId, memorialName, isOwner, guestEnabled,
             </ul>
             {candles.length < total && (
               <Button variant="outline" className="rounded-full" onClick={loadMore}>
-                Show more candles
+                {tr("a.9288b9018d")}
               </Button>
             )}
           </>
@@ -251,7 +252,7 @@ export function CandleSection({ memorialId, memorialName, isOwner, guestEnabled,
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-serif text-xl">
-              {myCandle ? 'Keep your candle burning' : 'Light a candle'}
+              {myCandle ? tr("a.977f89e376") : tr("a.8ef2daf431")}
             </DialogTitle>
           </DialogHeader>
           <CandlePlanPicker

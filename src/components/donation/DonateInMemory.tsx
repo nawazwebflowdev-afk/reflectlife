@@ -28,6 +28,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/utils/cn";
 
+import { tr } from "@/i18n/tr";
 type FundraiserType = "personal" | "charity";
 
 type Campaign = {
@@ -213,7 +214,7 @@ export default function DonateInMemory({
       const url = (data as any)?.url;
       const err = error?.message || (data as any)?.error;
       if (err || !url) {
-        toast.error(err || "Could not start checkout");
+        toast.error(err || tr("a.253f3031a4"));
         return;
       }
       window.location.href = url;
@@ -224,16 +225,16 @@ export default function DonateInMemory({
 
   const handleCreate = async () => {
     if (!userId) {
-      toast.error("Please sign in");
+      toast.error(tr("a.74d04a61dc"));
       return;
     }
     const g = Number(goal);
     if (!beneficiary.trim()) {
-      toast.error("Please name the beneficiary");
+      toast.error(tr("a.fa9ef1d7f3"));
       return;
     }
     if (newType === "charity" && !charity.trim()) {
-      toast.error("Please name the certified charity");
+      toast.error(tr("a.156ef48f3a"));
       return;
     }
 
@@ -242,7 +243,7 @@ export default function DonateInMemory({
       return;
     }
     if (!orgAccepted) {
-      toast.error("Please accept the donation terms");
+      toast.error(tr("a.65c94689da"));
       return;
     }
     setCreating(true);
@@ -262,7 +263,7 @@ export default function DonateInMemory({
       toast.error(error.message);
       return;
     }
-    toast.success("Fundraiser created");
+    toast.success(tr("a.733d5346e6"));
     load();
   };
 
@@ -273,20 +274,20 @@ export default function DonateInMemory({
       <DialogTrigger asChild>
         <Button className="rounded-full">
           <HeartHandshake className="w-4 h-4 mr-2" />
-          Donate in Memory
+          {tr("a.fbf5d74c20")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto p-0 border-0 bg-transparent">
-        <DialogTitle className="sr-only">Donate in Memory of {memorialName}</DialogTitle>
+        <DialogTitle className="sr-only">{tr("a.e73dc4c39c")} {memorialName}</DialogTitle>
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full border border-slate-100 dark:border-slate-800 transition-all">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800">
             <div>
               <span className="text-xs font-semibold tracking-wider text-amber-600 dark:text-amber-400 uppercase">
-                Reflectlife Memorial Support
+                {tr("a.701c423bc4")}
               </span>
               <h2 className="text-xl font-serif text-slate-800 dark:text-slate-100 mt-1">
-                Donate in Memory of {memorialName}
+                {tr("a.e73dc4c39c")} {memorialName}
               </h2>
             </div>
             <button
@@ -307,16 +308,12 @@ export default function DonateInMemory({
               isOwner ? (
                 <div className="space-y-4">
                   <p className="text-sm text-slate-600 dark:text-slate-400">
-                    Start a fundraiser for this memorial. Donations go to the
-                    beneficiary you name; Reflectlife deducts a platform fee of
-                    3.1% + {SYMBOLS[goalCurrency]}0.30 per donation for personal
-                    fundraisers and 2.9% + {SYMBOLS[goalCurrency]}0.30 for
-                    certified charity fundraisers, plus payment processing.
+                    {tr("a.4dd48e2b68")} {SYMBOLS[goalCurrency]}{tr("a.4b3ce77f77")} {SYMBOLS[goalCurrency]}{tr("a.dffbe0cf96")}
                   </p>
                   <div className="grid gap-3">
                     <div>
                       <Label className="text-slate-700 dark:text-slate-300">
-                        Who receives the funds? *
+                        {tr("a.6f4731ab97")}
                       </Label>
                       <div className="mt-1 grid grid-cols-2 gap-3">
                         <button
@@ -329,7 +326,7 @@ export default function DonateInMemory({
                               : "border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:text-slate-400"
                           )}
                         >
-                          <User size={16} /> Personal fundraiser
+                          <User size={16} /> {tr("a.cd470f31fa")}
                         </button>
                         <button
                           type="button"
@@ -341,13 +338,13 @@ export default function DonateInMemory({
                               : "border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:text-slate-400"
                           )}
                         >
-                          <ShieldCheck size={16} /> Certified charity
+                          <ShieldCheck size={16} /> {tr("a.835485daf3")}
                         </button>
                       </div>
                       <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                         {newType === "charity"
-                          ? "Funds go to the certified non-profit you name. Fee: 2.9% + 0.30 per donation."
-                          : "Funds go to the family or individual managing this wall. Fee: 3.1% + 0.30 per donation."}
+                          ? tr("a.9dfc6b8119")
+                          : tr("a.e5975cc7a2")}
                       </p>
                     </div>
                     <div>
@@ -355,13 +352,13 @@ export default function DonateInMemory({
                         htmlFor="ben"
                         className="text-slate-700 dark:text-slate-300"
                       >
-                        Beneficiary *
+                        {tr("a.4d208b9da1")}
                       </Label>
                       <Input
                         id="ben"
                         value={beneficiary}
                         onChange={(e) => setBeneficiary(e.target.value)}
-                        placeholder="e.g. Family of Anna Müller"
+                        placeholder={tr("a.24979c9b95")}
                         className="mt-1"
                       />
                     </div>
@@ -371,13 +368,13 @@ export default function DonateInMemory({
                           htmlFor="char"
                           className="text-slate-700 dark:text-slate-300"
                         >
-                          Certified charity organization *
+                          {tr("a.6c1a8a4bd3")}
                         </Label>
                         <Input
                           id="char"
                           value={charity}
                           onChange={(e) => setCharity(e.target.value)}
-                          placeholder="e.g. German Cancer Aid"
+                          placeholder={tr("a.a27af674f9")}
                           className="mt-1"
                         />
                       </div>
@@ -388,11 +385,11 @@ export default function DonateInMemory({
                         htmlFor="goal"
                         className="text-slate-700 dark:text-slate-300"
                       >
-                        Goal amount *
+                        {tr("a.8b6a0fcfd1")}
                       </Label>
                       <div className="mt-1 flex gap-2">
                         <select
-                          aria-label="Campaign currency"
+                          aria-label={tr("a.0deecc4622")}
                           value={goalCurrency}
                           onChange={(e) =>
                             setGoalCurrency(e.target.value as CurrencyCode)
@@ -420,14 +417,14 @@ export default function DonateInMemory({
                         htmlFor="story"
                         className="text-slate-700 dark:text-slate-300"
                       >
-                        Story (optional)
+                        {tr("a.56abda2153")}
                       </Label>
                       <Textarea
                         id="story"
                         rows={4}
                         value={story}
                         onChange={(e) => setStory(e.target.value)}
-                        placeholder="Tell supporters what the donations will be used for…"
+                        placeholder={tr("a.95a6e40ad5")}
                         maxLength={2000}
                         className="mt-1"
                       />
@@ -440,14 +437,13 @@ export default function DonateInMemory({
                       className="mt-0.5"
                     />
                     <span>
-                      I agree to the{" "}
+                      {tr("a.fdd995f7c5")}{" "}
                       <Link
                         to="/terms#donations"
                         target="_blank"
                         className="text-amber-600 underline underline-offset-4"
                       >
-                        Reflectlife donation, campaign transparency and payout
-                        terms
+                        {tr("a.1db7342a87")}
                       </Link>
                       .
                     </span>
@@ -457,13 +453,13 @@ export default function DonateInMemory({
                     disabled={creating}
                     className="rounded-xl w-full bg-amber-600 hover:bg-amber-700 text-white"
                   >
-                    {creating ? "Creating…" : "Start fundraiser"}
+                    {creating ? tr("a.94d7d8ee47") : tr("a.6704216b4e")}
                   </Button>
                 </div>
               ) : (
                 <div className="text-center py-8 text-slate-500 dark:text-slate-400">
                   <HeartHandshake className="w-10 h-10 mx-auto mb-3 text-amber-600/60" />
-                  <p>No fundraiser has been set up for this memorial yet.</p>
+                  <p>{tr("a.0a2c6d7b16")}</p>
                 </div>
               )
             ) : (
@@ -475,13 +471,13 @@ export default function DonateInMemory({
                       {money(totals.raised, currency)}
                     </p>
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                      raised of {money(Number(campaign.target_goal_amount), currency)} goal
+                      {tr("a.26f5fa9e8e")} {money(Number(campaign.target_goal_amount), currency)} goal
                     </p>
                   </div>
                   <Progress value={pct} className="h-3" />
                   <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
                     <Users className="w-4 h-4" /> {totals.donors}{" "}
-                    {totals.donors === 1 ? "donor" : "donors"} · {pct}% funded
+                    {totals.donors === 1 ? "donor" : "donors"} · {pct}{tr("a.4db753f56c")}
                   </p>
                   {campaign.story && (
                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-4 leading-relaxed whitespace-pre-line">
@@ -495,7 +491,7 @@ export default function DonateInMemory({
                         onClick={() => setOpen(false)}
                         className="inline-flex items-center text-sm font-medium text-amber-600 hover:text-amber-700 underline underline-offset-4"
                       >
-                        Manage campaign & payouts →
+                        {tr("a.def62cefe1")}
                       </Link>
                     </div>
                   )}
@@ -503,8 +499,7 @@ export default function DonateInMemory({
 
                 {campaign.status !== "active" ? (
                   <div className="rounded-lg bg-slate-50 dark:bg-slate-950 p-4 text-sm text-slate-500 dark:text-slate-400 text-center">
-                    This fundraiser is currently {campaign.status} and is not
-                    accepting donations.
+                    {tr("a.817693da30")} {campaign.status} {tr("a.a54ff4566d")}
                   </div>
                 ) : (
                   <>
@@ -527,7 +522,7 @@ export default function DonateInMemory({
                     {/* Donor Type Selector */}
                     <div>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Donating as
+                        {tr("a.6f5706be02")}
                       </label>
                       <div className="grid grid-cols-2 gap-3">
                         <button
@@ -540,7 +535,7 @@ export default function DonateInMemory({
                               : "border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:text-slate-400"
                           )}
                         >
-                          <User size={16} /> Individual
+                          <User size={16} /> {tr("a.a7abed83ed")}
                         </button>
                         <button
                           type="button"
@@ -552,7 +547,7 @@ export default function DonateInMemory({
                               : "border-slate-200 text-slate-600 hover:border-slate-300 dark:border-slate-800 dark:text-slate-400"
                           )}
                         >
-                          <Building2 size={16} /> Company
+                          <Building2 size={16} /> {tr("a.7a1994999d")}
                         </button>
                       </div>
                     </div>
@@ -562,7 +557,7 @@ export default function DonateInMemory({
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                          Currency
+                          {tr("a.e070de2244")}
                         </label>
                         <div className="grid grid-cols-2 gap-2">
                           {CURRENCIES.map((c) => (
@@ -584,7 +579,7 @@ export default function DonateInMemory({
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                          Frequency
+                          {tr("a.89836a870e")}
                         </label>
                         <div className="grid grid-cols-2 gap-2">
                           <button
@@ -597,14 +592,14 @@ export default function DonateInMemory({
                                 : "border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400"
                             )}
                           >
-                            One-time
+                            {tr("a.e9292906f5")}
                           </button>
                           <button
                             type="button"
                             onClick={() => {
                               if (!userId) {
                                 toast.error(
-                                  "Please sign in to give monthly."
+                                  tr("a.48eb2d19a4")
                                 );
                                 return;
                               }
@@ -617,7 +612,7 @@ export default function DonateInMemory({
                                 : "border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400"
                             )}
                           >
-                            Monthly
+                            {tr("a.d31edb7b8a")}
                           </button>
                         </div>
                       </div>
@@ -626,7 +621,7 @@ export default function DonateInMemory({
                     {/* Preset Amounts */}
                     <div>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Select Donation Amount
+                        {tr("a.3702bc0d53")}
                       </label>
                       <div className="grid grid-cols-3 gap-2 mb-3">
                         {PRESETS[donationCurrency].map((val) => (
@@ -656,7 +651,7 @@ export default function DonateInMemory({
                         </span>
                         <input
                           type="number"
-                          placeholder="Custom Amount"
+                          placeholder={tr("a.fde9fe7d71")}
                           value={customAmount}
                           onChange={(e) => {
                             setCustomAmount(e.target.value);
@@ -675,15 +670,15 @@ export default function DonateInMemory({
                           className="text-slate-700 dark:text-slate-300"
                         >
                           {donorType === "company"
-                            ? "Company name"
-                            : "Your name"}
+                            ? tr("a.1e5f7dc45c")
+                            : tr("a.ab42293e29")}
                         </Label>
                         <Input
                           id="dn"
                           value={donorName}
                           onChange={(e) => setDonorName(e.target.value)}
                           disabled={isAnonymous}
-                          placeholder={isAnonymous ? "Anonymous" : ""}
+                          placeholder={isAnonymous ? tr("a.9bed510400") : ""}
                           className="mt-1"
                         />
                       </div>
@@ -693,7 +688,7 @@ export default function DonateInMemory({
                             htmlFor="de"
                             className="text-slate-700 dark:text-slate-300"
                           >
-                            Email (for your receipt) *
+                            {tr("a.86bf72420a")}
                           </Label>
                           <Input
                             id="de"
@@ -709,11 +704,11 @@ export default function DonateInMemory({
                     {/* Words of Support */}
                     <div>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Message of Condolence (Optional)
+                        {tr("a.70fb40031f")}
                       </label>
                       <textarea
                         rows={3}
-                        placeholder="Write a message of remembrance…"
+                        placeholder={tr("a.b6c05a2af6")}
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         maxLength={500}
@@ -730,7 +725,7 @@ export default function DonateInMemory({
                           onChange={(e) => setIsAnonymous(e.target.checked)}
                           className="rounded border-slate-300 text-amber-600 focus:ring-amber-500 h-4 w-4"
                         />
-                        Hide my name publicly on the memory wall feed
+                        {tr("a.538a69135c")}
                       </label>
                       <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
                         <input
@@ -739,7 +734,7 @@ export default function DonateInMemory({
                           onChange={(e) => setNotify(e.target.checked)}
                           className="rounded border-slate-300 text-amber-600 focus:ring-amber-500 h-4 w-4"
                         />
-                        Notify the organizer about my donation
+                        {tr("a.f480e7d0b6")}
                       </label>
                       <label className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer">
                         <Checkbox
@@ -748,15 +743,15 @@ export default function DonateInMemory({
                           className="mt-0.5"
                         />
                         <span>
-                          I agree to the{" "}
+                          {tr("a.fdd995f7c5")}{" "}
                           <Link
                             to="/terms#donations"
                             target="_blank"
                             className="text-amber-600 underline underline-offset-4"
                           >
-                            Reflectlife donation terms
+                            {tr("a.a4bb8a9b7b")}
                           </Link>
-                          , campaign transparency guidelines and payout terms.
+                          {tr("a.fb4fd8eb0c")}
                         </span>
                       </label>
                     </div>
@@ -764,14 +759,14 @@ export default function DonateInMemory({
                     {/* Fee & Transparent Breakdown */}
                     <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-800 space-y-2 text-xs text-slate-500 dark:text-slate-400">
                       <div className="flex justify-between">
-                        <span>Gross Donation:</span>
+                        <span>{tr("a.b30f9c95de")}</span>
                         <span className="font-medium text-slate-700 dark:text-slate-200">
                           {validAmount ? money(amount, donationCurrency) : "—"}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>
-                          Reflectlife Platform Fee (
+                          {tr("a.6c051098ab")}
                           {fundraiserType === "charity" ? "2.9%" : "3.1%"} + {symbol}0.30):
                         </span>
 
@@ -780,13 +775,13 @@ export default function DonateInMemory({
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Payment Processing:</span>
+                        <span>{tr("a.894c1379bb")}</span>
                         <span className="text-[11px]">
-                          standard Stripe fee, deducted at settlement
+                          {tr("a.6ec178f348")}
                         </span>
                       </div>
                       <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-800 font-semibold text-slate-800 dark:text-slate-100 text-sm">
-                        <span>Net Amount to {campaign.beneficiary_name}:</span>
+                        <span>{tr("a.7f353cf963")} {campaign.beneficiary_name}:</span>
                         <span className="text-emerald-600 dark:text-emerald-400">
                           {validAmount ? money(netAmount, donationCurrency) : "—"}
                         </span>
@@ -813,15 +808,14 @@ export default function DonateInMemory({
                       />
                       {validAmount
                         ? `Complete Donation of ${money(amount, donationCurrency)}${recurring ? " / month" : ""}`
-                        : "Complete Donation"}
+                        : tr("a.5baa68cbbd")}
                     </button>
 
                     {/* Terms Footer */}
                     <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 text-center">
                       <ShieldCheck size={14} className="text-emerald-500" />
                       <span>
-                        Encrypted payment. Subject to Reflectlife's Terms & Fee
-                        Structure.
+                        {tr("a.f3cb02e021")}
                       </span>
                     </div>
                   </>
@@ -833,7 +827,7 @@ export default function DonateInMemory({
                     <Separator />
                     <div>
                       <p className="text-sm font-medium text-slate-800 dark:text-slate-100 mb-3">
-                        Recent supporters
+                        {tr("a.321e65d378")}
                       </p>
                       <ul className="space-y-3">
                         {supporterList.map((s) => (

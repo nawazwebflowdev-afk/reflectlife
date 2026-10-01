@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Upload } from "lucide-react";
 
+import { tr } from "@/i18n/tr";
 interface CreateTimelineModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -34,8 +35,8 @@ export const CreateTimelineModal = ({ open, onOpenChange, userId }: CreateTimeli
     
     if (!title.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter a title for the timeline",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.41a7048657"),
         variant: "destructive",
       });
       return;
@@ -79,16 +80,16 @@ export const CreateTimelineModal = ({ open, onOpenChange, userId }: CreateTimeli
       if (error) throw error;
 
       toast({
-        title: "Timeline created",
-        description: "Your memorial timeline has been created successfully",
+        title: tr("a.ba06f5a63b"),
+        description: tr("a.25788ddb6b"),
       });
 
       onOpenChange(false);
       navigate(`/timeline/${data.id}`);
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create timeline",
+        title: tr("a.7f2f6a15cf"),
+        description: error.message || tr("a.3884a0fce5"),
         variant: "destructive",
       });
     } finally {
@@ -100,33 +101,33 @@ export const CreateTimelineModal = ({ open, onOpenChange, userId }: CreateTimeli
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl">Create Memorial Timeline</DialogTitle>
+          <DialogTitle className="font-serif text-2xl">{tr("a.999db21f14")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Loved One's Name *</Label>
+            <Label htmlFor="title">{tr("a.a78a6218a4")}</Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g., John Smith"
+              placeholder={tr("a.494d28ffd2")}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{tr("a.55f8ebc805")}</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Share a few words about your loved one..."
+              placeholder={tr("a.4fe5d94571")}
               rows={4}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="background">Background Image</Label>
+            <Label htmlFor="background">{tr("a.7955201bb4")}</Label>
             <div className="flex items-center gap-2">
               <Input
                 id="background"
@@ -149,10 +150,10 @@ export const CreateTimelineModal = ({ open, onOpenChange, userId }: CreateTimeli
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              {tr("a.77dfd2135f")}
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Creating..." : "Create Timeline"}
+              {isLoading ? tr("a.28ea7667d0") : tr("a.192f97bc1e")}
             </Button>
           </div>
         </form>

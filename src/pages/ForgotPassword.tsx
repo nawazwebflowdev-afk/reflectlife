@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+import { tr } from "@/i18n/tr";
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -20,8 +21,8 @@ const ForgotPassword = () => {
 
     if (!email) {
       toast({
-        title: "Error",
-        description: "Please enter your email address",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.103d83a104"),
         variant: "destructive",
       });
       return;
@@ -37,7 +38,7 @@ const ForgotPassword = () => {
 
     if (error) {
       toast({
-        title: "Error",
+        title: tr("a.7f2f6a15cf"),
         description: error.message,
         variant: "destructive",
       });
@@ -46,8 +47,8 @@ const ForgotPassword = () => {
 
     setEmailSent(true);
     toast({
-      title: "Success",
-      description: "We've sent you a secure link to reset your password. Please check your inbox.",
+      title: tr("a.42a8f651d7"),
+      description: tr("a.b1b6421b8f"),
     });
   };
 
@@ -61,15 +62,15 @@ const ForgotPassword = () => {
                 <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
               <div className="space-y-2">
-                <CardTitle className="font-serif text-2xl">Check Your Email</CardTitle>
+                <CardTitle className="font-serif text-2xl">{tr("a.e80f3c73ae")}</CardTitle>
                 <CardDescription className="text-base">
-                  We've sent you a secure link to reset your password. Please check your inbox and follow the instructions.
+                  {tr("a.4624d72265")}
                 </CardDescription>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="p-4 bg-muted rounded-lg text-sm text-muted-foreground">
-                <p>Didn't receive the email? Check your spam folder or try again in a few minutes.</p>
+                <p>{tr("a.9a88eb8dce")}</p>
               </div>
               <Button
                 variant="outline"
@@ -77,7 +78,7 @@ const ForgotPassword = () => {
                 onClick={() => navigate("/login")}
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Sign In
+                {tr("a.c65048d3ff")}
               </Button>
             </CardContent>
           </Card>
@@ -90,29 +91,29 @@ const ForgotPassword = () => {
     <div className="min-h-screen flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2 animate-fade-in">
-          <h1 className="font-serif text-4xl font-bold">Forgot Password</h1>
+          <h1 className="font-serif text-4xl font-bold">{tr("a.f99d98e85f")}</h1>
           <p className="text-muted-foreground">
-            Enter your email to receive a password reset link
+            {tr("a.64924bcd93")}
           </p>
         </div>
 
         <Card className="shadow-elegant-lg animate-fade-up">
           <CardHeader className="space-y-1">
-            <CardTitle className="font-serif text-2xl">Reset Password</CardTitle>
+            <CardTitle className="font-serif text-2xl">{tr("a.3fb75e3bfe")}</CardTitle>
             <CardDescription>
-              We'll send you a secure link to reset your password
+              {tr("a.05012b8635")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleResetRequest} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">{tr("a.09ba557fd1")}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder={tr("a.2894efbef0")}
                     className="pl-10"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -126,10 +127,10 @@ const ForgotPassword = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending reset link...
+                    {tr("a.9b9e933299")}
                   </>
                 ) : (
-                  "Send Reset Link"
+                  tr("a.987be45240")
                 )}
               </Button>
 
@@ -141,7 +142,7 @@ const ForgotPassword = () => {
                 disabled={isLoading}
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Sign In
+                {tr("a.c65048d3ff")}
               </Button>
             </form>
           </CardContent>

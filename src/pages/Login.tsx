@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
 
+import { tr } from "@/i18n/tr";
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
@@ -48,8 +49,8 @@ const Login = () => {
     
     if (!email || !password) {
       toast({
-        title: "Error",
-        description: "Please fill in all fields",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.503ab476b1"),
         variant: "destructive",
       });
       return;
@@ -67,13 +68,13 @@ const Login = () => {
         // Check if error is related to unverified email
         if (error.message.includes("Email not confirmed")) {
           toast({
-            title: "Email not verified",
-            description: "Please verify your email before logging in. Check your inbox for the confirmation link.",
+            title: tr("a.9eb1c966dc"),
+            description: tr("a.d6a2a3fbe0"),
             variant: "destructive",
           });
         } else {
           toast({
-            title: "Sign in failed",
+            title: tr("a.108b931431"),
             description: error.message,
             variant: "destructive",
           });
@@ -85,23 +86,23 @@ const Login = () => {
       if (data.user && !data.user.email_confirmed_at) {
         await supabase.auth.signOut();
         toast({
-          title: "Email not verified",
-          description: "Please verify your email before logging in. Check your inbox for the confirmation link.",
+          title: tr("a.9eb1c966dc"),
+          description: tr("a.d6a2a3fbe0"),
           variant: "destructive",
         });
         return;
       }
 
       toast({
-        title: "Welcome back! 🌸",
-        description: "You've successfully signed in.",
+        title: tr("a.45b62d8259"),
+        description: tr("a.2c2bd4232e"),
       });
       navigate(destination);
 
     } catch (error: any) {
       toast({
-        title: "Sign in failed",
-        description: error.message || "An unexpected error occurred",
+        title: tr("a.108b931431"),
+        description: error.message || tr("a.0e71559369"),
         variant: "destructive",
       });
     } finally {
@@ -113,29 +114,29 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center py-12 px-4 gradient-subtle">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2 animate-fade-in">
-          <h1 className="font-serif text-4xl font-bold text-foreground">Welcome Back</h1>
+          <h1 className="font-serif text-4xl font-bold text-foreground">{tr("a.1c9089485a")}</h1>
           <p className="text-muted-foreground">
-            Sign in to continue your journey of remembrance
+            {tr("a.2a42dcec64")}
           </p>
         </div>
 
         <Card className="shadow-elegant animate-fade-up border-border/50">
           <CardHeader className="space-y-1">
-            <CardTitle className="font-serif text-2xl text-card-foreground">Sign In</CardTitle>
+            <CardTitle className="font-serif text-2xl text-card-foreground">{tr("a.f8492cc1de")}</CardTitle>
             <CardDescription>
-              Enter your credentials to continue
+              {tr("a.20a13380f4")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{tr("a.84add5b295")}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder={tr("a.2894efbef0")}
                     className="pl-10"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -147,13 +148,13 @@ const Login = () => {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{tr("a.8be3c943b1")}</Label>
                   <button
                     type="button"
                     onClick={() => navigate("/forgot-password")}
                     className="text-xs text-primary hover:text-primary/80 underline underline-offset-4 transition-smooth"
                   >
-                    Forgot password?
+                    {tr("a.4c29f7f033")}
                   </button>
                 </div>
                 <div className="relative">
@@ -175,24 +176,24 @@ const Login = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
+                    {tr("a.6ca8910ee6")}
                   </>
                 ) : (
                   <>
-                    Sign In
+                    {tr("a.f8492cc1de")}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </>
                 )}
               </Button>
 
               <div className="text-center text-sm text-muted-foreground">
-                Don't have an account?{" "}
+                {tr("a.f838dc11db")}{" "}
                 <button
                   type="button"
                   onClick={() => navigate("/signup")}
                   className="text-primary underline underline-offset-4 hover:text-primary/80 transition-smooth"
                 >
-                  Create account
+                  {tr("a.aaf3744797")}
                 </button>
               </div>
             </form>

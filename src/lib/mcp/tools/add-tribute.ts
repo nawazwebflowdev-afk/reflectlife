@@ -2,10 +2,11 @@ import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 import { errorResult, jsonResult, notAuthenticated, supabaseForUser } from "../supabase";
 
+import { tr } from "@/i18n/tr";
 export default defineTool({
   name: "add_tribute",
-  title: "Leave a tribute",
-  description: "Leave a tribute or condolence message on a memorial the caller can access.",
+  title: tr("a.8fcbbb27ff"),
+  description: tr("a.3ff6cea436"),
   inputSchema: {
     memorial_id: z.string().describe("UUID of the memorial."),
     tribute_text: z.string().describe("The tribute message."),

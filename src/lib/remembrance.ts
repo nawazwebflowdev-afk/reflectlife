@@ -1,4 +1,5 @@
-export type RemembranceEventType =
+
+import { tr } from "@/i18n/tr";export type RemembranceEventType =
   | "birthday"
   | "date_of_death"
   | "anniversary"
@@ -127,19 +128,19 @@ export const CATEGORY_OPTIONS = [
 ] as const;
 
 export const QUICK_RESPONSES = [
-  { type: "remember_too", emoji: "❤️", label: "I remember them too" },
-  { type: "lighting_candle", emoji: "🕯️", label: "Lighting a candle" },
-  { type: "thinking_today", emoji: "🙏", label: "Thinking of them today" },
-  { type: "sending_love", emoji: "💐", label: "Sending love" },
-  { type: "thank_you", emoji: "🤍", label: "Thank you for remembering" },
+  { type: "remember_too", emoji: "❤️", label: tr("a.6595d11024") },
+  { type: "lighting_candle", emoji: "🕯️", label: tr("a.bac2786cb2") },
+  { type: "thinking_today", emoji: "🙏", label: tr("a.5d00321995") },
+  { type: "sending_love", emoji: "💐", label: tr("a.7429f2ec65") },
+  { type: "thank_you", emoji: "🤍", label: tr("a.de5bc4cd9c") },
 ] as const;
 
 export const REACTIONS = [
-  { type: "love", emoji: "❤️", label: "Love" },
-  { type: "remembering", emoji: "🕯️", label: "Remembering" },
-  { type: "thinking_of_you", emoji: "🙏", label: "Thinking of you" },
-  { type: "with_you", emoji: "🤍", label: "With you" },
-  { type: "in_memory", emoji: "💐", label: "In memory" },
+  { type: "love", emoji: "❤️", label: tr("a.4f61ec4d2d") },
+  { type: "remembering", emoji: "🕯️", label: tr("a.76f226fa56") },
+  { type: "thinking_of_you", emoji: "🙏", label: tr("a.92913d1b19") },
+  { type: "with_you", emoji: "🤍", label: tr("a.8c5c5043e1") },
+  { type: "in_memory", emoji: "💐", label: tr("a.8d0734fa5f") },
 ] as const;
 
 export function toDateKey(d: Date): string {

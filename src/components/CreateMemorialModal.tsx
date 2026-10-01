@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 import { memorialSlug } from "@/utils/memorialSlug";
 
+import { tr } from "@/i18n/tr";
 interface CreateMemorialModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -68,8 +69,8 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
     
     if (images.length + files.length > 5) {
       toast({
-        title: "Too many images",
-        description: "You can upload a maximum of 5 images.",
+        title: tr("a.e8545eccb8"),
+        description: tr("a.fb4a364547"),
         variant: "destructive",
       });
       return;
@@ -95,8 +96,8 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
     
     if (!formData.name.trim()) {
       toast({
-        title: "Name required",
-        description: "Please enter the name of the deceased.",
+        title: tr("a.3cb8eeb8a4"),
+        description: tr("a.094af51e88"),
         variant: "destructive",
       });
       return;
@@ -104,8 +105,8 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
 
     if (images.length === 0) {
       toast({
-        title: "Image required",
-        description: "Please upload at least one image.",
+        title: tr("a.6782c86ac7"),
+        description: tr("a.b18184d2c1"),
         variant: "destructive",
       });
       return;
@@ -118,8 +119,8 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
       
       if (!user) {
         toast({
-          title: "Authentication required",
-          description: "Please log in to create a memorial.",
+          title: tr("a.682810de81"),
+          description: tr("a.58750450d0"),
           variant: "destructive",
         });
         setIsLoading(false);
@@ -189,8 +190,8 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
       if (mediaError) throw mediaError;
 
       toast({
-        title: "Your memorial has been added beautifully 🕊️",
-        description: "The memorial is now visible on the Memorial Wall.",
+        title: tr("a.0fdb19abea"),
+        description: tr("a.0d53fc3226"),
       });
 
       // Reset form
@@ -204,8 +205,8 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
     } catch (error: any) {
       console.error('Error creating memorial:', error);
       toast({
-        title: "Error creating memorial",
-        description: error.message || "Please try again later.",
+        title: tr("a.1c4515a641"),
+        description: error.message || tr("a.60af87728a"),
         variant: "destructive",
       });
     } finally {
@@ -217,13 +218,13 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl">Create a Memorial</DialogTitle>
+          <DialogTitle className="font-serif text-2xl">{tr("a.0bfb9d7153")}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Image Upload Section */}
           <div className="space-y-3">
-            <Label htmlFor="images">Images (1-5 photos)</Label>
+            <Label htmlFor="images">{tr("a.ded8596c7c")}</Label>
             <div className="border-2 border-dashed rounded-lg p-4 text-center hover:border-primary transition-colors">
               <input
                 id="images"
@@ -237,7 +238,7 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
               <label htmlFor="images" className="cursor-pointer">
                 <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
-                  Click to upload images ({images.length}/5)
+                  {tr("a.b5fc9012fd")}{images.length}/5)
                 </p>
               </label>
             </div>
@@ -267,51 +268,51 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
 
           {/* Full Name */}
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name of the Deceased *</Label>
+            <Label htmlFor="name">{tr("a.2189b63b51")}</Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Enter full name"
+              placeholder={tr("a.29362f24d4")}
               required
             />
           </div>
 
           {/* Description / Life Story */}
           <div className="space-y-2">
-            <Label htmlFor="memorialType">Memorial type</Label>
+            <Label htmlFor="memorialType">{tr("a.ef1ebe0339")}</Label>
             <select id="memorialType" value={formData.memorialType} onChange={(e) => setFormData({ ...formData, memorialType: e.target.value })} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
-              <option value="standard">Memorial</option>
+              <option value="standard">{tr("a.ecbb766b6d")}</option>
               <option value="defender_of_ukraine">Defender of Ukraine / Захисник або Захисниця України</option>
             </select>
           </div>
           {formData.memorialType === "defender_of_ukraine" && <div className="grid gap-4 rounded-md border p-4">
-            <div><Label htmlFor="defenderLabel">Respectful badge</Label><select id="defenderLabel" value={formData.defenderLabel} onChange={(e) => setFormData({ ...formData, defenderLabel: e.target.value })} className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="defender_male">Захисник України</option><option value="defender_female">Захисниця України</option></select></div>
-            <div><Label htmlFor="serviceUnit">Unit (optional)</Label><Input id="serviceUnit" maxLength={160} value={formData.serviceUnit} onChange={(e) => setFormData({ ...formData, serviceUnit: e.target.value })} /></div>
-            <div><Label htmlFor="servicePlace">Place of service (optional)</Label><Input id="servicePlace" maxLength={160} value={formData.servicePlace} onChange={(e) => setFormData({ ...formData, servicePlace: e.target.value })} /></div>
-            <p className="text-xs text-muted-foreground">Defender memorials and every candle duration on them are free. No advertising or upgrade prompts are shown.</p>
+            <div><Label htmlFor="defenderLabel">{tr("a.267ed3549e")}</Label><select id="defenderLabel" value={formData.defenderLabel} onChange={(e) => setFormData({ ...formData, defenderLabel: e.target.value })} className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="defender_male">Захисник України</option><option value="defender_female">Захисниця України</option></select></div>
+            <div><Label htmlFor="serviceUnit">{tr("a.84ed6b5445")}</Label><Input id="serviceUnit" maxLength={160} value={formData.serviceUnit} onChange={(e) => setFormData({ ...formData, serviceUnit: e.target.value })} /></div>
+            <div><Label htmlFor="servicePlace">{tr("a.aaf484284e")}</Label><Input id="servicePlace" maxLength={160} value={formData.servicePlace} onChange={(e) => setFormData({ ...formData, servicePlace: e.target.value })} /></div>
+            <p className="text-xs text-muted-foreground">{tr("a.9d751272a0")}</p>
           </div>}
 
           {/* Description / Life Story */}
           <div className="space-y-2">
-            <Label htmlFor="bio">Description / Life Story</Label>
+            <Label htmlFor="bio">{tr("a.7202dd9015")}</Label>
             <Textarea
               id="bio"
               value={formData.bio}
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-              placeholder="Share their story, achievements, and memories..."
+              placeholder={tr("a.b3fe3b3151")}
               rows={4}
             />
           </div>
 
           {/* Tributes */}
           <div className="space-y-2">
-            <Label htmlFor="tributes">Tributes</Label>
+            <Label htmlFor="tributes">{tr("a.5cf4a2b355")}</Label>
             <Textarea
               id="tributes"
               value={formData.tributes}
               onChange={(e) => setFormData({ ...formData, tributes: e.target.value })}
-              placeholder="Share heartfelt messages and tributes..."
+              placeholder={tr("a.bfe7334b8d")}
               rows={3}
             />
           </div>
@@ -319,7 +320,7 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
           {/* Dates */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="dateOfBirth">Date of Birth</Label>
+              <Label htmlFor="dateOfBirth">{tr("a.133160594d")}</Label>
               <Input
                 id="dateOfBirth"
                 type="date"
@@ -328,7 +329,7 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="dateOfDeath">Date of Passing</Label>
+              <Label htmlFor="dateOfDeath">{tr("a.704a73d75a")}</Label>
               <Input
                 id="dateOfDeath"
                 type="date"
@@ -340,12 +341,12 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
 
           {/* Location */}
           <div className="space-y-2">
-            <Label htmlFor="location">Location (Optional)</Label>
+            <Label htmlFor="location">{tr("a.1fb67e5610")}</Label>
             <Input
               id="location"
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              placeholder="City, Country"
+              placeholder={tr("a.4b98b8e871")}
             />
           </div>
 
@@ -355,10 +356,10 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
               {isPublic ? <Eye className="h-5 w-5 text-primary" /> : <EyeOff className="h-5 w-5 text-muted-foreground" />}
               <div>
                 <Label htmlFor="visibility" className="text-sm font-medium cursor-pointer">
-                  {isPublic ? "Public Memorial" : "Private Memorial"}
+                  {isPublic ? tr("a.f8a172c78f") : tr("a.44671cff62")}
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  {isPublic ? "Visible on the Memorial Wall and homepage" : "Only visible to you"}
+                  {isPublic ? tr("a.3c29eb42b5") : tr("a.384d197b4a")}
                 </p>
               </div>
             </div>
@@ -373,16 +374,16 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
-              Cancel
+              {tr("a.77dfd2135f")}
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Creating...
+                  {tr("a.28ea7667d0")}
                 </>
               ) : (
-                "Create Memorial"
+                tr("a.3bfcbf3133")
               )}
             </Button>
           </div>

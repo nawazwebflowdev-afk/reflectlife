@@ -2,6 +2,7 @@ import { CandleDisplay } from './CandleDisplay';
 import { useCountdown } from '@/hooks/useCountdown';
 import { cn } from '@/utils/cn';
 
+import { tr } from "@/i18n/tr";
 export interface MemorialCandle {
   id: string;
   memorial_id: string;
@@ -53,12 +54,12 @@ export function CandleCard({ candle, isMine, onRelight }: Props) {
     >
       <CandleDisplay lit={lit} size="md" />
       <p className="text-sm font-medium text-foreground leading-tight">
-        {isMine ? 'Your candle' : `Lit by ${name}`}
+        {isMine ? tr("a.17dc40f366") : `Lit by ${name}`}
       </p>
       {litDate && (
         <p className="text-xs text-muted-foreground">{litDate.toLocaleDateString()}</p>
       )}
-      <p className="text-xs text-muted-foreground">{lit ? remaining : 'Gone out'}</p>
+      <p className="text-xs text-muted-foreground">{lit ? remaining : tr("a.f0c2447b55")}</p>
       {candle.message && (
         <p className="mt-1 line-clamp-3 px-1 text-xs italic text-foreground/70">"{candle.message}"</p>
       )}
@@ -69,7 +70,7 @@ export function CandleCard({ candle, isMine, onRelight }: Props) {
           className="mt-2 rounded-full px-3 py-1 text-xs font-semibold text-white transition-all hover:brightness-110"
           style={{ backgroundColor: '#4A324A' }}
         >
-          {lit ? 'Extend' : 'Relight'}
+          {lit ? tr("a.281dd83602") : tr("a.db79bf8fa9")}
         </button>
       )}
     </div>

@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { tr } from "@/i18n/tr";
 export const detectDefaultCountry = (): CountryCode => {
   try {
     const locales = navigator.languages?.length ? navigator.languages : [navigator.language];
@@ -89,7 +90,7 @@ const PhoneNumberField = ({
           onValueChange={(c) => onCountryChange(c as CountryCode)}
           disabled={disabled}
         >
-          <SelectTrigger className="w-[110px] shrink-0" aria-label="Country code">
+          <SelectTrigger className="w-[110px] shrink-0" aria-label={tr("a.2eb6c4c537")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="max-h-[300px]">

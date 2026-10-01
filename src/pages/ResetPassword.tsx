@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+import { tr } from "@/i18n/tr";
 const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -27,8 +28,8 @@ const ResetPassword = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         toast({
-          title: "Invalid or expired link",
-          description: "Please request a new password reset link.",
+          title: tr("a.b7830e59c0"),
+          description: tr("a.a51cd5f15a"),
           variant: "destructive",
         });
         navigate("/forgot-password");
@@ -70,8 +71,8 @@ const ResetPassword = () => {
 
     if (!newPassword || !confirmPassword) {
       toast({
-        title: "Error",
-        description: "Please fill in all fields",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.503ab476b1"),
         variant: "destructive",
       });
       return;
@@ -79,8 +80,8 @@ const ResetPassword = () => {
 
     if (newPassword !== confirmPassword) {
       toast({
-        title: "Passwords don't match",
-        description: "Please make sure both passwords are the same",
+        title: tr("a.5f087918ec"),
+        description: tr("a.a7509eb6e4"),
         variant: "destructive",
       });
       return;
@@ -88,8 +89,8 @@ const ResetPassword = () => {
 
     if (passwordStrength.score < 3) {
       toast({
-        title: "Weak Password",
-        description: "Please choose a stronger password (at least 'Good' strength)",
+        title: tr("a.7e83f13ca0"),
+        description: tr("a.2e193731fc"),
         variant: "destructive",
       });
       return;
@@ -105,7 +106,7 @@ const ResetPassword = () => {
 
     if (error) {
       toast({
-        title: "Error",
+        title: tr("a.7f2f6a15cf"),
         description: error.message,
         variant: "destructive",
       });
@@ -114,8 +115,8 @@ const ResetPassword = () => {
 
     setPasswordReset(true);
     toast({
-      title: "Password Reset Successful",
-      description: "Your password has been successfully reset. You can now log in.",
+      title: tr("a.0582710f89"),
+      description: tr("a.9f19df05eb"),
     });
 
     // Redirect to auth page after 2 seconds
@@ -134,9 +135,9 @@ const ResetPassword = () => {
                 <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
               <div className="space-y-2">
-                <CardTitle className="font-serif text-2xl">Password Reset!</CardTitle>
+                <CardTitle className="font-serif text-2xl">{tr("a.8b26e0e54c")}</CardTitle>
                 <CardDescription className="text-base">
-                  Your password has been successfully reset. Redirecting you to sign in...
+                  {tr("a.73d7b5f7da")}
                 </CardDescription>
               </div>
             </CardHeader>
@@ -150,23 +151,23 @@ const ResetPassword = () => {
     <div className="min-h-screen flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2 animate-fade-in">
-          <h1 className="font-serif text-4xl font-bold">Reset Password</h1>
+          <h1 className="font-serif text-4xl font-bold">{tr("a.3fb75e3bfe")}</h1>
           <p className="text-muted-foreground">
-            Enter your new password
+            {tr("a.7bec90ce73")}
           </p>
         </div>
 
         <Card className="shadow-elegant-lg animate-fade-up">
           <CardHeader className="space-y-1">
-            <CardTitle className="font-serif text-2xl">Create New Password</CardTitle>
+            <CardTitle className="font-serif text-2xl">{tr("a.53b7d4c329")}</CardTitle>
             <CardDescription>
-              Choose a strong password to secure your account
+              {tr("a.a38ed28ed6")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
+                <Label htmlFor="newPassword">{tr("a.4894cb39ee")}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -196,11 +197,11 @@ const ResetPassword = () => {
                       <Shield className="h-3 w-3 mt-0.5 flex-shrink-0" />
                       <div>
                         {passwordStrength.score < 3 ? (
-                          <span className="text-orange-600">Use a mix of uppercase, lowercase, numbers, and special characters</span>
+                          <span className="text-orange-600">{tr("a.bd0c40bce3")}</span>
                         ) : (
                           <span className="text-green-600 flex items-center gap-1">
                             <CheckCircle2 className="h-3 w-3" />
-                            Strong password
+                            {tr("a.a4ca8db559")}
                           </span>
                         )}
                       </div>
@@ -210,7 +211,7 @@ const ResetPassword = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">{tr("a.c2d404cb7b")}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -231,10 +232,10 @@ const ResetPassword = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Resetting password...
+                    {tr("a.0c217107cd")}
                   </>
                 ) : (
-                  "Reset Password"
+                  tr("a.3fb75e3bfe")
                 )}
               </Button>
             </form>

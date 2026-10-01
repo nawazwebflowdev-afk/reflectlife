@@ -25,6 +25,7 @@ import {
   type RecurrenceUnit,
 } from "@/lib/remembrance";
 
+import { tr } from "@/i18n/tr";
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -48,10 +49,10 @@ function timezoneOptions(): string[] {
 }
 
 const PRESETS: { key: string; label: string; compute: () => Date }[] = [
-  { key: "1h", label: "In 1 hour", compute: () => new Date(Date.now() + 3600_000) },
+  { key: "1h", label: tr("a.57e831c688"), compute: () => new Date(Date.now() + 3600_000) },
   {
     key: "tomorrow",
-    label: "Tomorrow",
+    label: tr("a.1948bf2dfa"),
     compute: () => {
       const d = new Date();
       d.setDate(d.getDate() + 1);
@@ -61,7 +62,7 @@ const PRESETS: { key: string; label: string; compute: () => Date }[] = [
   },
   {
     key: "3d",
-    label: "In 3 days",
+    label: tr("a.fe579269c6"),
     compute: () => {
       const d = new Date();
       d.setDate(d.getDate() + 3);
@@ -71,7 +72,7 @@ const PRESETS: { key: string; label: string; compute: () => Date }[] = [
   },
   {
     key: "1w",
-    label: "Next week",
+    label: tr("a.5a20763adf"),
     compute: () => {
       const d = new Date();
       d.setDate(d.getDate() + 7);
@@ -81,7 +82,7 @@ const PRESETS: { key: string; label: string; compute: () => Date }[] = [
   },
   {
     key: "1mo",
-    label: "Next month",
+    label: tr("a.8abf7cf1d0"),
     compute: () => {
       const d = new Date();
       d.setMonth(d.getMonth() + 1);
@@ -91,7 +92,7 @@ const PRESETS: { key: string; label: string; compute: () => Date }[] = [
   },
   {
     key: "1y",
-    label: "Next year",
+    label: tr("a.22c6f667e4"),
     compute: () => {
       const d = new Date();
       d.setFullYear(d.getFullYear() + 1);
@@ -208,11 +209,11 @@ export default function RemembranceForm({
 
   const handleImage = async (file: File) => {
     if (!file.type.startsWith("image/")) {
-      toast.error("Please choose an image file.");
+      toast.error(tr("a.f8c8c1c46c"));
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Images must be smaller than 5 MB.");
+      toast.error(tr("a.08f3fdaa0c"));
       return;
     }
     setUploading(true);
@@ -224,7 +225,7 @@ export default function RemembranceForm({
       const { data } = supabase.storage.from("memorial_uploads").getPublicUrl(path);
       setImageUrl(data.publicUrl);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upload failed");
+      toast.error(e instanceof Error ? e.message : tr("a.ad0d0603e2"));
     } finally {
       setUploading(false);
     }
@@ -232,15 +233,15 @@ export default function RemembranceForm({
 
   const save = async () => {
     if (!title.trim() && subjects.length === 0) {
-      toast.error("Please add a title for your reminder.");
+      toast.error(tr("a.b40be615f0"));
       return;
     }
     if (isMemorialType && subjects.length === 0) {
-      toast.error("Please choose at least one person to remember.");
+      toast.error(tr("a.67d8f7ffe4"));
       return;
     }
     if (recipients.length === 0) {
-      toast.error("Please choose who should be reminded.");
+      toast.error(tr("a.002dfa67d6"));
       return;
     }
     setSaving(true);
@@ -300,7 +301,7 @@ export default function RemembranceForm({
       );
       if (recErr) throw recErr;
 
-      toast.success(existing ? "Reminder updated" : "Reminder created");
+      toast.success(existing ? tr("a.8e553b57d6") : tr("a.072ab4bc0c"));
       onOpenChange(false);
       onSaved();
     } catch (e) {
@@ -316,17 +317,17 @@ export default function RemembranceForm({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl">
-            {existing ? "Edit reminder" : "Create a reminder"}
+            {existing ? tr("a.1c3c423170") : tr("a.b1d4f6ad5f")}
           </DialogTitle>
           <DialogDescription>
-            Anything worth remembering — from the next hour to many years from now.
+            {tr("a.9b16c909d5")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-2">
           <section className="space-y-2">
             <Label htmlFor="r-title" className="text-base">
-              What should we remind you about?
+              {tr("a.015312c358")}
             </Label>
             <Input
               id="r-title"
@@ -334,12 +335,12 @@ export default function RemembranceForm({
               maxLength={120}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Call Mum, Anna's birthday, take medication…"
+              placeholder={tr("a.481223f728")}
             />
           </section>
 
           <section className="space-y-2">
-            <Label className="text-base">When?</Label>
+            <Label className="text-base">{tr("a.b2028cfcc7")}</Label>
             <div className="flex flex-wrap gap-2">
               {PRESETS.map((p) => (
                 <Button
@@ -356,15 +357,15 @@ export default function RemembranceForm({
             </div>
             <div className="grid gap-4 sm:grid-cols-2 pt-2">
               <div className="space-y-2">
-                <Label htmlFor="r-date">Date</Label>
+                <Label htmlFor="r-date">{tr("a.eb9a4bc1c0")}</Label>
                 <Input id="r-date" type="date" className="h-12" value={date} onChange={(e) => setDate(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="r-time">Time</Label>
+                <Label htmlFor="r-time">{tr("a.6c82e6dd86")}</Label>
                 <Input id="r-time" type="time" className="h-12" value={time} onChange={(e) => setTime(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="r-repeat">Repeat</Label>
+                <Label htmlFor="r-repeat">{tr("a.659eba1219")}</Label>
                 <Select value={recurrence} onValueChange={(v) => setRecurrence(v as RecurrenceType)}>
                   <SelectTrigger id="r-repeat" className="h-12">
                     <SelectValue />
@@ -380,7 +381,7 @@ export default function RemembranceForm({
               </div>
               {recurrence === "custom" && (
                 <div className="space-y-2">
-                  <Label>Every</Label>
+                  <Label>{tr("a.3560d90b70")}</Label>
                   <div className="flex gap-2">
                     <Input
                       type="number"
@@ -409,7 +410,7 @@ export default function RemembranceForm({
             {recurrence !== "once" && (
               <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="r-end">Stop repeating on a date</Label>
+                  <Label htmlFor="r-end">{tr("a.8c698a7e00")}</Label>
                   <Switch id="r-end" checked={hasEnd} onCheckedChange={setHasEnd} />
                 </div>
                 {hasEnd && (
@@ -422,7 +423,7 @@ export default function RemembranceForm({
           <Separator />
 
           <section className="space-y-3">
-            <Label className="text-base">Who should be reminded?</Label>
+            <Label className="text-base">{tr("a.04bc4c6c70")}</Label>
             <RecipientPicker
               value={recipients}
               onChange={setRecipients}
@@ -434,14 +435,14 @@ export default function RemembranceForm({
           <Collapsible open={moreOpen} onOpenChange={setMoreOpen}>
             <CollapsibleTrigger asChild>
               <Button variant="ghost" className="w-full justify-between">
-                More details (optional)
+                {tr("a.05f6a45e56")}
                 <ChevronDown className={`h-4 w-4 transition-transform ${moreOpen ? "rotate-180" : ""}`} />
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-6 pt-4">
               <section className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="r-type">Type</Label>
+                  <Label htmlFor="r-type">{tr("a.3deb745651")}</Label>
                   <Select value={eventType} onValueChange={(v) => setEventType(v as RemembranceEventType)}>
                     <SelectTrigger id="r-type" className="h-12">
                       <SelectValue />
@@ -456,13 +457,13 @@ export default function RemembranceForm({
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="r-cat">Category</Label>
+                  <Label htmlFor="r-cat">{tr("a.a3c686e711")}</Label>
                   <Select value={category} onValueChange={setCategory}>
                     <SelectTrigger id="r-cat" className="h-12">
-                      <SelectValue placeholder="No category" />
+                      <SelectValue placeholder={tr("a.fdc24c707e")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">No category</SelectItem>
+                      <SelectItem value="none">{tr("a.fdc24c707e")}</SelectItem>
                       {CATEGORY_OPTIONS.map((c) => (
                         <SelectItem key={c} value={c}>
                           {c}
@@ -472,18 +473,18 @@ export default function RemembranceForm({
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="r-loc">Location</Label>
+                  <Label htmlFor="r-loc">{tr("a.d219c68101")}</Label>
                   <Input
                     id="r-loc"
                     className="h-12"
                     maxLength={160}
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    placeholder="Where is it happening?"
+                    placeholder={tr("a.27f1d7b2d7")}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="r-tz">Time zone</Label>
+                  <Label htmlFor="r-tz">{tr("a.eea79afd83")}</Label>
                   <Select value={timezone} onValueChange={setTimezone}>
                     <SelectTrigger id="r-tz" className="h-12">
                       <SelectValue />
@@ -500,25 +501,25 @@ export default function RemembranceForm({
               </section>
 
               <section className="space-y-2">
-                <Label htmlFor="r-desc">Notes</Label>
+                <Label htmlFor="r-desc">{tr("a.70440046a3")}</Label>
                 <Textarea
                   id="r-desc"
                   rows={3}
                   maxLength={1000}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Anything you want to remember about this."
+                  placeholder={tr("a.4e17e77d0a")}
                 />
               </section>
 
               <section className="space-y-2">
-                <Label>Image</Label>
+                <Label>{tr("a.50e19fda0d")}</Label>
                 {imageUrl ? (
                   <div className="relative w-40">
-                    <img src={imageUrl} alt="Reminder" className="w-40 h-28 object-cover rounded-lg border border-border" />
+                    <img src={imageUrl} alt={tr("a.b87a1929f7")} className="w-40 h-28 object-cover rounded-lg border border-border" />
                     <button
                       type="button"
-                      aria-label="Remove image"
+                      aria-label={tr("a.5f94b03c2e")}
                       onClick={() => setImageUrl(null)}
                       className="absolute -top-2 -right-2 rounded-full bg-background border border-border p-1"
                     >
@@ -538,7 +539,7 @@ export default function RemembranceForm({
                     ) : (
                       <ImagePlus className="h-4 w-4 mr-2" />
                     )}
-                    {uploading ? "Uploading…" : "Add an image"}
+                    {uploading ? tr("a.d921a79afa") : tr("a.739743f630")}
                   </Button>
                 )}
                 <input
@@ -557,29 +558,29 @@ export default function RemembranceForm({
               <Separator />
 
               <section className="space-y-3">
-                <Label className="text-base">Someone to remember (optional)</Label>
+                <Label className="text-base">{tr("a.b447842798")}</Label>
                 <p className="text-xs text-muted-foreground">
-                  Link this reminder to a memorial to turn it into a shared remembrance.
+                  {tr("a.22ef4d482f")}
                 </p>
                 <SubjectPicker value={subjects} onChange={setSubjects} />
               </section>
 
               <section className="space-y-2">
-                <Label htmlFor="r-msg">Personal message</Label>
+                <Label htmlFor="r-msg">{tr("a.593c0277c3")}</Label>
                 <Textarea
                   id="r-msg"
                   rows={3}
                   maxLength={500}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="A short note sent with the reminder."
+                  placeholder={tr("a.7537c22149")}
                 />
               </section>
 
               <section className="flex items-center justify-between rounded-lg border border-border p-4">
                 <div>
-                  <Label htmlFor="r-active">Reminder active</Label>
-                  <p className="text-xs text-muted-foreground">Pause any time without deleting it.</p>
+                  <Label htmlFor="r-active">{tr("a.f16fcf2c86")}</Label>
+                  <p className="text-xs text-muted-foreground">{tr("a.f80983af56")}</p>
                 </div>
                 <Switch id="r-active" checked={isActive} onCheckedChange={setIsActive} />
               </section>
@@ -589,7 +590,7 @@ export default function RemembranceForm({
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={saving}>
-            Cancel
+            {tr("a.77dfd2135f")}
           </Button>
           <Button
             onClick={save}
@@ -597,7 +598,7 @@ export default function RemembranceForm({
             className="rounded-full px-8"
             style={{ backgroundColor: "#4A324A", color: "#fff" }}
           >
-            {saving ? "Saving…" : existing ? "Save changes" : "Create reminder"}
+            {saving ? tr("a.56a2285c5b") : existing ? tr("a.179359b39e") : tr("a.41cd579fe0")}
           </Button>
         </DialogFooter>
       </DialogContent>

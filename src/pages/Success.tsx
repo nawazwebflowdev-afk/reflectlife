@@ -6,6 +6,7 @@ import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+import { tr } from "@/i18n/tr";
 type PurchaseConfirmationState = "checking" | "success" | "error";
 
 const Success = () => {
@@ -36,7 +37,7 @@ const Success = () => {
         } = await supabase.auth.getSession();
 
         if (!session?.access_token) {
-          throw new Error("Please sign in again to confirm your purchase.");
+          throw new Error(tr("a.c1dc590cab"));
         }
 
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://osmyfzkcydvtwgnbjplx.supabase.co";
@@ -70,7 +71,7 @@ const Success = () => {
         }
 
         if (!data?.success) {
-          throw new Error(data?.error || "Failed to unlock your template");
+          throw new Error(data?.error || tr("a.01aa5d7e16"));
         }
 
         console.log('Purchase confirmed successfully:', data);
@@ -100,8 +101,8 @@ const Success = () => {
           await supabase.auth.refreshSession();
           setStatus("success");
           toast({
-            title: "Purchase confirmed",
-            description: "Your bought template is now active on your profile.",
+            title: tr("a.4a01b5c758"),
+            description: tr("a.31b7581a62"),
           });
         } else {
           setStatus("success");
@@ -116,7 +117,7 @@ const Success = () => {
 
         setStatus("error");
         toast({
-          title: "Finalizing purchase",
+          title: tr("a.e70d42a133"),
           description: `${message} Please open Templates and retry selection once.`,
           variant: "destructive",
         });
@@ -174,7 +175,7 @@ const Success = () => {
 
           <div className="space-y-3">
             <Button onClick={() => navigate("/templates")} size="lg" className="w-full">
-              View My Templates
+              {tr("a.4eb8573725")}
             </Button>
 
             <Button
@@ -183,12 +184,12 @@ const Success = () => {
               size="lg"
               className="w-full"
             >
-              Go to Dashboard
+              {tr("a.f7b5bf8cef")}
             </Button>
           </div>
 
           <p className="text-sm text-muted-foreground mt-6">
-            Redirecting to templates in a few seconds...
+            {tr("a.5dab184a69")}
           </p>
         </CardContent>
       </Card>

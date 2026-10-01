@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, X, Plus } from "lucide-react";
 
+import { tr } from "@/i18n/tr";
 export interface SelectedSubject {
   memorial_id: string | null;
   subject_name: string;
@@ -69,14 +70,14 @@ export default function SubjectPicker({ value, onChange }: Props) {
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search a memorial or type a name"
+          placeholder={tr("a.5924fd11b1")}
           className="pl-9 h-12"
         />
       </div>
 
       {query.trim().length >= 2 && (
         <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
-          {loading && <p className="px-3 py-3 text-sm text-muted-foreground">Searching…</p>}
+          {loading && <p className="px-3 py-3 text-sm text-muted-foreground">{tr("a.1a6a5ba8c2")}</p>}
           {!loading &&
             results.map((m) => (
               <button
@@ -99,7 +100,7 @@ export default function SubjectPicker({ value, onChange }: Props) {
               className="w-full flex items-center gap-2 px-3 py-3 text-left text-sm hover:bg-muted/60 transition-colors"
             >
               <Plus className="h-4 w-4" />
-              Remember “{query.trim()}”
+              {tr("a.488f871e30")}{query.trim()}”
             </button>
           )}
         </div>

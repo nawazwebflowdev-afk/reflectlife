@@ -6,11 +6,12 @@ import listDiaryEntries from "./tools/list-diary-entries";
 import createDiaryEntry from "./tools/create-diary-entry";
 import addTribute from "./tools/add-tribute";
 
+import { tr } from "@/i18n/tr";
 const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID ?? "project-ref-unset";
 
 export default defineMcp({
   name: "reflectlife-mcp",
-  title: "Reflectlife",
+  title: tr("a.1a0e32b358"),
   version: "0.1.0",
   instructions:
     "Tools for Reflectlife, a memorial and remembrance app. Use these tools to browse and create memorials, leave tributes, and manage the signed-in user's private reflection diary. All access respects the user's own permissions.",

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, HeartHandshake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+import { tr } from "@/i18n/tr";
 export default function DonationSuccess() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -39,21 +40,21 @@ export default function DonationSuccess() {
       )}
       <h1 className="font-serif text-2xl text-foreground">
         {status === "ok"
-          ? "Thank you for your gift of remembrance"
+          ? tr("a.c7a2c74a44")
           : status === "error"
-          ? "We could not confirm your donation"
-          : "Confirming your donation…"}
+          ? tr("a.fc8ffedcdd")
+          : tr("a.58449e0a3c")}
       </h1>
       <p className="text-muted-foreground max-w-md">
         {status === "ok"
-          ? "Your donation has been recorded and a receipt has been sent to your email."
+          ? tr("a.643386316a")
           : status === "error"
-          ? "If you were charged, your donation will still be recorded shortly. Please contact us if it does not appear."
-          : "This only takes a moment."}
+          ? tr("a.bfe0a005be")
+          : tr("a.0a3f9281c3")}
       </p>
       {status !== "pending" && memorialId && (
         <Button asChild className="rounded-full mt-2">
-          <Link to={`/memorial/${memorialId}`}>Return to the memorial</Link>
+          <Link to={`/memorial/${memorialId}`}>{tr("a.903162b951")}</Link>
         </Button>
       )}
     </div>

@@ -10,8 +10,9 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 
+import { tr } from "@/i18n/tr";
 const languages = [
-  { code: "en", label: "English", flag: "🇬🇧" },
+  { code: "en", label: tr("a.649df08a44"), flag: "🇬🇧" },
   { code: "uk", label: "Українська", flag: "🇺🇦" },
 ];
 

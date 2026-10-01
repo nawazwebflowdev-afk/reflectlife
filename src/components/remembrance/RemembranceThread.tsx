@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { QUICK_RESPONSES, REACTIONS } from "@/lib/remembrance";
 import { formatDistanceToNow } from "date-fns";
 
+import { tr } from "@/i18n/tr";
 interface ResponseRow {
   id: string;
   remembrance_id: string;
@@ -85,7 +86,7 @@ export default function RemembranceThread({ remembranceId, currentUserId, occurr
 
   const submit = async (responseType: string | null, responseText: string | null) => {
     if (!currentUserId) {
-      toast.error("Please sign in to respond.");
+      toast.error(tr("a.5e9d8191ac"));
       return;
     }
     setBusy(true);
@@ -102,7 +103,7 @@ export default function RemembranceThread({ remembranceId, currentUserId, occurr
       return;
     }
     setText("");
-    toast.success("Your response was shared");
+    toast.success(tr("a.fa405a7ec9"));
     load();
   };
 
@@ -132,7 +133,7 @@ export default function RemembranceThread({ remembranceId, currentUserId, occurr
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <p className="text-sm font-medium text-foreground">A gentle response</p>
+        <p className="text-sm font-medium text-foreground">{tr("a.ff1870a2ee")}</p>
         <div className="flex flex-wrap gap-2">
           {QUICK_RESPONSES.map((q) => (
             <Button
@@ -153,7 +154,7 @@ export default function RemembranceThread({ remembranceId, currentUserId, occurr
           value={text}
           maxLength={1000}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Write a response…"
+          placeholder={tr("a.929f7bd746")}
         />
         <Button
           disabled={busy || !text.trim()}
@@ -161,13 +162,13 @@ export default function RemembranceThread({ remembranceId, currentUserId, occurr
           className="rounded-full px-8"
           style={{ backgroundColor: "#4A324A", color: "#fff" }}
         >
-          Share response
+          {tr("a.0d2a61790b")}
         </Button>
       </div>
 
       <div className="space-y-4">
         {responses.length === 0 && (
-          <p className="text-sm text-muted-foreground">No responses yet — be the first to remember together.</p>
+          <p className="text-sm text-muted-foreground">{tr("a.e671f599de")}</p>
         )}
         {responses.map((r) => {
           const p = profiles[r.user_id];
@@ -182,7 +183,7 @@ export default function RemembranceThread({ remembranceId, currentUserId, occurr
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2 flex-wrap">
-                    <span className="text-sm font-medium">{p?.full_name || "A loved one"}</span>
+                    <span className="text-sm font-medium">{p?.full_name || tr("a.9bae913df1")}</span>
                     <span className="text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}
                     </span>

@@ -15,6 +15,7 @@ import PhoneNumberField, { detectDefaultCountry, toE164 } from "@/components/Pho
 import type { CountryCode } from "libphonenumber-js";
 import type { Session } from "@supabase/supabase-js";
 
+import { tr } from "@/i18n/tr";
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
@@ -103,8 +104,8 @@ const Auth = () => {
     
     if (!signInEmail || !signInPassword) {
       toast({
-        title: "Error",
-        description: "Please fill in all fields",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.503ab476b1"),
         variant: "destructive",
       });
       return;
@@ -120,21 +121,21 @@ const Auth = () => {
 
       if (error) {
         toast({
-          title: "Sign in failed",
+          title: tr("a.108b931431"),
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Welcome back!",
-          description: "You've successfully signed in.",
+          title: tr("a.1c5b34d687"),
+          description: tr("a.2c2bd4232e"),
         });
         navigate("/dashboard");
       }
     } catch (error: any) {
       toast({
-        title: "Sign in failed",
-        description: error.message || "An unexpected error occurred",
+        title: tr("a.108b931431"),
+        description: error.message || tr("a.0e71559369"),
         variant: "destructive",
       });
     } finally {
@@ -148,21 +149,21 @@ const Auth = () => {
 
     if (normalized.includes("rate limit") || normalized.includes("429") || normalized.includes("over_email_send_rate_limit")) {
       return {
-        title: "Email rate limit exceeded",
-        description: "Please wait 30–60 minutes before trying again, or try from a different network.",
+        title: tr("a.4d323287dd"),
+        description: tr("a.f87859d9a2"),
       };
     }
 
     if (normalized.includes("email not confirmed") || normalized.includes("email_not_confirmed")) {
       return {
-        title: "Check your email",
-        description: "Your account exists but email verification is pending. Open your inbox and confirm your email.",
+        title: tr("a.fab9f40578"),
+        description: tr("a.3019b74a11"),
       };
     }
 
     return {
-      title: "Sign up failed",
-      description: raw || "An unexpected error occurred. Please try again.",
+      title: tr("a.a7bdefb078"),
+      description: raw || tr("a.d07ac08788"),
     };
   };
 
@@ -171,8 +172,8 @@ const Auth = () => {
     
     if (!firstName || !lastName || !email || !password || !phoneNumber || !country) {
       toast({
-        title: "Error",
-        description: "All fields are required",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.16a9c9e05b"),
         variant: "destructive",
       });
       return;
@@ -183,8 +184,8 @@ const Auth = () => {
     if (!e164) {
       setPhoneError("Please enter a valid phone number for the selected country.");
       toast({
-        title: "Invalid phone number",
-        description: "Please enter a valid phone number for the selected country.",
+        title: tr("a.43c82e71b6"),
+        description: tr("a.e3350826ff"),
         variant: "destructive",
       });
       return;
@@ -193,8 +194,8 @@ const Auth = () => {
 
     if (!termsAccepted) {
       toast({
-        title: "Error",
-        description: "Please agree to the terms and conditions",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.8643b54bf9"),
         variant: "destructive",
       });
       return;
@@ -202,8 +203,8 @@ const Auth = () => {
 
     if (passwordStrength.score < 3) {
       toast({
-        title: "Weak Password",
-        description: "Please choose a stronger password (at least 'Good' strength)",
+        title: tr("a.7e83f13ca0"),
+        description: tr("a.2e193731fc"),
         variant: "destructive",
       });
       return;
@@ -248,8 +249,8 @@ const Auth = () => {
       }
 
       toast({
-        title: "Account created!",
-        description: "Please check your email to verify your account.",
+        title: tr("a.552cd3c724"),
+        description: tr("a.1aa4a201cc"),
       });
 
       setShowSignUp(false);
@@ -273,30 +274,30 @@ const Auth = () => {
       <div className="min-h-screen flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-2xl space-y-6">
           <div className="text-center space-y-2 animate-fade-in">
-            <h1 className="font-serif text-4xl font-bold">Create Your Account</h1>
+            <h1 className="font-serif text-4xl font-bold">{tr("a.c586a432ec")}</h1>
             <p className="text-muted-foreground">
-              Join Reflectlife to create meaningful memorials
+              {tr("a.5e05b02d50")}
             </p>
           </div>
 
           <Card className="shadow-elegant-lg animate-fade-up">
             <CardHeader className="space-y-1">
-              <CardTitle className="font-serif text-2xl">Sign Up</CardTitle>
+              <CardTitle className="font-serif text-2xl">{tr("a.2ba4023df4")}</CardTitle>
               <CardDescription>
-                Fill in your details to get started
+                {tr("a.fa6b4d61e9")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSignup} className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="firstName">{tr("a.b6ea992aab")}</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="firstName"
                         type="text"
-                        placeholder="John"
+                        placeholder={tr("a.5753a498f0")}
                         className="pl-10"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
@@ -307,13 +308,13 @@ const Auth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
+                    <Label htmlFor="lastName">{tr("a.863cb39fbe")}</Label>
                     <div className="relative">
                       <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="lastName"
                         type="text"
-                        placeholder="Doe"
+                        placeholder={tr("a.c947ad320e")}
                         className="pl-10"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
@@ -325,13 +326,13 @@ const Auth = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{tr("a.84add5b295")}</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="email"
                       type="email"
-                      placeholder="your@email.com"
+                      placeholder={tr("a.2894efbef0")}
                       className="pl-10"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -342,7 +343,7 @@ const Auth = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{tr("a.8be3c943b1")}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -372,11 +373,11 @@ const Auth = () => {
                         <Shield className="h-3 w-3 mt-0.5 flex-shrink-0" />
                         <div>
                           {passwordStrength.score < 3 ? (
-                            <span className="text-orange-600">Use a mix of uppercase, lowercase, numbers, and special characters</span>
+                            <span className="text-orange-600">{tr("a.bd0c40bce3")}</span>
                           ) : (
                             <span className="text-green-600 flex items-center gap-1">
                               <CheckCircle2 className="h-3 w-3" />
-                              Strong password
+                              {tr("a.a4ca8db559")}
                             </span>
                           )}
                         </div>
@@ -395,12 +396,12 @@ const Auth = () => {
                 />
 
                 <div className="space-y-2">
-                  <Label htmlFor="country">Country</Label>
+                  <Label htmlFor="country">{tr("a.d523ebbd10")}</Label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
                     <Select value={country} onValueChange={setCountry} required disabled={isLoading}>
                       <SelectTrigger id="country" className="pl-10">
-                        <SelectValue placeholder="Select your country" />
+                        <SelectValue placeholder={tr("a.5536b471cb")} />
                       </SelectTrigger>
                       <SelectContent className="max-h-[300px]">
                         {countries.map((c) => (
@@ -423,10 +424,10 @@ const Auth = () => {
                     />
                     <div className="space-y-1">
                       <Label htmlFor="terms" className="text-sm font-normal cursor-pointer">
-                        I agree to all terms and conditions
+                        {tr("a.1ebb6156b5")}
                       </Label>
                       <p className="text-xs text-muted-foreground">
-                        We respect your privacy and protect your data with care.
+                        {tr("a.f856f187c0")}
                       </p>
                     </div>
                   </div>
@@ -436,24 +437,24 @@ const Auth = () => {
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating account...
+                      {tr("a.27b8a2d710")}
                     </>
                   ) : (
                     <>
-                      Create Account
+                      {tr("a.eff4fd865f")}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </>
                   )}
                 </Button>
 
                 <div className="text-center text-sm text-muted-foreground">
-                  Already have an account?{" "}
+                  {tr("a.8559034a07")}{" "}
                   <button
                     type="button"
                     onClick={() => setShowSignUp(false)}
                     className="text-primary underline underline-offset-4 hover:text-primary/80 transition-colors"
                   >
-                    Sign in
+                    {tr("a.ada2e9e96f")}
                   </button>
                 </div>
               </form>
@@ -468,29 +469,29 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center py-12 px-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2 animate-fade-in">
-          <h1 className="font-serif text-4xl font-bold">Welcome Back</h1>
+          <h1 className="font-serif text-4xl font-bold">{tr("a.1c9089485a")}</h1>
           <p className="text-muted-foreground">
-            Sign in to access your memorials
+            {tr("a.585c5d9bb4")}
           </p>
         </div>
 
         <Card className="shadow-elegant-lg animate-fade-up">
           <CardHeader className="space-y-1">
-            <CardTitle className="font-serif text-2xl">Sign In</CardTitle>
+            <CardTitle className="font-serif text-2xl">{tr("a.f8492cc1de")}</CardTitle>
             <CardDescription>
-              Enter your credentials to continue
+              {tr("a.20a13380f4")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="signin-email">Email</Label>
+                <Label htmlFor="signin-email">{tr("a.84add5b295")}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="signin-email"
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder={tr("a.2894efbef0")}
                     className="pl-10"
                     value={signInEmail}
                     onChange={(e) => setSignInEmail(e.target.value)}
@@ -501,7 +502,7 @@ const Auth = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="signin-password">Password</Label>
+                <Label htmlFor="signin-password">{tr("a.8be3c943b1")}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -521,11 +522,11 @@ const Auth = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
+                    {tr("a.6ca8910ee6")}
                   </>
                 ) : (
                   <>
-                    Sign In
+                    {tr("a.f8492cc1de")}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </>
                 )}
@@ -537,18 +538,18 @@ const Auth = () => {
                   onClick={() => navigate("/forgot-password")}
                   className="text-primary underline underline-offset-4 hover:text-primary/80 transition-colors"
                 >
-                  Forgot Password?
+                  {tr("a.1cc8d18151")}
                 </button>
               </div>
 
               <div className="text-center text-sm text-muted-foreground">
-                Don't have an account?{" "}
+                {tr("a.f838dc11db")}{" "}
                 <button
                   type="button"
                   onClick={() => setShowSignUp(true)}
                   className="text-primary underline underline-offset-4 hover:text-primary/80 transition-colors"
                 >
-                  Sign up
+                  {tr("a.0b81497c85")}
                 </button>
               </div>
             </form>
@@ -556,7 +557,7 @@ const Auth = () => {
         </Card>
 
         <p className="text-center text-sm text-muted-foreground">
-          Need help? Contact our support team
+          {tr("a.18edb185e8")}
         </p>
       </div>
     </div>

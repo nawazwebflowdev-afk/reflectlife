@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { countries } from "@/data/countries";
 import { getCountryFlag } from "@/lib/countryFlags";
 
+import { tr } from "@/i18n/tr";
 interface CreatorTemplate {
   id: string;
   name: string;
@@ -105,8 +106,8 @@ const CreatorDashboard = () => {
     
     if (!user) {
       toast({
-        title: "Error",
-        description: "You must be logged in to upload templates",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.a833b59cab"),
         variant: "destructive",
       });
       return;
@@ -128,7 +129,7 @@ const CreatorDashboard = () => {
 
       if (uploadError) {
         toast({
-          title: "Error",
+          title: tr("a.7f2f6a15cf"),
           description: uploadError.message,
           variant: "destructive",
         });
@@ -171,14 +172,14 @@ const CreatorDashboard = () => {
 
     if (error) {
       toast({
-        title: "Error",
+        title: tr("a.7f2f6a15cf"),
         description: error.message,
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Success",
-        description: "Template published successfully!",
+        title: tr("a.42a8f651d7"),
+        description: tr("a.775423b43f"),
       });
       resetForm();
       setShowForm(false);
@@ -209,14 +210,14 @@ const CreatorDashboard = () => {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete template",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.cd7811a50b"),
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Template Deleted",
-        description: "Template has been removed",
+        title: tr("a.523eeebd03"),
+        description: tr("a.821a445a14"),
       });
       fetchCreatorTemplates();
     }
@@ -236,10 +237,10 @@ const CreatorDashboard = () => {
         <CardContent className="p-8 text-center">
           <Clock className="h-12 w-12 mx-auto mb-4 text-primary" />
           <h3 className="font-serif text-xl font-semibold mb-2">
-            Application Under Review
+            {tr("a.8a07e65bef")}
           </h3>
           <p className="text-muted-foreground">
-            Your creator application is being reviewed. You'll gain access to template uploads once approved.
+            {tr("a.cb4ffac6bb")}
           </p>
         </CardContent>
       </Card>
@@ -249,31 +250,31 @@ const CreatorDashboard = () => {
   return (
     <Tabs defaultValue="templates" className="space-y-6">
       <TabsList>
-        <TabsTrigger value="templates">My Templates</TabsTrigger>
+        <TabsTrigger value="templates">{tr("a.17a8348930")}</TabsTrigger>
         <TabsTrigger value="payouts">
           <Wallet className="h-4 w-4 mr-2" />
-          Earnings & Payouts
+          {tr("a.709d23d3c2")}
         </TabsTrigger>
       </TabsList>
 
       <TabsContent value="templates" className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="font-serif text-2xl font-bold">My Templates</h2>
+          <h2 className="font-serif text-2xl font-bold">{tr("a.17a8348930")}</h2>
           <Button onClick={() => setShowForm(!showForm)}>
             <Plus className="h-4 w-4 mr-2" />
-            Create Template
+            {tr("a.e48e668546")}
           </Button>
         </div>
 
       {showForm && (
         <Card>
           <CardHeader>
-            <CardTitle>Create New Template</CardTitle>
+            <CardTitle>{tr("a.ebd571fcc4")}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="name">Template Name *</Label>
+                <Label htmlFor="name">{tr("a.fb32ea3ed8")}</Label>
                 <Input
                   id="name"
                   value={name}
@@ -283,10 +284,10 @@ const CreatorDashboard = () => {
               </div>
 
               <div>
-                <Label htmlFor="country">Country *</Label>
+                <Label htmlFor="country">{tr("a.0f96626285")}</Label>
                 <Select value={country} onValueChange={setCountry} required>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select country" />
+                    <SelectValue placeholder={tr("a.59ee76bad1")} />
                   </SelectTrigger>
                   <SelectContent>
                     {countries.map((c) => (
@@ -299,7 +300,7 @@ const CreatorDashboard = () => {
               </div>
 
               <div>
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{tr("a.55f8ebc805")}</Label>
                 <Textarea
                   id="description"
                   value={description}
@@ -309,7 +310,7 @@ const CreatorDashboard = () => {
               </div>
 
               <div>
-                <Label htmlFor="preview">Preview Image</Label>
+                <Label htmlFor="preview">{tr("a.49e26d9c7b")}</Label>
                 <Input
                   id="preview"
                   type="file"
@@ -319,24 +320,24 @@ const CreatorDashboard = () => {
               </div>
 
               <div className="border rounded-lg p-4 space-y-4">
-                <h4 className="font-semibold text-sm">Theme Settings</h4>
+                <h4 className="font-semibold text-sm">{tr("a.9e1eaaaa07")}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <Label>Primary Color (HSL)</Label>
+                    <Label>{tr("a.346bd532b4")}</Label>
                     <div className="flex gap-2 items-center">
                       <Input value={palettePrimary} onChange={(e) => setPalettePrimary(e.target.value)} placeholder="315 18% 32%" />
                       <div className="w-8 h-8 rounded-full border flex-shrink-0" style={{ backgroundColor: `hsl(${palettePrimary})` }} />
                     </div>
                   </div>
                   <div>
-                    <Label>Secondary Color (HSL)</Label>
+                    <Label>{tr("a.4878caf92a")}</Label>
                     <div className="flex gap-2 items-center">
                       <Input value={paletteSecondary} onChange={(e) => setPaletteSecondary(e.target.value)} placeholder="43 45% 58%" />
                       <div className="w-8 h-8 rounded-full border flex-shrink-0" style={{ backgroundColor: `hsl(${paletteSecondary})` }} />
                     </div>
                   </div>
                   <div>
-                    <Label>Accent Color (HSL)</Label>
+                    <Label>{tr("a.adda5aa719")}</Label>
                     <div className="flex gap-2 items-center">
                       <Input value={paletteAccent} onChange={(e) => setPaletteAccent(e.target.value)} placeholder="105 10% 45%" />
                       <div className="w-8 h-8 rounded-full border flex-shrink-0" style={{ backgroundColor: `hsl(${paletteAccent})` }} />
@@ -345,25 +346,25 @@ const CreatorDashboard = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <Label>Heading Font</Label>
-                    <Input value={fontHeading} onChange={(e) => setFontHeading(e.target.value)} placeholder="Playfair Display" />
+                    <Label>{tr("a.1f3fbc0f71")}</Label>
+                    <Input value={fontHeading} onChange={(e) => setFontHeading(e.target.value)} placeholder={tr("a.43f08a7a31")} />
                   </div>
                   <div>
-                    <Label>Body Font</Label>
-                    <Input value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} placeholder="Lora" />
+                    <Label>{tr("a.5e13d06492")}</Label>
+                    <Input value={fontFamily} onChange={(e) => setFontFamily(e.target.value)} placeholder={tr("a.dbdc021eda")} />
                   </div>
                   <div>
-                    <Label>Layout Style</Label>
+                    <Label>{tr("a.82a800f62a")}</Label>
                     <Select value={layoutStyle} onValueChange={setLayoutStyle}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="classic">Classic</SelectItem>
-                        <SelectItem value="elegant">Elegant</SelectItem>
-                        <SelectItem value="ornate">Ornate</SelectItem>
-                        <SelectItem value="minimal">Minimal</SelectItem>
-                        <SelectItem value="modern">Modern</SelectItem>
+                        <SelectItem value="classic">{tr("a.130cd7fe33")}</SelectItem>
+                        <SelectItem value="elegant">{tr("a.4d459dfb9a")}</SelectItem>
+                        <SelectItem value="ornate">{tr("a.135640de98")}</SelectItem>
+                        <SelectItem value="minimal">{tr("a.a711cca9a4")}</SelectItem>
+                        <SelectItem value="modern">{tr("a.3a4e447e89")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -376,12 +377,12 @@ const CreatorDashboard = () => {
                   checked={isFree}
                   onCheckedChange={(checked) => setIsFree(checked as boolean)}
                 />
-                <Label htmlFor="isFree">Free Template</Label>
+                <Label htmlFor="isFree">{tr("a.26f7c651cd")}</Label>
               </div>
 
               {!isFree && (
                 <div>
-                  <Label htmlFor="price">Price (€) *</Label>
+                  <Label htmlFor="price">{tr("a.41fe56949f")}</Label>
                   <Input
                     id="price"
                     type="number"
@@ -398,7 +399,7 @@ const CreatorDashboard = () => {
 
               <div className="flex gap-2">
                 <Button type="submit" disabled={uploading}>
-                  {uploading ? "Creating..." : "Create Template"}
+                  {uploading ? tr("a.28ea7667d0") : tr("a.e48e668546")}
                 </Button>
                 <Button
                   type="button"
@@ -408,7 +409,7 @@ const CreatorDashboard = () => {
                     resetForm();
                   }}
                 >
-                  Cancel
+                  {tr("a.77dfd2135f")}
                 </Button>
               </div>
             </form>
@@ -436,7 +437,7 @@ const CreatorDashboard = () => {
               </p>
               <div className="flex items-center justify-between">
                 {template.is_free ? (
-                  <Badge variant="secondary">Free</Badge>
+                  <Badge variant="secondary">{tr("a.75f527181b")}</Badge>
                 ) : (
                   <Badge variant="outline">€{template.price}</Badge>
                 )}
@@ -457,7 +458,7 @@ const CreatorDashboard = () => {
           <Card>
             <CardContent className="p-12 text-center">
               <p className="text-muted-foreground">
-                No templates yet. Create your first template to get started!
+                {tr("a.4dc52bf75e")}
               </p>
             </CardContent>
           </Card>

@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { getCountryFlag } from "@/lib/countryFlags";
 import { useToast } from "@/hooks/use-toast";
 
+import { tr } from "@/i18n/tr";
 interface Template {
   id: string;
   name: string;
@@ -61,8 +62,8 @@ const FeaturedTemplates = () => {
   const handleBuyTemplate = (templateId: string, isFree: boolean) => {
     if (!userId) {
       toast({
-        title: "Sign in required",
-        description: "Please sign in to purchase a template",
+        title: tr("a.934d2a9003"),
+        description: tr("a.b24034fa9e"),
         variant: "destructive",
       });
       navigate("/login");
@@ -110,14 +111,14 @@ const FeaturedTemplates = () => {
               <p className="text-sm text-muted-foreground">{template.country}</p>
               <div className="flex items-center justify-between pt-2">
                 <span className="font-semibold text-lg">
-                  {template.is_free ? "Free" : `€${template.price.toFixed(2)}`}
+                  {template.is_free ? tr("a.75f527181b") : `€${template.price.toFixed(2)}`}
                 </span>
                 <Button 
                   variant="secondary" 
                   size="sm"
                   onClick={() => handleBuyTemplate(template.id, template.is_free)}
                 >
-                  {template.is_free ? "View Template" : "Buy Template"}
+                  {template.is_free ? tr("a.e489aa75c4") : tr("a.67049e6135")}
                 </Button>
               </div>
             </CardContent>
@@ -128,7 +129,7 @@ const FeaturedTemplates = () => {
       <div className="text-center">
         <Link to="/templates">
           <Button size="lg" className="px-8 shadow-elegant">
-            View All Templates
+            {tr("a.f93c035a7f")}
           </Button>
         </Link>
       </div>

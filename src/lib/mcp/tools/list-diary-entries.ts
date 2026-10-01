@@ -2,10 +2,11 @@ import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 import { errorResult, jsonResult, notAuthenticated, supabaseForUser } from "../supabase";
 
+import { tr } from "@/i18n/tr";
 export default defineTool({
   name: "list_diary_entries",
-  title: "List my diary entries",
-  description: "List the signed-in user's private reflection diary entries, newest first.",
+  title: tr("a.ce55ac9a86"),
+  description: tr("a.66efdf8837"),
   inputSchema: {
     limit: z.number().int().describe("Maximum number of entries to return (default 20).").optional(),
   },

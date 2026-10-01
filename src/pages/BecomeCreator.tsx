@@ -22,6 +22,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
+import { tr } from "@/i18n/tr";
 const templateFormSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters").max(100, "Name must be less than 100 characters"),
   description: z.string().min(10, "Description must be at least 10 characters").max(500, "Description must be less than 500 characters"),
@@ -63,8 +64,8 @@ const BecomeCreator = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) {
       toast({
-        title: "Sign in required",
-        description: "Please sign in to become a creator",
+        title: tr("a.934d2a9003"),
+        description: tr("a.4fca9545ae"),
         variant: "destructive",
       });
       navigate("/login");
@@ -96,8 +97,8 @@ const BecomeCreator = () => {
     
     if (!agreeTerms) {
       toast({
-        title: "Terms Required",
-        description: "Please agree to the Creator Terms",
+        title: tr("a.c4c1914255"),
+        description: tr("a.8a97e25e04"),
         variant: "destructive",
       });
       return;
@@ -122,8 +123,8 @@ const BecomeCreator = () => {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to submit creator application",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.1e190ae3cf"),
         variant: "destructive",
       });
     } else {
@@ -138,8 +139,8 @@ const BecomeCreator = () => {
       }).catch((err) => console.error("Email notification failed:", err));
 
       toast({
-        title: "Application Submitted! 🎨",
-        description: "We've sent a confirmation to your email. You'll be notified when approved.",
+        title: tr("a.9c2639158f"),
+        description: tr("a.4370903190"),
       });
       navigate("/dashboard");
     }
@@ -148,8 +149,8 @@ const BecomeCreator = () => {
   const handleTemplateSubmit = async (values: TemplateFormValues) => {
     if (!previewFile) {
       toast({
-        title: "Missing Information",
-        description: "Please upload a preview image",
+        title: tr("a.544c70e706"),
+        description: tr("a.5e67b4c3c9"),
         variant: "destructive",
       });
       return;
@@ -163,7 +164,7 @@ const BecomeCreator = () => {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
       if (authError || !user) {
-        throw new Error("You must be logged in to upload templates");
+        throw new Error(tr("a.a833b59cab"));
       }
 
       // Upload preview image
@@ -204,8 +205,8 @@ const BecomeCreator = () => {
       setUploadProgress(100);
 
       toast({
-        title: "Success",
-        description: "Template published successfully!",
+        title: tr("a.42a8f651d7"),
+        description: tr("a.775423b43f"),
       });
 
       form.reset();
@@ -213,8 +214,8 @@ const BecomeCreator = () => {
       setUploadProgress(0);
     } catch (error: any) {
       toast({
-        title: "Upload Failed",
-        description: error.message || "Failed to upload template. Please try again.",
+        title: tr("a.88c104b376"),
+        description: error.message || tr("a.0f48d75b93"),
         variant: "destructive",
       });
     } finally {
@@ -225,18 +226,18 @@ const BecomeCreator = () => {
   const benefits = [
     {
       icon: Palette,
-      title: "Creative Freedom",
-      description: "Design beautiful memorial templates with your unique style",
+      title: tr("a.2c058a4308"),
+      description: tr("a.f4cee16016"),
     },
     {
       icon: TrendingUp,
-      title: "Reach Thousands",
-      description: "Your templates will be seen by families worldwide",
+      title: tr("a.78f4a45f7d"),
+      description: tr("a.8c6785da6b"),
     },
     {
       icon: DollarSign,
-      title: "Earn Revenue",
-      description: "Set your own prices and earn from every template sale",
+      title: tr("a.1c4f21d861"),
+      description: tr("a.4298c569f3"),
     },
   ];
 
@@ -246,14 +247,14 @@ const BecomeCreator = () => {
       <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 flex items-center justify-center">
         <Card className="max-w-md mx-4">
           <CardHeader>
-            <CardTitle className="text-center font-serif">Application Under Review</CardTitle>
+            <CardTitle className="text-center font-serif">{tr("a.8a07e65bef")}</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
             <p className="text-muted-foreground mb-6">
-              Your creator request is still under review. You'll be notified once approved.
+              {tr("a.e38c976479")}
             </p>
             <Button onClick={() => navigate("/dashboard")}>
-              Back to Dashboard
+              {tr("a.8fb719081e")}
             </Button>
           </CardContent>
         </Card>
@@ -268,18 +269,18 @@ const BecomeCreator = () => {
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-12">
             <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Welcome to the Creative World
+              {tr("a.23d1da117e")}
             </h1>
             <p className="text-lg text-muted-foreground">
-              Where memories meet art
+              {tr("a.c7202507dd")}
             </p>
           </div>
 
           <Card className="shadow-elegant">
             <CardHeader>
-              <CardTitle className="font-serif text-2xl">Publish a New Template</CardTitle>
+              <CardTitle className="font-serif text-2xl">{tr("a.5bcdf81701")}</CardTitle>
               <CardDescription>
-                Share your creative design with the community
+                {tr("a.88f0c74c65")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -290,9 +291,9 @@ const BecomeCreator = () => {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Template Name</FormLabel>
+                        <FormLabel>{tr("a.48c5544ff8")}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter template name" {...field} />
+                          <Input placeholder={tr("a.aec03a9f44")} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -304,10 +305,10 @@ const BecomeCreator = () => {
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel>{tr("a.55f8ebc805")}</FormLabel>
                         <FormControl>
                           <Textarea 
-                            placeholder="Describe your template..."
+                            placeholder={tr("a.9ccca73c94")}
                             className="min-h-[100px]"
                             {...field}
                           />
@@ -318,7 +319,7 @@ const BecomeCreator = () => {
                   />
 
                   <div className="space-y-2">
-                    <Label htmlFor="preview_image">Preview Image *</Label>
+                    <Label htmlFor="preview_image">{tr("a.14b6118edd")}</Label>
                     <div className="flex items-center gap-4">
                       <Input
                         id="preview_image"
@@ -329,8 +330,8 @@ const BecomeCreator = () => {
                           if (file) {
                             if (file.size > 5 * 1024 * 1024) {
                               toast({
-                                title: "File too large",
-                                description: "Image must be less than 5MB",
+                                title: tr("a.a0704a4eaa"),
+                                description: tr("a.7b2cdf2257"),
                                 variant: "destructive",
                               });
                               return;
@@ -344,7 +345,7 @@ const BecomeCreator = () => {
                     </div>
                     {previewFile && (
                       <p className="text-sm text-muted-foreground">
-                        Selected: {previewFile.name}
+                        {tr("a.2e0844789c")} {previewFile.name}
                       </p>
                     )}
                   </div>
@@ -354,7 +355,7 @@ const BecomeCreator = () => {
                     name="price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Price (€)</FormLabel>
+                        <FormLabel>{tr("a.72877a5274")}</FormLabel>
                         <FormControl>
                           <Input 
                             type="number" 
@@ -383,10 +384,10 @@ const BecomeCreator = () => {
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Publishing...
+                        {tr("a.d281c9f37a")}
                       </>
                     ) : (
-                      "Publish Template"
+                      tr("a.8bf821ff59")
                     )}
                   </Button>
                 </form>
@@ -404,10 +405,10 @@ const BecomeCreator = () => {
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="text-center mb-12">
           <h1 className="font-serif text-4xl md:text-5xl font-bold mb-4">
-            Become a Template Creator
+            {tr("a.d6954f9f73")}
           </h1>
           <p className="text-lg text-muted-foreground">
-            Share your creativity and earn by designing memorial templates
+            {tr("a.3b8877ae7c")}
           </p>
         </div>
 
@@ -431,23 +432,23 @@ const BecomeCreator = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-serif text-2xl">Creator Registration</CardTitle>
+            <CardTitle className="font-serif text-2xl">{tr("a.aa6e574cb8")}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleApplicationSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="displayName">Display Name *</Label>
+                <Label htmlFor="displayName">{tr("a.2c006c5db0")}</Label>
                 <Input
                   id="displayName"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Your creative name"
+                  placeholder={tr("a.e7af5696f4")}
                   required
                 />
               </div>
 
               <div>
-                <Label htmlFor="email">Email *</Label>
+                <Label htmlFor="email">{tr("a.604e4bff22")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -458,10 +459,10 @@ const BecomeCreator = () => {
               </div>
 
               <div>
-                <Label htmlFor="country">Country *</Label>
+                <Label htmlFor="country">{tr("a.0f96626285")}</Label>
                 <Select value={country} onValueChange={setCountry} required>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select your country" />
+                    <SelectValue placeholder={tr("a.5536b471cb")} />
                   </SelectTrigger>
                   <SelectContent>
                     {countries.map((c) => (
@@ -474,7 +475,7 @@ const BecomeCreator = () => {
               </div>
 
               <div>
-                <Label htmlFor="portfolio">Portfolio Link (Optional)</Label>
+                <Label htmlFor="portfolio">{tr("a.411fcfa1b0")}</Label>
                 <Input
                   id="portfolio"
                   type="url"
@@ -485,12 +486,12 @@ const BecomeCreator = () => {
               </div>
 
               <div>
-                <Label htmlFor="description">Why do you want to become a creator? *</Label>
+                <Label htmlFor="description">{tr("a.27ebe10f20")}</Label>
                 <Textarea
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Tell us about your creative vision and why you'd like to design memorial templates..."
+                  placeholder={tr("a.30034279f7")}
                   rows={4}
                   required
                 />
@@ -503,13 +504,12 @@ const BecomeCreator = () => {
                   onCheckedChange={(checked) => setAgreeTerms(checked as boolean)}
                 />
                 <Label htmlFor="terms" className="cursor-pointer text-sm">
-                  I agree to the Creator Terms and understand that my templates will be
-                  reviewed before being published
+                  {tr("a.469347ba55")}
                 </Label>
               </div>
 
               <Button type="submit" size="lg" className="w-full" disabled={loading}>
-                {loading ? "Submitting..." : "Submit Application"}
+                {loading ? tr("a.46a1a6919d") : tr("a.f326633a19")}
               </Button>
             </form>
           </CardContent>

@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { InviteAccessPanel } from "@/components/InviteAccessPanel";
 
+import { tr } from "@/i18n/tr";
 interface EditMemorialModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -73,8 +74,8 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
 
     if (!formData.name.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter a name",
+        title: tr("a.7f2f6a15cf"),
+        description: tr("a.e948e93a08"),
         variant: "destructive",
       });
       return;
@@ -87,7 +88,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
       const user = refreshed.session?.user ?? null;
 
       if (refreshError || !user) {
-        throw new Error("Your session expired. Please log in again and retry.");
+        throw new Error(tr("a.ce6d6f1c66"));
       }
 
       const { data: ownedMemorial, error: ownershipError } = await supabase
@@ -99,7 +100,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
 
       if (ownershipError) throw ownershipError;
       if (!ownedMemorial) {
-        throw new Error("You don't have permission to edit this memorial.");
+        throw new Error(tr("a.bedfefa266"));
       }
 
       let previewImageUrl = ownedMemorial.preview_image_url || memorial.preview_image_url;
@@ -147,12 +148,12 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
 
       if (updateError) throw updateError;
       if (!updatedMemorial) {
-        throw new Error("You don't have permission to edit this memorial.");
+        throw new Error(tr("a.bedfefa266"));
       }
 
       toast({
-        title: "Success",
-        description: "Memorial updated successfully",
+        title: tr("a.42a8f651d7"),
+        description: tr("a.0bce6963e0"),
       });
 
       onMemorialUpdated();
@@ -165,7 +166,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
         : rawMessage;
 
       toast({
-        title: "Error",
+        title: tr("a.7f2f6a15cf"),
         description: friendlyMessage,
         variant: "destructive",
       });
@@ -184,23 +185,23 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-serif text-2xl">Edit Memorial</DialogTitle>
+          <DialogTitle className="font-serif text-2xl">{tr("a.2e53982b56")}</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="details" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="sharing">Privacy & Sharing</TabsTrigger>
+            <TabsTrigger value="details">{tr("a.dc3decbb93")}</TabsTrigger>
+            <TabsTrigger value="sharing">{tr("a.3967c45a44")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="details">
             <form onSubmit={handleSubmit} className="space-y-6 pt-4">
               {/* Name */}
               <div className="space-y-2">
-                <Label htmlFor="name">Name *</Label>
+                <Label htmlFor="name">{tr("a.d145bb8309")}</Label>
                 <Input
                   id="name"
-                  placeholder="Full name"
+                  placeholder={tr("a.eeb692087d")}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
@@ -208,15 +209,15 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
               </div>
 
               {/* Bio */}
-              <div className="space-y-2"><Label htmlFor="editMemorialType">Memorial type</Label><select id="editMemorialType" value={formData.memorial_type} onChange={(e) => setFormData({ ...formData, memorial_type: e.target.value })} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="standard">Memorial</option><option value="defender_of_ukraine">Defender of Ukraine</option></select></div>
-              {formData.memorial_type === "defender_of_ukraine" && <div className="grid gap-3 rounded-md border p-4"><div><Label htmlFor="editDefenderLabel">Badge</Label><select id="editDefenderLabel" value={formData.defender_label} onChange={(e) => setFormData({ ...formData, defender_label: e.target.value })} className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="defender_male">Захисник України</option><option value="defender_female">Захисниця України</option></select></div><div><Label htmlFor="editServiceUnit">Unit</Label><Input id="editServiceUnit" maxLength={160} value={formData.service_unit} onChange={(e) => setFormData({ ...formData, service_unit: e.target.value })}/></div><div><Label htmlFor="editServicePlace">Place of service</Label><Input id="editServicePlace" maxLength={160} value={formData.service_place} onChange={(e) => setFormData({ ...formData, service_place: e.target.value })}/></div></div>}
+              <div className="space-y-2"><Label htmlFor="editMemorialType">{tr("a.ef1ebe0339")}</Label><select id="editMemorialType" value={formData.memorial_type} onChange={(e) => setFormData({ ...formData, memorial_type: e.target.value })} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="standard">{tr("a.ecbb766b6d")}</option><option value="defender_of_ukraine">{tr("a.083eada927")}</option></select></div>
+              {formData.memorial_type === "defender_of_ukraine" && <div className="grid gap-3 rounded-md border p-4"><div><Label htmlFor="editDefenderLabel">{tr("a.6d12c8adbe")}</Label><select id="editDefenderLabel" value={formData.defender_label} onChange={(e) => setFormData({ ...formData, defender_label: e.target.value })} className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="defender_male">Захисник України</option><option value="defender_female">Захисниця України</option></select></div><div><Label htmlFor="editServiceUnit">{tr("a.f6b935ab33")}</Label><Input id="editServiceUnit" maxLength={160} value={formData.service_unit} onChange={(e) => setFormData({ ...formData, service_unit: e.target.value })}/></div><div><Label htmlFor="editServicePlace">{tr("a.2f8f356309")}</Label><Input id="editServicePlace" maxLength={160} value={formData.service_place} onChange={(e) => setFormData({ ...formData, service_place: e.target.value })}/></div></div>}
 
               {/* Bio */}
               <div className="space-y-2">
-                <Label htmlFor="bio">Biography</Label>
+                <Label htmlFor="bio">{tr("a.53c2de2d09")}</Label>
                 <Textarea
                   id="bio"
-                  placeholder="Share their story, passions, and what made them special..."
+                  placeholder={tr("a.172691a941")}
                   value={formData.bio}
                   onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                   rows={4}
@@ -226,7 +227,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
               {/* Dates */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="dob">Date of Birth</Label>
+                  <Label htmlFor="dob">{tr("a.133160594d")}</Label>
                   <Input
                     id="dob"
                     type="date"
@@ -235,7 +236,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="dod">Date of Passing</Label>
+                  <Label htmlFor="dod">{tr("a.704a73d75a")}</Label>
                   <Input
                     id="dod"
                     type="date"
@@ -247,10 +248,10 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
 
               {/* Location */}
               <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
+                <Label htmlFor="location">{tr("a.d219c68101")}</Label>
                 <Input
                   id="location"
-                  placeholder="City, Country"
+                  placeholder={tr("a.4b98b8e871")}
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 />
@@ -258,7 +259,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
 
               {/* Image Upload */}
               <div className="space-y-2">
-                <Label>Profile Image</Label>
+                <Label>{tr("a.14dcc4d842")}</Label>
                 <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-smooth">
                   <input
                     type="file"
@@ -272,7 +273,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
                       <div className="relative inline-block">
                         <img
                           src={imagePreview}
-                          alt="Preview"
+                          alt={tr("a.f1fbb2b43d")}
                           className="max-h-48 rounded-lg mx-auto"
                         />
                         <Button
@@ -285,14 +286,14 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
                             document.getElementById('image-upload')?.click();
                           }}
                         >
-                          Change Image
+                          {tr("a.e4fa833f31")}
                         </Button>
                       </div>
                     ) : (
                       <div className="space-y-2">
                         <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
                         <p className="text-sm text-muted-foreground">
-                          Click to upload an image
+                          {tr("a.28e4f1ff17")}
                         </p>
                       </div>
                     )}
@@ -301,7 +302,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
               </div>
 
               {/* Visibility Toggle */}
-              <div className="flex items-center justify-between rounded-lg border p-4"><div><Label htmlFor="guest-candles">Guest candles</Label><p className="text-xs text-muted-foreground">Allow visitors to light a free seven-day candle without signing in.</p></div><Switch id="guest-candles" checked={guestCandlesEnabled} onCheckedChange={setGuestCandlesEnabled}/></div>
+              <div className="flex items-center justify-between rounded-lg border p-4"><div><Label htmlFor="guest-candles">{tr("a.77732eb5ee")}</Label><p className="text-xs text-muted-foreground">{tr("a.5579a6b6c5")}</p></div><Switch id="guest-candles" checked={guestCandlesEnabled} onCheckedChange={setGuestCandlesEnabled}/></div>
 
               {/* Visibility Toggle */}
               <div className="flex items-center justify-between rounded-lg border p-4">
@@ -309,10 +310,10 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
                   {isPublic ? <Eye className="h-5 w-5 text-primary" /> : <EyeOff className="h-5 w-5 text-muted-foreground" />}
                   <div>
                     <Label htmlFor="edit-visibility" className="text-sm font-medium cursor-pointer">
-                      {isPublic ? "Public Memorial" : "Private Memorial"}
+                      {isPublic ? tr("a.f8a172c78f") : tr("a.44671cff62")}
                     </Label>
                     <p className="text-xs text-muted-foreground">
-                      {isPublic ? "Visible on the Memorial Wall and homepage" : "Only visible to you"}
+                      {isPublic ? tr("a.3c29eb42b5") : tr("a.384d197b4a")}
                     </p>
                   </div>
                 </div>
@@ -327,16 +328,16 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
                   onClick={handleClose}
                   disabled={loading}
                 >
-                  Cancel
+                  {tr("a.77dfd2135f")}
                 </Button>
                 <Button type="submit" disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
+                      {tr("a.ae7e887517")}
                     </>
                   ) : (
-                    "Save Changes"
+                    tr("a.fa2984b367")
                   )}
                 </Button>
               </div>
@@ -352,7 +353,7 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
               onPrivacyChange={async (newIsPublic, newPrivacyLevel) => {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (!user) {
-                  toast({ title: "Error", description: "Please log in again.", variant: "destructive" });
+                  toast({ title: tr("a.7f2f6a15cf"), description: tr("a.e35193e0f2"), variant: "destructive" });
                   return;
                 }
 
@@ -366,9 +367,9 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
                   .eq("user_id", user.id);
 
                 if (error) {
-                  toast({ title: "Error", description: "Failed to update privacy", variant: "destructive" });
+                  toast({ title: tr("a.7f2f6a15cf"), description: tr("a.8649d65a48"), variant: "destructive" });
                 } else {
-                  toast({ title: "Privacy updated" });
+                  toast({ title: tr("a.66f5270655") });
                   onMemorialUpdated();
                 }
               }}

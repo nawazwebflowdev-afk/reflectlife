@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { tr } from "@/i18n/tr";
 interface InviteAccessPanelProps {
   type: "memorial" | "tree";
   resourceId: string;
@@ -141,7 +142,7 @@ export const InviteAccessPanel = ({
     setSending(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      if (!user) throw new Error(tr("a.0c91acbae2"));
 
       const baseInsert = {
         invited_email: inviteEmail.trim(),
@@ -177,7 +178,7 @@ export const InviteAccessPanel = ({
       });
 
       toast({
-        title: "Invitation sent! 💌",
+        title: tr("a.d4d8ad8ee6"),
         description: `${inviteEmail} will receive an email invite`,
       });
       setInviteEmail("");
@@ -185,9 +186,9 @@ export const InviteAccessPanel = ({
       fetchGrants();
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: tr("a.7f2f6a15cf"),
         description: error.message?.includes("duplicate")
-          ? "This person has already been invited"
+          ? tr("a.0c02e9b755")
           : error.message,
         variant: "destructive",
       });
@@ -200,7 +201,7 @@ export const InviteAccessPanel = ({
     setSending(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+      if (!user) throw new Error(tr("a.0c91acbae2"));
 
       const baseInsert = {
         user_id: profile.id,
@@ -225,7 +226,7 @@ export const InviteAccessPanel = ({
       if (insertError) throw insertError;
 
       toast({
-        title: "Access granted! ✨",
+        title: tr("a.a62548851f"),
         description: `${profile.full_name} now has access`,
       });
       setSearchQuery("");
@@ -234,9 +235,9 @@ export const InviteAccessPanel = ({
       fetchGrants();
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: tr("a.7f2f6a15cf"),
         description: error.message?.includes("duplicate")
-          ? "This person already has access"
+          ? tr("a.2dbcd47cae")
           : error.message,
         variant: "destructive",
       });
@@ -255,22 +256,22 @@ export const InviteAccessPanel = ({
       error = res.error;
     }
     if (error) {
-      toast({ title: "Error", description: "Failed to remove access", variant: "destructive" });
+      toast({ title: tr("a.7f2f6a15cf"), description: tr("a.90959e2ec3"), variant: "destructive" });
     } else {
-      toast({ title: "Access removed" });
+      toast({ title: tr("a.a21363aec4") });
       fetchGrants();
     }
   };
 
   const privacyOptions = type === "memorial"
     ? [
-        { value: "public", label: "Public", icon: Globe, desc: "Anyone can view" },
-        { value: "friends", label: "Invited Only", icon: Users, desc: "Only invited people" },
-        { value: "private", label: "Private", icon: Lock, desc: "Only you" },
+        { value: "public", label: tr("a.dc5eb704bb"), icon: Globe, desc: tr("a.62403a18b0") },
+        { value: "friends", label: tr("a.29d4ce0c7a"), icon: Users, desc: tr("a.df46396466") },
+        { value: "private", label: tr("a.237dfa0a21"), icon: Lock, desc: tr("a.64fe846abb") },
       ]
     : [
-        { value: "public", label: "Public", icon: Globe, desc: "Anyone can view" },
-        { value: "private", label: "Private", icon: Lock, desc: "Only you and invited people" },
+        { value: "public", label: tr("a.dc5eb704bb"), icon: Globe, desc: tr("a.62403a18b0") },
+        { value: "private", label: tr("a.237dfa0a21"), icon: Lock, desc: tr("a.bd14b5c80c") },
       ];
 
   const currentPrivacy = type === "memorial"
@@ -283,7 +284,7 @@ export const InviteAccessPanel = ({
       <div className="space-y-3">
         <Label className="text-base font-semibold flex items-center gap-2">
           {currentPrivacy === "public" ? <Globe className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-          Privacy
+          {tr("a.cf01481f62")}
         </Label>
         <div className="grid gap-2">
           {privacyOptions.map((opt) => (
@@ -316,10 +317,10 @@ export const InviteAccessPanel = ({
       <div className="space-y-3">
         <Label className="text-base font-semibold flex items-center gap-2">
           <UserPlus className="h-4 w-4" />
-          Invite People
+          {tr("a.a937c4ac39")}
         </Label>
         <p className="text-sm text-muted-foreground">
-          Invite family or friends to view, comment, and contribute to this {type}.
+          {tr("a.cda689e569")} {type}.
         </p>
 
         {!inviteMethod ? (
@@ -331,7 +332,7 @@ export const InviteAccessPanel = ({
               onClick={() => setInviteMethod("user")}
             >
               <Search className="h-4 w-4" />
-              Find user
+              {tr("a.c32267ad0f")}
             </Button>
             <Button
               type="button"
@@ -340,7 +341,7 @@ export const InviteAccessPanel = ({
               onClick={() => setInviteMethod("email")}
             >
               <Mail className="h-4 w-4" />
-              Invite by email
+              {tr("a.e705c7bf70")}
             </Button>
           </div>
         ) : inviteMethod === "email" ? (
@@ -348,17 +349,17 @@ export const InviteAccessPanel = ({
             <div className="flex gap-2">
               <Input
                 type="email"
-                placeholder="friend@example.com"
+                placeholder={tr("a.c7363c9f0a")}
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleInviteByEmail()}
               />
               <Button onClick={handleInviteByEmail} disabled={sending || !inviteEmail.trim()}>
-                {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send"}
+                {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : tr("a.9bc2575c39")}
               </Button>
             </div>
             <Button type="button" variant="ghost" size="sm" onClick={() => setInviteMethod(null)}>
-              ← Back
+              {tr("a.c32ae9f4a7")}
             </Button>
           </div>
         ) : (
@@ -366,7 +367,7 @@ export const InviteAccessPanel = ({
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by name..."
+                placeholder={tr("a.6261a8e8f0")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -399,7 +400,7 @@ export const InviteAccessPanel = ({
             )}
 
             <Button type="button" variant="ghost" size="sm" onClick={() => setInviteMethod(null)}>
-              ← Back
+              {tr("a.c32ae9f4a7")}
             </Button>
           </div>
         )}
@@ -409,14 +410,14 @@ export const InviteAccessPanel = ({
 
       {/* Current Access List */}
       <div className="space-y-3">
-        <Label className="text-sm font-semibold">People with access</Label>
+        <Label className="text-sm font-semibold">{tr("a.f6a2fe72fc")}</Label>
         {loading ? (
           <div className="flex justify-center py-4">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         ) : grants.length === 0 ? (
           <p className="text-sm text-muted-foreground py-2">
-            No one has been invited yet.
+            {tr("a.7f26cc39da")}
           </p>
         ) : (
           <div className="space-y-2">
@@ -433,14 +434,14 @@ export const InviteAccessPanel = ({
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-sm truncate">
-                    {grant.profile?.full_name || grant.invited_email || "Unknown"}
+                    {grant.profile?.full_name || grant.invited_email || tr("a.bc7819b34f")}
                   </div>
                   <div className="flex items-center gap-1">
                     <Badge
                       variant={grant.status === "accepted" ? "default" : "secondary"}
                       className="text-xs"
                     >
-                      {grant.status === "accepted" ? "Active" : "Pending"}
+                      {grant.status === "accepted" ? tr("a.a733b809d2") : tr("a.96f608c16c")}
                     </Badge>
                   </div>
                 </div>

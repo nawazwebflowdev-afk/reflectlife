@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Separator } from "@/components/ui/separator";
 
+import { tr } from "@/i18n/tr";
 const CookiePolicy = () => {
   const { t } = useTranslation();
 
@@ -98,7 +99,7 @@ const CookiePolicy = () => {
         <p className="text-muted-foreground leading-relaxed">
           {t("cookiePolicy.moreContact")}{" "}
           <a href="mailto:sypera.sylvia@gmail.com" className="text-primary hover:underline">
-            sypera.sylvia@gmail.com
+            {tr("a.ef09634c32")}
           </a>
         </p>
       </section>

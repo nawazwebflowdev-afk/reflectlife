@@ -14,6 +14,7 @@ import timelineBg from "@/assets/timeline-bg.jpg";
 import { format } from "date-fns";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
+import { tr } from "@/i18n/tr";
 interface Memorial {
   id: string;
   name: string;
@@ -83,7 +84,7 @@ const Memorials = () => {
     } catch (error: any) {
       console.error('Error fetching memorials:', error);
       toast({
-        title: "Error loading memorials",
+        title: tr("a.0454c8d6df"),
         description: error.message,
         variant: "destructive",
       });
@@ -113,11 +114,11 @@ const Memorials = () => {
       if (error) throw error;
       setMemorials(prev => prev.map(m => m.id === memorial.id ? { ...m, is_public: newIsPublic, privacy_level: newPrivacy } : m));
       toast({
-        title: newIsPublic ? "Memorial is now public" : "Memorial is now private",
-        description: newIsPublic ? "This memorial will appear on the homepage." : "This memorial is hidden from public view.",
+        title: newIsPublic ? tr("a.ad852715e0") : tr("a.3834cbc700"),
+        description: newIsPublic ? tr("a.9a0e4dd12a") : tr("a.5c4f60d22e"),
       });
     } catch (error: any) {
-      toast({ title: "Error updating visibility", description: error.message, variant: "destructive" });
+      toast({ title: tr("a.b3ad1d0e96"), description: error.message, variant: "destructive" });
     }
   };
 
@@ -159,10 +160,10 @@ const Memorials = () => {
         
         <div className="relative container mx-auto px-4 text-center">
           <h1 className="font-serif text-4xl md:text-6xl font-bold mb-4 text-white drop-shadow-lg animate-fade-in">
-            Memorial Wall
+            {tr("a.a86506f38a")}
           </h1>
           <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-8 drop-shadow-md">
-            Celebrating lives and preserving legacies. Browse memorials or create one for your loved one.
+            {tr("a.7dc46766c3")}
           </p>
 
           {/* Search */}
@@ -171,7 +172,7 @@ const Memorials = () => {
               <Search className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Search by name, location, or date..."
+                placeholder={tr("a.e51747b39e")}
                 className="pl-10 h-12 bg-background/90 backdrop-blur-sm"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -187,7 +188,7 @@ const Memorials = () => {
               className="gap-2 shadow-lg"
             >
               <Plus className="h-5 w-5" />
-              Create a Memorial
+              {tr("a.0bfb9d7153")}
             </Button>
             {user && (
               <PageTemplateSelector
@@ -231,7 +232,7 @@ const Memorials = () => {
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          {memorial.is_public ? "Public — visible on homepage" : "Private — hidden from public"}
+                          {memorial.is_public ? tr("a.a1af738d65") : tr("a.e332284715")}
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -267,13 +268,13 @@ const Memorials = () => {
                 <Search className="h-10 w-10 text-muted-foreground" />
               </div>
               <h3 className="font-serif text-2xl font-semibold mb-3">
-                No Results Found
+                {tr("a.728b4ab4c0")}
               </h3>
               <p className="text-muted-foreground mb-6">
-                We couldn't find any memorials matching "{searchQuery}". Try a different search term or create a new memorial.
+                {tr("a.b06f1ed9a6")}{searchQuery}{tr("a.1ea5a9cf8c")}
               </p>
               <Button onClick={() => setSearchQuery("")} variant="outline">
-                Clear Search
+                {tr("a.87e328dc94")}
               </Button>
             </CardContent>
           </Card>
