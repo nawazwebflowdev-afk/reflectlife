@@ -1,3 +1,6 @@
+import { useTranslation } from "react-i18next";
+import { PrivacyPicker, visibilityToDb, visibilityFromDb, type Visibility } from "@/components/PrivacyPicker";
+import { InviteFamily } from "@/components/InviteFamily";
 import { useState, useEffect } from "react";
 import { X, Upload, Loader2, Eye, EyeOff } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -35,7 +38,9 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
-  const [isPublic, setIsPublic] = useState(true);
+  const [visibility, setVisibility] = useState<Visibility>("public");
+  const [theme, setTheme] = useState("standard");
+  const { t } = useTranslation();
   const [guestCandlesEnabled, setGuestCandlesEnabled] = useState(true);
 
   useEffect(() => {
@@ -52,7 +57,8 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
         service_place: memorial.service_place || "",
       });
       setImagePreview(memorial.preview_image_url || "");
-      setIsPublic(memorial.is_public ?? true);
+      setVisibility(visibilityFromDb(memorial.is_public, memorial.privacy_level));
+      setTheme(memorial.theme || "standard");
       setGuestCandlesEnabled(memorial.guest_candles_enabled ?? true);
     }
   }, [memorial, open]);
@@ -132,8 +138,8 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
           date_of_birth: formData.date_of_birth || null,
           date_of_death: formData.date_of_death || null,
           preview_image_url: previewImageUrl,
-          is_public: isPublic,
-          privacy_level: isPublic ? "public" : "private",
+          ...visibilityToDb(visibility),
+          theme: theme === "ofrenda" ? "ofrenda" : "standard",
           memorial_type: formData.memorial_type,
           defender_label: formData.memorial_type === "defender_of_ukraine" ? formData.defender_label : null,
           service_unit: formData.memorial_type === "defender_of_ukraine" ? formData.service_unit.trim() || null : null,
@@ -304,20 +310,18 @@ const EditMemorialModal = ({ open, onOpenChange, memorial, onMemorialUpdated }: 
               {/* Visibility Toggle */}
               <div className="flex items-center justify-between rounded-lg border p-4"><div><Label htmlFor="guest-candles">{tr("a.77732eb5ee")}</Label><p className="text-xs text-muted-foreground">{tr("a.5579a6b6c5")}</p></div><Switch id="guest-candles" checked={guestCandlesEnabled} onCheckedChange={setGuestCandlesEnabled}/></div>
 
-              {/* Visibility Toggle */}
-              <div className="flex items-center justify-between rounded-lg border p-4">
-                <div className="flex items-center gap-3">
-                  {isPublic ? <Eye className="h-5 w-5 text-primary" /> : <EyeOff className="h-5 w-5 text-muted-foreground" />}
-                  <div>
-                    <Label htmlFor="edit-visibility" className="text-sm font-medium cursor-pointer">
-                      {isPublic ? tr("a.f8a172c78f") : tr("a.44671cff62")}
-                    </Label>
-                    <p className="text-xs text-muted-foreground">
-                      {isPublic ? tr("a.3c29eb42b5") : tr("a.384d197b4a")}
-                    </p>
-                  </div>
-                </div>
-                <Switch id="edit-visibility" checked={isPublic} onCheckedChange={setIsPublic} />
+              <PrivacyPicker value={visibility} onChange={setVisibility} />
+
+              <div className="space-y-2">
+                <Label htmlFor="editTheme">{t("nov.design")}</Label>
+                <select id="editTheme" value={theme} onChange={(e) => setTheme(e.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                  <option value="standard">{t("nov.designStandard")}</option>
+                  <option value="ofrenda">{t("nov.designOfrenda")}</option>
+                </select>
+              </div>
+
+              <div className="rounded-lg border p-4">
+                <InviteFamily memorialId={memorial?.id} memorialSlug={memorial?.slug} memorialName={memorial?.name || ""} />
               </div>
 
               {/* Actions */}
