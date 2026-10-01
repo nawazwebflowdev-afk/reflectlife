@@ -1,6 +1,7 @@
-
-import { tr } from "@/i18n/tr";export type RemembranceEventType =
+import { tr } from "@/i18n/tr";
 import { appLocale } from "@/lib/dateFormat";
+
+export type RemembranceEventType =
   | "birthday"
   | "date_of_death"
   | "anniversary"

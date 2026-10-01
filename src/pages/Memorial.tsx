@@ -369,8 +369,8 @@ const Memorial = () => {
   }
 
   const formatDate = (date: string | null) => {
-    if (!date) return "Unknown";
-    return formatDate(date);
+    if (!date) return tr("a.unknown");
+    return formatLongDate(date);
   };
 
   return (
