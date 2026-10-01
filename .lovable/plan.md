@@ -1,114 +1,61 @@
-# Shared Memorial Candle System — Plan
+# Ukrainian Memorial Experience and Guest Candles
 
-One candle per memorial. Any visitor can light it (Free 24h, Monthly €4.99 / 30d, Yearly €49.99 / 365d) or extend it while it's already burning. New durations stack onto the current expiry. Every visitor viewing the page sees the flame ignite, the countdown update, and new dedications appear in real time via Supabase Realtime.
+## Goal
+Make Reflectlife feel native for Ukrainian families in Ukraine and abroad, while adding a respectful, abuse-resistant guest candle experience. Preserve the existing English experience and current paid candles outside Defender memorials.
 
-## User experience
+## Ukrainian experience
+- Add `/uk/pamiat` with original Ukrainian copy, three clear creation steps, selected public examples, and guidance for sharing with family in Ukraine and abroad.
+- Add Ukrainian labels and messages for memorial actions, candle states, sharing, reminders, emails, and Defender memorials through the existing language system.
+- Keep Cyrillic intact in names, stories, emails, and visible content. Add a deterministic Ukrainian-to-Latin slug generator (for example `Олена Коваленко` → `olena-kovalenko`) with collision-safe suffixes; old ID links continue working.
+- Telegram and Viber remain alongside WhatsApp, Facebook, X, and copy link. Shared memorial links use Ukrainian wording when the page language is Ukrainian. Static social cards continue using the safe branded fallback until server-rendered per-memorial metadata is available.
 
-**On a cold candle**
-- Uploaded `Candle.png` shown with a black wick, no flame, no glow.
-- Caption: *"Light a candle in memory of this loved one."*
-- Three plan cards: Free (24h) · Monthly €4.99 (30d) · Yearly €49.99 (365d, "Best Value" badge).
-- Optional inputs: display name (defaults to signed-in name, guests type theirs), an *"Add anonymously"* toggle, a 100-char dedication.
-- Big CTA: **Light This Candle**.
+## Guest candle experience
+- Anyone can light a free guest candle without signing in. It burns for seven days, then appears in a compact “Lit earlier” history with the optional name and lighting date.
+- Guest input is limited to an optional 40-character plain-text name. No dedication, URL, or rich-text field is accepted.
+- Enforce three guest candles per device/IP, per memorial, per calendar day in the backend. Store only an irreversible hash of the device/IP key used for enforcement.
+- Add invisible Cloudflare Turnstile verification. The public site key is used by the memorial page; the secret key is stored only for the candle function.
+- After lighting, show an inline confirmation: “Your candle is lit for [name].” with “Share this memorial” and “Add a memory” actions; adding a memory requires sign-in.
+- Add owner controls to disable future guest candles and hide individual candles. Hidden candles stay available to the owner but are removed from public lists.
+- Keep monthly/yearly candles and make them visually brighter than guest candles, with the note “Keep a candle burning for a month or a year.”
+- Track guest-candle conversion when a guest who lit a candle proceeds to sign up and completes registration.
+- On Defender memorials, monthly and yearly candle durations are free; no Stripe checkout is used.
 
-**On a burning candle**
-- Same illustration + realistic animated flame, warm halo, tiny embers, gentle sway. Pure CSS keyframes on `transform`/`opacity`/`filter` for 60fps; a rAF loop retunes CSS vars for organic flicker. `prefers-reduced-motion` → static flame, no embers. Animation pauses on `visibilitychange`.
-- Caption: *"This candle is currently burning in loving memory."*
-- Live countdown (`23d 14h 07m`), contributor count (*"kept alive by 12 people"*), most recent dedication.
-- **Extend the Candle** button opens the same plan picker; the chosen duration is *added* to `expires_at`.
-- Small scrolling list of the last 5 dedications with contributor name (or *"Anonymous"*) and relative time.
+## Remembrance dates
+- For memorials with a date of death, add an owner-only, opt-in remembrance-date panel. Every option is off by default.
+- Offer the 9th day, 40th day, first anniversary, and all following anniversaries.
+- The owner selects their email and invited family members who have explicitly opted in. No invitation recipient is subscribed automatically.
+- Extend the scheduled email worker with idempotent delivery records so each milestone is sent once.
+- Ukrainian emails use natural Ukrainian wording and link to the memorial with “Додати спогад” and “Запалити свічку”; English recipients receive English wording.
 
-**When the candle expires**
-- Flame fades, halo disappears, wick shown with a wisp of smoke SVG for a second.
-- Message: *"The candle has gone out. Light it again in loving memory."* Cards reappear.
+## Defender of Ukraine memorials
+- Add optional type `defender_of_ukraine`, service unit, place of service, and date of death to memorial creation/editing.
+- Show a restrained “Захисник України” or “Захисниця України” badge, based on the owner’s selected label rather than inferred gender.
+- Creation and management remain restricted to the memorial owner/family through current authentication and owner policies.
+- Hide template charges, premium prompts, and advertising on Defender pages. All candle durations are free.
+- Donation visibility is not changed until the owner’s preference for Defender donations is known.
 
-Fully responsive: cards stack, CTA becomes full-width, candle scales with viewport.
+## Data and security
+- Extend `memorials` with memorial type, Defender label/details, guest-candle enabled flag, and unique slug.
+- Extend candle records with guest/device hash, visibility, and archived/history state; add a private rate-limit ledger and conversion events.
+- Add remembrance milestone preference, recipient opt-in, and delivery tables with explicit grants and owner-scoped RLS.
+- All public writes go through validated Edge Functions. Validate UUIDs, names, dates, allowed enum values, captcha tokens, rate limits, and ownership server-side.
+- Public reads expose only public, non-hidden candles and public memorial fields. Email addresses, device hashes, IP hashes, opt-ins, and conversion details remain private.
 
-## Data model
+## Interface changes
+- Update memorial creation/editing with the Defender type and service fields, guest-candle switch, and remembrance-date controls.
+- Update the memorial page with the Defender badge, Ukrainian-first primary candle action, active candle row, paid/free highlighting, prior-candle list, owner hide actions, and localized share copy.
+- Add readable slug routing while retaining `/memorial/:id` compatibility.
 
-The existing `memorial_candles` table (id, memorial_id, session_id, user_id, created_at) is a legacy per-tribute log and doesn't model lifecycle. I'll **redesign it**: preserve the table name (per your spec) via a migration that drops legacy columns, adds the lifecycle columns, and creates `candle_contributions`. Zero legacy data is currently referenced by product code (checked), so the reshape is safe.
+## Stripe Connect donation work recorded separately
+The latest donation specification arrived incomplete, ending after “If ticked, gross up the charge so the recipient receives”. The known requirements are recorded: Express accounts, destination charges, admin-configured 7% fee, 0% Reflectlife fee for Defender memorials, guest Checkout, connected-account currency, 10/25/50/100 presets, custom minimum 5, and optional fee coverage. No payment-flow implementation will be started from a partial money specification; the remaining text can be folded into this plan without another discovery round.
 
-`public.memorial_candles` (one active row per memorial):
-- `memorial_id` (FK memorials, **unique** — one candle per memorial)
-- `status` — `inactive` | `active` | `expired`
-- `started_at`, `expires_at` (nullable while inactive)
-- `current_plan` — last plan applied (`free` | `monthly` | `yearly`)
-- standard `id`, `created_at`, `updated_at` (trigger)
+## Verification
+- Test English and Ukrainian pages on desktop and mobile, including Cyrillic names, generated Latin slugs, and all share targets.
+- Test guest candle success, four-candle rejection, seven-day archive behavior, owner disable/hide controls, Defender free durations, and signup conversion attribution.
+- Test milestone creation, family opt-in, duplicate prevention, anniversary recurrence, and Ukrainian/English email rendering.
+- Run the project checks and verify the central flows against the live preview and deployed functions.
 
-`public.candle_contributions` (append-only history):
-- `memorial_candle_id` (FK memorial_candles)
-- `user_id` (nullable, FK auth.users)
-- `contributor_name` (text, nullable)
-- `anonymous` (bool, default false)
-- `plan` (`free` | `monthly` | `yearly`)
-- `amount` (numeric, EUR — 0 for free)
-- `message` (text, ≤100 chars, nullable)
-- `stripe_session_id` (text, unique when set, nullable)
-- `created_at`
-
-**RLS**
-- `memorial_candles`: `SELECT` open to anon + authenticated (candles are public — memorial visitors see them). Writes only via `service_role` (edge functions) — the frontend never writes directly.
-- `candle_contributions`: `SELECT` open (last dedications are shown to visitors). Writes only via `service_role`.
-- All lifecycle transitions happen inside SECURITY DEFINER RPCs / edge functions, so RLS stays tight and the "any visitor can contribute" behavior is safe.
-
-**SQL helpers (SECURITY DEFINER, `search_path=public`)**
-- `apply_candle_contribution(memorial_id, plan, duration_seconds, amount, contributor_name, anonymous, message, user_id, stripe_session_id)` — upserts the `memorial_candles` row, computes new `expires_at` (stacking when already active, else `now()+duration`), inserts the contribution, returns the updated candle. Idempotent on `stripe_session_id`.
-- `expire_stale_candles()` — flips active rows past `expires_at` to `expired`.
-
-Realtime is enabled on both tables with `alter publication supabase_realtime add table`; RLS ensures subscribers only receive rows they're allowed to read (public in this case).
-
-## Stripe
-
-Two one-off prices created via `stripe--create_stripe_product_and_price`:
-- `Memorial Candle — 30 days` (€4.99)
-- `Memorial Candle — 365 days` (€49.99)
-
-Their `price_id`s are hardcoded server-side.
-
-New edge functions (all `verify_jwt = false`, auth handled in code where relevant):
-
-- `create-candle-checkout` — accepts `{ memorial_id, plan: 'monthly'|'yearly', contributor_name?, anonymous?, message? }`. **Allows guests** (no auth required — anyone can contribute). Validates memorial exists and is not deleted. Creates Stripe Checkout `mode: payment`. Metadata carries all contribution fields + `kind: 'candle'`. `success_url = /candle-success?session_id={CHECKOUT_SESSION_ID}&memorial_id=<id>`.
-- `confirm-candle-payment` — called from the success page with `session_id`. Retrieves the session, verifies `payment_status === 'paid'`, then calls the `apply_candle_contribution` RPC. Idempotent.
-- `light-free-candle` — accepts the same payload with `plan: 'free'`. Rate-limited server-side per IP (≤3/hour, in-memory soft limit) to discourage spam; also enforces `message` length ≤100 and sanitizes. Calls the RPC directly.
-- `stripe-webhook` (existing) — extended to branch on `metadata.kind === 'candle'` and call the same RPC. This is the source of truth: even if the user closes the tab, the webhook lights the candle.
-
-Free lighting never touches Stripe.
-
-## Frontend
-
-New files:
-- `src/components/candle/CandleSection.tsx` — orchestrator on the memorial page. Fetches the candle + last 5 contributions, subscribes to two Realtime channels (`candles:memorial=<id>` and `contribs:candle=<id>`), keeps state in sync, drives the countdown.
-- `src/components/candle/CandleDisplay.tsx` — the illustration + wick + optional flame layers.
-- `src/components/candle/CandleFlame.tsx` — pure-CSS animated flame + glow + ember spans. Reads `prefers-reduced-motion` and `document.hidden`.
-- `src/components/candle/CandlePlanPicker.tsx` — three plan cards + name/anon/message inputs + CTA. Same component used for "light" and "extend" flows (button label changes).
-- `src/components/candle/DedicationList.tsx` — recent messages with names/anon.
-- `src/hooks/useCountdown.ts` — ticks each second while active.
-- `src/pages/CandleSuccess.tsx` — hits `confirm-candle-payment`, shows a warm confirmation, then routes back to `/memorial/:memorialId`.
-- `src/assets/candle.png.asset.json` — uploaded via `lovable-assets` from `Candle.png`.
-
-Modified:
-- `src/pages/Memorial.tsx` — mount `<CandleSection memorialId={id} />` under the hero.
-- `src/App.tsx` — add `/candle-success` route.
-- `src/index.css` — flame/glow/ember/smoke keyframes gated behind `prefers-reduced-motion: no-preference`.
-- `supabase/config.toml` — register `create-candle-checkout`, `confirm-candle-payment`, `light-free-candle` with `verify_jwt = false`.
-- `supabase/functions/stripe-webhook/index.ts` — candle branch.
-
-## Realtime & concurrency
-
-- `apply_candle_contribution` runs inside a single transaction with a row lock on the candle row (`SELECT … FOR UPDATE`) so simultaneous extensions from multiple visitors stack correctly instead of racing.
-- The webhook is idempotent on `stripe_session_id` (unique constraint on `candle_contributions.stripe_session_id`), so retries won't double-extend.
-- Frontend never mutates directly — the ignition you see in the browser is triggered by the Realtime `UPDATE` from `apply_candle_contribution`.
-
-## Guest contributor UX
-
-- Guests can enter a display name or check *"Contribute anonymously"*.
-- Signed-in users get their name prefilled but can override or go anonymous.
-- Messages hard-capped at 100 chars client-side and server-side; HTML stripped server-side before insert.
-
-## Out of scope
-
-- Notifications to the memorial owner (can be layered on later via a trigger).
-- Localizing plan cards into UK — copy will use the existing i18n keys plus new keys added to `en.ts` / `uk.ts`.
-- Refunds / partial refunds for candles.
-
-Approve and I'll build it end-to-end.
+## Assumptions
+- Existing memorial ID links remain valid permanently.
+- “Every following anniversary” has no end date until the owner disables it.
+- Defender donations remain unchanged pending the missing donation specification and a decision on whether Defender pages should display donations.
