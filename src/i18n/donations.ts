@@ -1,5 +1,14 @@
 /** Donation UI text in all site languages (merged under the `don` namespace). */
 const en = {
+  cardTitle: "Donations",
+  collect: "Collect donations",
+  optStripe: "Receive donations via Reflectlife",
+  optStripeHint: "Donors pay by card, Apple Pay or Google Pay; Stripe pays out to the recipient’s bank.",
+  optExternal: "Add your own fundraising link",
+  optExternalHint: "Monobank jar, PayPal, GoFundMe or a charity page. Works immediately, without Stripe.",
+  notConnected: "Not connected",
+  active: "Active",
+  status: "Status",
   title: "Donations in memory",
   goesTo: "Donations go to {{name}}",
   feeNote: "Reflectlife keeps {{fee}}%, including payment fees.",
@@ -84,6 +93,15 @@ const en = {
 type Dict = typeof en;
 
 const uk: Dict = {
+  cardTitle: "Пожертви",
+  collect: "Збирати пожертви",
+  optStripe: "Отримувати пожертви через Reflectlife",
+  optStripeHint: "Оплата карткою, Apple Pay або Google Pay; Stripe виплачує кошти на рахунок отримувача.",
+  optExternal: "Додати власне посилання на збір",
+  optExternalHint: "Банка Monobank, PayPal, GoFundMe або сторінка фонду. Працює одразу, без Stripe.",
+  notConnected: "Не підключено",
+  active: "Активно",
+  status: "Статус",
   title: "Пожертви в пам'ять",
   goesTo: "Пожертви отримує {{name}}",
   feeNote: "Reflectlife утримує {{fee}}%, включно з платіжними комісіями.",
@@ -162,6 +180,15 @@ const uk: Dict = {
 };
 
 const es: Dict = {
+  cardTitle: "Donaciones",
+  collect: "Recibir donaciones",
+  optStripe: "Recibir donaciones a través de Reflectlife",
+  optStripeHint: "Se paga con tarjeta, Apple Pay o Google Pay; Stripe deposita en la cuenta bancaria de quien recibe.",
+  optExternal: "Agregar tu propio enlace de recaudación",
+  optExternalHint: "Monobank, PayPal, GoFundMe o la página de una organización. Funciona de inmediato, sin Stripe.",
+  notConnected: "No conectado",
+  active: "Activo",
+  status: "Estado",
   title: "Donaciones en memoria",
   goesTo: "Las donaciones son para {{name}}",
   feeNote: "Reflectlife conserva el {{fee}}%, incluidas las comisiones de pago.",
@@ -240,6 +267,15 @@ const es: Dict = {
 };
 
 const de: Dict = {
+  cardTitle: "Spenden",
+  collect: "Spenden sammeln",
+  optStripe: "Spenden über Reflectlife empfangen",
+  optStripeHint: "Bezahlt wird per Karte, Apple Pay oder Google Pay; Stripe zahlt direkt auf das Konto des Empfängers aus.",
+  optExternal: "Eigenen Spendenlink hinzufügen",
+  optExternalHint: "Monobank, PayPal, GoFundMe oder Seite einer Organisation. Funktioniert sofort, ohne Stripe.",
+  notConnected: "Nicht verbunden",
+  active: "Aktiv",
+  status: "Status",
   title: "Spenden im Gedenken",
   goesTo: "Die Spenden gehen an {{name}}",
   feeNote: "Reflectlife behält {{fee}} % ein, inklusive Zahlungsgebühren.",
