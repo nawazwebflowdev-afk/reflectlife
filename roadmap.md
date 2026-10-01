@@ -32,11 +32,11 @@
 - DONE (owner view untested: needs owner sign-in in preview) Memorial layout: remove Remembrance dates card, merge 9th/40th/anniversary checkboxes + email-me into Set Time to Remember dialog, show next upcoming reminder; Donations card in its place.
 
 ## New batch (Oct 1)
-- Invite family step after memorial creation + in settings, tracked
-- Owner emails: new memory awaiting approval (instant), weekly summary, opt-out
-- Privacy: Public / Link-only / Private; Download my data ZIP; Delete account
-- Analytics: Plausible + 6 events
-- Ofrenda (Día de Muertos) memorial theme
+- [x] Invite family step after memorial creation + in settings, tracked
+- [x] Owner emails: new memory awaiting approval (instant), weekly summary, opt-out
+- [x] Privacy: Public / Link-only / Private; Download my data ZIP; Delete account
+- [x] Analytics: Plausible + 6 events
+- [x] Ofrenda (Día de Muertos) memorial theme
 - Co-managers (max 5, roles, activity list, notifications)
 - Legacy contact (accept by email, 12-month inactivity reminders, admin-approved handover, ownership transfer with email confirmation; Stripe never transferred)
 - Funeral home accounts (admin approval, create+hand over memorials, discreet credit line, dashboard, QR card, no donation data)
