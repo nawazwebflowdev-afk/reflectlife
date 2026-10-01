@@ -75,6 +75,8 @@ const es = {
     "registerTitle": "Inscripción registral",
     "registerCourtLabel": "Tribunal de registro",
     "registerNumberLabel": "Número de registro",
+    "vatTitle": "NIF-IVA",
+    "vatLabel": "Número de identificación a efectos del IVA conforme al § 27a UStG",
     "contentResponsibilityTitle": "Responsable del contenido conforme al § 18, apartado 2, MStV:",
     "addressAsAbove": "dirección indicada arriba",
     "disputeTitle": "Resolución de litigios de consumo",

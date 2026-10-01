@@ -84,6 +84,8 @@ const uk = {
     registerTitle: "Register entry",
     registerCourtLabel: "Register court",
     registerNumberLabel: "Register number",
+    vatTitle: "VAT ID",
+    vatLabel: "VAT identification number pursuant to § 27a UStG",
     contentResponsibilityTitle: "Responsible for content pursuant to § 18(2) MStV:",
     addressAsAbove: "address as above",
     disputeTitle: "Consumer dispute resolution",

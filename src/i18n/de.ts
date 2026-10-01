@@ -75,6 +75,8 @@ const de = {
     "registerTitle": "Registereintrag",
     "registerCourtLabel": "Registergericht",
     "registerNumberLabel": "Registernummer",
+    "vatTitle": "Umsatzsteuer-ID",
+    "vatLabel": "Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG",
     "contentResponsibilityTitle": "Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV:",
     "addressAsAbove": "Anschrift wie oben",
     "disputeTitle": "Verbraucherstreitbeilegung",
