@@ -13,7 +13,7 @@ import { langFromPath } from "./langPath";
 // Spanish (/es) and German (/de) live under URL prefixes; the URL always wins over stored preference.
 const pathDetector = {
   name: "pathPrefix",
-  lookup: () => (typeof window !== "undefined" && langFromPath(window.location.pathname) : undefined),
+  lookup: () => (typeof window !== "undefined" ? langFromPath(window.location.pathname) : undefined),
 };
 const detector = new LanguageDetector();
 detector.addDetector(pathDetector);
