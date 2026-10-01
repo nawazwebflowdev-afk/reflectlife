@@ -1,3 +1,4 @@
+import { track } from "@/lib/analytics";
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -162,11 +163,13 @@ export function CandleSection({ memorialId, memorialName, isOwner, guestEnabled,
         const { data, error } = await supabase.functions.invoke('light-free-candle', { body: payload });
         if (error || (data as any)?.error) throw new Error((data as any)?.error || error?.message);
         toast({ title: tr("a.575d98d961"), description: tr("a.9a2712a847") });
+        track("Candle Lit", { kind: "free" });
         setDialogOpen(false);
         await fetchCandles(0, true);
       } else {
         const { data, error } = await supabase.functions.invoke('create-candle-checkout', { body: payload });
         if ((data as any)?.free) {
+          track("Candle Lit", { kind: "defender" });
           toast({ title: tr("a.575d98d961"), description: tr("a.e8c6fdc06a") });
           setDialogOpen(false);
           await fetchCandles(0, true);

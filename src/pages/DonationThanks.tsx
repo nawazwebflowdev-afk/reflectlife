@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { track } from "@/lib/analytics";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -9,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Flame, Share2, Heart } from "lucide-react";
 
 export default function DonationThanks() {
+  useEffect(() => { track("Donation Completed"); }, []);
   const { t } = useTranslation();
   const [params] = useSearchParams();
   const raw = params.get("memorial") ?? "";
