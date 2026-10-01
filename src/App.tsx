@@ -41,6 +41,7 @@ import RemembranceDetail from "./pages/RemembranceDetail";
 import DonationSuccess from "./pages/DonationSuccess";
 import CampaignDashboard from "./pages/CampaignDashboard";
 import Terms from "./pages/Terms";
+import UkrainianMemorialLanding from "./pages/UkrainianMemorialLanding";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => (
             <main className="flex-grow">
               <Routes>
                 <Route path="/" element={<Landing />} />
+                <Route path="/uk/pamiat" element={<UkrainianMemorialLanding />} />
                 <Route path="/auth" element={<Signup />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/login" element={<Login />} />

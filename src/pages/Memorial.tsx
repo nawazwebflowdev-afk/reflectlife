@@ -16,12 +16,14 @@ import ShareMemorial from "@/components/ShareMemorial";
 import RemembranceSection from "@/components/remembrance/RemembranceSection";
 import DonateInMemory from "@/components/donation/DonateInMemory";
 import PrintButton from "@/components/PrintButton";
+import { useTranslation } from "react-i18next";
 
 const Memorial = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const templateTheme = useTemplateTheme();
+  const { i18n } = useTranslation();
   const [memorial, setMemorial] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -52,7 +54,7 @@ const Memorial = () => {
       const { data, error } = await supabase
         .from("memorials")
         .select("*")
-        .eq("id", id)
+        .or(`id.eq.${id},slug.eq.${id}`)
         .maybeSingle();
 
       if (error) throw error;
@@ -487,7 +489,7 @@ const Memorial = () => {
           </Card>
         )}
 
-        {memorial?.id && <CandleSection memorialId={memorial.id} />}
+        {memorial?.id && <CandleSection memorialId={memorial.id} memorialName={memorial.name} isOwner={!!isCreator} guestEnabled={memorial.guest_candles_enabled !== false} isDefender={memorial.memorial_type === "defender_of_ukraine"} />}
 
         {memorial?.id && memorial?.name && (
           <RemembranceSection
@@ -509,7 +511,8 @@ const Memorial = () => {
         {memorial?.name && (
           <ShareMemorial
             name={memorial.name}
-            shareUrl={`https://reflectlife.net/memorial/${memorial.id}`}
+            shareUrl={`https://reflectlife.net/memorial/${memorial.slug || memorial.id}`}
+            shareText={i18n.language === "uk" ? `Світла пам'ять про ${memorial.name}` : `Remembering ${memorial.name}`}
           />
         )}
 
