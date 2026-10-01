@@ -4,7 +4,7 @@
 - Per-route titles/descriptions via react-helmet-async — done.
 - SEO part 1: audit+fixes, prerender check, robots disallows + AI bots, DB-driven sitemap (static x4 langs, blog, opted-in memorials), H1/title<60/desc<155/canonical/hreflang per page, memorial title format, short Latin URLs + 301s, 4-language 404.
 - SEO part 2: owner "Let people find this memorial on Google" (default off, noindex), JSON-LD (Org, WebSite, Article, Breadcrumb, FAQ, ProfilePage/Person), WebP ≤1600px uploads, lazy images w/ dimensions, alt text, CWV/preload/splitting/caching + PageSpeed before/after, memorial footer → guides, homepage 4 newest articles.
-- SEO part 3: Impressum/Legal notice (placeholder details), About in 4 langs, "What is Reflectlife" + 8 FAQ, blog "Things to know" /[lang]/blog, use-case landing template + 8 pages, seasonal URLs without year.
+- SEO part 3: Impressum/Legal notice — done; About in 4 langs, "What is Reflectlife" + 8 FAQ, blog "Things to know" /[lang]/blog, use-case landing template + 8 pages, seasonal URLs without year.
 - JSON-LD Organization + WebSite on home page — done.
 - Sitemap: add /examples and /pricing (pages do not exist yet) — done.
 - Stripe Connect donations (full spec received, parts 1–3): Express + destination charges, 7% admin setting (defender 0%), owner switch-on, recipient types, onboarding link by email, waiting state, external link fallback, test mode badge, guest Checkout 10/25/50/100/custom min 5, cover-fees, name/message/anonymous, thank-you page, webhook-only recording, memorial section, optional totals, donor list, charity note, report link, owner dashboard + CSV, admin page + pause, 4 languages.

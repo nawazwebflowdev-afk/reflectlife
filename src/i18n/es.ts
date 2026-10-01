@@ -60,9 +60,27 @@ const es = {
     "helpCentre": "Centro de Ayuda",
     "privacyPolicy": "Política de Privacidad",
     "cookiePolicy": "Política de Cookies",
+    "imprint": "Aviso legal",
     "qa": "Preguntas y Respuestas",
     "about": "Acerca de",
     "allRights": "© 2026 Sypera. Todos los derechos reservados"
+  },
+  "imprint": {
+    "title": "Aviso legal",
+    "providerTitle": "Información conforme al § 5 DDG",
+    "representedByTitle": "Representada por la directora general:",
+    "contactTitle": "Contacto",
+    "phoneLabel": "Teléfono",
+    "emailLabel": "Correo electrónico",
+    "registerTitle": "Inscripción registral",
+    "registerCourtLabel": "Tribunal de registro",
+    "registerNumberLabel": "Número de registro",
+    "vatTitle": "NIF-IVA",
+    "vatLabel": "Número de identificación a efectos del IVA conforme al § 27a UStG",
+    "contentResponsibilityTitle": "Responsable del contenido conforme al § 18, apartado 2, MStV:",
+    "addressAsAbove": "dirección indicada arriba",
+    "disputeTitle": "Resolución de litigios de consumo",
+    "disputeBody": "No estamos dispuestos ni obligados a participar en procedimientos de resolución de litigios ante una junta arbitral de consumo."
   },
   "auth": {
     "signIn": "Iniciar Sesión",

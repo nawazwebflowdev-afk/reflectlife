@@ -45,6 +45,7 @@ import DonationSuccess from "./pages/DonationSuccess";
 import CampaignDashboard from "./pages/CampaignDashboard";
 import Terms from "./pages/Terms";
 import UkrainianMemorialLanding from "./pages/UkrainianMemorialLanding";
+import Imprint from "./pages/Imprint";
 import LanguageAlternates from "./components/LanguageAlternates";
 import { langFromPath } from "./i18n/langPath";
 import SeasonalBanner from "./components/SeasonalBanner";
@@ -103,6 +104,9 @@ const App = () => (
                 <Route path="/admin/fundraisers" element={<AdminFundraisers />} />
                 <Route path="/campaign-dashboard/:id" element={<CampaignDashboard />} />
                 <Route path="/terms" element={<Terms />} />
+                <Route path="/imprint" element={<Imprint />} />
+                <Route path="/impressum" element={<Imprint />} />
+                <Route path="/aviso-legal" element={<Imprint />} />
                 <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

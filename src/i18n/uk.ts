@@ -68,9 +68,28 @@ const uk = {
     helpCentre: "Центр допомоги",
     privacyPolicy: "Політика конфіденційності",
     cookiePolicy: "Політика cookie",
+    imprint: "Imprint",
     qa: "Питання та відповіді",
     about: "Про нас",
     allRights: "© 2026 Sypera. Усі права захищені.",
+  },
+
+  imprint: {
+    title: "Imprint",
+    providerTitle: "Information pursuant to § 5 DDG",
+    representedByTitle: "Represented by the Managing Director:",
+    contactTitle: "Contact",
+    phoneLabel: "Phone",
+    emailLabel: "Email",
+    registerTitle: "Register entry",
+    registerCourtLabel: "Register court",
+    registerNumberLabel: "Register number",
+    vatTitle: "VAT ID",
+    vatLabel: "VAT identification number pursuant to § 27a UStG",
+    contentResponsibilityTitle: "Responsible for content pursuant to § 18(2) MStV:",
+    addressAsAbove: "address as above",
+    disputeTitle: "Consumer dispute resolution",
+    disputeBody: "We are neither willing nor obliged to participate in dispute resolution proceedings before a consumer arbitration board.",
   },
 
   // Auth

@@ -268,4 +268,25 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/pricing"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/pricing"/>
   </url>
+  <url><loc>https://reflectlife.net/imprint</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/imprint"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/imprint"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/aviso-legal"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/impressum"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/imprint"/>
+  </url>
+  <url><loc>https://reflectlife.net/es/aviso-legal</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/imprint"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/imprint"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/aviso-legal"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/impressum"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/imprint"/>
+  </url>
+  <url><loc>https://reflectlife.net/de/impressum</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/imprint"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/imprint"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/aviso-legal"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/impressum"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/imprint"/>
+  </url>
 </urlset>
