@@ -38,10 +38,11 @@ function jsonResult(data) {
 }
 
 // src/lib/mcp/tools/list-memorials.ts
+import { tr } from "npm:@/i18n/tr";
 var list_memorials_default = defineTool({
   name: "list_memorials",
-  title: "List my memorials",
-  description: "List memorial pages created by the signed-in Reflectlife user.",
+  title: tr("a.649a299be4"),
+  description: tr("a.acd39dc10b"),
   inputSchema: {
     limit: z.number().int().describe("Maximum number of memorials to return (default 20).").optional()
   },
@@ -58,10 +59,11 @@ var list_memorials_default = defineTool({
 // src/lib/mcp/tools/get-memorial.ts
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.24.0";
 import { z as z2 } from "npm:zod@^3.25.76";
+import { tr as tr2 } from "npm:@/i18n/tr";
 var get_memorial_default = defineTool2({
   name: "get_memorial",
-  title: "Get memorial details",
-  description: "Fetch a single memorial the caller may view, including its recent tributes.",
+  title: tr2("a.a98f3bab2a"),
+  description: tr2("a.c4d8f39489"),
   inputSchema: {
     memorial_id: z2.string().describe("UUID of the memorial.")
   },
@@ -80,10 +82,11 @@ var get_memorial_default = defineTool2({
 // src/lib/mcp/tools/create-memorial.ts
 import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.24.0";
 import { z as z3 } from "npm:zod@^3.25.76";
+import { tr as tr3 } from "npm:@/i18n/tr";
 var create_memorial_default = defineTool3({
   name: "create_memorial",
-  title: "Create a memorial",
-  description: "Create a new memorial page owned by the signed-in Reflectlife user.",
+  title: tr3("a.ce9ad284ad"),
+  description: tr3("a.3dfab8ce6b"),
   inputSchema: {
     name: z3.string().describe("Full name of the person being remembered."),
     bio: z3.string().describe("Short biography or remembrance text.").optional(),
@@ -116,10 +119,11 @@ var create_memorial_default = defineTool3({
 // src/lib/mcp/tools/list-diary-entries.ts
 import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.24.0";
 import { z as z4 } from "npm:zod@^3.25.76";
+import { tr as tr4 } from "npm:@/i18n/tr";
 var list_diary_entries_default = defineTool4({
   name: "list_diary_entries",
-  title: "List my diary entries",
-  description: "List the signed-in user's private reflection diary entries, newest first.",
+  title: tr4("a.ce55ac9a86"),
+  description: tr4("a.66efdf8837"),
   inputSchema: {
     limit: z4.number().int().describe("Maximum number of entries to return (default 20).").optional()
   },
@@ -136,10 +140,11 @@ var list_diary_entries_default = defineTool4({
 // src/lib/mcp/tools/create-diary-entry.ts
 import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.24.0";
 import { z as z5 } from "npm:zod@^3.25.76";
+import { tr as tr5 } from "npm:@/i18n/tr";
 var create_diary_entry_default = defineTool5({
   name: "create_diary_entry",
-  title: "Create a diary entry",
-  description: "Write a new reflection diary entry for the signed-in Reflectlife user.",
+  title: tr5("a.0784e4d08d"),
+  description: tr5("a.1b239d6b3f"),
   inputSchema: {
     title: z5.string().describe("Title of the entry."),
     content: z5.string().describe("Body text of the entry.").optional(),
@@ -168,10 +173,11 @@ var create_diary_entry_default = defineTool5({
 // src/lib/mcp/tools/add-tribute.ts
 import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.24.0";
 import { z as z6 } from "npm:zod@^3.25.76";
+import { tr as tr6 } from "npm:@/i18n/tr";
 var add_tribute_default = defineTool6({
   name: "add_tribute",
-  title: "Leave a tribute",
-  description: "Leave a tribute or condolence message on a memorial the caller can access.",
+  title: tr6("a.8fcbbb27ff"),
+  description: tr6("a.3ff6cea436"),
   inputSchema: {
     memorial_id: z6.string().describe("UUID of the memorial."),
     tribute_text: z6.string().describe("The tribute message.")
@@ -188,10 +194,11 @@ var add_tribute_default = defineTool6({
 });
 
 // src/lib/mcp/index.ts
+import { tr as tr7 } from "npm:@/i18n/tr";
 var projectRef = "osmyfzkcydvtwgnbjplx";
 var mcp_default = defineMcp({
   name: "reflectlife-mcp",
-  title: "Reflectlife",
+  title: tr7("a.1a0e32b358"),
   version: "0.1.0",
   instructions: "Tools for Reflectlife, a memorial and remembrance app. Use these tools to browse and create memorials, leave tributes, and manage the signed-in user's private reflection diary. All access respects the user's own permissions.",
   auth: auth.oauth.issuer({
