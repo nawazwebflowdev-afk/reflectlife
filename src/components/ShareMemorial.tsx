@@ -1,5 +1,6 @@
 import { Facebook, Link2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface ShareMemorialProps {
   name: string;
@@ -53,37 +54,39 @@ export const ShareMemorial = ({
   shareText,
   shareUrl: shareUrlProp,
 }: ShareMemorialProps) => {
+  const { i18n } = useTranslation();
+  const uk = i18n.language === "uk";
   const shareUrl = shareUrlProp ?? (typeof window !== "undefined" ? window.location.href : "");
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedText = encodeURIComponent(shareText ?? `Remembering ${name}`);
 
   const shareLinks = [
     {
-      label: "Share on Facebook",
+      label: uk ? "Поділитися у Facebook" : "Share on Facebook",
       href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
       icon: Facebook,
       hoverColor: "hover:bg-[#1877F2] hover:text-white hover:border-[#1877F2]",
     },
     {
-      label: "Share on X",
+      label: uk ? "Поділитися в X" : "Share on X",
       href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`,
       icon: XIcon,
       hoverColor: "hover:bg-black hover:text-white hover:border-black",
     },
     {
-      label: "Share on WhatsApp",
+      label: uk ? "Поділитися у WhatsApp" : "Share on WhatsApp",
       href: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
       icon: WhatsAppIcon,
       hoverColor: "hover:bg-[#25D366] hover:text-white hover:border-[#25D366]",
     },
     {
-      label: "Share on Telegram",
+      label: uk ? "Поділитися у Telegram" : "Share on Telegram",
       href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`,
       icon: TelegramIcon,
       hoverColor: "hover:bg-[#26A5E4] hover:text-white hover:border-[#26A5E4]",
     },
     {
-      label: "Share on Viber",
+      label: uk ? "Поділитися у Viber" : "Share on Viber",
       href: `viber://forward?text=${encodedText}%20${encodedUrl}`,
       icon: ViberIcon,
       hoverColor: "hover:bg-[#7360F2] hover:text-white hover:border-[#7360F2]",
@@ -92,13 +95,13 @@ export const ShareMemorial = ({
 
   const appShares = [
     {
-      label: "Share on Instagram",
+      label: uk ? "Поділитися в Instagram" : "Share on Instagram",
       icon: InstagramIcon,
       hoverColor: "hover:bg-[#E1306C] hover:text-white hover:border-[#E1306C]",
       url: "https://www.instagram.com/",
     },
     {
-      label: "Share on TikTok",
+      label: uk ? "Поділитися в TikTok" : "Share on TikTok",
       icon: TikTokIcon,
       hoverColor: "hover:bg-black hover:text-white hover:border-black",
       url: "https://www.tiktok.com/upload",
@@ -118,9 +121,9 @@ export const ShareMemorial = ({
     }
     try {
       await navigator.clipboard.writeText(text);
-      toast.success(`Link copied. Paste it into your ${platform} post or story.`);
+      toast.success(uk ? `Посилання скопійовано. Вставте його у допис або історію ${platform}.` : `Link copied. Paste it into your ${platform} post or story.`);
     } catch {
-      toast.error("Could not copy link. Please try again.");
+      toast.error(uk ? "Не вдалося скопіювати посилання. Спробуйте ще раз." : "Could not copy link. Please try again.");
     }
     window.open(url, "_blank", "noopener,noreferrer");
   };
@@ -128,9 +131,9 @@ export const ShareMemorial = ({
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      toast.success("Link copied successfully.");
+      toast.success(uk ? "Посилання скопійовано." : "Link copied successfully.");
     } catch {
-      toast.error("Could not copy link. Please try again.");
+      toast.error(uk ? "Не вдалося скопіювати посилання. Спробуйте ще раз." : "Could not copy link. Please try again.");
     }
   };
 
@@ -178,8 +181,8 @@ export const ShareMemorial = ({
           <button
             type="button"
             onClick={handleCopy}
-            aria-label="Copy Link"
-            title="Copy Link"
+            aria-label={uk ? "Копіювати посилання" : "Copy Link"}
+            title={uk ? "Копіювати посилання" : "Copy Link"}
             className="group flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition-all duration-200 hover:scale-110 hover:shadow-md hover:bg-primary hover:text-primary-foreground hover:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <Link2 className="h-5 w-5" />

@@ -2096,6 +2096,15 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      claim_guest_candle_rate_limit: {
+        Args: {
+          _device_hash: string
+          _ip_hash: string
+          _memorial_id: string
+          _rate_date: string
+        }
+        Returns: boolean
+      }
       expire_stale_candles: { Args: never; Returns: undefined }
       get_campaign_payout_summary: {
         Args: { _campaign_id: string }

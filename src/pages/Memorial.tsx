@@ -52,11 +52,9 @@ const Memorial = () => {
         return;
       }
 
-      const { data, error } = await supabase
-        .from("memorials")
-        .select("*")
-        .or(`id.eq.${id},slug.eq.${id}`)
-        .maybeSingle();
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+      const query = supabase.from("memorials").select("*");
+      const { data, error } = await (isUuid ? query.eq("id", id) : query.eq("slug", id)).maybeSingle();
 
       if (error) throw error;
 
