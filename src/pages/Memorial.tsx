@@ -18,7 +18,6 @@ import ShareMemorial from "@/components/ShareMemorial";
 import RemembranceSection from "@/components/remembrance/RemembranceSection";
 import PrintButton from "@/components/PrintButton";
 import { useTranslation } from "react-i18next";
-import { MemorialDateReminders } from "@/components/remembrance/MemorialDateReminders";
 
 import { tr } from "@/i18n/tr";
 import { formatDate as formatLongDate } from "@/lib/dateFormat";
@@ -502,7 +501,6 @@ const Memorial = () => {
         )}
 
         {memorial?.id && <CandleSection memorialId={memorial.id} memorialName={memorial.name} isOwner={!!isCreator} guestEnabled={memorial.guest_candles_enabled !== false} isDefender={memorial.memorial_type === "defender_of_ukraine"} />}
-        <MemorialDateReminders memorialId={memorial.id} ownerId={memorial.user_id} isOwner={!!isCreator} dateOfDeath={memorial.date_of_death} />
 
         {memorial?.id && memorial?.name && (
           <RemembranceSection
@@ -510,6 +508,8 @@ const Memorial = () => {
             memorialName={memorial.name}
             isOwner={!!isCreator}
             hasAccess={false}
+            ownerId={memorial.user_id}
+            dateOfDeath={memorial.date_of_death}
           />
         )}
 

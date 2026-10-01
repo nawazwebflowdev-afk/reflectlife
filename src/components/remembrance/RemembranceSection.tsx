@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Clock, Bell, Share2, MessageCircle, Send, Phone, CalendarIcon, Users } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useTranslation } from "react-i18next";
 import PhoneRecipientPicker, { type PhoneRecipient } from "./PhoneRecipientPicker";
 
 import { tr } from "@/i18n/tr";
@@ -58,6 +60,8 @@ interface Props {
   isOwner: boolean;
   hasAccess: boolean;
   actionSlot?: ReactNode;
+  ownerId?: string;
+  dateOfDeath?: string | null;
 }
 
 function localToUtcTime(local: string): string {
@@ -87,7 +91,11 @@ function parseDateKey(key: string) {
   return new Date(y, (m || 1) - 1, d || 1);
 }
 
-export default function RemembranceSection({ memorialId, memorialName, isOwner, hasAccess, actionSlot }: Props) {
+export default function RemembranceSection({ memorialId, memorialName, isOwner, hasAccess, actionSlot, ownerId, dateOfDeath }: Props) {
+  const { t, i18n } = useTranslation();
+  const [pref, setPref] = useState<{ id: string } | null>(null);
+  const [dates, setDates] = useState({ ninth_day: false, fortieth_day: false, first_anniversary: false, annual_anniversary: false, owner_email_enabled: false });
+  const showDates = isOwner && !!dateOfDeath;
   const [userId, setUserId] = useState<string | null>(null);
   const [schedule, setSchedule] = useState<Schedule | null>(null);
   const [recipients, setRecipients] = useState<PhoneRecipient[]>([]);
@@ -157,14 +165,67 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
     return () => { mounted = false; supabase.removeChannel(channel); };
   }, [memorialId]);
 
+  useEffect(() => {
+    if (!dateOfDeath) return;
+    supabase.from("memorial_remembrance_preferences").select("*").eq("memorial_id", memorialId).maybeSingle().then(({ data }) => {
+      if (!data) return;
+      setPref({ id: data.id });
+      setDates({ ninth_day: data.ninth_day, fortieth_day: data.fortieth_day, first_anniversary: data.first_anniversary, annual_anniversary: data.annual_anniversary, owner_email_enabled: data.owner_email_enabled });
+    });
+  }, [memorialId, dateOfDeath]);
+
+  // Next upcoming reminder across the schedule and the chosen remembrance dates.
+  const nextReminder = (() => {
+    const cands: { what: string; at: Date }[] = [];
+    if (schedule) {
+      const [h, m] = schedule.time_local.split(":").map(Number);
+      const at = parseDateKey(schedule.anchor_date); at.setHours(h, m, 0, 0);
+      const end = schedule.has_end_date && schedule.end_date ? parseDateKey(schedule.end_date) : null;
+      const step = (d: Date) => {
+        const f = schedule.frequency;
+        if (f === "daily") d.setDate(d.getDate() + 1); else if (f === "weekly") d.setDate(d.getDate() + 7);
+        else if (f === "monthly") d.setMonth(d.getMonth() + 1); else if (f === "yearly") d.setFullYear(d.getFullYear() + 1);
+      };
+      let guard = 0;
+      while (at < now && schedule.frequency !== "once" && guard++ < 5000) step(at);
+      if (at >= now && (!end || at <= new Date(end.getTime() + 86399999))) cands.push({ what: t("don.remTime"), at });
+    }
+    if (dateOfDeath) {
+      const d = parseDateKey(dateOfDeath);
+      const plus = (n: number) => { const x = new Date(d); x.setDate(x.getDate() + n); x.setHours(9, 0, 0, 0); return x; };
+      if (dates.ninth_day) cands.push({ what: t("don.remNinth"), at: plus(9) });
+      if (dates.fortieth_day) cands.push({ what: t("don.remFortieth"), at: plus(40) });
+      const first = new Date(d); first.setFullYear(d.getFullYear() + 1); first.setHours(9, 0, 0, 0);
+      if (dates.first_anniversary) cands.push({ what: t("don.remFirst"), at: first });
+      if (dates.annual_anniversary) {
+        const a = new Date(d); a.setFullYear(Math.max(now.getFullYear(), d.getFullYear() + 2)); a.setHours(9, 0, 0, 0);
+        if (a < now) a.setFullYear(a.getFullYear() + 1);
+        cands.push({ what: t("don.remAnnual"), at: a });
+      }
+    }
+    return cands.filter((c) => c.at >= now).sort((a, b) => a.at.getTime() - b.at.getTime())[0] ?? null;
+  })();
+
+  const saveDates = async () => {
+    if (!showDates || !ownerId) return;
+    const lang = ["uk", "es", "de"].includes(i18n.language) ? i18n.language : "en";
+    const payload = { memorial_id: memorialId, owner_id: ownerId, ...dates, language: lang };
+    const q = pref
+      ? supabase.from("memorial_remembrance_preferences").update(payload).eq("id", pref.id).select("id").single()
+      : supabase.from("memorial_remembrance_preferences").insert(payload).select("id").single();
+    const { data, error } = await q;
+    if (error) throw error;
+    setPref({ id: data.id });
+  };
+
   const displayTime = schedule
     ? utcTimeToLocalDisplay(schedule.time_utc, schedule.timezone)
     : "—:—";
 
   const nowStr = new Intl.DateTimeFormat(appLocale(), { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(now);
 
-  const scheduledSubtext = schedule
-    ? `Scheduled for ${format(parseDateKey(schedule.anchor_date), "MMM d")} at ${displayTime} · ${savedCount} recipient${savedCount === 1 ? "" : "s"}`
+  const scheduledSubtext = nextReminder
+    ? t("don.remNext", { what: nextReminder.what, date: format(nextReminder.at, "PPP p") })
     : tr("a.42f4bf5652");
 
   const handleSave = async () => {
@@ -187,6 +248,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
         custom_message: message.trim() ? message.trim().slice(0, MESSAGE_MAX) : null,
       };
 
+      await saveDates();
       let scheduleId = schedule?.id ?? null;
       if (scheduleId) {
         const { error } = await supabase.from("memorial_remembrances").update(payload).eq("id", scheduleId);
@@ -336,6 +398,22 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
                           <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                         )}
                       </>
+                    )}
+
+                    {showDates && (
+                      <div className="border-t pt-4 space-y-3">
+                        <Label>{t("don.remDates")}</Label>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          {([["ninth_day", "don.remNinth"], ["fortieth_day", "don.remFortieth"], ["first_anniversary", "don.remFirst"], ["annual_anniversary", "don.remAnnual"]] as const).map(([k, l]) => (
+                            <label key={k} className="flex items-center gap-2 text-sm">
+                              <Checkbox checked={dates[k]} onCheckedChange={(v) => setDates({ ...dates, [k]: v === true })} /> {t(l)}
+                            </label>
+                          ))}
+                        </div>
+                        <label className="flex items-center gap-2 text-sm">
+                          <Checkbox checked={dates.owner_email_enabled} onCheckedChange={(v) => setDates({ ...dates, owner_email_enabled: v === true })} /> {t("don.remEmailMe")}
+                        </label>
+                      </div>
                     )}
 
                     <div className="border-t pt-4 space-y-2">
