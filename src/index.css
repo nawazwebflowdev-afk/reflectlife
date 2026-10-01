@@ -179,3 +179,24 @@ All colors MUST be HSL.
 @media print {
   .print-hide { display: none !important; }
 }
+
+/* Digital ofrenda design (Día de Muertos): marigold, candle light, papel picado */
+.theme-ofrenda {
+  --primary: 28 95% 50%;
+  --primary-foreground: 30 100% 98%;
+  --accent: 330 70% 52%;
+  --ring: 28 95% 50%;
+  background-image:
+    radial-gradient(circle at 15% 85%, hsl(40 100% 60% / 0.18), transparent 40%),
+    radial-gradient(circle at 85% 80%, hsl(40 100% 60% / 0.14), transparent 40%),
+    linear-gradient(hsl(32 100% 97%), hsl(28 90% 92%)) !important;
+}
+.theme-ofrenda .papel-picado {
+  height: 56px;
+  background:
+    linear-gradient(135deg, transparent 25%, hsl(32 100% 97%) 25% 30%, transparent 30%) 0 0 / 28px 28px,
+    repeating-linear-gradient(90deg, hsl(28 95% 52%) 0 70px, hsl(330 70% 55%) 70px 140px, hsl(180 55% 42%) 140px 210px, hsl(48 95% 55%) 210px 280px);
+  clip-path: polygon(0 0, 100% 0, 100% 75%, 97.5% 100%, 95% 75%, 92.5% 100%, 90% 75%, 87.5% 100%, 85% 75%, 82.5% 100%, 80% 75%, 77.5% 100%, 75% 75%, 72.5% 100%, 70% 75%, 67.5% 100%, 65% 75%, 62.5% 100%, 60% 75%, 57.5% 100%, 55% 75%, 52.5% 100%, 50% 75%, 47.5% 100%, 45% 75%, 42.5% 100%, 40% 75%, 37.5% 100%, 35% 75%, 32.5% 100%, 30% 75%, 27.5% 100%, 25% 75%, 22.5% 100%, 20% 75%, 17.5% 100%, 15% 75%, 12.5% 100%, 10% 75%, 7.5% 100%, 5% 75%, 2.5% 100%, 0 75%);
+}
+.theme-ofrenda h1, .theme-ofrenda h2 { color: hsl(20 80% 30%); }
+.theme-ofrenda .shadow-elegant-lg { box-shadow: 0 0 40px hsl(40 100% 55% / 0.55) !important; }
