@@ -922,6 +922,38 @@ export type Database = {
         }
         Relationships: []
       }
+      memorial_invite_events: {
+        Row: {
+          channel: string
+          created_at: string
+          id: string
+          memorial_id: string
+          owner_id: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          id?: string
+          memorial_id: string
+          owner_id: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          id?: string
+          memorial_id?: string
+          owner_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_invite_events_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memorial_likes: {
         Row: {
           created_at: string
@@ -1321,6 +1353,7 @@ export type Database = {
           service_place: string | null
           service_unit: string | null
           slug: string | null
+          theme: string
           updated_at: string
           user_id: string
         }
@@ -1341,6 +1374,7 @@ export type Database = {
           service_place?: string | null
           service_unit?: string | null
           slug?: string | null
+          theme?: string
           updated_at?: string
           user_id: string
         }
@@ -1361,6 +1395,7 @@ export type Database = {
           service_place?: string | null
           service_unit?: string | null
           slug?: string | null
+          theme?: string
           updated_at?: string
           user_id?: string
         }
@@ -1423,6 +1458,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      owner_email_log: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          ref_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          ref_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          ref_id?: string
+        }
+        Relationships: []
+      }
+      owner_notification_settings: {
+        Row: {
+          new_memory_email: boolean
+          updated_at: string
+          user_id: string
+          weekly_summary_email: boolean
+        }
+        Insert: {
+          new_memory_email?: boolean
+          updated_at?: string
+          user_id: string
+          weekly_summary_email?: boolean
+        }
+        Update: {
+          new_memory_email?: boolean
+          updated_at?: string
+          user_id?: string
+          weekly_summary_email?: boolean
+        }
+        Relationships: []
       }
       platform_settings: {
         Row: {
