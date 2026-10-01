@@ -4,132 +4,231 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/"/>
   </url>
   <url><loc>https://reflectlife.net/es</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/"/>
+  </url>
+  <url><loc>https://reflectlife.net/de</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/"/>
   </url>
   <url><loc>https://reflectlife.net/memorials</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/memorials"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/memorials"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/memorials"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/memorials"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/memorials"/>
   </url>
   <url><loc>https://reflectlife.net/es/memorials</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/memorials"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/memorials"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/memorials"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/memorials"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/memorials"/>
+  </url>
+  <url><loc>https://reflectlife.net/de/memorials</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/memorials"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/memorials"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/memorials"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/memorials"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/memorials"/>
   </url>
   <url><loc>https://reflectlife.net/templates</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/templates"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/templates"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/templates"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/templates"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/templates"/>
   </url>
   <url><loc>https://reflectlife.net/es/templates</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/templates"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/templates"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/templates"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/templates"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/templates"/>
+  </url>
+  <url><loc>https://reflectlife.net/de/templates</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/templates"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/templates"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/templates"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/templates"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/templates"/>
   </url>
   <url><loc>https://reflectlife.net/about</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/about"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/about"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/about"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/about"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/about"/>
   </url>
   <url><loc>https://reflectlife.net/es/about</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/about"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/about"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/about"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/about"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/about"/>
+  </url>
+  <url><loc>https://reflectlife.net/de/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/about"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/about"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/about"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/about"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/about"/>
   </url>
   <url><loc>https://reflectlife.net/qa</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/qa"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/qa"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/qa"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/qa"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/qa"/>
   </url>
   <url><loc>https://reflectlife.net/es/qa</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/qa"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/qa"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/qa"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/qa"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/qa"/>
+  </url>
+  <url><loc>https://reflectlife.net/de/qa</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/qa"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/qa"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/qa"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/qa"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/qa"/>
   </url>
   <url><loc>https://reflectlife.net/help</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/help"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/help"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/help"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/help"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/help"/>
   </url>
   <url><loc>https://reflectlife.net/es/help</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/help"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/help"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/help"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/help"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/help"/>
+  </url>
+  <url><loc>https://reflectlife.net/de/help</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/help"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/help"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/help"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/help"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/help"/>
   </url>
   <url><loc>https://reflectlife.net/terms</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/terms"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/terms"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/terms"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/terms"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/terms"/>
   </url>
   <url><loc>https://reflectlife.net/es/terms</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/terms"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/terms"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/terms"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/terms"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/terms"/>
+  </url>
+  <url><loc>https://reflectlife.net/de/terms</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/terms"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/terms"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/terms"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/terms"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/terms"/>
   </url>
   <url><loc>https://reflectlife.net/privacy-policy</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/privacy-policy"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/privacy-policy"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/privacy-policy"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/privacy-policy"/>
   </url>
   <url><loc>https://reflectlife.net/es/privacy-policy</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/privacy-policy"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/privacy-policy"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/privacy-policy"/>
+  </url>
+  <url><loc>https://reflectlife.net/de/privacy-policy</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/privacy-policy"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/privacy-policy"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/privacy-policy"/>
   </url>
   <url><loc>https://reflectlife.net/cookie-policy</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/cookie-policy"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/cookie-policy"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/cookie-policy"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/cookie-policy"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/cookie-policy"/>
   </url>
   <url><loc>https://reflectlife.net/es/cookie-policy</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/cookie-policy"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/cookie-policy"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/cookie-policy"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/cookie-policy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/cookie-policy"/>
+  </url>
+  <url><loc>https://reflectlife.net/de/cookie-policy</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/cookie-policy"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/cookie-policy"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/cookie-policy"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/cookie-policy"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/cookie-policy"/>
   </url>
   <url><loc>https://reflectlife.net/signup</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/signup"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/signup"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/signup"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/signup"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/signup"/>
   </url>
   <url><loc>https://reflectlife.net/es/signup</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/signup"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/signup"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/signup"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/signup"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/signup"/>
+  </url>
+  <url><loc>https://reflectlife.net/de/signup</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/signup"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/signup"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/signup"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/signup"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/signup"/>
   </url>
   <url><loc>https://reflectlife.net/login</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/login"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/login"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/login"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/login"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/login"/>
   </url>
   <url><loc>https://reflectlife.net/es/login</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/login"/>
     <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/login"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/login"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/login"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/login"/>
+  </url>
+  <url><loc>https://reflectlife.net/de/login</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/login"/>
+    <xhtml:link rel="alternate" hreflang="uk" href="https://reflectlife.net/login"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/login"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/login"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/login"/>
   </url>
   <url><loc>https://reflectlife.net/uk/pamiat</loc></url>

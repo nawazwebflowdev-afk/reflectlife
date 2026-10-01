@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
-import { isSpanishPath, pathForLang } from "@/i18n/langPath";
+import { isPrefixedPath, pathForLang } from "@/i18n/langPath";
 
 import { tr } from "@/i18n/tr";
 const languages = [
@@ -38,9 +38,9 @@ const LanguageSwitcher = () => {
           .eq("id", session.user.id)
           .single();
         // An explicit /es URL wins over the saved profile language.
-        if (data?.preferred_language && data.preferred_language !== i18n.language && !isSpanishPath(window.location.pathname)) {
+        if (data?.preferred_language && data.preferred_language !== i18n.language && !isPrefixedPath(window.location.pathname)) {
           localStorage.setItem("reflectlife-lang", data.preferred_language);
-          if (data.preferred_language === "es") goTo("es"); else i18n.changeLanguage(data.preferred_language);
+          if (data.preferred_language === "es" || data.preferred_language === "de") goTo(data.preferred_language); else i18n.changeLanguage(data.preferred_language);
         }
       }
     };

@@ -1,7 +1,8 @@
 # Roadmap
 
 ## In progress
-- Stripe Connect donations: Express recipient accounts with destination charges; guest Checkout; recipient-account currency; presets 10/25/50/100 and custom minimum 5; admin-configured 7% all-inclusive Reflectlife fee, 0% for Defender memorials; optional fee coverage. Remaining specification is pending because the latest message ended mid-sentence.
+- Stripe Connect donations (full spec received, parts 1–3): Express + destination charges, 7% admin setting (defender 0%), owner switch-on, recipient types, onboarding link by email, waiting state, external link fallback, test mode badge, guest Checkout 10/25/50/100/custom min 5, cover-fees, name/message/anonymous, thank-you page, webhook-only recording, memorial section, optional totals, donor list, charity note, report link, owner dashboard + CSV, admin page + pause, 4 languages.
+- German (de) translation: done; deploy German reminder email.
 - Guest candles: production lighting awaits the public reCAPTCHA site key; all other requested behavior is implemented.
 - Memory Wall reminder: add a "Once" (one-time) frequency option to the reminder popup,
   with recipients reachable by email or SMS/phone, E.164 + email validation, and a
