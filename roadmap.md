@@ -1,6 +1,8 @@
 # Roadmap
 
 ## In progress
+- Ukrainian memorial experience: native Ukrainian sharing and landing page; remembrance-date emails; Defender of Ukraine memorial type; Cyrillic-safe Latin slugs.
+- Guest candles: free for 7 days, no login, optional 40-character name, no message/links, 3 per device/IP per memorial/day, invisible captcha, owner moderation/off switch, prior-candle archive, conversion tracking, and post-lighting inline actions. Defender memorials receive all candle types free.
 - Memory Wall reminder: add a "Once" (one-time) frequency option to the reminder popup,
   with recipients reachable by email or SMS/phone, E.164 + email validation, and a
   one-time scheduled dispatch that fires exactly once at the chosen date and time.
