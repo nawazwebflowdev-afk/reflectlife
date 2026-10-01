@@ -16,7 +16,6 @@ export default function Terms() {
       <Helmet>
         <title>{tr("a.ed7b67cc5c")}</title>
         <meta name="description" content="Reflectlife terms of use, including memorial donation, campaign transparency and payout terms." />
-        <link rel="canonical" href="https://reflectlife.net/terms" />
       </Helmet>
 
       <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-2">{tr("a.d35f2b98ed")}</h1>
