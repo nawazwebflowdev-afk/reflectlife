@@ -88,6 +88,7 @@ const es = {
   "language": {
     "en": "English",
     "uk": "Українська",
+    "es": "Español",
     "switchLabel": "Idioma"
   },
   "cookies": {

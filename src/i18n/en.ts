@@ -102,6 +102,7 @@ const en = {
   language: {
     en: "English",
     uk: "Українська",
+    es: "Español",
     switchLabel: "Language",
   },
 
