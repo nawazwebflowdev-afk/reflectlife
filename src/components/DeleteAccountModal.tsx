@@ -35,12 +35,8 @@ const DeleteAccountModal = ({ open, onOpenChange, userId }: DeleteAccountModalPr
       // Delete all user data first
       // Due to foreign key constraints with ON DELETE CASCADE, deleting the profile
       // will cascade to related tables
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userId);
-
-      if (profileError) throw profileError;
+      const { data, error: fnError } = await supabase.functions.invoke("delete-account", { body: { confirm: "DELETE" } });
+      if (fnError || !data?.deleted) throw fnError ?? new Error("delete failed");
 
       // Sign out the user - this will also trigger auth cleanup
       await supabase.auth.signOut();
