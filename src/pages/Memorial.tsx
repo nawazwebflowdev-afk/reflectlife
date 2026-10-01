@@ -370,7 +370,7 @@ const Memorial = () => {
 
   const formatDate = (date: string | null) => {
     if (!date) return "Unknown";
-    return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    return formatDate(date);
   };
 
   return (
@@ -642,7 +642,7 @@ const Memorial = () => {
                           </span>
                           <span className="text-sm text-muted-foreground">•</span>
                           <span className="text-sm text-muted-foreground">
-                            {new Date(tribute.created_at).toLocaleDateString()}
+                            {formatDate(tribute.created_at)}
                           </span>
                         </div>
                         {tribute.tribute_text && (

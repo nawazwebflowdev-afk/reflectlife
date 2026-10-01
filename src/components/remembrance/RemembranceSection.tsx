@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { format, appLocale } from "@/lib/dateFormat";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -73,7 +73,7 @@ function utcTimeToLocalDisplay(utc: string, tz: string): string {
   const [h, m] = utc.split(":").map(Number);
   const d = new Date();
   d.setUTCHours(h, m, 0, 0);
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat(appLocale(), {
     hour: "2-digit", minute: "2-digit", timeZone: tz || Intl.DateTimeFormat().resolvedOptions().timeZone,
   }).format(d);
 }
@@ -161,7 +161,7 @@ export default function RemembranceSection({ memorialId, memorialName, isOwner, 
     ? utcTimeToLocalDisplay(schedule.time_utc, schedule.timezone)
     : "—:—";
 
-  const nowStr = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(now);
+  const nowStr = new Intl.DateTimeFormat(appLocale(), { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(now);
 
   const scheduledSubtext = schedule
     ? `Scheduled for ${format(parseDateKey(schedule.anchor_date), "MMM d")} at ${displayTime} · ${savedCount} recipient${savedCount === 1 ? "" : "s"}`

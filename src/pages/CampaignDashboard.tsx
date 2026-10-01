@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { formatDate } from "@/lib/dateFormat";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -175,7 +176,7 @@ const CampaignDashboard = () => {
     if (currentMonthPayout) {
       toast({
         title: tr("a.a050a0d86f"),
-        description: `Payouts run once per month. Your next payout can be requested on ${nextPayoutDate.toLocaleDateString()}.`,
+        description: `Payouts run once per month. Your next payout can be requested on ${formatDate(nextPayoutDate)}.`,
         variant: "destructive",
       });
       return;
@@ -381,7 +382,7 @@ const CampaignDashboard = () => {
                     <TableBody>
                       {donations.map((d) => (
                         <TableRow key={d.id}>
-                          <TableCell>{new Date(d.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell>{formatDate(d.created_at)}</TableCell>
                           <TableCell>
                             {d.is_anonymous ? tr("a.9bed510400") : d.donor_name || d.donor_email}
                           </TableCell>
@@ -410,8 +411,8 @@ const CampaignDashboard = () => {
               <CardDescription>
                 {tr("a.dc8f089d41")} {money(10)}.
                 {currentMonthPayout
-                  ? ` This month's payout of ${money(currentMonthPayout.amount)} is already requested — next payout available on ${nextPayoutDate.toLocaleDateString()}.`
-                  : ` Next payout window opens ${nextPayoutDate.toLocaleDateString()} if you skip this month.`}
+                  ? ` This month's payout of ${money(currentMonthPayout.amount)} is already requested — next payout available on ${formatDate(nextPayoutDate)}.`
+                  : ` Next payout window opens ${formatDate(nextPayoutDate)} if you skip this month.`}
               </CardDescription>
 
             </CardHeader>
@@ -538,7 +539,7 @@ const CampaignDashboard = () => {
                   <TableBody>
                     {payouts.map((p) => (
                       <TableRow key={p.id}>
-                        <TableCell>{new Date(p.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell>{formatDate(p.created_at)}</TableCell>
                         <TableCell className="font-semibold">{money(p.amount)}</TableCell>
                         <TableCell>
                           {p.payout_method?.type === "paypal" ? (

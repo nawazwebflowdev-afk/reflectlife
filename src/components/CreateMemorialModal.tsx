@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Upload, X, Loader2, Eye, EyeOff } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { format } from "date-fns";
+import { format } from "@/lib/dateFormat";
 import { memorialSlug } from "@/utils/memorialSlug";
 
 import { tr } from "@/i18n/tr";

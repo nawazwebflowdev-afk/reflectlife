@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Upload, Music, Trash2, Save } from "lucide-react";
-import { format } from "date-fns";
+import { format } from "@/lib/dateFormat";
 
 import { tr } from "@/i18n/tr";
 interface DiaryEntry {

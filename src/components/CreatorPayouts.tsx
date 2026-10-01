@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { formatDate } from "@/lib/dateFormat";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -282,7 +283,7 @@ const CreatorPayouts = () => {
                 {payouts.map((payout) => (
                   <TableRow key={payout.id}>
                     <TableCell>
-                      {new Date(payout.created_at).toLocaleDateString()}
+                      {formatDate(payout.created_at)}
                     </TableCell>
                     <TableCell className="font-semibold">
                       €{Number(payout.amount).toFixed(2)}

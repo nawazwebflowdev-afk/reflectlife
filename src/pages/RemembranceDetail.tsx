@@ -31,7 +31,7 @@ import {
   toDateKey,
   type Remembrance,
 } from "@/lib/remembrance";
-import { format } from "date-fns";
+import { format } from "@/lib/dateFormat";
 
 import { tr } from "@/i18n/tr";
 export default function RemembranceDetail() {

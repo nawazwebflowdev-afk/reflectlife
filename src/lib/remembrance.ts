@@ -1,5 +1,6 @@
 
 import { tr } from "@/i18n/tr";export type RemembranceEventType =
+import { appLocale } from "@/lib/dateFormat";
   | "birthday"
   | "date_of_death"
   | "anniversary"
@@ -274,11 +275,11 @@ export function formatTime(time: string): string {
   const [h, m] = time.split(":").map(Number);
   const d = new Date();
   d.setHours(h || 0, m || 0, 0, 0);
-  return new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" }).format(d);
+  return new Intl.DateTimeFormat(appLocale(), { hour: "2-digit", minute: "2-digit" }).format(d);
 }
 
 export function formatClock(d: Date): string {
-  return new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" }).format(d);
+  return new Intl.DateTimeFormat(appLocale(), { hour: "2-digit", minute: "2-digit" }).format(d);
 }
 
 export function recurrenceLabel(r: Remembrance): string {

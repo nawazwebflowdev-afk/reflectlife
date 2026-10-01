@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { formatDate } from "@/lib/dateFormat";
 import {
   Dialog,
   DialogContent,
@@ -524,7 +525,7 @@ const AddConnectionModal = ({
                 <SelectContent>
                   {sharedMemories.map((memory) => (
                     <SelectItem key={memory.id} value={memory.id}>
-                      {memory.caption || `Memory from ${new Date(memory.created_at).toLocaleDateString()}`}
+                      {memory.caption || `Memory from ${formatDate(memory.created_at)}`}
                     </SelectItem>
                   ))}
                 </SelectContent>

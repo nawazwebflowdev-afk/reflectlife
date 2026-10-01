@@ -11,7 +11,7 @@ import CreateMemorialModal from "@/components/CreateMemorialModal";
 import PageTemplateSelector from "@/components/PageTemplateSelector";
 import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
 import timelineBg from "@/assets/timeline-bg.jpg";
-import { format } from "date-fns";
+import { format } from "@/lib/dateFormat";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { tr } from "@/i18n/tr";

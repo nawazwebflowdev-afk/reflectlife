@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { addDays, format, isSameDay, startOfWeek } from "date-fns";
+import { addDays, isSameDay, startOfWeek } from "date-fns";
+import { format } from "@/lib/dateFormat";
 import { Card, CardContent } from "@/components/ui/card";
 import { EVENT_TYPE_EMOJI, displayTitle, formatClock, occurrenceTimesInRange, type Remembrance } from "@/lib/remembrance";
 

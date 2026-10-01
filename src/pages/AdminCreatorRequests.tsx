@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { formatDate } from "@/lib/dateFormat";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -190,7 +191,7 @@ const AdminCreatorRequests = () => {
                               </a>
                             </p>
                           )}
-                          <p>{tr("a.4b62b9d7ac")} {new Date(app.created_at).toLocaleDateString()}</p>
+                          <p>{tr("a.4b62b9d7ac")} {formatDate(app.created_at)}</p>
                         </div>
                       </div>
                       <Badge variant={app.approved ? "default" : "secondary"}>

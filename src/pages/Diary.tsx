@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Search, Filter, FileDown, Palette } from "lucide-react";
 import DiaryEntryModal from "@/components/DiaryEntryModal";
-import { format } from "date-fns";
+import { format } from "@/lib/dateFormat";
 import { useNavigate } from "react-router-dom";
 
 import { tr } from "@/i18n/tr";

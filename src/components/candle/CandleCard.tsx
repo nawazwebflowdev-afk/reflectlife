@@ -1,4 +1,5 @@
 import { CandleDisplay } from './CandleDisplay';
+import { formatDate } from "@/lib/dateFormat";
 import { useCountdown } from '@/hooks/useCountdown';
 import { cn } from '@/utils/cn';
 
@@ -45,7 +46,7 @@ export function CandleCard({ candle, isMine, onRelight }: Props) {
     <div
       tabIndex={0}
       role="group"
-      aria-label={`Candle lit by ${name}${litDate ? ` on ${litDate.toLocaleDateString()}` : ''}. ${remaining}`}
+      aria-label={`Candle lit by ${name}${litDate ? ` on ${formatDate(litDate)}` : ''}. ${remaining}`}
       className={cn(
         'flex flex-col items-center gap-1 rounded-2xl border border-border bg-card/50 px-2 py-4 text-center',
         'transition-all animate-fade-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
@@ -57,7 +58,7 @@ export function CandleCard({ candle, isMine, onRelight }: Props) {
         {isMine ? tr("a.17dc40f366") : `Lit by ${name}`}
       </p>
       {litDate && (
-        <p className="text-xs text-muted-foreground">{litDate.toLocaleDateString()}</p>
+        <p className="text-xs text-muted-foreground">{formatDate(litDate)}</p>
       )}
       <p className="text-xs text-muted-foreground">{lit ? remaining : tr("a.f0c2447b55")}</p>
       {candle.message && (

@@ -32,7 +32,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { format } from "date-fns";
+import { format } from "@/lib/dateFormat";
 
 import { tr } from "@/i18n/tr";
 interface ConnectionDetailPanelProps {

@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AddMemoryModal } from "@/components/AddMemoryModal";
 import { useToast } from "@/hooks/use-toast";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
-import { format } from "date-fns";
+import { format } from "@/lib/dateFormat";
 import { ArrowLeft, Calendar, FileText, Image as ImageIcon, Plus, Video } from "lucide-react";
 import PageTemplateSelector from "@/components/PageTemplateSelector";
 
