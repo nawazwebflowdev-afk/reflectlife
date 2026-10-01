@@ -11,15 +11,35 @@ import { z } from "npm:zod@^3.25.76";
 
 // src/lib/mcp/supabase.ts
 import { createClient } from "npm:@supabase/supabase-js@^2.76.1";
-function supabaseForUser(ctx) {
-  return createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY,
-    {
-      global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
-      auth: { persistSession: false, autoRefreshToken: false }
+function env(name) {
+  const r = globalThis;
+  return (r.Deno?.env?.get?.(name) ?? r.process?.env?.[name])?.trim() || void 0;
+}
+function publishableKey() {
+  const direct = env("SUPABASE_PUBLISHABLE_KEY");
+  if (direct) return direct;
+  const keyset = env("SUPABASE_PUBLISHABLE_KEYS");
+  if (keyset) {
+    try {
+      const keys = JSON.parse(keyset);
+      const k = [keys.default, ...Object.values(keys)].find((v) => typeof v === "string" && v.startsWith("sb_publishable_"));
+      if (k) return k;
+    } catch {
     }
-  );
+  }
+  const legacy = env("SUPABASE_ANON_KEY");
+  if (legacy) return legacy;
+  throw new Error("Supabase publishable key is not configured");
+}
+function supabaseForUser(ctx) {
+  const token = ctx.getToken();
+  if (!token) throw new Error("A verified sign-in is required");
+  const url = env("SUPABASE_URL");
+  if (!url) throw new Error("SUPABASE_URL is not configured");
+  return createClient(url, publishableKey(), {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
 }
 function notAuthenticated() {
   return {
@@ -31,10 +51,7 @@ function errorResult(message) {
   return { content: [{ type: "text", text: message }], isError: true };
 }
 function jsonResult(data) {
-  return {
-    content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
-    structuredContent: { result: data }
-  };
+  return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
 }
 
 // src/lib/mcp/tools/list-memorials.ts
