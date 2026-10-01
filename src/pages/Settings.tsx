@@ -1,3 +1,4 @@
+import { DownloadMyData, OwnerNotificationSettings } from "@/components/AccountDataTools";
 import { User, Bell, Lock, Download, Trash2, Palette, Upload, X, Loader2, Share2, Star } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -588,9 +589,11 @@ const Settings = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 {tr("a.f90b6c9822")}
               </p>
-              <Button variant="outline">{tr("a.ed18235e1d")}</Button>
+              <DownloadMyData />
             </CardContent>
           </Card>
+
+          <OwnerNotificationSettings />
 
           {/* Danger Zone */}
           <Card className="shadow-elegant border-destructive/50">

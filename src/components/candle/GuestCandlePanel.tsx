@@ -1,3 +1,4 @@
+import { track } from "@/lib/analytics";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatDate } from "@/lib/dateFormat";
 import { Flame, EyeOff, Share2, Plus, Loader2 } from "lucide-react";
@@ -21,7 +22,7 @@ export function GuestCandlePanel({memorialId,memorialName,isOwner,enabled}:Props
   const active=useMemo(()=>candles.filter(c=>new Date(c.burns_until)>new Date()&&!c.hidden_by_owner),[candles]);
   const earlier=useMemo(()=>candles.filter(c=>new Date(c.burns_until)<=new Date()&&!c.hidden_by_owner),[candles]);
   const captcha=async()=>{const key=(import.meta.env.VITE_RECAPTCHA_SITE_KEY as string|undefined)||"6Lc_t9ktAAAAAFqRrUCkGkn2sTQZqzLSsXAgVd9b";if(!key)throw new Error(uk?"Захист від спаму ще налаштовується.":tr("a.6d433fc056"));if(!(window as any).grecaptcha){await new Promise<void>((resolve,reject)=>{const s=document.createElement("script");s.src=`https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(key)}`;s.async=true;s.onload=()=>resolve();s.onerror=()=>reject(new Error(tr("a.698390048e")));document.head.appendChild(s)})}const g=(window as any).grecaptcha;await new Promise<void>(resolve=>g.ready(resolve));return await g.execute(key,{action:"guest_candle"})};
-  const light=async()=>{if(name.length>40)return;setBusy(true);try{const token=await captcha();const {data,error}=await supabase.functions.invoke("light-guest-candle",{body:{memorial_id:memorialId,contributor_name:name.trim()||null,device_id:deviceId(),captcha_token:token}});if(error||(data as any)?.error)throw new Error((data as any)?.error||error?.message);setSuccess(true);setName("");await load()}catch(e:any){toast({title:uk?"Не вдалося запалити свічку":tr("a.05290f1302"),description:e.message,variant:"destructive"})}finally{setBusy(false)}};
+  const light=async()=>{if(name.length>40)return;setBusy(true);try{const token=await captcha();const {data,error}=await supabase.functions.invoke("light-guest-candle",{body:{memorial_id:memorialId,contributor_name:name.trim()||null,device_id:deviceId(),captcha_token:token}});if(error||(data as any)?.error)throw new Error((data as any)?.error||error?.message);setSuccess(true);track("Candle Lit",{kind:"guest"});setName("");await load()}catch(e:any){toast({title:uk?"Не вдалося запалити свічку":tr("a.05290f1302"),description:e.message,variant:"destructive"})}finally{setBusy(false)}};
   const hide=async(id:string)=>{const {error}=await supabase.from("memorial_guest_candles").update({hidden_by_owner:true}).eq("id",id);if(error)toast({title:tr("a.7f2f6a15cf"),description:error.message,variant:"destructive"});else load()};
   if(!enabled&&!isOwner)return null;
   return <div className="w-full space-y-5 border-t border-border pt-7">

@@ -56,3 +56,12 @@ verify_jwt = false
 
 [functions.fundraiser-connect]
 verify_jwt = false
+
+[functions.notify-new-memory]
+verify_jwt = false
+
+[functions.weekly-owner-summary]
+verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = false

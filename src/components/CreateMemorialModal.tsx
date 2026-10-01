@@ -1,3 +1,6 @@
+import { InviteFamily } from "@/components/InviteFamily";
+import { visibilityToDb } from "@/components/PrivacyPicker";
+import { track } from "@/lib/analytics";
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -19,6 +22,8 @@ interface CreateMemorialModalProps {
 }
 
 const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMemorialModalProps) => {
+  const [created, setCreated] = useState<{ id: string; slug: string | null; name: string } | null>(null);
+  const closeAll = (o: boolean) => { if (!o) setCreated(null); onOpenChange(o); };
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isPublic, setIsPublic] = useState(true);
@@ -163,8 +168,7 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
           date_of_death: formData.dateOfDeath || null,
           location: formData.location || null,
           preview_image_url: uploadedImageUrls[0],
-          is_public: isPublic,
-          privacy_level: isPublic ? 'public' : 'private',
+          ...visibilityToDb(isPublic ? "public" : "private"),
           slug: `${memorialSlug(formData.name)}-${crypto.randomUUID().slice(0, 6)}`,
           memorial_type: formData.memorialType,
           defender_label: formData.memorialType === "defender_of_ukraine" ? formData.defenderLabel : null,
@@ -200,8 +204,9 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
       setImages([]);
       setImagePreviews([]);
       
+      track("Memorial Created", { type: formData.memorialType });
       onMemorialCreated();
-      onOpenChange(false);
+      setCreated({ id: memorial.id, slug: memorial.slug, name: memorial.name });
     } catch (error: any) {
       console.error('Error creating memorial:', error);
       toast({
@@ -215,8 +220,11 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={closeAll}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        {created ? (
+          <InviteFamily memorialId={created.id} memorialSlug={created.slug} memorialName={created.name} showSkip onDone={() => closeAll(false)} />
+        ) : (<>
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl">{tr("a.0bfb9d7153")}</DialogTitle>
         </DialogHeader>
@@ -388,6 +396,7 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
             </Button>
           </div>
         </form>
+        </>)}
       </DialogContent>
     </Dialog>
   );

@@ -1,3 +1,5 @@
+import { InviteFamily } from "@/components/InviteFamily";
+import { track } from "@/lib/analytics";
 import { Helmet } from "react-helmet-async";
 import { MemorialDonations } from "@/components/donation/MemorialDonations";
 import { useState, useEffect } from "react";
@@ -165,13 +167,20 @@ const Memorial = () => {
       return;
     }
 
-    const { error } = await supabase
+    const { data: inserted, error } = await supabase
       .from("tributes" as any)
       .insert({
         user_id: user.id,
         memorial_id: memorial.id,
         tribute_text: tribute,
-      });
+      })
+      .select("id")
+      .single();
+    if (!error) {
+      track("Memory Added");
+      const tid = (inserted as any)?.id;
+      if (tid && user.id !== memorial.user_id) supabase.functions.invoke("notify-new-memory", { body: { tributeId: tid } }).catch(() => {});
+    }
 
     if (error) {
       console.error(error);
@@ -376,7 +385,7 @@ const Memorial = () => {
 
   return (
     <div 
-      className="min-h-screen transition-smooth"
+      className={`min-h-screen transition-smooth ${memorial?.theme === "ofrenda" ? "theme-ofrenda" : ""}`}
       style={{
         '--template-accent': templateTheme.accentColor,
         backgroundImage: `linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), url(${backgroundImage})`,
@@ -391,9 +400,10 @@ const Memorial = () => {
           <meta name="description" content={(memorial.bio || memorial.name).slice(0, 155)} />
           <meta property="og:title" content={`${memorial.name} | Reflectlife`} />
           <meta property="og:description" content={(memorial.bio || memorial.name).slice(0, 155)} />
-          {memorial.is_public === false && <meta name="robots" content="noindex" />}
+          {(memorial.is_public === false || memorial.privacy_level !== "public") && <meta name="robots" content="noindex" />}
         </Helmet>
       )}
+      {memorial?.theme === "ofrenda" && <div className="papel-picado" aria-hidden="true" />}
       {/* Hero Section */}
       <section 
         className="relative h-[400px] flex items-end transition-smooth"
@@ -500,6 +510,13 @@ const Memorial = () => {
           </Card>
         )}
 
+        {isCreator && memorial?.id && (
+          <section className="container mx-auto px-4 mt-6">
+            <div className="rounded-2xl border bg-card p-5 shadow-sm">
+              <InviteFamily memorialId={memorial.id} memorialSlug={memorial.slug} memorialName={memorial.name} />
+            </div>
+          </section>
+        )}
         {memorial?.id && <CandleSection memorialId={memorial.id} memorialName={memorial.name} isOwner={!!isCreator} guestEnabled={memorial.guest_candles_enabled !== false} isDefender={memorial.memorial_type === "defender_of_ukraine"} />}
         {memorial?.id && <MemorialDonations memorialId={memorial.id} memorialName={memorial.name} isOwner={!!isCreator} isDefender={memorial.memorial_type === "defender_of_ukraine"} />}
 
