@@ -37,3 +37,7 @@
 - Privacy: Public / Link-only / Private; Download my data ZIP; Delete account
 - Analytics: Plausible + 6 events
 - Ofrenda (Día de Muertos) memorial theme
+- Co-managers (max 5, roles, activity list, notifications)
+- Legacy contact (accept by email, 12-month inactivity reminders, admin-approved handover, ownership transfer with email confirmation; Stripe never transferred)
+- Funeral home accounts (admin approval, create+hand over memorials, discreet credit line, dashboard, QR card, no donation data)
+- Printed memory book (builder, preview, paid PDF EUR9 / softcover EUR39 via Stripe Checkout, print-on-demand API, 300dpi warnings, status emails)
