@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-import reflectlifeLogo from "@/assets/reflectlife-logo.png";
+import reflectlifeLogo from "@/assets/reflectlife-logo.webp";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -100,7 +100,7 @@ const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-3 group">
-            <img src={reflectlifeLogo} alt={tr("a.1a0e32b358")} className="h-10 w-auto object-contain transition-smooth group-hover:scale-105" />
+            <img src={reflectlifeLogo} alt={tr("a.1a0e32b358")} width={1166} height={460} decoding="async" className="h-10 w-auto object-contain transition-smooth group-hover:scale-105" />
           </Link>
 
           {/* Desktop Navigation */}

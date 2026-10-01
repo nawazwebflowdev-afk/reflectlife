@@ -9,8 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useTemplateTheme } from "@/hooks/useTemplateTheme";
 import CreateMemorialModal from "@/components/CreateMemorialModal";
 import PageTemplateSelector from "@/components/PageTemplateSelector";
-import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
-import timelineBg from "@/assets/timeline-bg.jpg";
+import portraitPlaceholder from "@/assets/portrait-placeholder.webp";
+import timelineBg from "@/assets/timeline-bg.webp";
 import { format } from "@/lib/dateFormat";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -241,6 +241,10 @@ const Memorials = () => {
                     <img
                       src={memorial.preview_image_url || portraitPlaceholder}
                       alt={memorial.name}
+                      width={512}
+                      height={512}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
                     />
                   </div>

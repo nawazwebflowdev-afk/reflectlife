@@ -219,6 +219,10 @@ const Tree = () => {
               <img
                 src={currentUser.avatar_url || "/placeholder.svg"}
                 alt={currentUser.full_name}
+                width={64}
+                height={64}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -272,7 +276,7 @@ const Tree = () => {
             <div className="flex flex-col items-center gap-2">
               <div className="relative">
                 <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-border shadow-md bg-background">
-                  <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                  <img src={avatarUrl} alt={displayName} width={56} height={56} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                 </div>
                 {isDeceased && <div className="absolute -top-1 -right-1 text-xl">🕯️</div>}
               </div>
@@ -568,7 +572,7 @@ const Tree = () => {
                               >
                                 <div className="w-10 h-10 rounded-full overflow-hidden border bg-muted flex-shrink-0">
                                   {avatarUrl ? (
-                                    <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                                    <img src={avatarUrl} alt={displayName} width={40} height={40} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                                   ) : (
                                     <div className="w-full h-full flex items-center justify-center text-sm font-medium text-muted-foreground">
                                       {displayName[0] || "?"}

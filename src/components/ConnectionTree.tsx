@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
+import portraitPlaceholder from "@/assets/portrait-placeholder.webp";
 
 import { tr } from "@/i18n/tr";
 type TreeType = "family" | "friendship";
@@ -212,6 +212,10 @@ const ConnectionTree = () => {
                         <img
                           src={node.photo || portraitPlaceholder}
                           alt={node.name}
+                          width={80}
+                          height={80}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -263,6 +267,9 @@ const ConnectionTree = () => {
                   <img
                     src={selectedNode.photo || portraitPlaceholder}
                     alt={selectedNode.name}
+                    width={80}
+                    height={80}
+                    decoding="async"
                     className="w-full h-full object-cover"
                   />
                 </div>

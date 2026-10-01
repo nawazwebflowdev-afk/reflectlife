@@ -40,7 +40,10 @@ export default function ReminderRow({
           <img
             src={r.image_url}
             alt=""
+            width={44}
+            height={44}
             loading="lazy"
+            decoding="async"
             className="h-11 w-11 rounded-lg object-cover flex-shrink-0"
           />
         ) : (

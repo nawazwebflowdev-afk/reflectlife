@@ -1,6 +1,4 @@
-import DonationThanks from "./pages/DonationThanks";
-import FundraiserDashboard from "./pages/FundraiserDashboard";
-import AdminFundraisers from "./pages/AdminFundraisers";
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,46 +7,49 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
-import CookieConsent from "./components/CookieConsent";
 import Landing from "./pages/Landing";
-
-import Signup from "./pages/Signup";
-import Login from "./pages/Login";
-import Verify from "./pages/Verify";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import Dashboard from "./pages/Dashboard";
-import Memorial from "./pages/Memorial";
-import Memorials from "./pages/Memorials";
-import Settings from "./pages/Settings";
-import Timeline from "./pages/Timeline";
-import TimelineView from "./pages/TimelineView";
-import Templates from "./pages/Templates";
-import BecomeCreator from "./pages/BecomeCreator";
-import AdminCreatorRequests from "./pages/AdminCreatorRequests";
-import Tree from "./pages/Tree";
-import Diary from "./pages/Diary";
-import HelpCentre from "./pages/HelpCentre";
-import NotFound from "./pages/NotFound";
-import Success from "./pages/Success";
-import Cancel from "./pages/Cancel";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import Checkout from "./pages/Checkout";
-import CookiePolicy from "./pages/CookiePolicy";
-import QA from "./pages/QA";
-import About from "./pages/About";
-import CandleSuccess from "./pages/CandleSuccess";
-import OAuthConsent from "./pages/OAuthConsent";
-import RemembrancePage from "./pages/Remembrance";
-import RemembranceDetail from "./pages/RemembranceDetail";
-import DonationSuccess from "./pages/DonationSuccess";
-import CampaignDashboard from "./pages/CampaignDashboard";
-import Terms from "./pages/Terms";
-import UkrainianMemorialLanding from "./pages/UkrainianMemorialLanding";
-import Imprint from "./pages/Imprint";
 import LanguageAlternates from "./components/LanguageAlternates";
 import { langFromPath } from "./i18n/langPath";
 import SeasonalBanner from "./components/SeasonalBanner";
+
+const DonationThanks = lazy(() => import("./pages/DonationThanks"));
+const FundraiserDashboard = lazy(() => import("./pages/FundraiserDashboard"));
+const AdminFundraisers = lazy(() => import("./pages/AdminFundraisers"));
+const CookieConsent = lazy(() => import("./components/CookieConsent"));
+const Signup = lazy(() => import("./pages/Signup"));
+const Login = lazy(() => import("./pages/Login"));
+const Verify = lazy(() => import("./pages/Verify"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Memorial = lazy(() => import("./pages/Memorial"));
+const Memorials = lazy(() => import("./pages/Memorials"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Timeline = lazy(() => import("./pages/Timeline"));
+const TimelineView = lazy(() => import("./pages/TimelineView"));
+const Templates = lazy(() => import("./pages/Templates"));
+const BecomeCreator = lazy(() => import("./pages/BecomeCreator"));
+const AdminCreatorRequests = lazy(() => import("./pages/AdminCreatorRequests"));
+const Tree = lazy(() => import("./pages/Tree"));
+const Diary = lazy(() => import("./pages/Diary"));
+const HelpCentre = lazy(() => import("./pages/HelpCentre"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Success = lazy(() => import("./pages/Success"));
+const Cancel = lazy(() => import("./pages/Cancel"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
+const QA = lazy(() => import("./pages/QA"));
+const About = lazy(() => import("./pages/About"));
+const CandleSuccess = lazy(() => import("./pages/CandleSuccess"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
+const RemembrancePage = lazy(() => import("./pages/Remembrance"));
+const RemembranceDetail = lazy(() => import("./pages/RemembranceDetail"));
+const DonationSuccess = lazy(() => import("./pages/DonationSuccess"));
+const CampaignDashboard = lazy(() => import("./pages/CampaignDashboard"));
+const Terms = lazy(() => import("./pages/Terms"));
+const UkrainianMemorialLanding = lazy(() => import("./pages/UkrainianMemorialLanding"));
+const Imprint = lazy(() => import("./pages/Imprint"));
 
 const urlLang = langFromPath(window.location.pathname);
 const routerBasename = urlLang ? `/${urlLang}` : undefined;
@@ -67,7 +68,8 @@ const App = () => (
             <Navigation />
             <SeasonalBanner />
             <main className="flex-grow">
-              <Routes>
+              <Suspense fallback={<div className="min-h-[50vh]" aria-hidden="true" />}>
+                <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/uk/pamiat" element={<UkrainianMemorialLanding />} />
                 <Route path="/auth" element={<Signup />} />
@@ -109,10 +111,11 @@ const App = () => (
                 <Route path="/aviso-legal" element={<Imprint />} />
                 <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
                 <Route path="*" element={<NotFound />} />
-              </Routes>
+                </Routes>
+              </Suspense>
             </main>
             <Footer />
-            <CookieConsent />
+            <Suspense fallback={null}><CookieConsent /></Suspense>
           </div>
         </BrowserRouter>
       </TooltipProvider>

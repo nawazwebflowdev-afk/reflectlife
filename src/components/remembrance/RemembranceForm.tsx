@@ -516,7 +516,7 @@ export default function RemembranceForm({
                 <Label>{tr("a.50e19fda0d")}</Label>
                 {imageUrl ? (
                   <div className="relative w-40">
-                    <img src={imageUrl} alt={tr("a.b87a1929f7")} className="w-40 h-28 object-cover rounded-lg border border-border" />
+                    <img src={imageUrl} alt={tr("a.b87a1929f7")} width={160} height={112} decoding="async" className="w-40 h-28 object-cover rounded-lg border border-border" />
                     <button
                       type="button"
                       aria-label={tr("a.5f94b03c2e")}

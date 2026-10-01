@@ -33,7 +33,7 @@ export const AvatarSelector = ({
           )}
           onClick={() => onSelectAvatar(index)}
         >
-          <img src={avatar} alt={`Avatar ${index + 1}`} className="w-full h-full object-cover rounded" />
+          <img src={avatar} alt={`Avatar ${index + 1}`} width={64} height={64} loading="lazy" decoding="async" className="w-full h-full object-cover rounded" />
         </Card>
       ))}
     </div>
@@ -64,6 +64,10 @@ export const AvatarDisplay = ({ avatarIndex, size = "md", className }: AvatarDis
       <img 
         src={AVATARS[avatarIndex % AVATARS.length]} 
         alt={`Avatar ${avatarIndex + 1}`} 
+        width={64}
+        height={64}
+        loading="lazy"
+        decoding="async"
         className="w-full h-full object-cover"
       />
     </div>

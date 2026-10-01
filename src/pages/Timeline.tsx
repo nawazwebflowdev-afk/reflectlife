@@ -374,6 +374,9 @@ const Timeline = () => {
                     <img
                       src={mediaPreview}
                       alt={tr("a.f1fbb2b43d")}
+                      width={768}
+                      height={192}
+                      decoding="async"
                       className="w-full h-48 object-cover"
                     />
                     <Button
@@ -451,6 +454,10 @@ const Timeline = () => {
                     <img
                       src={post.media_url}
                       alt={tr("a.89c8a2851d")}
+                      width={960}
+                      height={640}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-auto max-h-[500px] object-cover"
                     />
                   </div>

@@ -288,6 +288,9 @@ const DiaryEntryModal = ({ open, onOpenChange, entry, onSaved }: DiaryEntryModal
                 <img
                   src={mediaPreview}
                   alt={tr("a.f1fbb2b43d")}
+                  width={768}
+                  height={192}
+                  decoding="async"
                   className="w-full h-48 object-cover rounded-md"
                 />
                 <Button

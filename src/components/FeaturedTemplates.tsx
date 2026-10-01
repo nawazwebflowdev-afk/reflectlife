@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { getCountryFlag } from "@/lib/countryFlags";
 import { useToast } from "@/hooks/use-toast";
+import { optimizedImageUrl } from "@/lib/imageUrl";
 
 import { tr } from "@/i18n/tr";
 interface Template {
@@ -98,8 +99,12 @@ const FeaturedTemplates = () => {
           >
             <div className="aspect-[3/4] overflow-hidden">
               <img
-                src={template.preview_url || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
+                src={optimizedImageUrl(template.preview_url) || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
                 alt={template.name}
+                width={400}
+                height={533}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover hover:scale-105 transition-smooth"
               />
             </div>

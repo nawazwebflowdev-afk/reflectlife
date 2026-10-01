@@ -213,6 +213,10 @@ const PostDetailModal = ({
                 <img
                   src={post.media_url}
                   alt={tr("a.89c8a2851d")}
+                  width={768}
+                  height={512}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-auto max-h-[400px] object-cover"
                 />
               </div>

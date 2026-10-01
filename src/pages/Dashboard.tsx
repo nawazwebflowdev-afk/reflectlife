@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
+import portraitPlaceholder from "@/assets/portrait-placeholder.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
@@ -15,6 +15,7 @@ import CreatorDashboard from "@/components/CreatorDashboard";
 import { ProfileEditModal } from "@/components/ProfileEditModal";
 
 import { tr } from "@/i18n/tr";
+import { optimizedImageUrl } from "@/lib/imageUrl";
 interface Profile {
   id: string;
   first_name: string | null;
@@ -425,8 +426,12 @@ const Dashboard = () => {
                     >
                       <div className="aspect-[3/4] overflow-hidden">
                         <img
-                          src={template.preview_url || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
+                          src={optimizedImageUrl(template.preview_url) || "https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?w=400"}
                           alt={template.name}
+                          width={400}
+                          height={533}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -464,6 +469,10 @@ const Dashboard = () => {
                           <img
                             src={memorial.preview_image_url || portraitPlaceholder}
                             alt={memorial.name}
+                            width={96}
+                            height={96}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-cover rounded-lg"
                           />
                         </div>
@@ -541,6 +550,10 @@ const Dashboard = () => {
                           <img
                             src={memorial.preview_image_url || portraitPlaceholder}
                             alt={memorial.name}
+                            width={96}
+                            height={96}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-cover rounded-lg"
                           />
                         </div>

@@ -439,7 +439,7 @@ const AddConnectionModal = ({
                 <Label>{tr("a.5f68f7a2bb")}</Label>
                 {imagePreview ? (
                   <div className="relative w-32 h-32 rounded-lg overflow-hidden border">
-                    <img src={imagePreview} alt={tr("a.f1fbb2b43d")} className="w-full h-full object-cover" />
+                    <img src={imagePreview} alt={tr("a.f1fbb2b43d")} width={128} height={128} decoding="async" className="w-full h-full object-cover" />
                     <Button
                       type="button"
                       variant="destructive"

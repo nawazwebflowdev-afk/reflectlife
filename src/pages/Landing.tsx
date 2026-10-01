@@ -1,18 +1,27 @@
-import { useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Heart, Share2, Clock, Shield, Flame, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AvatarDisplay } from "@/components/EmojiAvatarSelector";
-import heroBanner from "@/assets/hero-banner.png";
-import portraitPlaceholder from "@/assets/portrait-placeholder.jpg";
-import FeaturedTemplates from "@/components/FeaturedTemplates";
-import LatestPrayers from "@/components/LatestPrayers";
-import PostDetailModal from "@/components/PostDetailModal";
+import hero640Avif from "@/assets/hero-640.avif.asset.json";
+import hero1024Avif from "@/assets/hero-1024.avif.asset.json";
+import hero1600Avif from "@/assets/hero-1600.avif.asset.json";
+import hero640Webp from "@/assets/hero-640.webp.asset.json";
+import hero1024Webp from "@/assets/hero-1024.webp.asset.json";
+import hero1600Webp from "@/assets/hero-1600.webp.asset.json";
+import portraitPlaceholder from "@/assets/portrait-placeholder.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
+import DeferredRender from "@/components/DeferredRender";
 
 import { tr } from "@/i18n/tr";
+const FeaturedTemplates = lazy(() => import("@/components/FeaturedTemplates"));
+const LatestPrayers = lazy(() => import("@/components/LatestPrayers"));
+const PostDetailModal = lazy(() => import("@/components/PostDetailModal"));
+
+const DeferredSectionFallback = () => <div className="min-h-48" aria-hidden="true" />;
+
 const Landing = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -108,8 +117,31 @@ const Landing = () => {
       {/* Hero Banner */}
       <section className="relative w-full">
         <div className="relative w-full h-[500px] md:h-[600px] overflow-hidden">
-          <img src={heroBanner} alt={tr("a.119e758436")} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40" />
+          <picture>
+            <source
+              type="image/avif"
+              srcSet={`${hero640Avif.url} 640w, ${hero1024Avif.url} 1024w, ${hero1600Avif.url} 1600w`}
+              sizes="100vw"
+            />
+            <source
+              type="image/webp"
+              srcSet={`${hero640Webp.url} 640w, ${hero1024Webp.url} 1024w, ${hero1600Webp.url} 1600w`}
+              sizes="100vw"
+            />
+            <img
+              src={hero1024Webp.url}
+              srcSet={`${hero640Webp.url} 640w, ${hero1024Webp.url} 1024w, ${hero1600Webp.url} 1600w`}
+              sizes="100vw"
+              width={1600}
+              height={914}
+              {...({ fetchpriority: "high" } as Record<string, string>)}
+              loading="eager"
+              decoding="async"
+              alt={tr("a.119e758436")}
+              className="w-full h-full object-cover"
+            />
+          </picture>
+          <div className="absolute inset-0 bg-gradient-to-b from-foreground/65 via-foreground/55 to-foreground/70" />
           <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
             <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 md:mb-6 drop-shadow-lg animate-fade-in">
               {t("landing.heroTitle")}
@@ -177,6 +209,10 @@ const Landing = () => {
                         <img
                           src={memorial.preview_image_url || portraitPlaceholder}
                           alt={memorial.name}
+                          width={512}
+                          height={512}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
                         />
                       </div>
@@ -243,7 +279,11 @@ const Landing = () => {
               {t("landing.featuredTemplatesDesc")}
             </p>
           </div>
-          <FeaturedTemplates />
+          <DeferredRender fallback={<DeferredSectionFallback />}>
+            <Suspense fallback={<DeferredSectionFallback />}>
+              <FeaturedTemplates />
+            </Suspense>
+          </DeferredRender>
         </div>
       </section>
 
@@ -256,7 +296,11 @@ const Landing = () => {
               {t("landing.latestPrayersDesc")}
             </p>
           </div>
-          <LatestPrayers />
+          <DeferredRender fallback={<DeferredSectionFallback />}>
+            <Suspense fallback={<DeferredSectionFallback />}>
+              <LatestPrayers />
+            </Suspense>
+          </DeferredRender>
         </div>
       </section>
 
@@ -276,13 +320,17 @@ const Landing = () => {
         </div>
       </section>
 
-      <PostDetailModal
-        open={!!selectedPost}
-        onOpenChange={(open) => !open && setSelectedPost(null)}
-        post={selectedPost}
-        user={user}
-        onPostUpdated={fetchTimelinePosts}
-      />
+      {selectedPost && (
+        <Suspense fallback={null}>
+          <PostDetailModal
+            open
+            onOpenChange={(open) => !open && setSelectedPost(null)}
+            post={selectedPost}
+            user={user}
+            onPostUpdated={fetchTimelinePosts}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };

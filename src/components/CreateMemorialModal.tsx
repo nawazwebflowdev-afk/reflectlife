@@ -259,6 +259,9 @@ const CreateMemorialModal = ({ open, onOpenChange, onMemorialCreated }: CreateMe
                     <img
                       src={preview}
                       alt={`Preview ${index + 1}`}
+                      width={256}
+                      height={96}
+                      decoding="async"
                       className="w-full h-24 object-cover rounded-lg"
                     />
                     <button

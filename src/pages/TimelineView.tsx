@@ -266,6 +266,10 @@ const TimelineView = () => {
                           <img
                             src={entry.content_url}
                             alt={entry.caption || tr("a.89c8a2851d")}
+                            width={768}
+                            height={512}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full max-w-lg rounded-lg mb-4"
                           />
                         )}
