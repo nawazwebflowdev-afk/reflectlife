@@ -210,6 +210,76 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_candle_conversions: {
+        Row: {
+          created_at: string
+          device_hash: string
+          event_type: string
+          id: string
+          memorial_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_hash: string
+          event_type: string
+          id?: string
+          memorial_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_hash?: string
+          event_type?: string
+          id?: string
+          memorial_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_candle_conversions_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guest_candle_rate_limits: {
+        Row: {
+          created_at: string
+          device_hash: string
+          id: string
+          ip_hash: string
+          memorial_id: string
+          rate_date: string
+        }
+        Insert: {
+          created_at?: string
+          device_hash: string
+          id?: string
+          ip_hash: string
+          memorial_id: string
+          rate_date?: string
+        }
+        Update: {
+          created_at?: string
+          device_hash?: string
+          id?: string
+          ip_hash?: string
+          memorial_id?: string
+          rate_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_candle_rate_limits_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memorial_access: {
         Row: {
           created_at: string
@@ -565,6 +635,47 @@ export type Database = {
           },
         ]
       }
+      memorial_guest_candles: {
+        Row: {
+          burns_until: string
+          contributor_name: string | null
+          device_hash: string
+          hidden_by_owner: boolean
+          id: string
+          ip_hash: string
+          lit_at: string
+          memorial_id: string
+        }
+        Insert: {
+          burns_until?: string
+          contributor_name?: string | null
+          device_hash: string
+          hidden_by_owner?: boolean
+          id?: string
+          ip_hash: string
+          lit_at?: string
+          memorial_id: string
+        }
+        Update: {
+          burns_until?: string
+          contributor_name?: string | null
+          device_hash?: string
+          hidden_by_owner?: boolean
+          id?: string
+          ip_hash?: string
+          lit_at?: string
+          memorial_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_guest_candles_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: false
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memorial_hearts: {
         Row: {
           created_at: string
@@ -736,6 +847,148 @@ export type Database = {
           },
         ]
       }
+      memorial_remembrance_deliveries: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          milestone_key: string
+          preference_id: string
+          recipient_email_hash: string
+          scheduled_for: string
+          sent_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          milestone_key: string
+          preference_id: string
+          recipient_email_hash: string
+          scheduled_for: string
+          sent_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          milestone_key?: string
+          preference_id?: string
+          recipient_email_hash?: string
+          scheduled_for?: string
+          sent_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_remembrance_deliveries_preference_id_fkey"
+            columns: ["preference_id"]
+            isOneToOne: false
+            referencedRelation: "memorial_remembrance_preferences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memorial_remembrance_preferences: {
+        Row: {
+          annual_anniversary: boolean
+          created_at: string
+          first_anniversary: boolean
+          fortieth_day: boolean
+          id: string
+          language: string
+          memorial_id: string
+          ninth_day: boolean
+          owner_email_enabled: boolean
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          annual_anniversary?: boolean
+          created_at?: string
+          first_anniversary?: boolean
+          fortieth_day?: boolean
+          id?: string
+          language?: string
+          memorial_id: string
+          ninth_day?: boolean
+          owner_email_enabled?: boolean
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          annual_anniversary?: boolean
+          created_at?: string
+          first_anniversary?: boolean
+          fortieth_day?: boolean
+          id?: string
+          language?: string
+          memorial_id?: string
+          ninth_day?: boolean
+          owner_email_enabled?: boolean
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_remembrance_preferences_memorial_id_fkey"
+            columns: ["memorial_id"]
+            isOneToOne: true
+            referencedRelation: "memorials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memorial_remembrance_recipients: {
+        Row: {
+          access_id: string
+          created_at: string
+          id: string
+          language: string
+          opted_in: boolean
+          preference_id: string
+          recipient_email: string
+          recipient_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_id: string
+          created_at?: string
+          id?: string
+          language?: string
+          opted_in?: boolean
+          preference_id: string
+          recipient_email: string
+          recipient_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_id?: string
+          created_at?: string
+          id?: string
+          language?: string
+          opted_in?: boolean
+          preference_id?: string
+          recipient_email?: string
+          recipient_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memorial_remembrance_recipients_access_id_fkey"
+            columns: ["access_id"]
+            isOneToOne: false
+            referencedRelation: "memorial_access"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "memorial_remembrance_recipients_preference_id_fkey"
+            columns: ["preference_id"]
+            isOneToOne: false
+            referencedRelation: "memorial_remembrance_preferences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memorial_remembrances: {
         Row: {
           anchor_date: string
@@ -869,12 +1122,18 @@ export type Database = {
           created_at: string
           date_of_birth: string | null
           date_of_death: string | null
+          defender_label: string | null
+          guest_candles_enabled: boolean
           id: string
           is_public: boolean | null
           location: string | null
+          memorial_type: string
           name: string
           preview_image_url: string | null
           privacy_level: Database["public"]["Enums"]["privacy_level"] | null
+          service_place: string | null
+          service_unit: string | null
+          slug: string | null
           updated_at: string
           user_id: string
         }
@@ -883,12 +1142,18 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           date_of_death?: string | null
+          defender_label?: string | null
+          guest_candles_enabled?: boolean
           id?: string
           is_public?: boolean | null
           location?: string | null
+          memorial_type?: string
           name: string
           preview_image_url?: string | null
           privacy_level?: Database["public"]["Enums"]["privacy_level"] | null
+          service_place?: string | null
+          service_unit?: string | null
+          slug?: string | null
           updated_at?: string
           user_id: string
         }
@@ -897,12 +1162,18 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           date_of_death?: string | null
+          defender_label?: string | null
+          guest_candles_enabled?: boolean
           id?: string
           is_public?: boolean | null
           location?: string | null
+          memorial_type?: string
           name?: string
           preview_image_url?: string | null
           privacy_level?: Database["public"]["Enums"]["privacy_level"] | null
+          service_place?: string | null
+          service_unit?: string | null
+          slug?: string | null
           updated_at?: string
           user_id?: string
         }
