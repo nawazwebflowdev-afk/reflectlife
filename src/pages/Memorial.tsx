@@ -501,6 +501,7 @@ const Memorial = () => {
         )}
 
         {memorial?.id && <CandleSection memorialId={memorial.id} memorialName={memorial.name} isOwner={!!isCreator} guestEnabled={memorial.guest_candles_enabled !== false} isDefender={memorial.memorial_type === "defender_of_ukraine"} />}
+        {memorial?.id && <MemorialDonations memorialId={memorial.id} memorialName={memorial.name} isOwner={!!isCreator} isDefender={memorial.memorial_type === "defender_of_ukraine"} />}
 
         {memorial?.id && memorial?.name && (
           <RemembranceSection
@@ -775,7 +776,6 @@ const Memorial = () => {
           </TabsContent>
         </Tabs>
 
-        {memorial?.id && <MemorialDonations memorialId={memorial.id} memorialName={memorial.name} isOwner={!!isCreator} isDefender={memorial.memorial_type === "defender_of_ukraine"} />}
       </div>
 
       {/* Edit Modal */}
