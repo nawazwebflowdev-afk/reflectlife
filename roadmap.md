@@ -1,6 +1,7 @@
 # Roadmap
 
 ## In progress
+- Per-route titles/descriptions via react-helmet-async.
 - JSON-LD Organization + WebSite on home page — done.
 - Sitemap: add /examples and /pricing (pages do not exist yet) — done.
 - Stripe Connect donations (full spec received, parts 1–3): Express + destination charges, 7% admin setting (defender 0%), owner switch-on, recipient types, onboarding link by email, waiting state, external link fallback, test mode badge, guest Checkout 10/25/50/100/custom min 5, cover-fees, name/message/anonymous, thank-you page, webhook-only recording, memorial section, optional totals, donor list, charity note, report link, owner dashboard + CSV, admin page + pause, 4 languages.
