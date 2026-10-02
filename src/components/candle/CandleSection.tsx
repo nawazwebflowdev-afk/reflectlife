@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Flame } from 'lucide-react';
 import type { CandlePlanKey } from './candlePlans';
-import { GuestCandlePanel } from './GuestCandlePanel';
 
 import { tr } from "@/i18n/tr";
 const PAGE_SIZE = 100;
@@ -248,7 +247,6 @@ export function CandleSection({ memorialId, memorialName, isOwner, guestEnabled,
             )}
           </>
         )}
-        <GuestCandlePanel memorialId={memorialId} memorialName={memorialName} isOwner={isOwner} enabled={guestEnabled} />
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
