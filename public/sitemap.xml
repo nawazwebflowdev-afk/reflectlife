@@ -294,4 +294,8 @@
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/info"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/info"/>
   </url>
+  <url><loc>https://reflectlife.net/info/why-we-built-reflectlife</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/info/why-we-built-reflectlife"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/info/why-we-built-reflectlife"/>
+  </url>
 </urlset>
