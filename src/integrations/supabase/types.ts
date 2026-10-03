@@ -399,6 +399,99 @@ export type Database = {
           },
         ]
       }
+      info_items: {
+        Row: {
+          ai_assisted: boolean
+          body: string | null
+          caption_url: string | null
+          category: string
+          created_at: string
+          description: string | null
+          duration_seconds: number | null
+          embed_url: string | null
+          featured: boolean
+          id: string
+          item_type: string
+          languages: string[]
+          publish_at: string
+          slug: string
+          status: string
+          tags: string[]
+          thumbnail_alt: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          ai_assisted?: boolean
+          body?: string | null
+          caption_url?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          embed_url?: string | null
+          featured?: boolean
+          id?: string
+          item_type?: string
+          languages?: string[]
+          publish_at?: string
+          slug: string
+          status?: string
+          tags?: string[]
+          thumbnail_alt?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          ai_assisted?: boolean
+          body?: string | null
+          caption_url?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          embed_url?: string | null
+          featured?: boolean
+          id?: string
+          item_type?: string
+          languages?: string[]
+          publish_at?: string
+          slug?: string
+          status?: string
+          tags?: string[]
+          thumbnail_alt?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      info_pages: {
+        Row: {
+          body: string
+          key: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          key: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          key?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       memorial_access: {
         Row: {
           created_at: string
