@@ -14,6 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
+      articles: {
+        Row: {
+          body: string | null
+          category: string | null
+          cover_image: string | null
+          created_at: string
+          excerpt: string | null
+          id: string
+          publish_date: string
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+          video_id: string | null
+        }
+        Insert: {
+          body?: string | null
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          publish_date?: string
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+          video_id?: string | null
+        }
+        Update: {
+          body?: string | null
+          category?: string | null
+          cover_image?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          publish_date?: string
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          video_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "articles_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candle_contributions: {
         Row: {
           amount: number
@@ -137,6 +196,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      content_categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
       }
       creator_payouts: {
         Row: {
@@ -2380,6 +2460,48 @@ export type Database = {
         }
         Relationships: []
       }
+      videos: {
+        Row: {
+          captions_file: string | null
+          created_at: string
+          description: string | null
+          duration: number | null
+          featured: boolean
+          id: string
+          poster_image: string | null
+          status: string
+          title: string
+          updated_at: string
+          video_file: string | null
+        }
+        Insert: {
+          captions_file?: string | null
+          created_at?: string
+          description?: string | null
+          duration?: number | null
+          featured?: boolean
+          id?: string
+          poster_image?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          video_file?: string | null
+        }
+        Update: {
+          captions_file?: string | null
+          created_at?: string
+          description?: string | null
+          duration?: number | null
+          featured?: boolean
+          id?: string
+          poster_image?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          video_file?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       public_profiles: {
@@ -2551,6 +2673,7 @@ export type Database = {
         Args: { _owner_id: string; _permission: string; _user_id: string }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
       is_invitee: { Args: { _invitation_email: string }; Returns: boolean }
       is_memorial_owner: {
         Args: { _memorial_id: string; _user_id: string }
