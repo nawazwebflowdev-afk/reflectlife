@@ -105,7 +105,7 @@ const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden xl:flex items-center gap-6">
             {navLinks.map((link) => {
               if ((link as any).authRequired && !isAuthenticated) return null;
               return (
@@ -165,7 +165,7 @@ const Navigation = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 text-foreground hover:bg-muted rounded-lg transition-smooth"
+            className="xl:hidden p-2 text-foreground hover:bg-muted rounded-lg transition-smooth"
             aria-label={tr("a.52092247b8")}
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -174,7 +174,7 @@ const Navigation = () => {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden py-4 border-t border-border animate-fade-in">
+          <div className="xl:hidden py-4 border-t border-border animate-fade-in">
             <div className="flex flex-col gap-2">
               {navLinks.map((link) => {
                 if ((link as any).authRequired && !isAuthenticated) return null;
