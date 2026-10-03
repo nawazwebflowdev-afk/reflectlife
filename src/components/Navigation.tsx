@@ -89,7 +89,6 @@ const Navigation = () => {
     { name: t("nav.memorialWall"), path: "/memorials" },
     { name: t("info.title"), path: "/info" },
     { name: t("nav.dashboard"), path: "/dashboard", authRequired: true },
-    { name: t("cms.stories"), path: "/stories" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -149,9 +148,9 @@ const Navigation = () => {
                       {t("nav.dashboard")}
                     </DropdownMenuItem>
                     {isAdmin && (
-                      <DropdownMenuItem onClick={() => navigate("/admin/content")}>
+                      <DropdownMenuItem onClick={() => navigate("/admin")}>
                         <FileText className="mr-2 h-4 w-4" />
-                        {t("cms.manager")}
+                        {t("info.admin")}
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem onClick={() => navigate("/settings")}>
@@ -214,8 +213,8 @@ const Navigation = () => {
                     <p className="text-xs text-muted-foreground">{user?.email}</p>
                   </div>
                   {isAdmin && (
-                    <Link to="/admin/content" onClick={() => setIsOpen(false)}>
-                      <Button variant="ghost" size="sm" className="gap-2 justify-start w-full"><FileText className="h-4 w-4" />{t("cms.manager")}</Button>
+                    <Link to="/admin" onClick={() => setIsOpen(false)}>
+                      <Button variant="ghost" size="sm" className="gap-2 justify-start w-full"><FileText className="h-4 w-4" />{t("info.admin")}</Button>
                     </Link>
                   )}
                   <Link to="/settings" onClick={() => setIsOpen(false)}>
