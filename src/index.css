@@ -218,3 +218,14 @@ All colors MUST be HSL.
 }
 .theme-ofrenda h1, .theme-ofrenda h2 { color: hsl(20 80% 30%); }
 .theme-ofrenda .shadow-elegant-lg { box-shadow: 0 0 40px hsl(40 100% 55% / 0.55) !important; }
+
+@layer components {
+  .article-body h2 { @apply font-serif text-2xl font-semibold mt-6; }
+  .article-body h3 { @apply font-serif text-xl font-semibold mt-4; }
+  .article-body ul { @apply list-disc pl-6 space-y-1; }
+  .article-body ol { @apply list-decimal pl-6 space-y-1; }
+  .article-body blockquote { @apply border-l-4 border-primary/40 pl-4 italic text-muted-foreground; }
+  .article-body a { @apply text-primary underline; }
+  .article-body img { @apply rounded-xl max-w-full h-auto; }
+  .article-body p + p { @apply mt-3; }
+}

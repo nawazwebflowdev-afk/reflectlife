@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, User, LogOut, Settings } from "lucide-react";
+import { Menu, X, User, LogOut, Settings, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { tr } from "@/i18n/tr";
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [profile, setProfile] = useState<{ full_name?: string; avatar_url?: string } | null>(null);
   const location = useLocation();
@@ -39,6 +40,7 @@ const Navigation = () => {
           setTimeout(() => { fetchProfile(uid); }, 0);
         } else {
           setProfile(null);
+          setIsAdmin(false);
         }
       }
     );
@@ -61,6 +63,8 @@ const Navigation = () => {
       .eq("id", userId)
       .single();
     if (data) setProfile(data);
+    const { data: role } = await supabase.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle();
+    setIsAdmin(!!role);
   };
 
   const handleSignOut = async () => {
@@ -85,6 +89,7 @@ const Navigation = () => {
     { name: t("nav.memorialWall"), path: "/memorials" },
     { name: t("info.title"), path: "/info" },
     { name: t("nav.dashboard"), path: "/dashboard", authRequired: true },
+    { name: t("cms.stories"), path: "/stories" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -143,6 +148,12 @@ const Navigation = () => {
                       <User className="mr-2 h-4 w-4" />
                       {t("nav.dashboard")}
                     </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem onClick={() => navigate("/admin/content")}>
+                        <FileText className="mr-2 h-4 w-4" />
+                        {t("cms.manager")}
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={() => navigate("/settings")}>
                       <Settings className="mr-2 h-4 w-4" />
                       {t("nav.settings")}
@@ -202,6 +213,11 @@ const Navigation = () => {
                     <p className="text-sm font-medium">{profile?.full_name || user?.email}</p>
                     <p className="text-xs text-muted-foreground">{user?.email}</p>
                   </div>
+                  {isAdmin && (
+                    <Link to="/admin/content" onClick={() => setIsOpen(false)}>
+                      <Button variant="ghost" size="sm" className="gap-2 justify-start w-full"><FileText className="h-4 w-4" />{t("cms.manager")}</Button>
+                    </Link>
+                  )}
                   <Link to="/settings" onClick={() => setIsOpen(false)}>
                     <Button variant="ghost" size="sm" className="gap-2 justify-start w-full">
                       <Settings className="h-4 w-4" />
