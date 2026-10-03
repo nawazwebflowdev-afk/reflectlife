@@ -10,3 +10,4 @@
 - Memorial donations use Stripe Connect Express destination charges with a separate donations Stripe key, and are recorded only by the signed `fundraiser-webhook`, because Reflectlife must never hold or self-report donated money.
 - Keep the homepage route eager and lazy-load all other pages plus below-fold homepage features, because the first mobile download must remain small.
 - Info Board content (info_items/info_pages) is editable only by admin-role users and media is stored under the admin's own folder in the existing public uploads bucket, because new public buckets are blocked for this workspace.
+- Marketing articles/videos use their own tables and private buckets that grant read to everyone; media is shown via signed links, because public buckets are blocked and memorial storage must stay untouched.

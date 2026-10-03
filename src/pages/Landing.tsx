@@ -304,6 +304,9 @@ const Landing = () => {
           </DeferredRender>
         </div>
       </section>
+      <DeferredRender fallback={null}>
+        <Suspense fallback={null}><FeaturedVideo /></Suspense>
+      </DeferredRender>
 
       {/* CTA */}
       <section className="py-20 gradient-hero">
