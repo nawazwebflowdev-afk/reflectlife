@@ -83,6 +83,7 @@ const Navigation = () => {
     { name: t("nav.myDiary"), path: "/diary", authRequired: true },
     { name: t("nav.remembrance"), path: "/remembrance", authRequired: true },
     { name: t("nav.memorialWall"), path: "/memorials" },
+    { name: t("info.title"), path: "/info" },
     { name: t("nav.dashboard"), path: "/dashboard", authRequired: true },
   ];
 

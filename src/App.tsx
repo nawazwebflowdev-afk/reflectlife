@@ -49,6 +49,10 @@ const DonationSuccess = lazy(() => import("./pages/DonationSuccess"));
 const CampaignDashboard = lazy(() => import("./pages/CampaignDashboard"));
 const Terms = lazy(() => import("./pages/Terms"));
 const UkrainianMemorialLanding = lazy(() => import("./pages/UkrainianMemorialLanding"));
+const InfoBoard = lazy(() => import("./pages/InfoBoard"));
+const InfoItemPage = lazy(() => import("./pages/InfoItemPage"));
+const InfoSupport = lazy(() => import("./pages/InfoSupport"));
+const AdminInfo = lazy(() => import("./pages/AdminInfo"));
 const Imprint = lazy(() => import("./pages/Imprint"));
 
 const urlLang = langFromPath(window.location.pathname);
@@ -105,6 +109,10 @@ const App = () => (
                 <Route path="/fundraiser-dashboard/:memorialId" element={<FundraiserDashboard />} />
                 <Route path="/admin/fundraisers" element={<AdminFundraisers />} />
                 <Route path="/campaign-dashboard/:id" element={<CampaignDashboard />} />
+                <Route path="/info" element={<InfoBoard />} />
+                <Route path="/info/:slug" element={<InfoItemPage />} />
+                <Route path="/support" element={<InfoSupport />} />
+                <Route path="/admin" element={<AdminInfo />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/imprint" element={<Imprint />} />
                 <Route path="/impressum" element={<Imprint />} />

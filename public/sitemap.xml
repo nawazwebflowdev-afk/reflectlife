@@ -289,4 +289,9 @@
     <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/impressum"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://reflectlife.net/imprint"/>
   </url>
+  <url><loc>https://reflectlife.net/info</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/info"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/info"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/info"/>
+  </url>
 </urlset>
