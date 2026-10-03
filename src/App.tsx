@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
@@ -53,9 +53,6 @@ const InfoBoard = lazy(() => import("./pages/InfoBoard"));
 const InfoItemPage = lazy(() => import("./pages/InfoItemPage"));
 const InfoSupport = lazy(() => import("./pages/InfoSupport"));
 const AdminInfo = lazy(() => import("./pages/AdminInfo"));
-const Stories = lazy(() => import("./pages/Stories"));
-const StoryPage = lazy(() => import("./pages/StoryPage"));
-const AdminContent = lazy(() => import("./pages/AdminContent"));
 const Imprint = lazy(() => import("./pages/Imprint"));
 
 const urlLang = langFromPath(window.location.pathname);
@@ -116,9 +113,9 @@ const App = () => (
                 <Route path="/info/:slug" element={<InfoItemPage />} />
                 <Route path="/support" element={<InfoSupport />} />
                 <Route path="/admin" element={<AdminInfo />} />
-                <Route path="/stories" element={<Stories />} />
-                <Route path="/stories/:slug" element={<StoryPage />} />
-                <Route path="/admin/content" element={<AdminContent />} />
+                <Route path="/stories" element={<Navigate to="/info" replace />} />
+                <Route path="/stories/*" element={<Navigate to="/info" replace />} />
+                <Route path="/admin/content" element={<Navigate to="/admin" replace />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/imprint" element={<Imprint />} />
                 <Route path="/impressum" element={<Imprint />} />

@@ -17,7 +17,6 @@ import DeferredRender from "@/components/DeferredRender";
 
 import { tr } from "@/i18n/tr";
 const FeaturedTemplates = lazy(() => import("@/components/FeaturedTemplates"));
-const FeaturedVideo = lazy(() => import("@/components/content/FeaturedVideo"));
 const LatestPrayers = lazy(() => import("@/components/LatestPrayers"));
 const PostDetailModal = lazy(() => import("@/components/PostDetailModal"));
 
@@ -304,9 +303,6 @@ const Landing = () => {
           </DeferredRender>
         </div>
       </section>
-      <DeferredRender fallback={null}>
-        <Suspense fallback={null}><FeaturedVideo /></Suspense>
-      </DeferredRender>
 
       {/* CTA */}
       <section className="py-20 gradient-hero">

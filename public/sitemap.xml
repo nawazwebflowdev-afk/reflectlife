@@ -294,9 +294,4 @@
     <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/info"/>
     <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/info"/>
   </url>
-  <url><loc>https://reflectlife.net/stories</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://reflectlife.net/stories"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://reflectlife.net/es/stories"/>
-    <xhtml:link rel="alternate" hreflang="de" href="https://reflectlife.net/de/stories"/>
-  </url>
 </urlset>
