@@ -4,7 +4,8 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import { useEffect } from "react";
 import { Bold, Italic, Heading2, Heading3, List, ListOrdered, Quote, Link2, ImageIcon, Film } from "lucide-react";
-import { IMAGES, toWebp, uploadWithProgress, mediaUrl, type Video } from "@/lib/content";
+import { IMAGES, toWebp, uploadWithProgress, type Video } from "@/lib/content";
+import { supabase } from "@/integrations/supabase/client";
 
 type Props = { value: string; onChange: (html: string) => void; videos: Video[]; onError: (m: string) => void };
 
@@ -33,10 +34,9 @@ const RichEditor = ({ value, onChange, videos, onError }: Props) => {
       const f = input.files?.[0]; if (!f) return;
       try {
         const path = await uploadWithProgress(IMAGES, await toWebp(f), "webp");
-        // Stored as storage:<path>; resolved to a viewable link when shown.
-        const preview = await mediaUrl(IMAGES, path);
-        editor.chain().focus().setImage({ src: `storage:${path}`, alt: f.name.replace(/\.[^.]+$/, "") }).run();
-        void preview;
+        // Long-lived link so the image keeps working inside saved article text.
+        const { data } = await supabase.storage.from(IMAGES).createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+        if (data?.signedUrl) editor.chain().focus().setImage({ src: data.signedUrl, alt: f.name.replace(/\.[^.]+$/, "") }).run();
       } catch (e: any) { onError(e.message); }
     };
     input.click();

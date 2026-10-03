@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import DOMPurify from "dompurify";
 import MediaVideo from "./MediaVideo";
-import { IMAGES, db, mediaUrl, type Video } from "@/lib/content";
+import { db, type Video } from "@/lib/content";
 
 const TOKEN = /<p>\s*\[\[video:([0-9a-f-]{36})\]\]\s*<\/p>|\[\[video:([0-9a-f-]{36})\]\]/g;
 
-/** Renders sanitized article HTML; `[[video:<id>]]` placeholders become video players, storage paths in images become links. */
+/** Renders sanitized article HTML; `[[video:<id>]]` placeholders become video players. */
 const ArticleBody = ({ html }: { html: string }) => {
   const parts = useMemo(() => {
     const out: ({ html: string } | { video: string })[] = [];
@@ -35,15 +35,8 @@ const ArticleBody = ({ html }: { html: string }) => {
   );
 };
 
-const SafeHtml = ({ html }: { html: string }) => {
-  const [out, setOut] = useState(() => DOMPurify.sanitize(html, { ADD_ATTR: ["target"] }));
-  useEffect(() => {
-    const doc = new DOMParser().parseFromString(DOMPurify.sanitize(html, { ADD_ATTR: ["target"] }), "text/html");
-    const imgs = Array.from(doc.querySelectorAll("img[src^='storage:']"));
-    imgs.forEach((im) => { im.setAttribute("loading", "lazy"); im.setAttribute("decoding", "async"); });
-    Promise.all(imgs.map(async (im) => im.setAttribute("src", (await mediaUrl(IMAGES, im.getAttribute("src")!.slice(8))) || ""))).then(() => setOut(doc.body.innerHTML));
-  }, [html]);
-  return <div dangerouslySetInnerHTML={{ __html: out }} />;
-};
+const SafeHtml = ({ html }: { html: string }) => (
+  <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html, { ADD_ATTR: ["target"] }) }} />
+);
 
 export default ArticleBody;
