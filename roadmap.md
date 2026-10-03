@@ -14,6 +14,8 @@
   with recipients reachable by email or SMS/phone, E.164 + email validation, and a
   one-time scheduled dispatch that fires exactly once at the chosen date and time.
 
+- Marketing content system: articles + videos, /admin/content, /stories, homepage featured video (Oct 3)
+
 ## Done
 - Donations parts 1–3 (Stripe Connect, checkout, webhook, memorial section, owner/admin dashboards, 4 languages) — awaiting Stripe keys from user.
 - Ukrainian memorial experience: native Ukrainian sharing and landing page; remembrance-date emails; Defender of Ukraine memorial type; Cyrillic-safe Latin slugs.
