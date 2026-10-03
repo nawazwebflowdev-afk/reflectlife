@@ -43,3 +43,7 @@
 - Legacy contact (accept by email, 12-month inactivity reminders, admin-approved handover, ownership transfer with email confirmation; Stripe never transferred)
 - Funeral home accounts (admin approval, create+hand over memorials, discreet credit line, dashboard, QR card, no donation data)
 - Printed memory book (builder, preview, paid PDF EUR9 / softcover EUR39 via Stripe Checkout, print-on-demand API, 300dpi warnings, status emails)
+
+## Info Board content (Oct 3)
+- [ ] Add founder story item "Why we built Reflectlife" with the uploaded family-memories video
+- [ ] Add "What happens to your Instagram when you die" item with the uploaded Instagram clip and supplied script
