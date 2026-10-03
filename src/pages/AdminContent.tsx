@@ -188,7 +188,7 @@ const VideoEditor = ({ initial, onClose }: { initial: Partial<Video>; onClose: (
             <label className="flex items-center gap-2 text-sm"><Switch checked={v.status === "published"} onCheckedChange={(c) => set({ status: c ? "published" : "draft" })} />{t("cms.published")}</label>
             <label className="flex items-center gap-2 text-sm"><Switch checked={!!v.featured} onCheckedChange={(c) => set({ featured: c })} />{t("cms.featured")}</label>
           </div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={onClose}>{t("cms.close")}</Button><Button onClick={save} disabled={Object.values(prog).some((x) => x !== null && x !== undefined)}>{t("cms.saveDraft").split(" ")[0] && t("cms.saved").length ? t("cms.edit") === "Edit" ? "Save" : "✓" : "Save"}</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={onClose}>{t("cms.close")}</Button><Button onClick={save} disabled={Object.values(prog).some((x) => x !== null && x !== undefined)}>{t("cms.save")}</Button></div>
         </div>
       </DialogContent>
     </Dialog>

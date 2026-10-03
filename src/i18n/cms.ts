@@ -13,7 +13,7 @@ const en = {
   autosaved: "Draft auto-saved {{time}}", saved: "Saved",
   dropHere: "Drag & drop or click to choose", mp4Only: "MP4 files only.", tooBig: "This file is over {{mb}} MB. Large videos load slowly on phones.",
   poster: "Poster image", pickFrame: "Use current frame", captions: "Captions (.vtt, optional)", description: "Description", duration: "Length",
-  featured: "Featured on homepage", addCategory: "Add category", noAccess: "Only the site admin can open this page.",
+  featured: "Featured on homepage", save: "Save", addCategory: "Add category", noAccess: "Only the site admin can open this page.",
 };
 type D = typeof en;
 const es: D = {
@@ -30,7 +30,7 @@ const es: D = {
   autosaved: "Borrador guardado automáticamente {{time}}", saved: "Guardado",
   dropHere: "Arrastra y suelta o haz clic para elegir", mp4Only: "Solo archivos MP4.", tooBig: "El archivo supera {{mb}} MB. Los videos grandes cargan lento en el móvil.",
   poster: "Imagen de póster", pickFrame: "Usar fotograma actual", captions: "Subtítulos (.vtt, opcional)", description: "Descripción", duration: "Duración",
-  featured: "Destacado en la portada", addCategory: "Añadir categoría", noAccess: "Solo la administración del sitio puede abrir esta página.",
+  featured: "Destacado en la portada", save: "Guardar", addCategory: "Añadir categoría", noAccess: "Solo la administración del sitio puede abrir esta página.",
 };
 const de: D = {
   stories: "Geschichten", storiesSub: "Artikel und Videos über das Erinnern an die Menschen, die wir lieben.",
@@ -46,7 +46,7 @@ const de: D = {
   autosaved: "Entwurf automatisch gespeichert {{time}}", saved: "Gespeichert",
   dropHere: "Hierher ziehen oder klicken", mp4Only: "Nur MP4-Dateien.", tooBig: "Die Datei ist größer als {{mb}} MB. Große Videos laden auf Handys langsam.",
   poster: "Vorschaubild", pickFrame: "Aktuelles Bild verwenden", captions: "Untertitel (.vtt, optional)", description: "Beschreibung", duration: "Länge",
-  featured: "Auf der Startseite zeigen", addCategory: "Kategorie hinzufügen", noAccess: "Nur die Seitenverwaltung kann diese Seite öffnen.",
+  featured: "Auf der Startseite zeigen", save: "Speichern", addCategory: "Kategorie hinzufügen", noAccess: "Nur die Seitenverwaltung kann diese Seite öffnen.",
 };
 const uk: D = {
   stories: "Історії", storiesSub: "Статті та відео про пам'ять про тих, кого ми любимо.",
@@ -62,6 +62,6 @@ const uk: D = {
   autosaved: "Чернетку автоматично збережено {{time}}", saved: "Збережено",
   dropHere: "Перетягніть або натисніть, щоб вибрати", mp4Only: "Лише файли MP4.", tooBig: "Файл більший за {{mb}} МБ. Великі відео повільно вантажаться на телефонах.",
   poster: "Постер", pickFrame: "Взяти поточний кадр", captions: "Субтитри (.vtt, необов'язково)", description: "Опис", duration: "Тривалість",
-  featured: "Показувати на головній", addCategory: "Додати категорію", noAccess: "Цю сторінку може відкрити лише адміністратор.",
+  featured: "Показувати на головній", save: "Зберегти", addCategory: "Додати категорію", noAccess: "Цю сторінку може відкрити лише адміністратор.",
 };
 export const cmsI18n = { en, es, de, uk };

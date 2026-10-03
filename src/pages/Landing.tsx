@@ -17,6 +17,7 @@ import DeferredRender from "@/components/DeferredRender";
 
 import { tr } from "@/i18n/tr";
 const FeaturedTemplates = lazy(() => import("@/components/FeaturedTemplates"));
+const FeaturedVideo = lazy(() => import("@/components/content/FeaturedVideo"));
 const LatestPrayers = lazy(() => import("@/components/LatestPrayers"));
 const PostDetailModal = lazy(() => import("@/components/PostDetailModal"));
 
