@@ -399,7 +399,7 @@ export type Database = {
           },
         ]
       }
-      info_items: {
+      info_board_items: {
         Row: {
           ai_assisted: boolean
           body: string | null
@@ -415,6 +415,7 @@ export type Database = {
           languages: string[]
           publish_at: string
           slug: string
+          sort_order: number
           status: string
           tags: string[]
           thumbnail_alt: string | null
@@ -438,6 +439,7 @@ export type Database = {
           languages?: string[]
           publish_at?: string
           slug: string
+          sort_order?: number
           status?: string
           tags?: string[]
           thumbnail_alt?: string | null
@@ -461,6 +463,7 @@ export type Database = {
           languages?: string[]
           publish_at?: string
           slug?: string
+          sort_order?: number
           status?: string
           tags?: string[]
           thumbnail_alt?: string | null
