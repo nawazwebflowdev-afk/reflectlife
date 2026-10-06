@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "@/integrations/supabase/client";
+import { ArrowDown, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/dateFormat";
-import { INFO_CATEGORIES, INFO_LANGS, infoPagesTable, infoTable, slugify, type InfoItem } from "@/lib/info";
+import { INFO_CATEGORIES, INFO_LANGS, infoPagesTable, infoTable, isDirectVideoUrl, slugify, videoThumb, type InfoItem } from "@/lib/info";
 
 type Draft = Partial<InfoItem> & { tagsText?: string };
 const BUCKET = "memorial_uploads";
@@ -19,7 +20,7 @@ const BUCKET = "memorial_uploads";
 const empty = (): Draft => ({
   item_type: "video", title: "", slug: "", category: "know", languages: ["en"], tagsText: "", description: "", body: "",
   video_url: null, embed_url: "", thumbnail_url: null, thumbnail_alt: "", caption_url: null, duration_seconds: null,
-  ai_assisted: true, featured: false, status: "draft", publish_at: new Date().toISOString(),
+  ai_assisted: true, featured: false, status: "draft", publish_at: new Date().toISOString(), sort_order: 0,
 });
 
 const parseCsv = (text: string): string[][] => {
@@ -46,6 +47,7 @@ const AdminInfo = () => {
   const [search, setSearch] = useState("");
   const [draft, setDraft] = useState<Draft | null>(null);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<number | null>(null);
   const [support, setSupport] = useState<{ title: string; body: string } | null>(null);
 
   useEffect(() => {
@@ -59,18 +61,32 @@ const AdminInfo = () => {
     })();
   }, []);
 
-  const load = () => infoTable().select("*").order("publish_at", { ascending: false }).then(({ data }: any) => setItems(data ?? []));
+  const load = () => infoTable().select("*").order("sort_order", { ascending: true }).order("publish_at", { ascending: false }).then(({ data }: any) => setItems(data ?? []));
 
   const shown = useMemo(() => {
     const s = search.toLowerCase();
     return items.filter((i) => !s || i.title.toLowerCase().includes(s) || i.tags.join(" ").toLowerCase().includes(s));
   }, [items, search]);
 
+  /** Uploads through the Storage endpoint so the bar can show real progress. */
   const upload = async (file: File, kind: string) => {
     const ext = file.name.split(".").pop() || "bin";
     const path = `${uid}/info/${kind}-${crypto.randomUUID()}.${ext}`;
-    const { error } = await supabase.storage.from(BUCKET).upload(path, file, { contentType: file.type || undefined });
-    if (error) throw error;
+    const { data: { session } } = await supabase.auth.getSession();
+    const result = await new Promise<{ ok: boolean; status: number }>((resolve) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`);
+      xhr.setRequestHeader("Authorization", `Bearer ${session?.access_token ?? SUPABASE_PUBLISHABLE_KEY}`);
+      xhr.setRequestHeader("apikey", SUPABASE_PUBLISHABLE_KEY);
+      xhr.setRequestHeader("x-upsert", "false");
+      xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+      if (kind === "video") xhr.upload.onprogress = (e) => e.lengthComputable && setProgress(Math.round((e.loaded / e.total) * 100));
+      xhr.onload = () => resolve({ ok: xhr.status < 300, status: xhr.status });
+      xhr.onerror = () => resolve({ ok: false, status: 0 });
+      xhr.send(file);
+    });
+    setProgress(null);
+    if (!result.ok) throw new Error(t("info.uploadFailed"));
     return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
   };
 
@@ -78,6 +94,7 @@ const AdminInfo = () => {
 
   const onVideo = async (file?: File) => {
     if (!file) return;
+    if (!/^video\/(mp4|webm)$/.test(file.type) && !/\.(mp4|webm)$/i.test(file.name)) { toast({ title: t("info.badVideo"), variant: "destructive" }); return; }
     if (file.size > 200 * 1024 * 1024) { toast({ title: "Max 200 MB", variant: "destructive" }); return; }
     setBusy(true);
     try {
@@ -118,8 +135,16 @@ const AdminInfo = () => {
     if (!draft?.title?.trim()) return;
     setBusy(true);
     const { tagsText, id, created_at, ...rest } = draft as any;
+    // A link to a page (YouTube/Vimeo/…) embeds; a link to a file plays directly.
+    const link = (draft.embed_url || "").trim();
+    const asFile = isDirectVideoUrl(link);
     const row = {
-      ...rest, slug: slugify(draft.slug || draft.title), embed_url: draft.embed_url || null,
+      ...rest,
+      slug: slugify(draft.slug || draft.title),
+      video_url: draft.video_url || (asFile ? link : null),
+      embed_url: asFile ? null : link || null,
+      thumbnail_url: draft.thumbnail_url || videoThumb(link) || null,
+      sort_order: Number.isFinite(Number(draft.sort_order)) ? Number(draft.sort_order) : 0,
       tags: (tagsText || "").split(",").map((s: string) => s.trim()).filter(Boolean),
       description: (draft.description || "").slice(0, 160) || null,
       status: draft.status === "published" && new Date(draft.publish_at!) > new Date() ? "scheduled" : draft.status,
@@ -136,6 +161,30 @@ const AdminInfo = () => {
   });
 
   const unpublish = async (i: InfoItem) => { await infoTable().update({ status: "draft" }).eq("id", i.id); load(); };
+
+  /** Swaps an item with its neighbour in the list, so you can set the display order. */
+  const move = async (item: InfoItem, dir: -1 | 1) => {
+    const list = shown;
+    const i = list.findIndex((x) => x.id === item.id);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= list.length) return;
+    const a = list[i];
+    const b = list[j];
+    let va = a.sort_order;
+    let vb = b.sort_order;
+    if (va === vb) {
+      // Give every item its own slot first, then swap the two.
+      await Promise.all(list.map((x, k) => infoTable().update({ sort_order: (k + 1) * 10 }).eq("id", x.id)));
+      va = (i + 1) * 10;
+      vb = (j + 1) * 10;
+    }
+    await Promise.all([
+      infoTable().update({ sort_order: vb }).eq("id", a.id),
+      infoTable().update({ sort_order: va }).eq("id", b.id),
+    ]);
+    load();
+  };
+
   const remove = async (i: InfoItem) => {
     if (!window.confirm(t("info.confirmDelete", { t: i.title }))) return;
     await infoTable().delete().eq("id", i.id); load();
@@ -191,15 +240,21 @@ const AdminInfo = () => {
 
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-left"><tr><th className="p-3">Title</th><th className="p-3">{t("info.category")}</th><th className="p-3">{t("info.status")}</th><th className="p-3">{t("info.publishDate")}</th><th className="p-3" /></tr></thead>
+          <thead className="bg-muted/50 text-left"><tr><th className="p-3" /><th className="p-3">Title</th><th className="p-3">{t("info.category")}</th><th className="p-3">{t("info.languages")}</th><th className="p-3">{t("info.status")}</th><th className="p-3">{t("info.publishDate")}</th><th className="p-3" /></tr></thead>
           <tbody>
-            {shown.map((i) => (
+            {shown.map((i, n) => (
               <tr key={i.id} className="border-t border-border">
+                <td className="p-3">{i.thumbnail_url
+                  ? <img src={i.thumbnail_url} alt="" width={36} height={64} loading="lazy" decoding="async" className="h-16 w-9 rounded-md object-cover" />
+                  : <div className="h-16 w-9 rounded-md bg-muted" />}</td>
                 <td className="p-3 font-medium">{i.title}{i.featured && " ★"}</td>
                 <td className="p-3">{t(`info.${i.category}`)}</td>
+                <td className="p-3 uppercase text-muted-foreground">{i.languages.join(" · ")}</td>
                 <td className="p-3">{t(`info.${statusOf(i)}`)}</td>
                 <td className="p-3 whitespace-nowrap">{formatDate(i.publish_at)}</td>
                 <td className="p-3"><div className="flex flex-wrap justify-end gap-1">
+                  <Button size="sm" variant="ghost" aria-label={t("info.moveUp")} title={t("info.moveUp")} disabled={n === 0} onClick={() => move(i, -1)}><ArrowUp className="h-4 w-4" /></Button>
+                  <Button size="sm" variant="ghost" aria-label={t("info.moveDown")} title={t("info.moveDown")} disabled={n === shown.length - 1} onClick={() => move(i, 1)}><ArrowDown className="h-4 w-4" /></Button>
                   <Button size="sm" variant="ghost" onClick={() => openEdit(i)}>{t("info.edit")}</Button>
                   <Button size="sm" variant="ghost" onClick={() => openEdit(i, true)}>{t("info.duplicate")}</Button>
                   {i.status !== "draft" && <Button size="sm" variant="ghost" onClick={() => unpublish(i)}>{t("info.unpublish")}</Button>}
@@ -247,7 +302,15 @@ const AdminInfo = () => {
               <div><Label>{t("info.description")} ({(draft.description || "").length}/160)</Label><Textarea rows={2} maxLength={160} value={draft.description || ""} onChange={(e) => set({ description: e.target.value })} /></div>
               <div><Label>{t("info.body")}</Label><Textarea rows={8} value={draft.body || ""} onChange={(e) => set({ body: e.target.value })} /></div>
               {draft.item_type === "video" && (<>
-                <div><Label>{t("info.videoFile")}</Label><Input type="file" accept="video/mp4" onChange={(e) => onVideo(e.target.files?.[0])} />
+                <div><Label>{t("info.videoFile")}</Label><Input type="file" accept="video/mp4,video/webm,.mp4,.webm" onChange={(e) => onVideo(e.target.files?.[0])} />
+                  {progress != null && (
+                    <div className="mt-2" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                        <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} />
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">{t("info.uploadProgress", { n: progress })}</p>
+                    </div>
+                  )}
                   {draft.video_url && <p className="mt-1 truncate text-xs text-muted-foreground">{draft.video_url}</p>}</div>
                 <div><Label>{t("info.videoLink")}</Label><Input value={draft.embed_url || ""} onChange={(e) => set({ embed_url: e.target.value })} placeholder="https://" /></div>
                 <div><Label>{t("info.captions")}</Label><Input type="file" accept=".srt,.vtt" onChange={(e) => onFile(e.target.files?.[0], "caption_url")} /></div>
@@ -260,6 +323,9 @@ const AdminInfo = () => {
                 <label className="flex items-center gap-2 text-sm"><Switch checked={!!draft.ai_assisted} onCheckedChange={(v) => set({ ai_assisted: v })} />{t("info.aiAssisted")}</label>
                 <label className="flex items-center gap-2 text-sm"><Switch checked={!!draft.featured} onCheckedChange={(v) => set({ featured: v })} />{t("info.featuredToggle")}</label>
               </div>
+              <div><Label>{t("info.sortOrder")}</Label>
+                <Input type="number" value={draft.sort_order ?? 0} onChange={(e) => set({ sort_order: e.target.value === "" ? 0 : Number(e.target.value) })} />
+                <p className="mt-1 text-xs text-muted-foreground">{t("info.orderHint")}</p></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>{t("info.status")}</Label>
                   <select className="w-full rounded-md border border-input bg-background p-2" value={draft.status === "scheduled" ? "published" : draft.status} onChange={(e) => set({ status: e.target.value as any })}>
@@ -271,7 +337,7 @@ const AdminInfo = () => {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setDraft(null)}>{t("info.cancel")}</Button>
-                <Button onClick={save} disabled={busy}>{busy ? t("info.uploading") : t("info.save")}</Button>
+                <Button onClick={save} disabled={busy}>{busy ? (progress != null ? t("info.uploadProgress", { n: progress }) : t("info.uploading")) : t("info.save")}</Button>
               </div>
             </div>
           )}
