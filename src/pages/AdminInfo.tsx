@@ -287,7 +287,7 @@ const AdminInfo = () => {
                     <option value="video">{t("info.video")}</option><option value="guide">{t("info.guide")}</option>
                   </select></div>
                 <div><Label>{t("info.category")}</Label>
-                  <select className="w-full rounded-md border border-input bg-background p-2" value={draft.category} onChange={(e) => set({ category: e.target.value })}>
+                  <select className="w-full rounded-md border border-input bg-background p-2" value={draft.category} onChange={(e) => set({ category: e.target.value as InfoItem["category"] })}>
                     {INFO_CATEGORIES.map((c) => <option key={c} value={c}>{t(`info.${c}`)}</option>)}
                   </select></div>
               </div>

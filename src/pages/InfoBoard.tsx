@@ -2,10 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
-import { Fuse } from "fuse.js";
+import Fuse from "fuse.js";
 import { Card, CardContent } from "@/components/ui/card";
-import { InfoCard } from "@/components/info/InfoCard";
-import { SectionHeading } from "@/components/info/SectionHeading";
+import InfoCard from "@/components/info/InfoCard";
 import { infoTable, INFO_CATEGORIES, INFO_LANGS, type InfoItem } from "@/lib/info";
 
 const InfoBoard = () => {
@@ -75,7 +74,10 @@ const InfoBoard = () => {
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-6xl">
-      <SectionHeading title={t("info.title")} subtitle={t("info.subtitle")} />
+      <header className="space-y-2 pb-2">
+        <h1 className="font-serif text-3xl font-bold">{t("info.title")}</h1>
+        <p className="max-w-2xl text-muted-foreground">{t("info.subtitle")}</p>
+      </header>
 
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <input
