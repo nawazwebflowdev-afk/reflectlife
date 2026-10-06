@@ -24,7 +24,7 @@ const en = {
   status: "Status", draft: "Draft", published: "Published", scheduled: "Scheduled", publishDate: "Publish date",
   type: "Type", slug: "Slug", category: "Category", languages: "Languages", tags: "Tags (comma separated)",
   description: "Short description", body: "Body / transcript (Markdown supported)",
-  videoFile: "Upload MP4 (max 200 MB)", videoLink: "…or paste a TikTok, Instagram or YouTube link",
+  videoFile: "Upload MP4 or WebM (max 200 MB)", videoLink: "…or paste a YouTube, Vimeo, TikTok or Instagram link",
   thumbnail: "Thumbnail / cover image", thumbAuto: "Generate from video", thumbAlt: "Thumbnail alt text",
   captions: "Caption file (.srt or .vtt)", duration: "Length (seconds)",
   aiAssisted: "AI-assisted", featuredToggle: "Featured",
@@ -33,6 +33,10 @@ const en = {
   csvHint: "Columns: date, category, language, title, description, tags, transcript",
   supportPage: "Support page", noAccess: "Only the site admin can open this page.",
   searchAdmin: "Search items",
+  play: "Play video",
+  moveUp: "Move up", moveDown: "Move down", sortOrder: "Sort order", orderHint: "Lower numbers show first.",
+  uploadProgress: "Uploading… {{n}}%", uploadFailed: "Upload failed. Please try again.",
+  badVideo: "Please choose an MP4 or WebM video file.",
 };
 type Dict = typeof en;
 
@@ -61,7 +65,7 @@ const es: Dict = {
   status: "Estado", draft: "Borrador", published: "Publicado", scheduled: "Programado", publishDate: "Fecha de publicación",
   type: "Tipo", slug: "Slug", category: "Categoría", languages: "Idiomas", tags: "Etiquetas (separadas por comas)",
   description: "Descripción corta", body: "Texto / transcripción (admite Markdown)",
-  videoFile: "Subir MP4 (máx. 200 MB)", videoLink: "…o pega un enlace de TikTok, Instagram o YouTube",
+  videoFile: "Subir MP4 o WebM (máx. 200 MB)", videoLink: "…o pega un enlace de YouTube, Vimeo, TikTok o Instagram",
   thumbnail: "Miniatura / portada", thumbAuto: "Generar desde el video", thumbAlt: "Texto alternativo",
   captions: "Subtítulos (.srt o .vtt)", duration: "Duración (segundos)",
   aiAssisted: "Asistido por IA", featuredToggle: "Destacado",
@@ -70,6 +74,10 @@ const es: Dict = {
   csvHint: "Columnas: date, category, language, title, description, tags, transcript",
   supportPage: "Página de apoyo", noAccess: "Solo la administración del sitio puede abrir esta página.",
   searchAdmin: "Buscar",
+  play: "Reproducir el video",
+  moveUp: "Subir", moveDown: "Bajar", sortOrder: "Orden", orderHint: "Los números más bajos aparecen primero.",
+  uploadProgress: "Subiendo… {{n}}%", uploadFailed: "La subida falló. Inténtalo de nuevo.",
+  badVideo: "Elige un archivo de video MP4 o WebM.",
 };
 
 const de: Dict = {
@@ -97,7 +105,7 @@ const de: Dict = {
   status: "Status", draft: "Entwurf", published: "Veröffentlicht", scheduled: "Geplant", publishDate: "Veröffentlichung",
   type: "Typ", slug: "Slug", category: "Kategorie", languages: "Sprachen", tags: "Schlagwörter (kommagetrennt)",
   description: "Kurzbeschreibung", body: "Text / Transkript (Markdown möglich)",
-  videoFile: "MP4 hochladen (max. 200 MB)", videoLink: "…oder TikTok-, Instagram- oder YouTube-Link einfügen",
+  videoFile: "MP4 oder WebM hochladen (max. 200 MB)", videoLink: "…oder YouTube-, Vimeo-, TikTok- oder Instagram-Link einfügen",
   thumbnail: "Vorschaubild / Cover", thumbAuto: "Aus Video erzeugen", thumbAlt: "Alternativtext",
   captions: "Untertiteldatei (.srt oder .vtt)", duration: "Länge (Sekunden)",
   aiAssisted: "KI-gestützt", featuredToggle: "Empfohlen",
@@ -106,6 +114,10 @@ const de: Dict = {
   csvHint: "Spalten: date, category, language, title, description, tags, transcript",
   supportPage: "Hilfeseite", noAccess: "Nur die Seitenverwaltung kann diese Seite öffnen.",
   searchAdmin: "Suchen",
+  play: "Video abspielen",
+  moveUp: "Nach oben", moveDown: "Nach unten", sortOrder: "Reihenfolge", orderHint: "Kleinere Zahlen erscheinen zuerst.",
+  uploadProgress: "Wird hochgeladen… {{n}}%", uploadFailed: "Der Upload ist fehlgeschlagen. Bitte erneut versuchen.",
+  badVideo: "Bitte eine MP4- oder WebM-Videodatei auswählen.",
 };
 
 const uk: Dict = {
@@ -133,7 +145,7 @@ const uk: Dict = {
   status: "Статус", draft: "Чернетка", published: "Опубліковано", scheduled: "Заплановано", publishDate: "Дата публікації",
   type: "Тип", slug: "Slug", category: "Категорія", languages: "Мови", tags: "Теги (через кому)",
   description: "Короткий опис", body: "Текст / розшифровка (підтримується Markdown)",
-  videoFile: "Завантажити MP4 (до 200 МБ)", videoLink: "…або вставте посилання TikTok, Instagram чи YouTube",
+  videoFile: "Завантажити MP4 або WebM (до 200 МБ)", videoLink: "…або вставте посилання YouTube, Vimeo, TikTok чи Instagram",
   thumbnail: "Мініатюра / обкладинка", thumbAuto: "Створити з відео", thumbAlt: "Альтернативний текст",
   captions: "Файл субтитрів (.srt або .vtt)", duration: "Тривалість (секунди)",
   aiAssisted: "За участі ШІ", featuredToggle: "Рекомендоване",
@@ -142,6 +154,10 @@ const uk: Dict = {
   csvHint: "Стовпці: date, category, language, title, description, tags, transcript",
   supportPage: "Сторінка підтримки", noAccess: "Цю сторінку може відкрити лише адміністратор.",
   searchAdmin: "Пошук",
+  play: "Відтворити відео",
+  moveUp: "Вгору", moveDown: "Вниз", sortOrder: "Порядок", orderHint: "Менші числа показуються першими.",
+  uploadProgress: "Завантаження… {{n}}%", uploadFailed: "Не вдалося завантажити. Спробуйте ще раз.",
+  badVideo: "Виберіть файл відео MP4 або WebM.",
 };
 
 export const infoI18n = { en, es, de, uk };

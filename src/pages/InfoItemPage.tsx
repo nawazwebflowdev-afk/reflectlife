@@ -3,13 +3,13 @@ import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
 import ReactMarkdown from "react-markdown";
-import { Share2, Link as LinkIcon, Sparkles } from "lucide-react";
+import { Share2, Link as LinkIcon, Sparkles, Play, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import InfoCard from "@/components/info/InfoCard";
 import { formatDate } from "@/lib/dateFormat";
-import { infoTable, toEmbedUrl, transcriptToVtt, type InfoItem } from "@/lib/info";
+import { infoTable, toEmbedUrl, videoThumb, transcriptToVtt, type InfoItem } from "@/lib/info";
 
 const SITE = "https://reflectlife.net";
 
@@ -19,9 +19,12 @@ const InfoItemPage = () => {
   const { toast } = useToast();
   const [item, setItem] = useState<InfoItem | null | undefined>(undefined);
   const [related, setRelated] = useState<InfoItem[]>([]);
+  // Nothing is downloaded until the visitor presses play.
+  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
     setItem(undefined);
+    setPlaying(false);
     infoTable().select("*").eq("slug", slug).maybeSingle().then(({ data }: any) => {
       setItem(data ?? null);
       if (data) infoTable().select("*").eq("category", data.category).neq("id", data.id)
@@ -44,11 +47,14 @@ const InfoItemPage = () => {
   );
 
   const url = `${SITE}/info/${item.slug}`;
-  const embed = item.embed_url ? toEmbedUrl(item.embed_url) : null;
+  const embed = toEmbedUrl(item.embed_url || item.video_url);
+  const direct = !embed && !!item.video_url;
+  const thumb = item.thumbnail_url || videoThumb(item.embed_url || item.video_url);
+  const embedSrc = embed ? `${embed}${embed.includes("?") ? "&" : "?"}autoplay=1` : null;
   const isVideo = item.item_type === "video" && (item.video_url || embed);
   const jsonLd = isVideo ? {
     "@context": "https://schema.org", "@type": "VideoObject", name: item.title,
-    description: item.description || item.title, thumbnailUrl: item.thumbnail_url ? [item.thumbnail_url] : undefined,
+    description: item.description || item.title, thumbnailUrl: thumb ? [thumb] : undefined,
     uploadDate: item.publish_at, contentUrl: item.video_url || undefined, embedUrl: embed || undefined,
     duration: item.duration_seconds ? `PT${item.duration_seconds}S` : undefined, transcript: item.body || undefined,
   } : {
@@ -68,23 +74,46 @@ const InfoItemPage = () => {
         <meta property="og:description" content={item.description || ""} />
         <meta property="og:type" content={isVideo ? "video.other" : "article"} />
         <meta property="og:url" content={url} />
-        {item.thumbnail_url && <meta property="og:image" content={item.thumbnail_url} />}
+        {thumb && <meta property="og:image" content={thumb} />}
         <meta name="twitter:card" content="summary_large_image" />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
       <div className="mx-auto w-full max-w-sm">
-        {item.video_url ? (
-          <video controls playsInline preload="metadata" poster={item.thumbnail_url || undefined} className="aspect-[9/16] w-full rounded-2xl bg-foreground object-contain">
-            <source src={item.video_url} type="video/mp4" />
+        {(direct || embed) && !playing && (
+          <button
+            type="button"
+            onClick={() => setPlaying(true)}
+            aria-label={t("info.play")}
+            className={`group relative block w-full overflow-hidden rounded-2xl bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${embed ? "aspect-video" : "aspect-[9/16]"}`}
+          >
+            {thumb ? (
+              <img src={thumb} alt={item.thumbnail_alt || item.title} width={720} height={1280} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full items-center justify-center bg-gradient-to-b from-primary/10 to-accent/20 text-primary">
+                <PlayCircle className="h-12 w-12" />
+              </div>
+            )}
+            <span className="absolute inset-0 flex items-center justify-center">
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-background/90 text-primary shadow-lg transition-transform group-hover:scale-105">
+                <Play className="ml-1 h-7 w-7" />
+              </span>
+            </span>
+          </button>
+        )}
+        {direct && playing && (
+          <video controls autoPlay playsInline preload="none" poster={item.thumbnail_url || undefined} className="aspect-[9/16] w-full rounded-2xl bg-foreground object-contain">
+            <source src={item.video_url!} type="video/mp4" />
             {(item.caption_url || vttUrl) && <track kind="captions" src={item.caption_url || vttUrl!} srcLang={item.languages[0]} label={item.languages[0].toUpperCase()} default />}
           </video>
-        ) : embed ? (
-          <iframe src={embed} title={item.title} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen loading="lazy"
-            className="aspect-[9/16] w-full rounded-2xl border-0 bg-muted" />
-        ) : item.thumbnail_url ? (
-          <img src={item.thumbnail_url} alt={item.thumbnail_alt || item.title} className="w-full rounded-2xl" width={720} height={1280} />
-        ) : null}
+        )}
+        {embed && playing && (
+          <iframe src={embedSrc!} title={item.title} allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin" className="aspect-[9/16] w-full rounded-2xl border-0 bg-muted" />
+        )}
+        {!direct && !embed && thumb && (
+          <img src={thumb} alt={item.thumbnail_alt || item.title} className="w-full rounded-2xl" width={720} height={1280} />
+        )}
         {item.ai_assisted && item.item_type === "video" && (
           <p className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground"><Sparkles className="h-4 w-4 shrink-0" />{t("info.aiLabel")}</p>
         )}

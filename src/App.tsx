@@ -112,10 +112,11 @@ const App = () => (
                 <Route path="/info" element={<InfoBoard />} />
                 <Route path="/info/:slug" element={<InfoItemPage />} />
                 <Route path="/support" element={<InfoSupport />} />
-                <Route path="/admin" element={<AdminInfo />} />
+                <Route path="/admin/info-board" element={<AdminInfo />} />
+                <Route path="/admin" element={<Navigate to="/admin/info-board" replace />} />
                 <Route path="/stories" element={<Navigate to="/info" replace />} />
                 <Route path="/stories/*" element={<Navigate to="/info" replace />} />
-                <Route path="/admin/content" element={<Navigate to="/admin" replace />} />
+                <Route path="/admin/content" element={<Navigate to="/admin/info-board" replace />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/imprint" element={<Imprint />} />
                 <Route path="/impressum" element={<Imprint />} />
