@@ -105,7 +105,7 @@ const de: Dict = {
   status: "Status", draft: "Entwurf", published: "Veröffentlicht", scheduled: "Geplant", publishDate: "Veröffentlichung",
   type: "Typ", slug: "Slug", category: "Kategorie", languages: "Sprachen", tags: "Schlagwörter (kommagetrennt)",
   description: "Kurzbeschreibung", body: "Text / Transkript (Markdown möglich)",
-  videoFile: "MP4 hochladen (max. 200 MB)", videoLink: "…oder TikTok-, Instagram- oder YouTube-Link einfügen",
+  videoFile: "MP4 oder WebM hochladen (max. 200 MB)", videoLink: "…oder YouTube-, Vimeo-, TikTok- oder Instagram-Link einfügen",
   thumbnail: "Vorschaubild / Cover", thumbAuto: "Aus Video erzeugen", thumbAlt: "Alternativtext",
   captions: "Untertiteldatei (.srt oder .vtt)", duration: "Länge (Sekunden)",
   aiAssisted: "KI-gestützt", featuredToggle: "Empfohlen",
@@ -114,6 +114,10 @@ const de: Dict = {
   csvHint: "Spalten: date, category, language, title, description, tags, transcript",
   supportPage: "Hilfeseite", noAccess: "Nur die Seitenverwaltung kann diese Seite öffnen.",
   searchAdmin: "Suchen",
+  play: "Video abspielen",
+  moveUp: "Nach oben", moveDown: "Nach unten", sortOrder: "Reihenfolge", orderHint: "Kleinere Zahlen erscheinen zuerst.",
+  uploadProgress: "Wird hochgeladen… {{n}}%", uploadFailed: "Der Upload ist fehlgeschlagen. Bitte erneut versuchen.",
+  badVideo: "Bitte eine MP4- oder WebM-Videodatei auswählen.",
 };
 
 const uk: Dict = {
@@ -141,7 +145,7 @@ const uk: Dict = {
   status: "Статус", draft: "Чернетка", published: "Опубліковано", scheduled: "Заплановано", publishDate: "Дата публікації",
   type: "Тип", slug: "Slug", category: "Категорія", languages: "Мови", tags: "Теги (через кому)",
   description: "Короткий опис", body: "Текст / розшифровка (підтримується Markdown)",
-  videoFile: "Завантажити MP4 (до 200 МБ)", videoLink: "…або вставте посилання TikTok, Instagram чи YouTube",
+  videoFile: "Завантажити MP4 або WebM (до 200 МБ)", videoLink: "…або вставте посилання YouTube, Vimeo, TikTok чи Instagram",
   thumbnail: "Мініатюра / обкладинка", thumbAuto: "Створити з відео", thumbAlt: "Альтернативний текст",
   captions: "Файл субтитрів (.srt або .vtt)", duration: "Тривалість (секунди)",
   aiAssisted: "За участі ШІ", featuredToggle: "Рекомендоване",
@@ -150,6 +154,10 @@ const uk: Dict = {
   csvHint: "Стовпці: date, category, language, title, description, tags, transcript",
   supportPage: "Сторінка підтримки", noAccess: "Цю сторінку може відкрити лише адміністратор.",
   searchAdmin: "Пошук",
+  play: "Відтворити відео",
+  moveUp: "Вгору", moveDown: "Вниз", sortOrder: "Порядок", orderHint: "Менші числа показуються першими.",
+  uploadProgress: "Завантаження… {{n}}%", uploadFailed: "Не вдалося завантажити. Спробуйте ще раз.",
+  badVideo: "Виберіть файл відео MP4 або WebM.",
 };
 
 export const infoI18n = { en, es, de, uk };
