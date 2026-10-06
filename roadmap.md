@@ -45,15 +45,18 @@
 - Printed memory book (builder, preview, paid PDF EUR9 / softcover EUR39 via Stripe Checkout, print-on-demand API, 300dpi warnings, status emails)
 
 ## Info Board content (Oct 3)
-- [ ] Add founder story item "Why we built Reflectlife" with the uploaded family-memories video
-- [ ] Add "What happens to your Instagram when you die" item with the uploaded Instagram clip and supplied script
+- [x] Add founder story item "Why we built Reflectlife" with the uploaded family-memories video
+- [x] Add "What happens to your Instagram when you die" item with the uploaded Instagram clip and supplied script
 
 ## Info Board admin page (Oct 5)
-- [ ] Table info_board_items with all fields + sort_order, migrate existing rows
-- [ ] Admin-only access (user_roles + RLS), make Sylvia Perez Andrae admin
-- [ ] /admin/info-board route + "Admin" link in user menu (admins only)
-- [ ] Admin list: thumbnail, title, category, language, published, edit/delete(confirm)/reorder
-- [ ] Add/edit form: upload MP4/WebM max 200MB with progress bar, or YouTube/Vimeo link; optional thumbnail with auto first-frame / YouTube thumb
-- [ ] Drafts visible only to admins
-- [ ] Public page: click-to-play, preload="none", youtube-nocookie
-- [ ] Finish: publish Instagram clip item, publish founder story item
+- [x] Table info_board_items with all fields + sort_order, migrate existing rows
+- [x] Admin-only access (user_roles + RLS), make Sylvia Perez Andrae admin
+- [x] /admin/info-board route + "Admin" link in user menu (admins only)
+- [x] Admin list: thumbnail, title, category, language, published, edit/delete(confirm)/reorder
+- [x] Add/edit form: upload MP4/WebM max 200MB with progress bar, or YouTube/Vimeo link; optional thumbnail with auto first-frame / YouTube thumb
+- [x] Drafts visible only to admins
+- [x] Public page: click-to-play, preload="none", youtube-nocookie
+- [x] Finish: publish Instagram clip item, publish founder story item
+- [ ] Signed-in check of the admin list, reorder buttons and a real upload (blocked: this project's
+      Supabase is user-managed, so the sandbox cannot sign in as an admin; needs Sylvia's browser)
+- [ ] Publish so the live site matches
