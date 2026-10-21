@@ -84,13 +84,58 @@ export const toEmbedUrl = (url?: string | null): string | null => {
 };
 
 /**
- * Wraps a plain-text transcript in WebVTT. The whole clip becomes a single cue —
- * good enough for a readable transcript on screen and for search engines.
+ * Wraps a plain-text transcript in WebVTT. The text is split into sentence-sized
+ * cues that each get a proportional share of the clip's duration, so captions
+ * change line by line instead of covering the whole video at once.
  */
+const vttTimestamp = (totalSeconds: number): string => {
+  const s = Math.max(0, Math.floor(totalSeconds));
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(Math.floor(s / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}.000`;
+};
+
 export const transcriptToVtt = (transcript: string, durationSeconds = 3600): string => {
   const safe = transcript.replace(/\r\n/g, "\n").trim();
+  if (!safe) return "WEBVTT\n";
   const end = Math.max(1, Math.floor(durationSeconds));
-  return `WEBVTT\n\n00:00:00.000 --> 00:${String(Math.floor(end / 60)).padStart(2, "0")}:${String(end % 60).padStart(2, "0")}.000\n${safe}\n`;
+
+  // Sentence-ish cues; fall back to the whole text when nothing splits.
+  const sentences = safe
+    .split(/(?<=[.!?…])\s+|\n+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const cues = (sentences.length ? sentences : [safe]).flatMap((s) => {
+    if (s.length <= 100) return [s];
+    // Break over-long sentences into readable chunks at word boundaries.
+    const chunks: string[] = [];
+    let current = "";
+    for (const word of s.split(/\s+/)) {
+      if (current && (current + " " + word).length > 100) {
+        chunks.push(current);
+        current = word;
+      } else {
+        current = current ? `${current} ${word}` : word;
+      }
+    }
+    if (current) chunks.push(current);
+    return chunks;
+  });
+
+  const weights = cues.map((c) => Math.max(1, c.length));
+  const totalWeight = weights.reduce((a, b) => a + b, 0);
+
+  let elapsed = 0;
+  const lines: string[] = ["WEBVTT", ""];
+  cues.forEach((cue, i) => {
+    const start = elapsed;
+    if (i < cues.length - 1) {
+      elapsed += (weights[i] / totalWeight) * end;
+    } else {
+      elapsed = end;
+    }
+    lines.push(`${vttTimestamp(start)} --> ${vttTimestamp(elapsed)}`, cue, "");
+  });
+  return lines.join("\n") + "\n";
 };
 
 /** 63 -> "1:03", 603 -> "10:03" */
