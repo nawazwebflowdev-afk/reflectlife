@@ -75,6 +75,10 @@ const InfoBoard = () => {
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-6xl">
+      <Helmet>
+        <title>{`${t("info.title")} | Reflectlife`}</title>
+        <meta name="description" content={t("info.subtitle")} />
+      </Helmet>
       <header className="space-y-2 pb-2">
         <h1 className="font-serif text-3xl font-bold">{t("info.title")}</h1>
         <p className="max-w-2xl text-muted-foreground">{t("info.subtitle")}</p>
