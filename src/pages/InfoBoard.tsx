@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Helmet } from "react-helmet-async";
 import { Loader2 } from "lucide-react";
 import Fuse from "fuse.js";
 import { Card, CardContent } from "@/components/ui/card";
