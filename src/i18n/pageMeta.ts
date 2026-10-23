@@ -27,6 +27,24 @@ const pages: Record<string, Record<Lang, Meta>> = {
     es: { title: "Acerca de Reflectlife", description: "Por qué creamos un lugar tranquilo para guardar y compartir las historias de tus seres queridos." },
     de: { title: "Über Reflectlife", description: "Warum wir einen ruhigen Ort geschaffen haben, um Geschichten geliebter Menschen zu bewahren." },
   },
+  "/examples": {
+    en: { title: "Example memorials | Reflectlife", description: "See what a Reflectlife memorial can hold — candles, photos, timelines and family trees." },
+    uk: { title: "Приклади меморіалів | Reflectlife", description: "Погляньте, що може містити меморіал Reflectlife — свічки, фото, стрічки часу та родинні дерева." },
+    es: { title: "Memoriales de ejemplo | Reflectlife", description: "Descubre lo que puede contener un memorial de Reflectlife: velas, fotos, líneas de tiempo y árboles familiares." },
+    de: { title: "Beispiel-Gedenkseiten | Reflectlife", description: "Sieh, was eine Reflectlife-Gedenkseite enthalten kann — Kerzen, Fotos, Zeitachsen und Stammbäume." },
+  },
+  "/pricing": {
+    en: { title: "Pricing | Reflectlife", description: "Free memorials, remembrance candles from €4.99/month, templates from €0 — transparent pricing, no hidden costs." },
+    uk: { title: "Ціни | Reflectlife", description: "Безкоштовні меморіали, свічки пам'яті від 4,99 €/міс, шаблони від 0 € — прозорі ціни без прихованих витрат." },
+    es: { title: "Precios | Reflectlife", description: "Memoriales gratis, velas de recuerdo desde 4,99 €/mes, plantillas desde 0 € — precios transparentes, sin costes ocultos." },
+    de: { title: "Preise | Reflectlife", description: "Kostenlose Gedenkseiten, Gedenkkerzen ab 4,99 €/Monat, Vorlagen ab 0 € — transparente Preise ohne versteckte Kosten." },
+  },
+  "/qa": {
+    en: { title: "Questions & Answers | Reflectlife", description: "Frequently asked questions about online memorials, candles, the grief diary and privacy on Reflectlife." },
+    uk: { title: "Питання та відповіді | Reflectlife", description: "Відповіді на поширені питання про онлайн-меморіали, свічки, щоденник та конфіденційність на Reflectlife." },
+    es: { title: "Preguntas y respuestas | Reflectlife", description: "Preguntas frecuentes sobre memoriales en línea, velas, el diario de duelo y la privacidad en Reflectlife." },
+    de: { title: "Fragen & Antworten | Reflectlife", description: "Häufige Fragen zu Online-Gedenkseiten, Kerzen, dem Trauertagebuch und Datenschutz auf Reflectlife." },
+  },
   "/help": {
     en: { title: "Help Centre | Reflectlife", description: "Answers and support for creating and managing memorials." },
     uk: { title: "Довідка | Reflectlife", description: "Відповіді та підтримка щодо сторінок пам'яті." },
