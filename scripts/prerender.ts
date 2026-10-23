@@ -7,15 +7,17 @@
 
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
 import en from "../src/i18n/en";
 import es from "../src/i18n/es";
 import de from "../src/i18n/de";
 import { pageMeta } from "../src/i18n/pageMeta";
 
 const SITE = "https://reflectlife.net";
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 const auto = (lang: string): Record<string, string> =>
-  JSON.parse(readFileSync(resolve(`src/i18n/auto/${lang}.json`), "utf8"));
+  JSON.parse(readFileSync(resolve(ROOT, `src/i18n/auto/${lang}.json`), "utf8"));
 
 const esc = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -163,13 +165,13 @@ ${nav}
   );
   html = html.replace('<div id="root"></div>', staticRoot);
 
-  const out = resolve("dist", lang === "en" ? "" : lang, base, "index.html");
+  const out = resolve(ROOT, "dist", lang === "en" ? "" : lang, base, "index.html");
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, html);
   return out;
 }
 
-const template = readFileSync(resolve("dist/index.html"), "utf8");
+const template = readFileSync(resolve(ROOT, "dist/index.html"), "utf8");
 const bases = ["", "memorials", "examples", "pricing", "about", "qa"];
 let count = 0;
 for (const lang of ["en", "es", "de"]) {
