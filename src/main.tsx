@@ -11,5 +11,10 @@ const wanted = pathForLang(pathname, lang);
 if ((lang === "es" || lang === "de") && langFromPath(pathname) !== lang && !pathname.startsWith("/.lovable")) {
   window.location.replace(wanted + search + hash);
 } else {
+  // Prerendered pages ship static canonical/hreflang links for no-JS crawlers; Helmet re-adds
+  // them dynamically, so remove the static copies to avoid duplicates once JS runs.
+  document
+    .querySelectorAll('link[rel="canonical"], link[rel="alternate"]')
+    .forEach((el) => el.remove());
   createRoot(document.getElementById("root")!).render(<App />);
 }
