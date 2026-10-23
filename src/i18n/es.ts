@@ -191,6 +191,38 @@ const es = {
     "closing1": "Por aquellos a quienes llevamos con nosotros.",
     "closing2": "Por el amor que nunca se va.",
     "backHome": "← Volver al Inicio"
+  },
+  "examples": {
+    "title": "Memoriales de ejemplo",
+    "subtitle": "Descubre lo que puede contener un memorial de Reflectlife y encuentra inspiración para tu propio tributo.",
+    "candleTitle": "Una vela que sigue encendida",
+    "candleText": "Cada memorial tiene su propia vela. Familiares y amigos pueden encenderla, dejar una breve dedicatoria y mantener viva la llama, juntos, desde cualquier parte del mundo.",
+    "galleryTitle": "Fotos, historias y tributos",
+    "galleryText": "Un memorial reúne galerías de fotos, historias de vida y tributos de invitados en un lugar tranquilo: un retrato vivo de la persona que amas.",
+    "timelineTitle": "La línea de tiempo de una vida",
+    "timelineText": "Traza los momentos que importaron, desde los hitos hasta los recuerdos cotidianos, y observa cómo se despliega una historia de vida.",
+    "treeTitle": "Árbol de familia y amigos",
+    "treeText": "Conecta a las personas que formaron parte de su vida y descubre cómo todos pertenecen al mismo lugar.",
+    "wallCta": "Visita el Muro de homenaje",
+    "createCta": "Crea tu propio memorial — es gratis"
+  },
+  "pricing": {
+    "title": "Precios",
+    "subtitle": "Reflectlife es gratuito. Los extras opcionales ayudan a mantener vivo este lugar — de forma transparente, sin suscripciones que no necesitas.",
+    "memorialTitle": "Página de memorial",
+    "memorialPrice": "Gratis",
+    "memorialDesc": "Crea memoriales, escribe en tu diario, construye líneas de tiempo y tu árbol de familia y amigos, e invita a tus seres queridos — todo gratis.",
+    "candlesTitle": "Velas de recuerdo",
+    "candlesDesc": "Enciende una vela gratis en cualquier memorial. Para mantener tu propia vela encendida sin interrupciones:",
+    "candleFree": "Gratis — enciende una vela cuando quieras",
+    "candleMonthly": "4,99 € al mes",
+    "candleYearly": "49,99 € al año",
+    "templatesTitle": "Plantillas",
+    "templatesPrice": "Gratis y 9,99 €",
+    "templatesDesc": "Elige entre muchos diseños gratuitos para tus memoriales. Las plantillas premium creadas individualmente están disponibles por un pago único de 9,99 € cada una.",
+    "donationsTitle": "Donaciones en memoria",
+    "donationsDesc": "Los invitados pueden donar en memoria de un ser querido. Reflectlife cobra una comisión de plataforma del 7 % —exenta por completo en memoriales de Defensores de Ucrania— más un 2,5–3,0 % aproximado de procesamiento de pago. El dinero llega directamente a la cuenta conectada del memorial; Reflectlife nunca custodia los fondos donados.",
+    "note": "Sin costes ocultos, sin anuncios, sin venta de datos. Tus recuerdos siguen siendo tuyos."
   }
 };
 

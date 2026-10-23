@@ -215,6 +215,42 @@ const en = {
     closing2: "For the love that never leaves.",
     backHome: "← Back to Home",
   },
+
+  // Examples page
+  examples: {
+    title: "Example memorials",
+    subtitle: "See what a Reflectlife memorial can hold — and find inspiration for your own tribute.",
+    candleTitle: "A candle that keeps burning",
+    candleText: "Every memorial has its own candle. Family and friends can light it, leave a short dedication, and keep the flame alive — together, from anywhere in the world.",
+    galleryTitle: "Photos, stories and tributes",
+    galleryText: "A memorial gathers photo galleries, life stories and guest tributes in one calm place — a living portrait of the person you love.",
+    timelineTitle: "A timeline of a life",
+    timelineText: "Map the moments that mattered, from milestones to quiet everyday memories, and watch a life story unfold.",
+    treeTitle: "Family & friends tree",
+    treeText: "Connect the people who were part of their life and see how everyone belongs together.",
+    wallCta: "Visit the Memorial Wall",
+    createCta: "Create your own memorial — it's free",
+  },
+
+  // Pricing page
+  pricing: {
+    title: "Pricing",
+    subtitle: "Reflectlife is free to use. Optional extras help keep this place alive — transparent, with no subscriptions you don't need.",
+    memorialTitle: "Memorial page",
+    memorialPrice: "Free",
+    memorialDesc: "Create memorials, write in your diary, build timelines and your family & friends tree, and invite family and friends — all free.",
+    candlesTitle: "Remembrance candles",
+    candlesDesc: "Light a candle on any memorial for free. To keep your own candle burning without interruption:",
+    candleFree: "Free — light a candle anytime",
+    candleMonthly: "€4.99 per month",
+    candleYearly: "€49.99 per year",
+    templatesTitle: "Templates",
+    templatesPrice: "Free & €9.99",
+    templatesDesc: "Choose from many free designs for your memorial pages. Individually crafted premium templates are available for a one-time €9.99 each.",
+    donationsTitle: "Donations in memory",
+    donationsDesc: "Guests can donate in memory of a loved one. Reflectlife charges a 7% platform fee — waived entirely for Defender of Ukraine memorials — plus payment processing of about 2.5–3.0%. The money goes directly to the memorial's connected account; Reflectlife never holds donated funds.",
+    note: "No hidden costs, no ads, no selling of data. Your memories stay yours.",
+  },
 };
 
 export default en;
