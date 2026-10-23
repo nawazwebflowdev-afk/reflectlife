@@ -8,8 +8,8 @@
 - [x] hreflang uk korrigiert (LanguageAlternates: uk nur noch auf /uk/pamiat als Selbstverweis); Sitemap um /examples + /pricing und lastmod 2026-10-23 für die geänderten Seiten ergänzt
 - [ ] Nach dem Publish prüfen: Liefert das Hosting /de/pricing (ohne Slash) als statische Datei aus?
 
-## Security: ausgewählte Scan-Befunde (2026-10-23, läuft)
-- [ ] 20 ausgewählte Findings beheben: RLS-Leseregeln (10), Storage-Regeln (9), dompurify-Update (1)
+## Security: ausgewählte Scan-Befunde (2026-10-23)
+- [x] 20 ausgewählte Findings bearbeitet: 9 behoben (platform_settings, candle_contributions, memorial_candles, memorial_hearts, info_media-Policy, 3 Avatar-Schreibregeln, dompurify 3.4.17), 11 als beabsichtigt bestätigt (öffentliche Leseregeln für Feeds, Zeitleisten, Vorlagen, Info Board, öffentliche Buckets)
 
 ## Offen aus früheren Aufgaben
 - [ ] Veröffentlichen (Publish) steht noch aus — alle SEO-Änderungen werden erst dann live sichtbar
