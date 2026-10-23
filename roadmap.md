@@ -1,15 +1,15 @@
 # Roadmap
 
 ## SEO: statisches Prerendering (2026-10-23)
-- [ ] Neue Seiten /examples und /pricing (mit Inhalt, Routen, Navigation, Sitemap)
-- [ ] Prerender-Skript: statische HTML-Dateien mit echtem Text für /, /de, /es, /memorials, /examples, /pricing, /about, /qa (+ Sprachvarianten)
-- [ ] Pro Seite: eigener <title>, meta description, H1, canonical auf https://reflectlife.net
-- [ ] lang="de" bei deutscher Version (auch /es → lang="es")
-- [ ] Sitemap: hreflang uk korrigieren (uk darf nicht auf englische Startseite zeigen), /examples + /pricing aufnehmen, lastmod wo sinnvoll
-- [ ] Verifizieren: Build + lokale Prüfung der erzeugten HTML-Dateien
+- [x] Neue Seiten /examples und /pricing (Inhalt, Routen, Footer-Links, Sitemap)
+- [x] Prerender-Skript scripts/prerender.ts: 18 statische HTML-Seiten mit echtem Text (/, /de, /es, /memorials, /examples, /pricing, /about, /qa je en/es/de)
+- [x] Pro Seite: eigener <title>, meta description, H1, canonical auf https://reflectlife.net (pageMeta.ts um /examples, /pricing, /qa ergänzt)
+- [x] lang="de" / lang="es" in statischen Dateien und zur Laufzeit
+- [x] hreflang uk korrigiert (LanguageAlternates: uk nur noch auf /uk/pamiat als Selbstverweis); Sitemap um /examples + /pricing und lastmod 2026-10-23 für die geänderten Seiten ergänzt
+- [ ] Nach dem Publish prüfen: Liefert das Hosting /de/pricing (ohne Slash) als statische Datei aus?
 
 ## Offen aus früheren Aufgaben
-- [ ] Veröffentlichen (Publish) steht noch aus
+- [ ] Veröffentlichen (Publish) steht noch aus — alle SEO-Änderungen werden erst dann live sichtbar
 - [ ] Admin-UI /admin/info-board durch Sylvia im Browser prüfen (Sandbox kann keine Anmeldung)
 - [ ] 55 bereits bestehende Sicherheitshinweise prüfen (wartet auf Freigabe)
 - [ ] Co-Manager, Legacy-Kontakt, Bestatter-B2B, gedruckte Erinnerungsbücher (nicht umgesetzt)
