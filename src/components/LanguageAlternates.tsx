@@ -17,6 +17,24 @@ const LanguageAlternates = () => {
   const lang = i18n.language.startsWith("es") ? "es" : i18n.language.startsWith("de") ? "de" : i18n.language.startsWith("uk") ? "uk" : "en";
   const meta = pageMeta(pathname, lang);
   const self = lang === "es" ? es : lang === "de" ? de : en;
+  // /uk/pamiat exists only in Ukrainian — no en/es/de equivalents, so it is its own only alternate.
+  if (pathname === "/uk/pamiat") {
+    return (
+      <Helmet htmlAttributes={{ lang: "uk" }}>
+        <title>{meta.title}</title>
+        <meta name="description" content={meta.description} />
+        <meta property="og:title" content={meta.title} />
+        <meta property="og:description" content={meta.description} />
+        <meta property="og:url" content={`${SITE}/uk/pamiat`} />
+        <meta name="twitter:title" content={meta.title} />
+        <meta name="twitter:description" content={meta.description} />
+        <link rel="alternate" hrefLang="uk" href={`${SITE}/uk/pamiat`} />
+        <link rel="alternate" hrefLang="x-default" href={`${SITE}/uk/pamiat`} />
+        <link rel="canonical" href={`${SITE}/uk/pamiat`} />
+        <meta property="og:locale" content="uk_UA" />
+      </Helmet>
+    );
+  }
   return (
     <Helmet htmlAttributes={{ lang }}>
       <title>{meta.title}</title>
@@ -27,7 +45,6 @@ const LanguageAlternates = () => {
       <meta name="twitter:title" content={meta.title} />
       <meta name="twitter:description" content={meta.description} />
       <link rel="alternate" hrefLang="en" href={en} />
-      <link rel="alternate" hrefLang="uk" href={en} />
       <link rel="alternate" hrefLang="es" href={es} />
       <link rel="alternate" hrefLang="es-MX" href={es} />
       <link rel="alternate" hrefLang="de" href={de} />
