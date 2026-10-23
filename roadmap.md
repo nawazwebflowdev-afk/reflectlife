@@ -8,6 +8,9 @@
 - [x] hreflang uk korrigiert (LanguageAlternates: uk nur noch auf /uk/pamiat als Selbstverweis); Sitemap um /examples + /pricing und lastmod 2026-10-23 für die geänderten Seiten ergänzt
 - [ ] Nach dem Publish prüfen: Liefert das Hosting /de/pricing (ohne Slash) als statische Datei aus?
 
+## Security: ausgewählte Scan-Befunde (2026-10-23, läuft)
+- [ ] 20 ausgewählte Findings beheben: RLS-Leseregeln (10), Storage-Regeln (9), dompurify-Update (1)
+
 ## Offen aus früheren Aufgaben
 - [ ] Veröffentlichen (Publish) steht noch aus — alle SEO-Änderungen werden erst dann live sichtbar
 - [ ] Admin-UI /admin/info-board durch Sylvia im Browser prüfen (Sandbox kann keine Anmeldung)
