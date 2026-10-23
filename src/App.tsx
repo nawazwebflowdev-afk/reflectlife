@@ -41,6 +41,8 @@ const Checkout = lazy(() => import("./pages/Checkout"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const QA = lazy(() => import("./pages/QA"));
 const About = lazy(() => import("./pages/About"));
+const Examples = lazy(() => import("./pages/Examples"));
+const Pricing = lazy(() => import("./pages/Pricing"));
 const CandleSuccess = lazy(() => import("./pages/CandleSuccess"));
 const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const RemembrancePage = lazy(() => import("./pages/Remembrance"));
@@ -103,6 +105,8 @@ const App = () => (
                 <Route path="/cookie-policy" element={<CookiePolicy />} />
                 <Route path="/qa" element={<QA />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/examples" element={<Examples />} />
+                <Route path="/pricing" element={<Pricing />} />
                 <Route path="/candle-success" element={<CandleSuccess />} />
                 <Route path="/donation-success" element={<DonationSuccess />} />
                 <Route path="/donation-thanks" element={<DonationThanks />} />

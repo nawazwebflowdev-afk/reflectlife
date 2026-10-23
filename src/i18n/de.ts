@@ -191,6 +191,38 @@ const de = {
     "closing1": "Für die, die wir in uns tragen.",
     "closing2": "Für die Liebe, die niemals vergeht.",
     "backHome": "← Zurück zur Startseite"
+  },
+  "examples": {
+    "title": "Beispiel-Gedenkseiten",
+    "subtitle": "Sieh, was eine Reflectlife-Gedenkseite alles enthalten kann – und lass dich für deine eigene Erinnerung inspirieren.",
+    "candleTitle": "Eine Kerze, die weiterbrennt",
+    "candleText": "Jede Gedenkseite hat ihre eigene Kerze. Familie und Freunde können sie anzünden, eine kurze Widmung hinterlassen und die Flamme gemeinsam am Leben halten – von überall auf der Welt.",
+    "galleryTitle": "Fotos, Geschichten und Ehrungen",
+    "galleryText": "Eine Gedenkseite sammelt Fotoalben, Lebensgeschichten und Ehrungen von Gästen an einem ruhigen Ort – ein lebendiges Porträt des Menschen, den du liebst.",
+    "timelineTitle": "Eine Zeitachse eines Lebens",
+    "timelineText": "Halte die Momente fest, die zählten – von Meilensteinen bis zu stillen Alltagserinnerungen – und sieh zu, wie sich eine Lebensgeschichte entfaltet.",
+    "treeTitle": "Familien- & Freundesbaum",
+    "treeText": "Verbinde die Menschen, die Teil ihres Lebens waren, und sieh, wie alle zusammengehören.",
+    "wallCta": "Zur Gedenkwand",
+    "createCta": "Erstelle deine eigene Gedenkseite – kostenlos"
+  },
+  "pricing": {
+    "title": "Preise",
+    "subtitle": "Reflectlife ist kostenlos. Optionale Extras helfen, diesen Ort zu erhalten – transparent, ohne Abos, die du nicht brauchst.",
+    "memorialTitle": "Gedenkseite",
+    "memorialPrice": "Kostenlos",
+    "memorialDesc": "Erstelle Gedenkseiten, schreibe in dein Tagebuch, baue Zeitachsen und deinen Familien- & Freundesbaum und lade Familie und Freunde ein – alles kostenlos.",
+    "candlesTitle": "Gedenkkerzen",
+    "candlesDesc": "Zünde auf jeder Gedenkseite kostenlos eine Kerze an. Damit deine eigene Kerze ohne Unterbrechung weiterbrennt:",
+    "candleFree": "Kostenlos – zünde jederzeit eine Kerze an",
+    "candleMonthly": "4,99 € pro Monat",
+    "candleYearly": "49,99 € pro Jahr",
+    "templatesTitle": "Vorlagen",
+    "templatesPrice": "Kostenlos & 9,99 €",
+    "templatesDesc": "Wähle aus vielen kostenlosen Designs für deine Gedenkseiten. Individuell gestaltete Premium-Vorlagen gibt es für einmalig 9,99 €.",
+    "donationsTitle": "Spenden im Gedenken",
+    "donationsDesc": "Gäste können im Gedenken an einen geliebten Menschen spenden. Reflectlife erhebt eine Plattformgebühr von 7 % – für Gedenkseiten für Verteidiger der Ukraine entfällt sie vollständig – plus etwa 2,5–3,0 % Zahlungsabwicklung. Das Geld geht direkt auf das verbundene Konto der Gedenkseite; Reflectlife verwahrt niemals Spendengelder.",
+    "note": "Keine versteckten Kosten, keine Werbung, kein Verkauf von Daten. Deine Erinnerungen bleiben deine."
   }
 };
 
