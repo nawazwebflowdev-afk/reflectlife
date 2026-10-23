@@ -50,7 +50,6 @@ export function CandleSection({ memorialId, memorialName, isOwner, guestEnabled,
   useEffect(() => {
     let mounted = true;
     (async () => {
-      await supabase.rpc('expire_stale_candles');
       const { data: userData } = await supabase.auth.getUser();
       if (!mounted) return;
       setUserId(userData?.user?.id ?? null);
