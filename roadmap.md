@@ -14,5 +14,5 @@
 ## Offen aus früheren Aufgaben
 - [ ] Veröffentlichen (Publish) steht noch aus — alle SEO-Änderungen werden erst dann live sichtbar
 - [ ] Admin-UI /admin/info-board durch Sylvia im Browser prüfen (Sandbox kann keine Anmeldung)
-- [ ] 55 bereits bestehende Sicherheitshinweise prüfen (wartet auf Freigabe)
+- [x] 55 Sicherheitshinweise bearbeitet: heikle und interne Funktionen gesperrt, Helfer ohne öffentlichen Bedarf für Gäste gesperrt, Rest beabsichtigt (pg_net bleibt)
 - [ ] Co-Manager, Legacy-Kontakt, Bestatter-B2B, gedruckte Erinnerungsbücher (nicht umgesetzt)
